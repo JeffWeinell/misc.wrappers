@@ -1,17 +1,7 @@
-# required packages
-# library(sp)                 ### Used for everything
-# library(maps)               ### map.axes function
-# library(rgeos)              ### gBuffer and gArea function
-# library(rgdal)              ### showWKT function
-# library(raster)             ### crs and bind function
-# library(smoothr)            ### densify function for adding outer points by interpolating along perimeter
-# library(sampSurf)           ### spCircle function
-# library(geosphere)          ### perimeter and areaPolygon functions
-# library(alphahull)          ### ahull function
-# library(adehabitatHR)       ### function to generate minimum convex polygon
-# library(rnaturalearth)      ### Global geographic vectors
-# library(rnaturalearthhires) ### high resolution data for rnaturalearth package
-
+#' @title create.outer function
+#' 
+#' This function automatically generates the '*.outer' file needed by EEMS, given the '*.coords' file also needed by EEMS.
+#' 
 #' @param coords Two column numeric matrix containing longitude and latitude of the samples in decimal degree format, or a character string with path to the input .coords file used for eems; the input file must be space separated and without a header.
 #' @param method A number (1, 2, or 3) determining how the output coordinates will be generated.
 #' If method=1 (the default) produces a potentially more useful result, and uses the alpha hull of geographic regions that intersect with input coordinates. This method may be slow if input coordinates include large sampling gaps. In such cases increases the value of alpha.start.
@@ -25,6 +15,7 @@
 #' @param counter.clockwise Should the output cooordinates be ordered counterclockwise. Default is TRUE and is the required format for EEMS.
 #' @param output.path Character string with path where to save coordinates. Default is NULL.
 #' @result A two column numerical matrix containing the longitude and latitude of the output polygon. The matrix written to output.path can be used as the ".outer" polygon used by EEMS. A map is plotted to visualize the results.
+#' @export create.outer
 create.outer <- function(coords,method=1,buffer.adj=0,coords.radius=0.01,max.fractal.dimension=1.1,plot.outer=TRUE,ask.use=FALSE,counter.clockwise=TRUE,output.path=NULL){
 	# Function to extract the coordinates matrix (numeric mode) from a class Polygon, Polygons, SpatialPolygons, or SpatialPolygonsDataFrame object that containins a single polygon.
 	# Do not use this function if the inout spatial object contains more than coordinates matrix.

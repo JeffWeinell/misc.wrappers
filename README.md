@@ -333,6 +333,20 @@ colnames(Luzon.coords) <- c("x","y")
 plots.chain2[[1]] + geom_path(data=Luzon.coords)
 plots.chain2.v2 <- lapply(X=plots.chain2,FUN=function(x){x+theme(plot.margin = unit(c(0.25,0.25,0.25,0.25), "inches"))+geom_path(data=Luzon.outer})
 
+# required packages
+# library(sp)                 ### Used for everything
+# library(maps)               ### map.axes function
+# library(rgeos)              ### gBuffer and gArea function
+# library(rgdal)              ### showWKT function
+# library(raster)             ### crs and bind function
+# library(smoothr)            ### densify function for adding outer points by interpolating along perimeter
+# library(sampSurf)           ### spCircle function
+# library(geosphere)          ### perimeter and areaPolygon functions
+# library(alphahull)          ### ahull function
+# library(adehabitatHR)       ### function to generate minimum convex polygon
+# library(rnaturalearth)      ### Global geographic vectors
+# library(rnaturalearthhires) ### high resolution data for rnaturalearth package
+
 
 #### Include metrics describing polygon shape:
 ## Described here: http://www.umass.edu/landeco/teaching/landscape_ecology/schedule/chapter9_metrics.pdf
