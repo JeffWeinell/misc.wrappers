@@ -1,0 +1,20 @@
+Package: misc.wrappers
+Title: Miscellaneous Wrapper Functions for Spatial Population Genomics
+Version: 1.0
+Authors@R: 
+    person(given = "Jeffrey",
+           family = "Weinell",
+           role = c("aut", "cre"),
+           email = "jweine2@gmail.com",
+           comment = c(ORCID = "0000-0002-9568-0672"))
+Description: Wrapper functions to streamline a variety of analyses population genomic data. Beta Version.
+License: CCO
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.1
+Imports: sp, maps, rgeos, rgdal, raster, smoothr, sampSurf, geosphere, alphahull, adehabitatHR, rnaturalearth, rnaturalearthhires, grid, gridExtra, reemsplots2, reemsplots, ggplot2, vcfR, adegenet, stringr
+Depends: R (>= 3.6.0)
+Suggests: phytools, biofiles, DECIPHER, dplyr, GenomeInfoDb,
+        GenomicRanges, igraph, IRanges, parallel, phangorn, RCurl,
+        Rsamtools, stringr, tibble, utils, data.table, , Biostrings, BSgenome
