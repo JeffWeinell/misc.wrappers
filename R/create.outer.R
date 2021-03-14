@@ -14,7 +14,7 @@
 #' @param ask.use Logical indicating if, after plotting, the user should be asked if the output should be written to file. Default is FALSE. Ignored if output.path is NULL or if plot.outer is FALSE.
 #' @param counter.clockwise Should the output cooordinates be ordered counterclockwise. Default is TRUE and is the required format for EEMS.
 #' @param output.path Character string with path where to save coordinates. Default is NULL.
-#' @result A two column numerical matrix containing the longitude and latitude of the output polygon. The matrix written to output.path can be used as the ".outer" polygon used by EEMS. A map is plotted to visualize the results.
+#' @return A two column numerical matrix containing the longitude and latitude of the output polygon. The matrix written to output.path can be used as the ".outer" polygon used by EEMS. A map is plotted to visualize the results.
 #' @export create.outer
 create.outer <- function(coords,method=1,buffer.adj=0,coords.radius=0.01,max.fractal.dimension=1.1,plot.outer=TRUE,ask.use=FALSE,counter.clockwise=TRUE,output.path=NULL){
 	# Function to extract the coordinates matrix (numeric mode) from a class Polygon, Polygons, SpatialPolygons, or SpatialPolygonsDataFrame object that containins a single polygon.
