@@ -1,6 +1,13 @@
 # misc.wrappers
  Collection of wrappers for programs that I did not create.
 
+```
+library(BiocManager)
+BiocManager::install("JeffWeinell/misc.wrappers",auth_token="323d9e4cd00247a39a805dbb66f37db6403cfb8b")
+```
+
+
+
 <!--
 ```
 library(ade4)
