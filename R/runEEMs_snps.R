@@ -42,7 +42,8 @@ runEEMs_snps <- function(exe.path=NULL, input.data, coord, outer=NULL, ask.use.o
 	}
 	input.data <- data
 	if(dir.exists(output.dirpath)){
-		stop(paste("Output directory:",output.dirpath,"already exists. Use a new output.dirpath"))
+		command.to.remove.directory <- paste0("unlink(",output.dirpath,",recursive=T)")
+		stop(paste("Output directory:",output.dirpath,"already exists. Use a new output.dirpath or run '' "))
 	} else {
 		dir.create(output.dirpath)
 	}
