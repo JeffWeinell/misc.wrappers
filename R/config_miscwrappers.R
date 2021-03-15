@@ -12,7 +12,7 @@ config_miscwrappers <- function(exe.paths){
 	if(!all(files.executable)){
 		stop(paste0("not executable: ",exe.paths[which(files.executable!=0)]))
 	}
-	settings.dir  <- path.expand(user_config_dir("R_misc_wrappers", version=packageVersion("misc.wrappers")))
+	settings.dir  <- path.expand(rappdirs::user_config_dir("R_misc_wrappers", version=packageVersion("misc.wrappers")))
 	dir.create(settings.dir,recursive=T)
 	settings.mat  <- cbind(basename(exe.paths),exe.paths)
 	colnames(settings.mat) <- c("program","exe_path")

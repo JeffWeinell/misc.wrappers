@@ -6,7 +6,7 @@
 #' @return Two column data.frame with program name and corresponding full path to the program executable file
 #' @export exepaths_miscwrappers
 exepaths_miscwrappers <- function(programs=NULL){
-	settings.file <- paste0(path.expand(user_config_dir("R_misc_wrappers", version=packageVersion("misc.wrappers"))),"/exepaths.txt")
+	settings.file <- paste0(path.expand(rappdirs::user_config_dir("R_misc_wrappers", version=packageVersion("misc.wrappers"))),"/exepaths.txt")
 	if(!file.exists(settings.file)){
 		stop("No paths set for executables. Use config_miscwrappers function to set paths")
 	}
