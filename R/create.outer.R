@@ -210,29 +210,29 @@ create.outer <- function(coords,method=1,buffer.adj=0,coords.radius=0.01,max.fra
 		### Plots in slightly different ways depending depending on the method used.
 		if(method %in% c(1,2)){
 			### Plot the outer coordinates in white to define the extent
-			plot(sp::SpatialPoints(outer),col="white")
+			sp::plot(sp::SpatialPoints(outer),col="white")
 			#plot(submaps.with.points.sp,add=T,col="gray90")
-			plot(spdf_world_10,add=T)
+			sp::plot(spdf_world_10,add=T)
 			if(method==1){
 			### Add a layer containing the regions of the basemap that include at least one point (regions in gray)
-				plot(spdf_unique.features.at.circles,add=T,col="gray90")
-				plot(sp_unique.polygons.without.circles,add=T,col="white")
+				sp::plot(spdf_unique.features.at.circles,add=T,col="gray90")
+				sp::plot(sp_unique.polygons.without.circles,add=T,col="white")
 			}
 			### Add green crosshairs for output coordinates (the outer file for eems)
-			plot(sp::SpatialPoints(outer),col="green",add=T)
+			sp::plot(sp::SpatialPoints(outer),col="green",add=T)
 			### Add black circles for locations of the input coordinates
-			plot(points.sp,add=T,pch=20)
+			sp::plot(points.sp,add=T,pch=20)
 			### Add text/legend to show what the green crosshairs are
 			mtext("+ = coordinates written to output.path (if set)",col="green",adj=0,line=1.5,cex=0.8)
 			mtext(paste0("P:A fractal dimension of area inscribed by output coordinates",round(fractal.dimension,digits=3)),adj=0,line=0.5,cex=0.8)
 			### Add map axes
 			maps::map.axes()
 		} else {
-			plot(SpatialPoints(outer),col="white")
-			extent.sp <- SpatialPoints(rbind(outer,coords))
-			plot(spdf_world_10,add=T)
-			plot(SpatialPoints(outer),col="green",add=T)
-			plot(points.sp,add=T,pch=20)
+			sp::plot(sp::SpatialPoints(outer),col="white")
+			extent.sp <- sp::SpatialPoints(rbind(outer,coords))
+			sp::plot(spdf_world_10,add=T)
+			sp::plot(sp::SpatialPoints(outer),col="green",add=T)
+			sp::plot(points.sp,add=T,pch=20)
 			mtext("+ outer (coordinates written to output.path)",col="green",adj=0.1,line=0.25,cex=0.8)
 			maps::map.axes()
 		}
