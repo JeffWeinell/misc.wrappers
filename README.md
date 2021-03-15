@@ -369,6 +369,8 @@ devtools::install_github("JeffWeinell/misc.wrappers",auth_token="323d9e4cd00247a
 library(misc.wrappers)
 test <- runEEMs_snps(data="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/Oxyrhabdium_populations.snps_28Feb2021.vcf",coord="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/EEMS/Oxyrhabdium.coord",output.dirpath="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/EEMS/EEMS_Oxyrhabdium",method=2)
 
+test <- runEEMs_snps(data="/panfs/pfs.local/home/j926w878/work/ddRAD/snps_goodData/Oxyrhabdium-leporinum_Luzon_1snpPerLocus_8May2021.vcf",coord=,output.dirpath=,method=1)
+
 data="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/Oxyrhabdium_populations.snps_28Feb2021.vcf";coord="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/EEMS/Oxyrhabdium.coord";output.dirpath="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/EEMS/EEMS_Oxyrhabdium";exe.path=NULL; outer=NULL; ask.use.outer=T; data.type="diffs"; n.sites=NULL; pl=2; nDemes=300; numMCMCIter = 10000000; numBurnIter = 1000000; numThinIter = 9999; nchains=3; setup.only=T
 
 exe.path=NULL; input.data; coord; outer=NULL; ask.use.outer=T; data.type="diffs"; output.dirpath; n.sites; ploidy=2; nDemes=300; numMCMCIter = 10000000; numBurnIter = 1000000; numThinIter = 9999; nchains=3; setup.only=T
