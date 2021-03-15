@@ -9,7 +9,7 @@
 config_miscwrappers <- function(exe.paths){
 	# runeems_snps.exe.path <- paste0(eems_master.dirpath,"/runeems_snps/src/runeems_snps")
 	files.executable <- sapply(exe.paths,FUN=check.if.executable)
-	if(!all(files.executable)){
+	if(!all(files.executable==0)){
 		stop(paste0("not executable: ",exe.paths[which(files.executable!=0)]))
 	}
 	settings.dir  <- path.expand(rappdirs::user_config_dir("R_misc_wrappers", version=packageVersion("misc.wrappers")))
