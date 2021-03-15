@@ -247,7 +247,7 @@ create.outer <- function(coords,method=1,buffer.adj=0,coords.radius=0.01,max.fra
 					write.table(outer,output.path,row.names=F,col.names=F,sep=" ",quote=F)
 				}
 			} else {
-				stop("aborting. unrecognized response to promt; expected (yes/no) response")
+				return(stop("aborting. unrecognized response to promt; expected (yes/no) response"))
 			}
 		} else {
 			write.table(outer,output.path,row.names=F,col.names=F,sep=" ",quote=F)

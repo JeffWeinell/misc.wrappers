@@ -367,9 +367,12 @@ plots.chain2.v2 <- lapply(X=plots.chain2,FUN=function(x){x+theme(plot.margin = u
 library(devtools)
 devtools::install_github("JeffWeinell/misc.wrappers",auth_token="323d9e4cd00247a39a805dbb66f37db6403cfb8b")
 library(misc.wrappers)
-test <- runEEMs_snps(input.data="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/Oxyrhabdium_populations.snps_28Feb2021.vcf",coord="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/EEMS/Oxyrhabdium.coord",output.dirpath="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/EEMS/EEMS_Oxyrhabdium")
+test <- runEEMs_snps(data="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/Oxyrhabdium_populations.snps_28Feb2021.vcf",coord="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/EEMS/Oxyrhabdium.coord",output.dirpath="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/EEMS/EEMS_Oxyrhabdium")
+
+data="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/Oxyrhabdium_populations.snps_28Feb2021.vcf";coord="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/EEMS/Oxyrhabdium.coord";output.dirpath="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/EEMS/EEMS_Oxyrhabdium";exe.path=NULL; outer=NULL; ask.use.outer=T; data.type="diffs"; n.sites=NULL; pl=2; nDemes=300; numMCMCIter = 10000000; numBurnIter = 1000000; numThinIter = 9999; nchains=3; setup.only=T
 
 exe.path=NULL; input.data; coord; outer=NULL; ask.use.outer=T; data.type="diffs"; output.dirpath; n.sites; ploidy=2; nDemes=300; numMCMCIter = 10000000; numBurnIter = 1000000; numThinIter = 9999; nchains=3; setup.only=T
+input.dirpath = "/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/EEMS/EEMS_Oxyrhabdium/data"
 output.file = "/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/EEMS/EEMS_Oxyrhabdium/data/data.diffs"
 ```
 

@@ -1,3 +1,10 @@
+test <- spTransform(spdf_world_10,crs.string)
+wkt(spdf_world_10)
+wkt(spdf_world_10) <- crs.string
+spdf_world_10             <- rnaturalearth::ne_countries(scale=10)
+wkt(spdf_world_10)
+?CRS()
+CRS(spdf_world_10)
 spdf_world_10             <- rnaturalearth::ne_countries(scale=10)
 CRS(spdf_world_10)
 crs(spdf_world_10)
@@ -6591,27 +6598,17 @@ test <- create.outer(coords="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdi
 ?ploidy()
 dev.off()
 library(devtools)
-devtools::install()
 devtools::install_github("JeffWeinell/misc.wrappers",auth_token="323d9e4cd00247a39a805dbb66f37db6403cfb8b")
-test <- runEEMs_snps(input.data="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/Oxyrhabdium_populations.snps_28Feb2021.vcf",coord="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/EEMS/Oxyrhabdium.coord",output.dirpath="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/EEMS/EEMS_Oxyrhabdium")
 library(misc.wrappers)
 test <- runEEMs_snps(input.data="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/Oxyrhabdium_populations.snps_28Feb2021.vcf",coord="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/EEMS/Oxyrhabdium.coord",output.dirpath="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/EEMS/EEMS_Oxyrhabdium")
-input.data="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/Oxyrhabdium_populations.snps_28Feb2021.vcf"
-vcf.data   <- vcfR::read.vcfR(input.data)#
-				genind     <- vcfR::vcfR2genind(vcf.data)
-ploidy=2
-input.dirpath <- "/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/EEMS/EEMS_Oxyrhabdium/data"
-data.diffs <- misc.wrappers::genind2diffs(genind.obj=genind,ploidy=ploidy,output.file=paste0(input.dirpath,"/data.diffs"))
-diffs      <- data.diffs[["diffs"]]#
-				nIndiv     <- data.diffs[["nIndiv"]]#
-				nSites     <- data.diffs[["nSites"]]
-nIndiv
-nSites
-diffs
-as.integer(nIndiv)
-is(input.data,"character")
-is(input.data,"genind")
+test <- runEEMs_snps(input.data="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/Oxyrhabdium_populations.snps_28Feb2021.vcf",coord="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/EEMS/Oxyrhabdium.coord",output.dirpath="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/EEMS/EEMS_Oxyrhabdium")
+input.data
+install.packages("spatstat")
+install.packages("utf8")
+dev.off()
+devtools::install_github("JeffWeinell/misc.wrappers",auth_token="323d9e4cd00247a39a805dbb66f37db6403cfb8b")
 devtools::document()
 setwd("Documents/misc.wrappers")
 devtools::document()
 devtools::document()
+devtools::install_github("JeffWeinell/misc.wrappers",auth_token="323d9e4cd00247a39a805dbb66f37db6403cfb8b")
