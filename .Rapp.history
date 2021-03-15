@@ -1,0 +1,3086 @@
+test <- create.outer(coords="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/EEMS/EEMS_Katie/mainland_maculilabris.coord",method=2,max.fractal.dimension=1.105)
+# required packages#
+# library(sp)                 ### Used for everything#
+# library(maps)               ### map.axes function#
+# library(rgeos)              ### gBuffer and gArea function#
+# library(rgdal)              ### showWKT function#
+# library(raster)             ### crs and bind function#
+# library(smoothr)            ### densify function for adding outer points by interpolating along perimeter#
+# library(sampSurf)           ### spCircle function#
+# library(geosphere)          ### perimeter and areaPolygon functions#
+# library(alphahull)          ### ahull function#
+# library(adehabitatHR)       ### function to generate minimum convex polygon#
+# library(rnaturalearth)      ### Global geographic vectors#
+# library(rnaturalearthhires) ### high resolution data for rnaturalearth package#
+#
+#' @param coords Two column numeric matrix containing longitude and latitude of the samples in decimal degree format, or a character string with path to the input .coords file used for eems; the input file must be space separated and without a header.#
+#' @param alpha Value of alpha parameter (Default is 1). Increase alpha incrementally by about 0.1 until the polygon plot corresponding to the outer coordinates is simple polygon (as opposed to a complex, self-intersecting polygon).#
+#' @param buffer.adj This argument is not yet implemented. A number between 0 and 1 that determines the size of the buffer region surrounding the points supplied by coords.#
+#' @param method A number (1, 2, or 3) determining how the output coordinates will be generated.#
+#' If method=1 (the default) produces a potentially more useful result, and uses the alpha hull of geographic regions that intersect with input coordinates. This method may be slow if input coordinates include large sampling gaps. In such cases increases the value of alpha.start.#
+#' If method=2 is similar to method 1, except that the output coordinates are only determined from the input coordinates (and buffer setting), rather than from the regions of the base map (political geography from natural earth dataset) that intersect the input coordinates. Either method should be fine for EEMS, but method 1 tends to look nicer.#
+#' If method=3 is fast and uses the minimum convex polygon of input coodinates as a starting point.#
+#' @param coords.radius Number specifying the radius (in degrees) to use around input coordinates when determining spatial intersections. Increasing the value of this parameter can be useful if coordinates are located offshore of regions outlined in basemaps (high resolution Natural Earth dataset).#
+#' @param max.fractal.dimension Value between 1 and 2 contolling the shape complexity of the polygon with the output coordinates. Values near 1 have low complexity (e.g., circles, squares), and shape complexity increases as max.fractal.dimension approaches 2. The default value 1.1 seems to work well for most cases. Ignored if method=3.#
+#' @param plot.outer Logical indicating if the points defining the output ".outer" table should be plotted in green, as well as the ".coords" (coords) points in black.#
+#' @param counter.clockwise Should the output cooordinates be ordered counterclockwise. Default is TRUE and is the required format for EEMS.#
+#' @param output.path Character string with path where to save coordinates. Default is NULL.#
+#' @result A two column numerical matrix containing the longitude and latitude of the output polygon. The matrix written to output.path can be used as the ".outer" polygon used by EEMS. A map is plotted to visualize the results.#
+create.outer <- function(coords,method=1,buffer.adj=0,coords.radius=0.01,max.fractal.dimension=1.1,plot.outer=T,counter.clockwise=T,output.path=NULL){#
+	# Function to extract the coordinates matrix (numeric mode) from a class Polygon, Polygons, SpatialPolygons, or SpatialPolygonsDataFrame object that containins a single polygon.#
+	# Do not use this function if the inout spatial object contains more than coordinates matrix.#
+	sp2coords <- function(x){#
+		if(is(x,"SpatialPolygonsDataFrame") | is(x,"SpatialPolygons")){#
+			result <- x@polygons[[1]]@Polygons[[1]]@coords#
+		}#
+		if(is(x,"Polygons")){#
+			result <- x@Polygons[[1]]@coords#
+		}#
+		if(is(x,"Polygon") | is(x,"SpatialPoints")){#
+			result <- x@coords#
+		}#
+		unname(result)#
+	}#
+	### Convert a coordinates matrix into a SpatialPolygons object in circles centered at input coordinates, and radius specified by r#
+	coords2sp.poly <- function(coords.mat,r=0.01){#
+		colnames(coords.mat) <- c("x","y")#
+		circles.list <- apply(X=coords.mat,MARGIN=1,FUN=function(x){sampSurf::spCircle(radius=r,centerPoint=x)[[1]]})#
+		res          <- do.call(raster::bind,circles.list)#
+		res#
+	}#
+	### Fractal dimension of perimeter-area relationship, a metric of polygon complexity with values from 1 (simple euclidean shapes likes squares and circles) tp approaching 2 for increasingly complex polygons.#
+	# More info: http://www.umass.edu/landeco/teaching/landscape_ecology/schedule/chapter9_metrics.pdf#
+	# Input must be a SpatialPolygons object#
+	fracD <- function(x){#
+		# area in meters squared#
+		x.area      <- geosphere::areaPolygon(x)#
+		# perimeter in meters#
+		x.perimeter <- geosphere::perimeter(x)#
+		(2*log10(x.perimeter))/(log10(x.area))#
+	}#
+	#### For a SpatialPolygonsDataFrame, extract the lowest-level polygons and hold each as a feature in a SpatialPolygons object.#
+	extract.base.polygons <- function(spdf){#
+		for(i in 1:nrow(spdf)){#
+			sp.temp <- spdf@polygons[[i]]#
+			for(j in 1:length(sp.temp@Polygons)){#
+				id.temp <- paste0(i,".",j)#
+				polygons.ij <- sp::SpatialPolygons(list(sp::Polygons(list(sp.temp@Polygons[[j]]),ID=id.temp)))#
+				if(i==1 & j==1){#
+					polygons.all <- polygons.ij#
+				} else {#
+					polygons.all <- raster::bind(polygons.all,polygons.ij)#
+				}#
+			}#
+		}#
+		### Preserve crs definition#
+		raster::crs(polygons.all) <- raster::crs(spdf)#
+		### object returned#
+		polygons.all#
+	}#
+	input.coords <- coords#
+	### Check which type of object is being supplied to coords and define coords accordingly#
+	if(is(input.coords,"character")){#
+		coords   <- data.matrix(read.table(input.coords,header=F))#
+	}#
+	if(is(input.coords,"matrix") | is(input.coords,"data.frame")){#
+		coords       <- data.matrix(input.coords)#
+		mode(coords) <- "numeric"#
+	}#
+	## High resolution global map of political regions.#
+	spdf_world_10             <- rnaturalearth::ne_countries(scale=10)#
+	## Character string defining the Coordinate Reference System (CRS) in WKT format#
+	# crs.string <- rgdal::showWKT(sp::proj4string(spdf_world_10))#
+	# crs.string <- "+init=epsg:4326 +proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0"#
+	crs.string <- "+init=EPSG:4326"#
+	wkt.string <- rgdal::showWKT(crs.string)#
+	### Define CRS using wkt format#
+	raster::crs(spdf_world_10)   <- crs.string#
+	### SpatialPoints object holding coords#
+	points.sp <- sp::SpatialPoints(coords)#
+	raster::crs(points.sp) <- crs.string#
+	### SpatialPolygons object holding circles with centerpoints at coords#
+	circles.poly <- coords2sp.poly(coords.mat=coords,r=coords.radius)#
+	raster::crs(circles.poly) <- crs.string#
+	### Spatial data frame for the map features that intersect with the input coords#
+	unique.features.at.circles <- do.call(rbind,unique(sp::over(circles.poly, spdf_world_10,returnList=T)))#
+	### spdf row indices for the unique regions in unique.features.at.circles#
+	indices_unique.features.at.circles <- which(spdf_world_10$sov_a3 %in% unique(unique.features.at.circles$sov_a3))#
+	### Corresponding SpatialPolygonsDateFrame object#
+	spdf_unique.features.at.circles <- spdf_world_10[indices_unique.features.at.circles,]#
+	### Restructuring the heirarchy of lowest-level polygons, treating them as separate features of one SpatialPolygons object.#
+	## The purpose of this is to be able to use sp::over() to search for polygons that intersect with coords.#
+	base.polygons.sp <- extract.base.polygons(spdf_unique.features.at.circles)#
+	### Get the feature indices for the polygons that intersect with circles representing input coordinates#
+	indices_polygons.at.circles <- sp::over(circles.poly,base.polygons.sp)#
+	### Check if any NA values in indices_unique.polygons.at.circles, which occurs when one more of the input circles does not intersect any polygons (i.e. they fall in the ocean).#
+	### If NAs exist, try increasing the value of r parameter of coords2sp.poly function.#
+	if(any(is.na(indices_polygons.at.circles))){#
+		problem.points <- unname(which(is.na(indices_polygons.at.circles)))#
+		stop(paste0("sample(s) coords[",paste(problem.points,collapse=" "),",]  does not intersect map. Try increasing coords.radius or remove sample(s) from input"))#
+	}#
+	### Extract polygons in base.polygons.sp that intersect circles.poly#
+	sp_unique.polygons.at.circles      <- base.polygons.sp[unique(indices_polygons.at.circles)]#
+	sp_unique.polygons.without.circles <- base.polygons.sp[-unique(indices_polygons.at.circles)]#
+	if(method %in% c(1,2)){#
+		#### Method 1 for getting maps.coords.list#
+		### Two column numerical matrix of the coordinates of polygons that intersect input points#
+		coords.polygons.with.points <- unique(round(do.call(rbind,lapply(X=1:length(sp_unique.polygons.at.circles),FUN=function(x){sp2coords(sp::polygons(sp_unique.polygons.at.circles)[x])})),digits=3))#
+		####
+		if(method==1){#
+			coords.for.alphahull <- coords.polygons.with.points#
+			#buffer.width <- ((-0.75)+buffer.adj)#
+		}#
+		if(method==2){#
+			coords.for.alphahull <- unique(coords)#
+			#buffer.width <- buffer.adj#
+		}#
+		### initiallizing the while loop#
+		alpha.lower <- 1#
+		alpha.upper <- 50#
+		i=1; areas.equal <- FALSE; alpha <- alpha.upper; alpha.tol <- 0.1#
+		### Run while loop to find a low value of alpha that also generates a simple polygon (not self-intersecting or filled with holes) when input coordinates are supplied to ahull.#
+		# A polygon is considered simple if supplying the ahull polygon to gBuffer with buffer.width=0 produces a polygon with the same area as the input polygon. This works because gBuffer produces simple polygons even if the result clips the input polygon.#
+		while(((alpha.upper-alpha.lower)>alpha.tol) & (i < 100)){#
+			hull.alpha         <- alphahull::ahull(coords.for.alphahull,alpha=alpha)#
+			hull.alpha.coords  <- rbind(hull.alpha$arcs[,1:2],hull.alpha$arcs[1,1:2])#
+			hull.alpha.sp      <- sp::SpatialPoints(hull.alpha.coords)#
+			hull.alpha.polygon <- sp::SpatialPolygons(list(sp::Polygons(list(sp::Polygon(hull.alpha.sp)),ID="alpha.hull")))#
+			if(rgeos::gIsSimple(hull.alpha.polygon)){#
+				### Test hull.alpha.polygon is simple#
+				# geosphere::areaPolygon(hull.alpha.polygon) == geosphere::areaPolygon(gBuffer(hull.alpha.polygon,width=0))#
+				### Create a polygon encompassing hull.alpha.polygon, with size determined by the value of buffer.width#
+				# Note: Do not set the crs of hull.alpha.polygon because gBuffer function would introduce distortions associated with the projection. In reality this might not be be a big deal but I'm not sure.#
+				buffer.poly        <- rgeos::gBuffer(hull.alpha.polygon,width=((-0.75)+buffer.adj))#
+				### Same as buffer.poly except points are added at midpoints of edges longer than max_distance; process repeated until all edges less than. This can make it easier to visualize the border of the output polygon, but otherwise this isnt useful.#
+				outer.poly         <- smoothr::densify(buffer.poly,max_distance=(0.25*alpha))#
+				### Run this test before switching back to Euclidean space#
+				### Set CRS of outer.poly (now we are back in Euclidean space); this must be done before using function sp::over()#
+				raster::crs(outer.poly) <- crs.string#
+				### Test that the output coordinates define a simple polygon.#
+				test.simple        <- all(c(rgeos::gIsSimple(outer.poly), rgeos::gIsSimple(hull.alpha.polygon)))#
+				### Test if all of the input points are in the output polygon#
+				test.coverage      <- (!any(is.na(sp::over(points.sp,outer.poly))))#
+			} else {#
+				test.simple   <- FALSE#
+				test.coverage <- FALSE#
+			}#
+			if(test.simple & test.coverage){#
+				alpha.upper <- min(alpha.upper,alpha)#
+			} else {#
+				alpha.lower <- max(alpha.lower,alpha)#
+			}#
+			### save a copy of the current alpha value to initialize the next while loop#
+			alpha.i <- alpha#
+			alpha   <- median(c(alpha.lower,alpha.upper))#
+			i=(i+1)#
+		}#
+		fractal.dimension  <- fracD(outer.poly)#
+		alpha          <- alpha.i#
+		while(fractal.dimension > max.fractal.dimension){#
+			alpha              <- (alpha+0.1)#
+			hull.alpha         <- alphahull::ahull(coords.for.alphahull,alpha=alpha)#
+			hull.alpha.coords  <- rbind(hull.alpha$arcs[,1:2],hull.alpha$arcs[1,1:2])#
+			hull.alpha.sp      <- sp::SpatialPoints(hull.alpha.coords)#
+			hull.alpha.polygon <- sp::SpatialPolygons(list(sp::Polygons(list(sp::Polygon(hull.alpha.sp)),ID="alpha.hull")))#
+			buffer.poly        <- rgeos::gBuffer(hull.alpha.polygon,width=((-0.75)+buffer.adj))#
+			outer.poly         <- smoothr::densify(buffer.poly,max_distance=(0.25*alpha))#
+			fractal.dimension  <- fracD(outer.poly)#
+		}#
+		raster::crs(outer.poly) <- crs.string#
+	} else {#
+		if(method==3){#
+			### Minimum convex polygon that contains the maps with points.#
+			polygons.mcp <- suppressWarnings(adehabitatHR::mcp(points.sp,percent=100))#
+			mcp.coords   <- unique(sp2coords(polygons.mcp))#
+			### Generate the alpha-hull of the polygons with points#
+			hull.alpha         <- alphahull::ahull(mcp.coords,alpha=1)#
+			hull.alpha.coords  <- rbind(hull.alpha$arcs[,1:2],hull.alpha$arcs[1,1:2])#
+			hull.alpha.sp      <- sp::SpatialPoints(hull.alpha.coords)#
+			hull.alpha.polygon <- sp::SpatialPolygons(list(sp::Polygons(list(sp::Polygon(hull.alpha.sp)),ID="alpha.hull")))#
+			buffer.width       <- (0.5+buffer.adj)#
+			### Create a polygon encompassing hull.alpha.polygon, with size determined by the value of buffer.width#
+			buffer.poly        <- rgeos::gBuffer(hull.alpha.polygon,width=buffer.width)#
+			### Same as buffer.poly except points are added at midpoints of edges longer than max_distance; process repeated until all edges less than. This can make it easier to visualize the border of the output polygon, but otherwise this isnt useful.#
+			outer.poly         <- smoothr::densify(buffer.poly,max_distance=(0.25*alpha))#
+			raster::crs(outer.poly) <- crs.string#
+		} else {#
+			stop("set method to 1, 2, or 3")#
+		}#
+	}#
+	outer     <- unname(sp2coords(outer.poly))#
+	if(counter.clockwise){#
+		outer <- cbind(rev(outer[,1]),rev(outer[,2]))#
+	}#
+	### Show the relationship between the outer coordinates, the input coordinates, and geographic regions#
+	if(plot.outer){#
+		### Turns off current graphics devices before plotting. This seems to help prevent the new plots from inheriting graphical parameters from the current device.#
+		if(!is.null(dev.list())){#
+			dev.off()#
+		}#
+		### Plots in slightly different ways depending depending on the method used.#
+		if(method %in% c(1,2)){#
+			### Plot the outer coordinates in white to define the extent#
+			plot(sp::SpatialPoints(outer),col="white")#
+			#plot(submaps.with.points.sp,add=T,col="gray90")#
+			plot(spdf_world_10,add=T)#
+			if(method==1){#
+			### Add a layer containing the regions of the basemap that include at least one point (regions in gray)#
+				plot(spdf_unique.features.at.circles,add=T,col="gray90")#
+				plot(sp_unique.polygons.without.circles,add=T,col="white")#
+			}#
+			### Add green crosshairs for output coordinates (the outer file for eems)#
+			plot(sp::SpatialPoints(outer),col="green",add=T)#
+			### Add black circles for locations of the input coordinates#
+			plot(points.sp,add=T,pch=20)#
+			### Add text/legend to show what the green crosshairs are#
+			mtext("+ = coordinates written to output.path (if set)",col="green",adj=0.1,line=1.25,cex=0.8)#
+			mtext(paste0("P:A fractal dimension of area inscribed by output coordinates",round(fractal.dimension,digits=3)),adj=0.1,line=0.25,cex=0.8)#
+			### Add map axes#
+			maps::map.axes()#
+		} else {#
+			plot(SpatialPoints(outer),col="white")#
+			extent.sp <- SpatialPoints(rbind(outer,coords))#
+			plot(spdf_world_10,add=T)#
+			plot(SpatialPoints(outer),col="green",add=T)#
+			plot(points.sp,add=T,pch=20)#
+			mtext("+ outer (coordinates written to output.path)",col="green",adj=0.1,line=0.25,cex=0.8)#
+			maps::map.axes()#
+		}#
+	}#
+	### Write outer file to output.path#
+	if(!is.null(output.path)){#
+		write.table(outer,output.path,row.names=F,col.names=F,sep=" ",quote=F)#
+	}#
+	### return a list including a matrix of the coordinates in the output file and a SpatialPolygons object of the output coordinates#
+	list(outer,outer.poly)#
+}
+# required packages#
+# library(sp)                 ### Used for everything#
+# library(maps)               ### map.axes function#
+# library(rgeos)              ### gBuffer and gArea function#
+# library(rgdal)              ### showWKT function#
+# library(raster)             ### crs and bind function#
+# library(smoothr)            ### densify function for adding outer points by interpolating along perimeter#
+# library(sampSurf)           ### spCircle function#
+# library(geosphere)          ### perimeter and areaPolygon functions#
+# library(alphahull)          ### ahull function#
+# library(adehabitatHR)       ### function to generate minimum convex polygon#
+# library(rnaturalearth)      ### Global geographic vectors#
+# library(rnaturalearthhires) ### high resolution data for rnaturalearth package#
+#
+#' @param coords Two column numeric matrix containing longitude and latitude of the samples in decimal degree format, or a character string with path to the input .coords file used for eems; the input file must be space separated and without a header.#
+#' @param alpha Value of alpha parameter (Default is 1). Increase alpha incrementally by about 0.1 until the polygon plot corresponding to the outer coordinates is simple polygon (as opposed to a complex, self-intersecting polygon).#
+#' @param buffer.adj This argument is not yet implemented. A number between 0 and 1 that determines the size of the buffer region surrounding the points supplied by coords.#
+#' @param method A number (1, 2, or 3) determining how the output coordinates will be generated.#
+#' If method=1 (the default) produces a potentially more useful result, and uses the alpha hull of geographic regions that intersect with input coordinates. This method may be slow if input coordinates include large sampling gaps. In such cases increases the value of alpha.start.#
+#' If method=2 is similar to method 1, except that the output coordinates are only determined from the input coordinates (and buffer setting), rather than from the regions of the base map (political geography from natural earth dataset) that intersect the input coordinates. Either method should be fine for EEMS, but method 1 tends to look nicer.#
+#' If method=3 is fast and uses the minimum convex polygon of input coodinates as a starting point.#
+#' @param coords.radius Number specifying the radius (in degrees) to use around input coordinates when determining spatial intersections. Increasing the value of this parameter can be useful if coordinates are located offshore of regions outlined in basemaps (high resolution Natural Earth dataset).#
+#' @param max.fractal.dimension Value between 1 and 2 contolling the shape complexity of the polygon with the output coordinates. Values near 1 have low complexity (e.g., circles, squares), and shape complexity increases as max.fractal.dimension approaches 2. The default value 1.1 seems to work well for most cases. Ignored if method=3.#
+#' @param plot.outer Logical indicating if the points defining the output ".outer" table should be plotted in green, as well as the ".coords" (coords) points in black.#
+#' @param counter.clockwise Should the output cooordinates be ordered counterclockwise. Default is TRUE and is the required format for EEMS.#
+#' @param output.path Character string with path where to save coordinates. Default is NULL.#
+#' @result A two column numerical matrix containing the longitude and latitude of the output polygon. The matrix written to output.path can be used as the ".outer" polygon used by EEMS. A map is plotted to visualize the results.#
+create.outer <- function(coords,method=1,buffer.adj=0,coords.radius=0.01,max.fractal.dimension=1.1,plot.outer=T,counter.clockwise=T,output.path=NULL){#
+	# Function to extract the coordinates matrix (numeric mode) from a class Polygon, Polygons, SpatialPolygons, or SpatialPolygonsDataFrame object that containins a single polygon.#
+	# Do not use this function if the inout spatial object contains more than coordinates matrix.#
+	sp2coords <- function(x){#
+		if(is(x,"SpatialPolygonsDataFrame") | is(x,"SpatialPolygons")){#
+			result <- x@polygons[[1]]@Polygons[[1]]@coords#
+		}#
+		if(is(x,"Polygons")){#
+			result <- x@Polygons[[1]]@coords#
+		}#
+		if(is(x,"Polygon") | is(x,"SpatialPoints")){#
+			result <- x@coords#
+		}#
+		unname(result)#
+	}#
+	### Convert a coordinates matrix into a SpatialPolygons object in circles centered at input coordinates, and radius specified by r#
+	coords2sp.poly <- function(coords.mat,r=0.01){#
+		colnames(coords.mat) <- c("x","y")#
+		circles.list <- apply(X=coords.mat,MARGIN=1,FUN=function(x){sampSurf::spCircle(radius=r,centerPoint=x)[[1]]})#
+		res          <- do.call(raster::bind,circles.list)#
+		res#
+	}#
+	### Fractal dimension of perimeter-area relationship, a metric of polygon complexity with values from 1 (simple euclidean shapes likes squares and circles) tp approaching 2 for increasingly complex polygons.#
+	# More info: http://www.umass.edu/landeco/teaching/landscape_ecology/schedule/chapter9_metrics.pdf#
+	# Input must be a SpatialPolygons object#
+	fracD <- function(x){#
+		# area in meters squared#
+		x.area      <- geosphere::areaPolygon(x)#
+		# perimeter in meters#
+		x.perimeter <- geosphere::perimeter(x)#
+		(2*log10(x.perimeter))/(log10(x.area))#
+	}#
+	#### For a SpatialPolygonsDataFrame, extract the lowest-level polygons and hold each as a feature in a SpatialPolygons object.#
+	extract.base.polygons <- function(spdf){#
+		for(i in 1:nrow(spdf)){#
+			sp.temp <- spdf@polygons[[i]]#
+			for(j in 1:length(sp.temp@Polygons)){#
+				id.temp <- paste0(i,".",j)#
+				polygons.ij <- sp::SpatialPolygons(list(sp::Polygons(list(sp.temp@Polygons[[j]]),ID=id.temp)))#
+				if(i==1 & j==1){#
+					polygons.all <- polygons.ij#
+				} else {#
+					polygons.all <- raster::bind(polygons.all,polygons.ij)#
+				}#
+			}#
+		}#
+		### Preserve crs definition#
+		raster::crs(polygons.all) <- raster::crs(spdf)#
+		### object returned#
+		polygons.all#
+	}#
+	input.coords <- coords#
+	### Check which type of object is being supplied to coords and define coords accordingly#
+	if(is(input.coords,"character")){#
+		coords   <- data.matrix(read.table(input.coords,header=F))#
+	}#
+	if(is(input.coords,"matrix") | is(input.coords,"data.frame")){#
+		coords       <- data.matrix(input.coords)#
+		mode(coords) <- "numeric"#
+	}#
+	## High resolution global map of political regions.#
+	spdf_world_10             <- rnaturalearth::ne_countries(scale=10)#
+	## Character string defining the Coordinate Reference System (CRS) in WKT format#
+	# crs.string <- rgdal::showWKT(sp::proj4string(spdf_world_10))#
+	# crs.string <- "+init=epsg:4326 +proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0"#
+	crs.string <- "+init=EPSG:4326"#
+	wkt.string <- rgdal::showWKT(crs.string)#
+	### Define CRS using wkt format#
+	raster::crs(spdf_world_10)   <- crs.string#
+	### SpatialPoints object holding coords#
+	points.sp <- sp::SpatialPoints(coords)#
+	raster::crs(points.sp) <- crs.string#
+	### SpatialPolygons object holding circles with centerpoints at coords#
+	circles.poly <- coords2sp.poly(coords.mat=coords,r=coords.radius)#
+	raster::crs(circles.poly) <- crs.string#
+	### Spatial data frame for the map features that intersect with the input coords#
+	unique.features.at.circles <- do.call(rbind,unique(sp::over(circles.poly, spdf_world_10,returnList=T)))#
+	### spdf row indices for the unique regions in unique.features.at.circles#
+	indices_unique.features.at.circles <- which(spdf_world_10$sov_a3 %in% unique(unique.features.at.circles$sov_a3))#
+	### Corresponding SpatialPolygonsDateFrame object#
+	spdf_unique.features.at.circles <- spdf_world_10[indices_unique.features.at.circles,]#
+	### Restructuring the heirarchy of lowest-level polygons, treating them as separate features of one SpatialPolygons object.#
+	## The purpose of this is to be able to use sp::over() to search for polygons that intersect with coords.#
+	base.polygons.sp <- extract.base.polygons(spdf_unique.features.at.circles)#
+	### Get the feature indices for the polygons that intersect with circles representing input coordinates#
+	indices_polygons.at.circles <- sp::over(circles.poly,base.polygons.sp)#
+	### Check if any NA values in indices_unique.polygons.at.circles, which occurs when one more of the input circles does not intersect any polygons (i.e. they fall in the ocean).#
+	### If NAs exist, try increasing the value of r parameter of coords2sp.poly function.#
+	if(any(is.na(indices_polygons.at.circles))){#
+		problem.points <- unname(which(is.na(indices_polygons.at.circles)))#
+		stop(paste0("sample(s) coords[",paste(problem.points,collapse=" "),",]  does not intersect map. Try increasing coords.radius or remove sample(s) from input"))#
+	}#
+	### Extract polygons in base.polygons.sp that intersect circles.poly#
+	sp_unique.polygons.at.circles      <- base.polygons.sp[unique(indices_polygons.at.circles)]#
+	sp_unique.polygons.without.circles <- base.polygons.sp[-unique(indices_polygons.at.circles)]#
+	if(method %in% c(1,2)){#
+		#### Method 1 for getting maps.coords.list#
+		### Two column numerical matrix of the coordinates of polygons that intersect input points#
+		coords.polygons.with.points <- unique(round(do.call(rbind,lapply(X=1:length(sp_unique.polygons.at.circles),FUN=function(x){sp2coords(sp::polygons(sp_unique.polygons.at.circles)[x])})),digits=3))#
+		####
+		if(method==1){#
+			coords.for.alphahull <- coords.polygons.with.points#
+			#buffer.width <- ((-0.75)+buffer.adj)#
+		}#
+		if(method==2){#
+			coords.for.alphahull <- unique(coords)#
+			#buffer.width <- buffer.adj#
+		}#
+		### initiallizing the while loop#
+		alpha.lower <- 1#
+		alpha.upper <- 50#
+		i=1; areas.equal <- FALSE; alpha <- alpha.upper; alpha.tol <- 0.1#
+		### Run while loop to find a low value of alpha that also generates a simple polygon (not self-intersecting or filled with holes) when input coordinates are supplied to ahull.#
+		# A polygon is considered simple if supplying the ahull polygon to gBuffer with buffer.width=0 produces a polygon with the same area as the input polygon. This works because gBuffer produces simple polygons even if the result clips the input polygon.#
+		while(((alpha.upper-alpha.lower)>alpha.tol) & (i < 100)){#
+			hull.alpha         <- alphahull::ahull(coords.for.alphahull,alpha=alpha)#
+			hull.alpha.coords  <- rbind(hull.alpha$arcs[,1:2],hull.alpha$arcs[1,1:2])#
+			hull.alpha.sp      <- sp::SpatialPoints(hull.alpha.coords)#
+			hull.alpha.polygon <- sp::SpatialPolygons(list(sp::Polygons(list(sp::Polygon(hull.alpha.sp)),ID="alpha.hull")))#
+			if(rgeos::gIsSimple(hull.alpha.polygon)){#
+				### Test hull.alpha.polygon is simple#
+				# geosphere::areaPolygon(hull.alpha.polygon) == geosphere::areaPolygon(gBuffer(hull.alpha.polygon,width=0))#
+				### Create a polygon encompassing hull.alpha.polygon, with size determined by the value of buffer.width#
+				# Note: Do not set the crs of hull.alpha.polygon because gBuffer function would introduce distortions associated with the projection. In reality this might not be be a big deal but I'm not sure.#
+				buffer.poly        <- rgeos::gBuffer(hull.alpha.polygon,width=((-0.75)+buffer.adj))#
+				### Same as buffer.poly except points are added at midpoints of edges longer than max_distance; process repeated until all edges less than. This can make it easier to visualize the border of the output polygon, but otherwise this isnt useful.#
+				outer.poly         <- smoothr::densify(buffer.poly,max_distance=(0.25*alpha))#
+				### Run this test before switching back to Euclidean space#
+				### Set CRS of outer.poly (now we are back in Euclidean space); this must be done before using function sp::over()#
+				raster::crs(outer.poly) <- crs.string#
+				### Test that the output coordinates define a simple polygon.#
+				test.simple        <- all(c(rgeos::gIsSimple(outer.poly), rgeos::gIsSimple(hull.alpha.polygon)))#
+				### Test if all of the input points are in the output polygon#
+				test.coverage      <- (!any(is.na(sp::over(points.sp,outer.poly))))#
+			} else {#
+				test.simple   <- FALSE#
+				test.coverage <- FALSE#
+			}#
+			if(test.simple & test.coverage){#
+				alpha.upper <- min(alpha.upper,alpha)#
+			} else {#
+				alpha.lower <- max(alpha.lower,alpha)#
+			}#
+			### save a copy of the current alpha value to initialize the next while loop#
+			alpha.i <- alpha#
+			alpha   <- median(c(alpha.lower,alpha.upper))#
+			i=(i+1)#
+		}#
+		fractal.dimension  <- fracD(outer.poly)#
+		alpha          <- alpha.i#
+		while(fractal.dimension > max.fractal.dimension){#
+			alpha              <- (alpha+0.1)#
+			hull.alpha         <- alphahull::ahull(coords.for.alphahull,alpha=alpha)#
+			hull.alpha.coords  <- rbind(hull.alpha$arcs[,1:2],hull.alpha$arcs[1,1:2])#
+			hull.alpha.sp      <- sp::SpatialPoints(hull.alpha.coords)#
+			hull.alpha.polygon <- sp::SpatialPolygons(list(sp::Polygons(list(sp::Polygon(hull.alpha.sp)),ID="alpha.hull")))#
+			buffer.poly        <- rgeos::gBuffer(hull.alpha.polygon,width=((-0.75)+buffer.adj))#
+			outer.poly         <- smoothr::densify(buffer.poly,max_distance=(0.25*alpha))#
+			fractal.dimension  <- fracD(outer.poly)#
+		}#
+		raster::crs(outer.poly) <- crs.string#
+	} else {#
+		if(method==3){#
+			### Minimum convex polygon that contains the maps with points.#
+			polygons.mcp <- suppressWarnings(adehabitatHR::mcp(points.sp,percent=100))#
+			mcp.coords   <- unique(sp2coords(polygons.mcp))#
+			### Generate the alpha-hull of the polygons with points#
+			hull.alpha         <- alphahull::ahull(mcp.coords,alpha=1)#
+			hull.alpha.coords  <- rbind(hull.alpha$arcs[,1:2],hull.alpha$arcs[1,1:2])#
+			hull.alpha.sp      <- sp::SpatialPoints(hull.alpha.coords)#
+			hull.alpha.polygon <- sp::SpatialPolygons(list(sp::Polygons(list(sp::Polygon(hull.alpha.sp)),ID="alpha.hull")))#
+			buffer.width       <- (0.5+buffer.adj)#
+			### Create a polygon encompassing hull.alpha.polygon, with size determined by the value of buffer.width#
+			buffer.poly        <- rgeos::gBuffer(hull.alpha.polygon,width=buffer.width)#
+			### Same as buffer.poly except points are added at midpoints of edges longer than max_distance; process repeated until all edges less than. This can make it easier to visualize the border of the output polygon, but otherwise this isnt useful.#
+			outer.poly         <- smoothr::densify(buffer.poly,max_distance=(0.25*alpha))#
+			raster::crs(outer.poly) <- crs.string#
+		} else {#
+			stop("set method to 1, 2, or 3")#
+		}#
+	}#
+	outer     <- unname(sp2coords(outer.poly))#
+	if(counter.clockwise){#
+		outer <- cbind(rev(outer[,1]),rev(outer[,2]))#
+	}#
+	### Show the relationship between the outer coordinates, the input coordinates, and geographic regions#
+	if(plot.outer){#
+		### Turns off current graphics devices before plotting. This seems to help prevent the new plots from inheriting graphical parameters from the current device.#
+		if(!is.null(dev.list())){#
+			dev.off()#
+		}#
+		### Plots in slightly different ways depending depending on the method used.#
+		if(method %in% c(1,2)){#
+			### Plot the outer coordinates in white to define the extent#
+			plot(sp::SpatialPoints(outer),col="white")#
+			#plot(submaps.with.points.sp,add=T,col="gray90")#
+			plot(spdf_world_10,add=T)#
+			if(method==1){#
+			### Add a layer containing the regions of the basemap that include at least one point (regions in gray)#
+				plot(spdf_unique.features.at.circles,add=T,col="gray90")#
+				plot(sp_unique.polygons.without.circles,add=T,col="white")#
+			}#
+			### Add green crosshairs for output coordinates (the outer file for eems)#
+			plot(sp::SpatialPoints(outer),col="green",add=T)#
+			### Add black circles for locations of the input coordinates#
+			plot(points.sp,add=T,pch=20)#
+			### Add text/legend to show what the green crosshairs are#
+			text("+ = coordinates written to output.path (if set)",col="green",adj=0.1,line=1.25,cex=0.8,pos=3)#
+			text(paste0("P:A fractal dimension of area inscribed by output coordinates",round(fractal.dimension,digits=3)),adj=0.1,line=0.25,cex=0.8,pos=3)#
+			### Add map axes#
+			maps::map.axes()#
+		} else {#
+			plot(SpatialPoints(outer),col="white")#
+			extent.sp <- SpatialPoints(rbind(outer,coords))#
+			plot(spdf_world_10,add=T)#
+			plot(SpatialPoints(outer),col="green",add=T)#
+			plot(points.sp,add=T,pch=20)#
+			mtext("+ outer (coordinates written to output.path)",col="green",adj=0.1,line=0.25,cex=0.8)#
+			maps::map.axes()#
+		}#
+	}#
+	### Write outer file to output.path#
+	if(!is.null(output.path)){#
+		write.table(outer,output.path,row.names=F,col.names=F,sep=" ",quote=F)#
+	}#
+	### return a list including a matrix of the coordinates in the output file and a SpatialPolygons object of the output coordinates#
+	list(outer,outer.poly)#
+}
+test <- create.outer(coords="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/EEMS/EEMS_Katie/mainland_maculilabris.coord",method=2,max.fractal.dimension=1.105)
+?text()
+??text()
+# required packages#
+# library(sp)                 ### Used for everything#
+# library(maps)               ### map.axes function#
+# library(rgeos)              ### gBuffer and gArea function#
+# library(rgdal)              ### showWKT function#
+# library(raster)             ### crs and bind function#
+# library(smoothr)            ### densify function for adding outer points by interpolating along perimeter#
+# library(sampSurf)           ### spCircle function#
+# library(geosphere)          ### perimeter and areaPolygon functions#
+# library(alphahull)          ### ahull function#
+# library(adehabitatHR)       ### function to generate minimum convex polygon#
+# library(rnaturalearth)      ### Global geographic vectors#
+# library(rnaturalearthhires) ### high resolution data for rnaturalearth package#
+#
+#' @param coords Two column numeric matrix containing longitude and latitude of the samples in decimal degree format, or a character string with path to the input .coords file used for eems; the input file must be space separated and without a header.#
+#' @param alpha Value of alpha parameter (Default is 1). Increase alpha incrementally by about 0.1 until the polygon plot corresponding to the outer coordinates is simple polygon (as opposed to a complex, self-intersecting polygon).#
+#' @param buffer.adj This argument is not yet implemented. A number between 0 and 1 that determines the size of the buffer region surrounding the points supplied by coords.#
+#' @param method A number (1, 2, or 3) determining how the output coordinates will be generated.#
+#' If method=1 (the default) produces a potentially more useful result, and uses the alpha hull of geographic regions that intersect with input coordinates. This method may be slow if input coordinates include large sampling gaps. In such cases increases the value of alpha.start.#
+#' If method=2 is similar to method 1, except that the output coordinates are only determined from the input coordinates (and buffer setting), rather than from the regions of the base map (political geography from natural earth dataset) that intersect the input coordinates. Either method should be fine for EEMS, but method 1 tends to look nicer.#
+#' If method=3 is fast and uses the minimum convex polygon of input coodinates as a starting point.#
+#' @param coords.radius Number specifying the radius (in degrees) to use around input coordinates when determining spatial intersections. Increasing the value of this parameter can be useful if coordinates are located offshore of regions outlined in basemaps (high resolution Natural Earth dataset).#
+#' @param max.fractal.dimension Value between 1 and 2 contolling the shape complexity of the polygon with the output coordinates. Values near 1 have low complexity (e.g., circles, squares), and shape complexity increases as max.fractal.dimension approaches 2. The default value 1.1 seems to work well for most cases. Ignored if method=3.#
+#' @param plot.outer Logical indicating if the points defining the output ".outer" table should be plotted in green, as well as the ".coords" (coords) points in black.#
+#' @param counter.clockwise Should the output cooordinates be ordered counterclockwise. Default is TRUE and is the required format for EEMS.#
+#' @param output.path Character string with path where to save coordinates. Default is NULL.#
+#' @result A two column numerical matrix containing the longitude and latitude of the output polygon. The matrix written to output.path can be used as the ".outer" polygon used by EEMS. A map is plotted to visualize the results.#
+create.outer <- function(coords,method=1,buffer.adj=0,coords.radius=0.01,max.fractal.dimension=1.1,plot.outer=T,counter.clockwise=T,output.path=NULL){#
+	# Function to extract the coordinates matrix (numeric mode) from a class Polygon, Polygons, SpatialPolygons, or SpatialPolygonsDataFrame object that containins a single polygon.#
+	# Do not use this function if the inout spatial object contains more than coordinates matrix.#
+	sp2coords <- function(x){#
+		if(is(x,"SpatialPolygonsDataFrame") | is(x,"SpatialPolygons")){#
+			result <- x@polygons[[1]]@Polygons[[1]]@coords#
+		}#
+		if(is(x,"Polygons")){#
+			result <- x@Polygons[[1]]@coords#
+		}#
+		if(is(x,"Polygon") | is(x,"SpatialPoints")){#
+			result <- x@coords#
+		}#
+		unname(result)#
+	}#
+	### Convert a coordinates matrix into a SpatialPolygons object in circles centered at input coordinates, and radius specified by r#
+	coords2sp.poly <- function(coords.mat,r=0.01){#
+		colnames(coords.mat) <- c("x","y")#
+		circles.list <- apply(X=coords.mat,MARGIN=1,FUN=function(x){sampSurf::spCircle(radius=r,centerPoint=x)[[1]]})#
+		res          <- do.call(raster::bind,circles.list)#
+		res#
+	}#
+	### Fractal dimension of perimeter-area relationship, a metric of polygon complexity with values from 1 (simple euclidean shapes likes squares and circles) tp approaching 2 for increasingly complex polygons.#
+	# More info: http://www.umass.edu/landeco/teaching/landscape_ecology/schedule/chapter9_metrics.pdf#
+	# Input must be a SpatialPolygons object#
+	fracD <- function(x){#
+		# area in meters squared#
+		x.area      <- geosphere::areaPolygon(x)#
+		# perimeter in meters#
+		x.perimeter <- geosphere::perimeter(x)#
+		(2*log10(x.perimeter))/(log10(x.area))#
+	}#
+	#### For a SpatialPolygonsDataFrame, extract the lowest-level polygons and hold each as a feature in a SpatialPolygons object.#
+	extract.base.polygons <- function(spdf){#
+		for(i in 1:nrow(spdf)){#
+			sp.temp <- spdf@polygons[[i]]#
+			for(j in 1:length(sp.temp@Polygons)){#
+				id.temp <- paste0(i,".",j)#
+				polygons.ij <- sp::SpatialPolygons(list(sp::Polygons(list(sp.temp@Polygons[[j]]),ID=id.temp)))#
+				if(i==1 & j==1){#
+					polygons.all <- polygons.ij#
+				} else {#
+					polygons.all <- raster::bind(polygons.all,polygons.ij)#
+				}#
+			}#
+		}#
+		### Preserve crs definition#
+		raster::crs(polygons.all) <- raster::crs(spdf)#
+		### object returned#
+		polygons.all#
+	}#
+	input.coords <- coords#
+	### Check which type of object is being supplied to coords and define coords accordingly#
+	if(is(input.coords,"character")){#
+		coords   <- data.matrix(read.table(input.coords,header=F))#
+	}#
+	if(is(input.coords,"matrix") | is(input.coords,"data.frame")){#
+		coords       <- data.matrix(input.coords)#
+		mode(coords) <- "numeric"#
+	}#
+	## High resolution global map of political regions.#
+	spdf_world_10             <- rnaturalearth::ne_countries(scale=10)#
+	## Character string defining the Coordinate Reference System (CRS) in WKT format#
+	# crs.string <- rgdal::showWKT(sp::proj4string(spdf_world_10))#
+	# crs.string <- "+init=epsg:4326 +proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0"#
+	crs.string <- "+init=EPSG:4326"#
+	wkt.string <- rgdal::showWKT(crs.string)#
+	### Define CRS using wkt format#
+	raster::crs(spdf_world_10)   <- crs.string#
+	### SpatialPoints object holding coords#
+	points.sp <- sp::SpatialPoints(coords)#
+	raster::crs(points.sp) <- crs.string#
+	### SpatialPolygons object holding circles with centerpoints at coords#
+	circles.poly <- coords2sp.poly(coords.mat=coords,r=coords.radius)#
+	raster::crs(circles.poly) <- crs.string#
+	### Spatial data frame for the map features that intersect with the input coords#
+	unique.features.at.circles <- do.call(rbind,unique(sp::over(circles.poly, spdf_world_10,returnList=T)))#
+	### spdf row indices for the unique regions in unique.features.at.circles#
+	indices_unique.features.at.circles <- which(spdf_world_10$sov_a3 %in% unique(unique.features.at.circles$sov_a3))#
+	### Corresponding SpatialPolygonsDateFrame object#
+	spdf_unique.features.at.circles <- spdf_world_10[indices_unique.features.at.circles,]#
+	### Restructuring the heirarchy of lowest-level polygons, treating them as separate features of one SpatialPolygons object.#
+	## The purpose of this is to be able to use sp::over() to search for polygons that intersect with coords.#
+	base.polygons.sp <- extract.base.polygons(spdf_unique.features.at.circles)#
+	### Get the feature indices for the polygons that intersect with circles representing input coordinates#
+	indices_polygons.at.circles <- sp::over(circles.poly,base.polygons.sp)#
+	### Check if any NA values in indices_unique.polygons.at.circles, which occurs when one more of the input circles does not intersect any polygons (i.e. they fall in the ocean).#
+	### If NAs exist, try increasing the value of r parameter of coords2sp.poly function.#
+	if(any(is.na(indices_polygons.at.circles))){#
+		problem.points <- unname(which(is.na(indices_polygons.at.circles)))#
+		stop(paste0("sample(s) coords[",paste(problem.points,collapse=" "),",]  does not intersect map. Try increasing coords.radius or remove sample(s) from input"))#
+	}#
+	### Extract polygons in base.polygons.sp that intersect circles.poly#
+	sp_unique.polygons.at.circles      <- base.polygons.sp[unique(indices_polygons.at.circles)]#
+	sp_unique.polygons.without.circles <- base.polygons.sp[-unique(indices_polygons.at.circles)]#
+	if(method %in% c(1,2)){#
+		#### Method 1 for getting maps.coords.list#
+		### Two column numerical matrix of the coordinates of polygons that intersect input points#
+		coords.polygons.with.points <- unique(round(do.call(rbind,lapply(X=1:length(sp_unique.polygons.at.circles),FUN=function(x){sp2coords(sp::polygons(sp_unique.polygons.at.circles)[x])})),digits=3))#
+		####
+		if(method==1){#
+			coords.for.alphahull <- coords.polygons.with.points#
+			#buffer.width <- ((-0.75)+buffer.adj)#
+		}#
+		if(method==2){#
+			coords.for.alphahull <- unique(coords)#
+			#buffer.width <- buffer.adj#
+		}#
+		### initiallizing the while loop#
+		alpha.lower <- 1#
+		alpha.upper <- 50#
+		i=1; areas.equal <- FALSE; alpha <- alpha.upper; alpha.tol <- 0.1#
+		### Run while loop to find a low value of alpha that also generates a simple polygon (not self-intersecting or filled with holes) when input coordinates are supplied to ahull.#
+		# A polygon is considered simple if supplying the ahull polygon to gBuffer with buffer.width=0 produces a polygon with the same area as the input polygon. This works because gBuffer produces simple polygons even if the result clips the input polygon.#
+		while(((alpha.upper-alpha.lower)>alpha.tol) & (i < 100)){#
+			hull.alpha         <- alphahull::ahull(coords.for.alphahull,alpha=alpha)#
+			hull.alpha.coords  <- rbind(hull.alpha$arcs[,1:2],hull.alpha$arcs[1,1:2])#
+			hull.alpha.sp      <- sp::SpatialPoints(hull.alpha.coords)#
+			hull.alpha.polygon <- sp::SpatialPolygons(list(sp::Polygons(list(sp::Polygon(hull.alpha.sp)),ID="alpha.hull")))#
+			if(rgeos::gIsSimple(hull.alpha.polygon)){#
+				### Test hull.alpha.polygon is simple#
+				# geosphere::areaPolygon(hull.alpha.polygon) == geosphere::areaPolygon(gBuffer(hull.alpha.polygon,width=0))#
+				### Create a polygon encompassing hull.alpha.polygon, with size determined by the value of buffer.width#
+				# Note: Do not set the crs of hull.alpha.polygon because gBuffer function would introduce distortions associated with the projection. In reality this might not be be a big deal but I'm not sure.#
+				buffer.poly        <- rgeos::gBuffer(hull.alpha.polygon,width=((-0.75)+buffer.adj))#
+				### Same as buffer.poly except points are added at midpoints of edges longer than max_distance; process repeated until all edges less than. This can make it easier to visualize the border of the output polygon, but otherwise this isnt useful.#
+				outer.poly         <- smoothr::densify(buffer.poly,max_distance=(0.25*alpha))#
+				### Run this test before switching back to Euclidean space#
+				### Set CRS of outer.poly (now we are back in Euclidean space); this must be done before using function sp::over()#
+				raster::crs(outer.poly) <- crs.string#
+				### Test that the output coordinates define a simple polygon.#
+				test.simple        <- all(c(rgeos::gIsSimple(outer.poly), rgeos::gIsSimple(hull.alpha.polygon)))#
+				### Test if all of the input points are in the output polygon#
+				test.coverage      <- (!any(is.na(sp::over(points.sp,outer.poly))))#
+			} else {#
+				test.simple   <- FALSE#
+				test.coverage <- FALSE#
+			}#
+			if(test.simple & test.coverage){#
+				alpha.upper <- min(alpha.upper,alpha)#
+			} else {#
+				alpha.lower <- max(alpha.lower,alpha)#
+			}#
+			### save a copy of the current alpha value to initialize the next while loop#
+			alpha.i <- alpha#
+			alpha   <- median(c(alpha.lower,alpha.upper))#
+			i=(i+1)#
+		}#
+		fractal.dimension  <- fracD(outer.poly)#
+		alpha          <- alpha.i#
+		while(fractal.dimension > max.fractal.dimension){#
+			alpha              <- (alpha+0.1)#
+			hull.alpha         <- alphahull::ahull(coords.for.alphahull,alpha=alpha)#
+			hull.alpha.coords  <- rbind(hull.alpha$arcs[,1:2],hull.alpha$arcs[1,1:2])#
+			hull.alpha.sp      <- sp::SpatialPoints(hull.alpha.coords)#
+			hull.alpha.polygon <- sp::SpatialPolygons(list(sp::Polygons(list(sp::Polygon(hull.alpha.sp)),ID="alpha.hull")))#
+			buffer.poly        <- rgeos::gBuffer(hull.alpha.polygon,width=((-0.75)+buffer.adj))#
+			outer.poly         <- smoothr::densify(buffer.poly,max_distance=(0.25*alpha))#
+			fractal.dimension  <- fracD(outer.poly)#
+		}#
+		raster::crs(outer.poly) <- crs.string#
+	} else {#
+		if(method==3){#
+			### Minimum convex polygon that contains the maps with points.#
+			polygons.mcp <- suppressWarnings(adehabitatHR::mcp(points.sp,percent=100))#
+			mcp.coords   <- unique(sp2coords(polygons.mcp))#
+			### Generate the alpha-hull of the polygons with points#
+			hull.alpha         <- alphahull::ahull(mcp.coords,alpha=1)#
+			hull.alpha.coords  <- rbind(hull.alpha$arcs[,1:2],hull.alpha$arcs[1,1:2])#
+			hull.alpha.sp      <- sp::SpatialPoints(hull.alpha.coords)#
+			hull.alpha.polygon <- sp::SpatialPolygons(list(sp::Polygons(list(sp::Polygon(hull.alpha.sp)),ID="alpha.hull")))#
+			buffer.width       <- (0.5+buffer.adj)#
+			### Create a polygon encompassing hull.alpha.polygon, with size determined by the value of buffer.width#
+			buffer.poly        <- rgeos::gBuffer(hull.alpha.polygon,width=buffer.width)#
+			### Same as buffer.poly except points are added at midpoints of edges longer than max_distance; process repeated until all edges less than. This can make it easier to visualize the border of the output polygon, but otherwise this isnt useful.#
+			outer.poly         <- smoothr::densify(buffer.poly,max_distance=(0.25*alpha))#
+			raster::crs(outer.poly) <- crs.string#
+		} else {#
+			stop("set method to 1, 2, or 3")#
+		}#
+	}#
+	outer     <- unname(sp2coords(outer.poly))#
+	if(counter.clockwise){#
+		outer <- cbind(rev(outer[,1]),rev(outer[,2]))#
+	}#
+	### Show the relationship between the outer coordinates, the input coordinates, and geographic regions#
+	if(plot.outer){#
+		### Turns off current graphics devices before plotting. This seems to help prevent the new plots from inheriting graphical parameters from the current device.#
+		if(!is.null(dev.list())){#
+			dev.off()#
+		}#
+		### Plots in slightly different ways depending depending on the method used.#
+		if(method %in% c(1,2)){#
+			### Plot the outer coordinates in white to define the extent#
+			plot(sp::SpatialPoints(outer),col="white")#
+			#plot(submaps.with.points.sp,add=T,col="gray90")#
+			plot(spdf_world_10,add=T)#
+			if(method==1){#
+			### Add a layer containing the regions of the basemap that include at least one point (regions in gray)#
+				plot(spdf_unique.features.at.circles,add=T,col="gray90")#
+				plot(sp_unique.polygons.without.circles,add=T,col="white")#
+			}#
+			### Add green crosshairs for output coordinates (the outer file for eems)#
+			plot(sp::SpatialPoints(outer),col="green",add=T)#
+			### Add black circles for locations of the input coordinates#
+			plot(points.sp,add=T,pch=20)#
+			### Add text/legend to show what the green crosshairs are#
+			mtext("+ = coordinates written to output.path (if set)",col="green",adj=0.1,line=1.5,cex=0.8)#
+			mtext(paste0("P:A fractal dimension of area inscribed by output coordinates",round(fractal.dimension,digits=3)),adj=0.1,line=0.5,cex=0.8)#
+			### Add map axes#
+			maps::map.axes()#
+		} else {#
+			plot(SpatialPoints(outer),col="white")#
+			extent.sp <- SpatialPoints(rbind(outer,coords))#
+			plot(spdf_world_10,add=T)#
+			plot(SpatialPoints(outer),col="green",add=T)#
+			plot(points.sp,add=T,pch=20)#
+			mtext("+ outer (coordinates written to output.path)",col="green",adj=0.1,line=0.25,cex=0.8)#
+			maps::map.axes()#
+		}#
+	}#
+	### Write outer file to output.path#
+	if(!is.null(output.path)){#
+		write.table(outer,output.path,row.names=F,col.names=F,sep=" ",quote=F)#
+	}#
+	### return a list including a matrix of the coordinates in the output file and a SpatialPolygons object of the output coordinates#
+	list(outer,outer.poly)#
+}
+test <- create.outer(coords="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/EEMS/EEMS_Katie/mainland_maculilabris.coord",method=2,max.fractal.dimension=1.105)
+# required packages#
+# library(sp)                 ### Used for everything#
+# library(maps)               ### map.axes function#
+# library(rgeos)              ### gBuffer and gArea function#
+# library(rgdal)              ### showWKT function#
+# library(raster)             ### crs and bind function#
+# library(smoothr)            ### densify function for adding outer points by interpolating along perimeter#
+# library(sampSurf)           ### spCircle function#
+# library(geosphere)          ### perimeter and areaPolygon functions#
+# library(alphahull)          ### ahull function#
+# library(adehabitatHR)       ### function to generate minimum convex polygon#
+# library(rnaturalearth)      ### Global geographic vectors#
+# library(rnaturalearthhires) ### high resolution data for rnaturalearth package#
+#
+#' @param coords Two column numeric matrix containing longitude and latitude of the samples in decimal degree format, or a character string with path to the input .coords file used for eems; the input file must be space separated and without a header.#
+#' @param alpha Value of alpha parameter (Default is 1). Increase alpha incrementally by about 0.1 until the polygon plot corresponding to the outer coordinates is simple polygon (as opposed to a complex, self-intersecting polygon).#
+#' @param buffer.adj This argument is not yet implemented. A number between 0 and 1 that determines the size of the buffer region surrounding the points supplied by coords.#
+#' @param method A number (1, 2, or 3) determining how the output coordinates will be generated.#
+#' If method=1 (the default) produces a potentially more useful result, and uses the alpha hull of geographic regions that intersect with input coordinates. This method may be slow if input coordinates include large sampling gaps. In such cases increases the value of alpha.start.#
+#' If method=2 is similar to method 1, except that the output coordinates are only determined from the input coordinates (and buffer setting), rather than from the regions of the base map (political geography from natural earth dataset) that intersect the input coordinates. Either method should be fine for EEMS, but method 1 tends to look nicer.#
+#' If method=3 is fast and uses the minimum convex polygon of input coodinates as a starting point.#
+#' @param coords.radius Number specifying the radius (in degrees) to use around input coordinates when determining spatial intersections. Increasing the value of this parameter can be useful if coordinates are located offshore of regions outlined in basemaps (high resolution Natural Earth dataset).#
+#' @param max.fractal.dimension Value between 1 and 2 contolling the shape complexity of the polygon with the output coordinates. Values near 1 have low complexity (e.g., circles, squares), and shape complexity increases as max.fractal.dimension approaches 2. The default value 1.1 seems to work well for most cases. Ignored if method=3.#
+#' @param plot.outer Logical indicating if the points defining the output ".outer" table should be plotted in green, as well as the ".coords" (coords) points in black.#
+#' @param counter.clockwise Should the output cooordinates be ordered counterclockwise. Default is TRUE and is the required format for EEMS.#
+#' @param output.path Character string with path where to save coordinates. Default is NULL.#
+#' @result A two column numerical matrix containing the longitude and latitude of the output polygon. The matrix written to output.path can be used as the ".outer" polygon used by EEMS. A map is plotted to visualize the results.#
+create.outer <- function(coords,method=1,buffer.adj=0,coords.radius=0.01,max.fractal.dimension=1.1,plot.outer=T,counter.clockwise=T,output.path=NULL){#
+	# Function to extract the coordinates matrix (numeric mode) from a class Polygon, Polygons, SpatialPolygons, or SpatialPolygonsDataFrame object that containins a single polygon.#
+	# Do not use this function if the inout spatial object contains more than coordinates matrix.#
+	sp2coords <- function(x){#
+		if(is(x,"SpatialPolygonsDataFrame") | is(x,"SpatialPolygons")){#
+			result <- x@polygons[[1]]@Polygons[[1]]@coords#
+		}#
+		if(is(x,"Polygons")){#
+			result <- x@Polygons[[1]]@coords#
+		}#
+		if(is(x,"Polygon") | is(x,"SpatialPoints")){#
+			result <- x@coords#
+		}#
+		unname(result)#
+	}#
+	### Convert a coordinates matrix into a SpatialPolygons object in circles centered at input coordinates, and radius specified by r#
+	coords2sp.poly <- function(coords.mat,r=0.01){#
+		colnames(coords.mat) <- c("x","y")#
+		circles.list <- apply(X=coords.mat,MARGIN=1,FUN=function(x){sampSurf::spCircle(radius=r,centerPoint=x)[[1]]})#
+		res          <- do.call(raster::bind,circles.list)#
+		res#
+	}#
+	### Fractal dimension of perimeter-area relationship, a metric of polygon complexity with values from 1 (simple euclidean shapes likes squares and circles) tp approaching 2 for increasingly complex polygons.#
+	# More info: http://www.umass.edu/landeco/teaching/landscape_ecology/schedule/chapter9_metrics.pdf#
+	# Input must be a SpatialPolygons object#
+	fracD <- function(x){#
+		# area in meters squared#
+		x.area      <- geosphere::areaPolygon(x)#
+		# perimeter in meters#
+		x.perimeter <- geosphere::perimeter(x)#
+		(2*log10(x.perimeter))/(log10(x.area))#
+	}#
+	#### For a SpatialPolygonsDataFrame, extract the lowest-level polygons and hold each as a feature in a SpatialPolygons object.#
+	extract.base.polygons <- function(spdf){#
+		for(i in 1:nrow(spdf)){#
+			sp.temp <- spdf@polygons[[i]]#
+			for(j in 1:length(sp.temp@Polygons)){#
+				id.temp <- paste0(i,".",j)#
+				polygons.ij <- sp::SpatialPolygons(list(sp::Polygons(list(sp.temp@Polygons[[j]]),ID=id.temp)))#
+				if(i==1 & j==1){#
+					polygons.all <- polygons.ij#
+				} else {#
+					polygons.all <- raster::bind(polygons.all,polygons.ij)#
+				}#
+			}#
+		}#
+		### Preserve crs definition#
+		raster::crs(polygons.all) <- raster::crs(spdf)#
+		### object returned#
+		polygons.all#
+	}#
+	input.coords <- coords#
+	### Check which type of object is being supplied to coords and define coords accordingly#
+	if(is(input.coords,"character")){#
+		coords   <- data.matrix(read.table(input.coords,header=F))#
+	}#
+	if(is(input.coords,"matrix") | is(input.coords,"data.frame")){#
+		coords       <- data.matrix(input.coords)#
+		mode(coords) <- "numeric"#
+	}#
+	## High resolution global map of political regions.#
+	spdf_world_10             <- rnaturalearth::ne_countries(scale=10)#
+	## Character string defining the Coordinate Reference System (CRS) in WKT format#
+	# crs.string <- rgdal::showWKT(sp::proj4string(spdf_world_10))#
+	# crs.string <- "+init=epsg:4326 +proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0"#
+	crs.string <- "+init=EPSG:4326"#
+	wkt.string <- rgdal::showWKT(crs.string)#
+	### Define CRS using wkt format#
+	raster::crs(spdf_world_10)   <- crs.string#
+	### SpatialPoints object holding coords#
+	points.sp <- sp::SpatialPoints(coords)#
+	raster::crs(points.sp) <- crs.string#
+	### SpatialPolygons object holding circles with centerpoints at coords#
+	circles.poly <- coords2sp.poly(coords.mat=coords,r=coords.radius)#
+	raster::crs(circles.poly) <- crs.string#
+	### Spatial data frame for the map features that intersect with the input coords#
+	unique.features.at.circles <- do.call(rbind,unique(sp::over(circles.poly, spdf_world_10,returnList=T)))#
+	### spdf row indices for the unique regions in unique.features.at.circles#
+	indices_unique.features.at.circles <- which(spdf_world_10$sov_a3 %in% unique(unique.features.at.circles$sov_a3))#
+	### Corresponding SpatialPolygonsDateFrame object#
+	spdf_unique.features.at.circles <- spdf_world_10[indices_unique.features.at.circles,]#
+	### Restructuring the heirarchy of lowest-level polygons, treating them as separate features of one SpatialPolygons object.#
+	## The purpose of this is to be able to use sp::over() to search for polygons that intersect with coords.#
+	base.polygons.sp <- extract.base.polygons(spdf_unique.features.at.circles)#
+	### Get the feature indices for the polygons that intersect with circles representing input coordinates#
+	indices_polygons.at.circles <- sp::over(circles.poly,base.polygons.sp)#
+	### Check if any NA values in indices_unique.polygons.at.circles, which occurs when one more of the input circles does not intersect any polygons (i.e. they fall in the ocean).#
+	### If NAs exist, try increasing the value of r parameter of coords2sp.poly function.#
+	if(any(is.na(indices_polygons.at.circles))){#
+		problem.points <- unname(which(is.na(indices_polygons.at.circles)))#
+		stop(paste0("sample(s) coords[",paste(problem.points,collapse=" "),",]  does not intersect map. Try increasing coords.radius or remove sample(s) from input"))#
+	}#
+	### Extract polygons in base.polygons.sp that intersect circles.poly#
+	sp_unique.polygons.at.circles      <- base.polygons.sp[unique(indices_polygons.at.circles)]#
+	sp_unique.polygons.without.circles <- base.polygons.sp[-unique(indices_polygons.at.circles)]#
+	if(method %in% c(1,2)){#
+		#### Method 1 for getting maps.coords.list#
+		### Two column numerical matrix of the coordinates of polygons that intersect input points#
+		coords.polygons.with.points <- unique(round(do.call(rbind,lapply(X=1:length(sp_unique.polygons.at.circles),FUN=function(x){sp2coords(sp::polygons(sp_unique.polygons.at.circles)[x])})),digits=3))#
+		####
+		if(method==1){#
+			coords.for.alphahull <- coords.polygons.with.points#
+			#buffer.width <- ((-0.75)+buffer.adj)#
+		}#
+		if(method==2){#
+			coords.for.alphahull <- unique(coords)#
+			#buffer.width <- buffer.adj#
+		}#
+		### initiallizing the while loop#
+		alpha.lower <- 1#
+		alpha.upper <- 50#
+		i=1; areas.equal <- FALSE; alpha <- alpha.upper; alpha.tol <- 0.1#
+		### Run while loop to find a low value of alpha that also generates a simple polygon (not self-intersecting or filled with holes) when input coordinates are supplied to ahull.#
+		# A polygon is considered simple if supplying the ahull polygon to gBuffer with buffer.width=0 produces a polygon with the same area as the input polygon. This works because gBuffer produces simple polygons even if the result clips the input polygon.#
+		while(((alpha.upper-alpha.lower)>alpha.tol) & (i < 100)){#
+			hull.alpha         <- alphahull::ahull(coords.for.alphahull,alpha=alpha)#
+			hull.alpha.coords  <- rbind(hull.alpha$arcs[,1:2],hull.alpha$arcs[1,1:2])#
+			hull.alpha.sp      <- sp::SpatialPoints(hull.alpha.coords)#
+			hull.alpha.polygon <- sp::SpatialPolygons(list(sp::Polygons(list(sp::Polygon(hull.alpha.sp)),ID="alpha.hull")))#
+			if(rgeos::gIsSimple(hull.alpha.polygon)){#
+				### Test hull.alpha.polygon is simple#
+				# geosphere::areaPolygon(hull.alpha.polygon) == geosphere::areaPolygon(gBuffer(hull.alpha.polygon,width=0))#
+				### Create a polygon encompassing hull.alpha.polygon, with size determined by the value of buffer.width#
+				# Note: Do not set the crs of hull.alpha.polygon because gBuffer function would introduce distortions associated with the projection. In reality this might not be be a big deal but I'm not sure.#
+				buffer.poly        <- rgeos::gBuffer(hull.alpha.polygon,width=((-0.75)+buffer.adj))#
+				### Same as buffer.poly except points are added at midpoints of edges longer than max_distance; process repeated until all edges less than. This can make it easier to visualize the border of the output polygon, but otherwise this isnt useful.#
+				outer.poly         <- smoothr::densify(buffer.poly,max_distance=(0.25*alpha))#
+				### Run this test before switching back to Euclidean space#
+				### Set CRS of outer.poly (now we are back in Euclidean space); this must be done before using function sp::over()#
+				raster::crs(outer.poly) <- crs.string#
+				### Test that the output coordinates define a simple polygon.#
+				test.simple        <- all(c(rgeos::gIsSimple(outer.poly), rgeos::gIsSimple(hull.alpha.polygon)))#
+				### Test if all of the input points are in the output polygon#
+				test.coverage      <- (!any(is.na(sp::over(points.sp,outer.poly))))#
+			} else {#
+				test.simple   <- FALSE#
+				test.coverage <- FALSE#
+			}#
+			if(test.simple & test.coverage){#
+				alpha.upper <- min(alpha.upper,alpha)#
+			} else {#
+				alpha.lower <- max(alpha.lower,alpha)#
+			}#
+			### save a copy of the current alpha value to initialize the next while loop#
+			alpha.i <- alpha#
+			alpha   <- median(c(alpha.lower,alpha.upper))#
+			i=(i+1)#
+		}#
+		fractal.dimension  <- fracD(outer.poly)#
+		alpha          <- alpha.i#
+		while(fractal.dimension > max.fractal.dimension){#
+			alpha              <- (alpha+0.1)#
+			hull.alpha         <- alphahull::ahull(coords.for.alphahull,alpha=alpha)#
+			hull.alpha.coords  <- rbind(hull.alpha$arcs[,1:2],hull.alpha$arcs[1,1:2])#
+			hull.alpha.sp      <- sp::SpatialPoints(hull.alpha.coords)#
+			hull.alpha.polygon <- sp::SpatialPolygons(list(sp::Polygons(list(sp::Polygon(hull.alpha.sp)),ID="alpha.hull")))#
+			buffer.poly        <- rgeos::gBuffer(hull.alpha.polygon,width=((-0.75)+buffer.adj))#
+			outer.poly         <- smoothr::densify(buffer.poly,max_distance=(0.25*alpha))#
+			fractal.dimension  <- fracD(outer.poly)#
+		}#
+		raster::crs(outer.poly) <- crs.string#
+	} else {#
+		if(method==3){#
+			### Minimum convex polygon that contains the maps with points.#
+			polygons.mcp <- suppressWarnings(adehabitatHR::mcp(points.sp,percent=100))#
+			mcp.coords   <- unique(sp2coords(polygons.mcp))#
+			### Generate the alpha-hull of the polygons with points#
+			hull.alpha         <- alphahull::ahull(mcp.coords,alpha=1)#
+			hull.alpha.coords  <- rbind(hull.alpha$arcs[,1:2],hull.alpha$arcs[1,1:2])#
+			hull.alpha.sp      <- sp::SpatialPoints(hull.alpha.coords)#
+			hull.alpha.polygon <- sp::SpatialPolygons(list(sp::Polygons(list(sp::Polygon(hull.alpha.sp)),ID="alpha.hull")))#
+			buffer.width       <- (0.5+buffer.adj)#
+			### Create a polygon encompassing hull.alpha.polygon, with size determined by the value of buffer.width#
+			buffer.poly        <- rgeos::gBuffer(hull.alpha.polygon,width=buffer.width)#
+			### Same as buffer.poly except points are added at midpoints of edges longer than max_distance; process repeated until all edges less than. This can make it easier to visualize the border of the output polygon, but otherwise this isnt useful.#
+			outer.poly         <- smoothr::densify(buffer.poly,max_distance=(0.25*alpha))#
+			raster::crs(outer.poly) <- crs.string#
+		} else {#
+			stop("set method to 1, 2, or 3")#
+		}#
+	}#
+	outer     <- unname(sp2coords(outer.poly))#
+	if(counter.clockwise){#
+		outer <- cbind(rev(outer[,1]),rev(outer[,2]))#
+	}#
+	### Show the relationship between the outer coordinates, the input coordinates, and geographic regions#
+	if(plot.outer){#
+		### Turns off current graphics devices before plotting. This seems to help prevent the new plots from inheriting graphical parameters from the current device.#
+		if(!is.null(dev.list())){#
+			dev.off()#
+		}#
+		### Plots in slightly different ways depending depending on the method used.#
+		if(method %in% c(1,2)){#
+			### Plot the outer coordinates in white to define the extent#
+			plot(sp::SpatialPoints(outer),col="white")#
+			#plot(submaps.with.points.sp,add=T,col="gray90")#
+			plot(spdf_world_10,add=T)#
+			if(method==1){#
+			### Add a layer containing the regions of the basemap that include at least one point (regions in gray)#
+				plot(spdf_unique.features.at.circles,add=T,col="gray90")#
+				plot(sp_unique.polygons.without.circles,add=T,col="white")#
+			}#
+			### Add green crosshairs for output coordinates (the outer file for eems)#
+			plot(sp::SpatialPoints(outer),col="green",add=T)#
+			### Add black circles for locations of the input coordinates#
+			plot(points.sp,add=T,pch=20)#
+			### Add text/legend to show what the green crosshairs are#
+			mtext("+ = coordinates written to output.path (if set)",col="green",adj=0.12,line=1.5,cex=0.8)#
+			mtext(paste0("P:A fractal dimension of area inscribed by output coordinates",round(fractal.dimension,digits=3)),adj=0.1,line=0.5,cex=0.8)#
+			### Add map axes#
+			maps::map.axes()#
+		} else {#
+			plot(SpatialPoints(outer),col="white")#
+			extent.sp <- SpatialPoints(rbind(outer,coords))#
+			plot(spdf_world_10,add=T)#
+			plot(SpatialPoints(outer),col="green",add=T)#
+			plot(points.sp,add=T,pch=20)#
+			mtext("+ outer (coordinates written to output.path)",col="green",adj=0.1,line=0.25,cex=0.8)#
+			maps::map.axes()#
+		}#
+	}#
+	### Write outer file to output.path#
+	if(!is.null(output.path)){#
+		write.table(outer,output.path,row.names=F,col.names=F,sep=" ",quote=F)#
+	}#
+	### return a list including a matrix of the coordinates in the output file and a SpatialPolygons object of the output coordinates#
+	list(outer,outer.poly)#
+}
+test <- create.outer(coords="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/EEMS/EEMS_Katie/mainland_maculilabris.coord",method=2,max.fractal.dimension=1.105)
+# required packages#
+# library(sp)                 ### Used for everything#
+# library(maps)               ### map.axes function#
+# library(rgeos)              ### gBuffer and gArea function#
+# library(rgdal)              ### showWKT function#
+# library(raster)             ### crs and bind function#
+# library(smoothr)            ### densify function for adding outer points by interpolating along perimeter#
+# library(sampSurf)           ### spCircle function#
+# library(geosphere)          ### perimeter and areaPolygon functions#
+# library(alphahull)          ### ahull function#
+# library(adehabitatHR)       ### function to generate minimum convex polygon#
+# library(rnaturalearth)      ### Global geographic vectors#
+# library(rnaturalearthhires) ### high resolution data for rnaturalearth package#
+#
+#' @param coords Two column numeric matrix containing longitude and latitude of the samples in decimal degree format, or a character string with path to the input .coords file used for eems; the input file must be space separated and without a header.#
+#' @param alpha Value of alpha parameter (Default is 1). Increase alpha incrementally by about 0.1 until the polygon plot corresponding to the outer coordinates is simple polygon (as opposed to a complex, self-intersecting polygon).#
+#' @param buffer.adj This argument is not yet implemented. A number between 0 and 1 that determines the size of the buffer region surrounding the points supplied by coords.#
+#' @param method A number (1, 2, or 3) determining how the output coordinates will be generated.#
+#' If method=1 (the default) produces a potentially more useful result, and uses the alpha hull of geographic regions that intersect with input coordinates. This method may be slow if input coordinates include large sampling gaps. In such cases increases the value of alpha.start.#
+#' If method=2 is similar to method 1, except that the output coordinates are only determined from the input coordinates (and buffer setting), rather than from the regions of the base map (political geography from natural earth dataset) that intersect the input coordinates. Either method should be fine for EEMS, but method 1 tends to look nicer.#
+#' If method=3 is fast and uses the minimum convex polygon of input coodinates as a starting point.#
+#' @param coords.radius Number specifying the radius (in degrees) to use around input coordinates when determining spatial intersections. Increasing the value of this parameter can be useful if coordinates are located offshore of regions outlined in basemaps (high resolution Natural Earth dataset).#
+#' @param max.fractal.dimension Value between 1 and 2 contolling the shape complexity of the polygon with the output coordinates. Values near 1 have low complexity (e.g., circles, squares), and shape complexity increases as max.fractal.dimension approaches 2. The default value 1.1 seems to work well for most cases. Ignored if method=3.#
+#' @param plot.outer Logical indicating if the points defining the output ".outer" table should be plotted in green, as well as the ".coords" (coords) points in black.#
+#' @param counter.clockwise Should the output cooordinates be ordered counterclockwise. Default is TRUE and is the required format for EEMS.#
+#' @param output.path Character string with path where to save coordinates. Default is NULL.#
+#' @result A two column numerical matrix containing the longitude and latitude of the output polygon. The matrix written to output.path can be used as the ".outer" polygon used by EEMS. A map is plotted to visualize the results.#
+create.outer <- function(coords,method=1,buffer.adj=0,coords.radius=0.01,max.fractal.dimension=1.1,plot.outer=T,counter.clockwise=T,output.path=NULL){#
+	# Function to extract the coordinates matrix (numeric mode) from a class Polygon, Polygons, SpatialPolygons, or SpatialPolygonsDataFrame object that containins a single polygon.#
+	# Do not use this function if the inout spatial object contains more than coordinates matrix.#
+	sp2coords <- function(x){#
+		if(is(x,"SpatialPolygonsDataFrame") | is(x,"SpatialPolygons")){#
+			result <- x@polygons[[1]]@Polygons[[1]]@coords#
+		}#
+		if(is(x,"Polygons")){#
+			result <- x@Polygons[[1]]@coords#
+		}#
+		if(is(x,"Polygon") | is(x,"SpatialPoints")){#
+			result <- x@coords#
+		}#
+		unname(result)#
+	}#
+	### Convert a coordinates matrix into a SpatialPolygons object in circles centered at input coordinates, and radius specified by r#
+	coords2sp.poly <- function(coords.mat,r=0.01){#
+		colnames(coords.mat) <- c("x","y")#
+		circles.list <- apply(X=coords.mat,MARGIN=1,FUN=function(x){sampSurf::spCircle(radius=r,centerPoint=x)[[1]]})#
+		res          <- do.call(raster::bind,circles.list)#
+		res#
+	}#
+	### Fractal dimension of perimeter-area relationship, a metric of polygon complexity with values from 1 (simple euclidean shapes likes squares and circles) tp approaching 2 for increasingly complex polygons.#
+	# More info: http://www.umass.edu/landeco/teaching/landscape_ecology/schedule/chapter9_metrics.pdf#
+	# Input must be a SpatialPolygons object#
+	fracD <- function(x){#
+		# area in meters squared#
+		x.area      <- geosphere::areaPolygon(x)#
+		# perimeter in meters#
+		x.perimeter <- geosphere::perimeter(x)#
+		(2*log10(x.perimeter))/(log10(x.area))#
+	}#
+	#### For a SpatialPolygonsDataFrame, extract the lowest-level polygons and hold each as a feature in a SpatialPolygons object.#
+	extract.base.polygons <- function(spdf){#
+		for(i in 1:nrow(spdf)){#
+			sp.temp <- spdf@polygons[[i]]#
+			for(j in 1:length(sp.temp@Polygons)){#
+				id.temp <- paste0(i,".",j)#
+				polygons.ij <- sp::SpatialPolygons(list(sp::Polygons(list(sp.temp@Polygons[[j]]),ID=id.temp)))#
+				if(i==1 & j==1){#
+					polygons.all <- polygons.ij#
+				} else {#
+					polygons.all <- raster::bind(polygons.all,polygons.ij)#
+				}#
+			}#
+		}#
+		### Preserve crs definition#
+		raster::crs(polygons.all) <- raster::crs(spdf)#
+		### object returned#
+		polygons.all#
+	}#
+	input.coords <- coords#
+	### Check which type of object is being supplied to coords and define coords accordingly#
+	if(is(input.coords,"character")){#
+		coords   <- data.matrix(read.table(input.coords,header=F))#
+	}#
+	if(is(input.coords,"matrix") | is(input.coords,"data.frame")){#
+		coords       <- data.matrix(input.coords)#
+		mode(coords) <- "numeric"#
+	}#
+	## High resolution global map of political regions.#
+	spdf_world_10             <- rnaturalearth::ne_countries(scale=10)#
+	## Character string defining the Coordinate Reference System (CRS) in WKT format#
+	# crs.string <- rgdal::showWKT(sp::proj4string(spdf_world_10))#
+	# crs.string <- "+init=epsg:4326 +proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0"#
+	crs.string <- "+init=EPSG:4326"#
+	wkt.string <- rgdal::showWKT(crs.string)#
+	### Define CRS using wkt format#
+	raster::crs(spdf_world_10)   <- crs.string#
+	### SpatialPoints object holding coords#
+	points.sp <- sp::SpatialPoints(coords)#
+	raster::crs(points.sp) <- crs.string#
+	### SpatialPolygons object holding circles with centerpoints at coords#
+	circles.poly <- coords2sp.poly(coords.mat=coords,r=coords.radius)#
+	raster::crs(circles.poly) <- crs.string#
+	### Spatial data frame for the map features that intersect with the input coords#
+	unique.features.at.circles <- do.call(rbind,unique(sp::over(circles.poly, spdf_world_10,returnList=T)))#
+	### spdf row indices for the unique regions in unique.features.at.circles#
+	indices_unique.features.at.circles <- which(spdf_world_10$sov_a3 %in% unique(unique.features.at.circles$sov_a3))#
+	### Corresponding SpatialPolygonsDateFrame object#
+	spdf_unique.features.at.circles <- spdf_world_10[indices_unique.features.at.circles,]#
+	### Restructuring the heirarchy of lowest-level polygons, treating them as separate features of one SpatialPolygons object.#
+	## The purpose of this is to be able to use sp::over() to search for polygons that intersect with coords.#
+	base.polygons.sp <- extract.base.polygons(spdf_unique.features.at.circles)#
+	### Get the feature indices for the polygons that intersect with circles representing input coordinates#
+	indices_polygons.at.circles <- sp::over(circles.poly,base.polygons.sp)#
+	### Check if any NA values in indices_unique.polygons.at.circles, which occurs when one more of the input circles does not intersect any polygons (i.e. they fall in the ocean).#
+	### If NAs exist, try increasing the value of r parameter of coords2sp.poly function.#
+	if(any(is.na(indices_polygons.at.circles))){#
+		problem.points <- unname(which(is.na(indices_polygons.at.circles)))#
+		stop(paste0("sample(s) coords[",paste(problem.points,collapse=" "),",]  does not intersect map. Try increasing coords.radius or remove sample(s) from input"))#
+	}#
+	### Extract polygons in base.polygons.sp that intersect circles.poly#
+	sp_unique.polygons.at.circles      <- base.polygons.sp[unique(indices_polygons.at.circles)]#
+	sp_unique.polygons.without.circles <- base.polygons.sp[-unique(indices_polygons.at.circles)]#
+	if(method %in% c(1,2)){#
+		#### Method 1 for getting maps.coords.list#
+		### Two column numerical matrix of the coordinates of polygons that intersect input points#
+		coords.polygons.with.points <- unique(round(do.call(rbind,lapply(X=1:length(sp_unique.polygons.at.circles),FUN=function(x){sp2coords(sp::polygons(sp_unique.polygons.at.circles)[x])})),digits=3))#
+		####
+		if(method==1){#
+			coords.for.alphahull <- coords.polygons.with.points#
+			#buffer.width <- ((-0.75)+buffer.adj)#
+		}#
+		if(method==2){#
+			coords.for.alphahull <- unique(coords)#
+			#buffer.width <- buffer.adj#
+		}#
+		### initiallizing the while loop#
+		alpha.lower <- 1#
+		alpha.upper <- 50#
+		i=1; areas.equal <- FALSE; alpha <- alpha.upper; alpha.tol <- 0.1#
+		### Run while loop to find a low value of alpha that also generates a simple polygon (not self-intersecting or filled with holes) when input coordinates are supplied to ahull.#
+		# A polygon is considered simple if supplying the ahull polygon to gBuffer with buffer.width=0 produces a polygon with the same area as the input polygon. This works because gBuffer produces simple polygons even if the result clips the input polygon.#
+		while(((alpha.upper-alpha.lower)>alpha.tol) & (i < 100)){#
+			hull.alpha         <- alphahull::ahull(coords.for.alphahull,alpha=alpha)#
+			hull.alpha.coords  <- rbind(hull.alpha$arcs[,1:2],hull.alpha$arcs[1,1:2])#
+			hull.alpha.sp      <- sp::SpatialPoints(hull.alpha.coords)#
+			hull.alpha.polygon <- sp::SpatialPolygons(list(sp::Polygons(list(sp::Polygon(hull.alpha.sp)),ID="alpha.hull")))#
+			if(rgeos::gIsSimple(hull.alpha.polygon)){#
+				### Test hull.alpha.polygon is simple#
+				# geosphere::areaPolygon(hull.alpha.polygon) == geosphere::areaPolygon(gBuffer(hull.alpha.polygon,width=0))#
+				### Create a polygon encompassing hull.alpha.polygon, with size determined by the value of buffer.width#
+				# Note: Do not set the crs of hull.alpha.polygon because gBuffer function would introduce distortions associated with the projection. In reality this might not be be a big deal but I'm not sure.#
+				buffer.poly        <- rgeos::gBuffer(hull.alpha.polygon,width=((-0.75)+buffer.adj))#
+				### Same as buffer.poly except points are added at midpoints of edges longer than max_distance; process repeated until all edges less than. This can make it easier to visualize the border of the output polygon, but otherwise this isnt useful.#
+				outer.poly         <- smoothr::densify(buffer.poly,max_distance=(0.25*alpha))#
+				### Run this test before switching back to Euclidean space#
+				### Set CRS of outer.poly (now we are back in Euclidean space); this must be done before using function sp::over()#
+				raster::crs(outer.poly) <- crs.string#
+				### Test that the output coordinates define a simple polygon.#
+				test.simple        <- all(c(rgeos::gIsSimple(outer.poly), rgeos::gIsSimple(hull.alpha.polygon)))#
+				### Test if all of the input points are in the output polygon#
+				test.coverage      <- (!any(is.na(sp::over(points.sp,outer.poly))))#
+			} else {#
+				test.simple   <- FALSE#
+				test.coverage <- FALSE#
+			}#
+			if(test.simple & test.coverage){#
+				alpha.upper <- min(alpha.upper,alpha)#
+			} else {#
+				alpha.lower <- max(alpha.lower,alpha)#
+			}#
+			### save a copy of the current alpha value to initialize the next while loop#
+			alpha.i <- alpha#
+			alpha   <- median(c(alpha.lower,alpha.upper))#
+			i=(i+1)#
+		}#
+		fractal.dimension  <- fracD(outer.poly)#
+		alpha          <- alpha.i#
+		while(fractal.dimension > max.fractal.dimension){#
+			alpha              <- (alpha+0.1)#
+			hull.alpha         <- alphahull::ahull(coords.for.alphahull,alpha=alpha)#
+			hull.alpha.coords  <- rbind(hull.alpha$arcs[,1:2],hull.alpha$arcs[1,1:2])#
+			hull.alpha.sp      <- sp::SpatialPoints(hull.alpha.coords)#
+			hull.alpha.polygon <- sp::SpatialPolygons(list(sp::Polygons(list(sp::Polygon(hull.alpha.sp)),ID="alpha.hull")))#
+			buffer.poly        <- rgeos::gBuffer(hull.alpha.polygon,width=((-0.75)+buffer.adj))#
+			outer.poly         <- smoothr::densify(buffer.poly,max_distance=(0.25*alpha))#
+			fractal.dimension  <- fracD(outer.poly)#
+		}#
+		raster::crs(outer.poly) <- crs.string#
+	} else {#
+		if(method==3){#
+			### Minimum convex polygon that contains the maps with points.#
+			polygons.mcp <- suppressWarnings(adehabitatHR::mcp(points.sp,percent=100))#
+			mcp.coords   <- unique(sp2coords(polygons.mcp))#
+			### Generate the alpha-hull of the polygons with points#
+			hull.alpha         <- alphahull::ahull(mcp.coords,alpha=1)#
+			hull.alpha.coords  <- rbind(hull.alpha$arcs[,1:2],hull.alpha$arcs[1,1:2])#
+			hull.alpha.sp      <- sp::SpatialPoints(hull.alpha.coords)#
+			hull.alpha.polygon <- sp::SpatialPolygons(list(sp::Polygons(list(sp::Polygon(hull.alpha.sp)),ID="alpha.hull")))#
+			buffer.width       <- (0.5+buffer.adj)#
+			### Create a polygon encompassing hull.alpha.polygon, with size determined by the value of buffer.width#
+			buffer.poly        <- rgeos::gBuffer(hull.alpha.polygon,width=buffer.width)#
+			### Same as buffer.poly except points are added at midpoints of edges longer than max_distance; process repeated until all edges less than. This can make it easier to visualize the border of the output polygon, but otherwise this isnt useful.#
+			outer.poly         <- smoothr::densify(buffer.poly,max_distance=(0.25*alpha))#
+			raster::crs(outer.poly) <- crs.string#
+		} else {#
+			stop("set method to 1, 2, or 3")#
+		}#
+	}#
+	outer     <- unname(sp2coords(outer.poly))#
+	if(counter.clockwise){#
+		outer <- cbind(rev(outer[,1]),rev(outer[,2]))#
+	}#
+	### Show the relationship between the outer coordinates, the input coordinates, and geographic regions#
+	if(plot.outer){#
+		### Turns off current graphics devices before plotting. This seems to help prevent the new plots from inheriting graphical parameters from the current device.#
+		if(!is.null(dev.list())){#
+			dev.off()#
+		}#
+		### Plots in slightly different ways depending depending on the method used.#
+		if(method %in% c(1,2)){#
+			### Plot the outer coordinates in white to define the extent#
+			plot(sp::SpatialPoints(outer),col="white")#
+			#plot(submaps.with.points.sp,add=T,col="gray90")#
+			plot(spdf_world_10,add=T)#
+			if(method==1){#
+			### Add a layer containing the regions of the basemap that include at least one point (regions in gray)#
+				plot(spdf_unique.features.at.circles,add=T,col="gray90")#
+				plot(sp_unique.polygons.without.circles,add=T,col="white")#
+			}#
+			### Add green crosshairs for output coordinates (the outer file for eems)#
+			plot(sp::SpatialPoints(outer),col="green",add=T)#
+			### Add black circles for locations of the input coordinates#
+			plot(points.sp,add=T,pch=20)#
+			### Add text/legend to show what the green crosshairs are#
+			mtext("+ = coordinates written to output.path (if set)",col="green",adj=0.0.75,line=1.5,cex=0.8)#
+			mtext(paste0("P:A fractal dimension of area inscribed by output coordinates",round(fractal.dimension,digits=3)),adj=0.1,line=0.5,cex=0.8)#
+			### Add map axes#
+			maps::map.axes()#
+		} else {#
+			plot(SpatialPoints(outer),col="white")#
+			extent.sp <- SpatialPoints(rbind(outer,coords))#
+			plot(spdf_world_10,add=T)#
+			plot(SpatialPoints(outer),col="green",add=T)#
+			plot(points.sp,add=T,pch=20)#
+			mtext("+ outer (coordinates written to output.path)",col="green",adj=0.1,line=0.25,cex=0.8)#
+			maps::map.axes()#
+		}#
+	}#
+	### Write outer file to output.path#
+	if(!is.null(output.path)){#
+		write.table(outer,output.path,row.names=F,col.names=F,sep=" ",quote=F)#
+	}#
+	### return a list including a matrix of the coordinates in the output file and a SpatialPolygons object of the output coordinates#
+	list(outer,outer.poly)#
+}
+# required packages#
+# library(sp)                 ### Used for everything#
+# library(maps)               ### map.axes function#
+# library(rgeos)              ### gBuffer and gArea function#
+# library(rgdal)              ### showWKT function#
+# library(raster)             ### crs and bind function#
+# library(smoothr)            ### densify function for adding outer points by interpolating along perimeter#
+# library(sampSurf)           ### spCircle function#
+# library(geosphere)          ### perimeter and areaPolygon functions#
+# library(alphahull)          ### ahull function#
+# library(adehabitatHR)       ### function to generate minimum convex polygon#
+# library(rnaturalearth)      ### Global geographic vectors#
+# library(rnaturalearthhires) ### high resolution data for rnaturalearth package#
+#
+#' @param coords Two column numeric matrix containing longitude and latitude of the samples in decimal degree format, or a character string with path to the input .coords file used for eems; the input file must be space separated and without a header.#
+#' @param alpha Value of alpha parameter (Default is 1). Increase alpha incrementally by about 0.1 until the polygon plot corresponding to the outer coordinates is simple polygon (as opposed to a complex, self-intersecting polygon).#
+#' @param buffer.adj This argument is not yet implemented. A number between 0 and 1 that determines the size of the buffer region surrounding the points supplied by coords.#
+#' @param method A number (1, 2, or 3) determining how the output coordinates will be generated.#
+#' If method=1 (the default) produces a potentially more useful result, and uses the alpha hull of geographic regions that intersect with input coordinates. This method may be slow if input coordinates include large sampling gaps. In such cases increases the value of alpha.start.#
+#' If method=2 is similar to method 1, except that the output coordinates are only determined from the input coordinates (and buffer setting), rather than from the regions of the base map (political geography from natural earth dataset) that intersect the input coordinates. Either method should be fine for EEMS, but method 1 tends to look nicer.#
+#' If method=3 is fast and uses the minimum convex polygon of input coodinates as a starting point.#
+#' @param coords.radius Number specifying the radius (in degrees) to use around input coordinates when determining spatial intersections. Increasing the value of this parameter can be useful if coordinates are located offshore of regions outlined in basemaps (high resolution Natural Earth dataset).#
+#' @param max.fractal.dimension Value between 1 and 2 contolling the shape complexity of the polygon with the output coordinates. Values near 1 have low complexity (e.g., circles, squares), and shape complexity increases as max.fractal.dimension approaches 2. The default value 1.1 seems to work well for most cases. Ignored if method=3.#
+#' @param plot.outer Logical indicating if the points defining the output ".outer" table should be plotted in green, as well as the ".coords" (coords) points in black.#
+#' @param counter.clockwise Should the output cooordinates be ordered counterclockwise. Default is TRUE and is the required format for EEMS.#
+#' @param output.path Character string with path where to save coordinates. Default is NULL.#
+#' @result A two column numerical matrix containing the longitude and latitude of the output polygon. The matrix written to output.path can be used as the ".outer" polygon used by EEMS. A map is plotted to visualize the results.#
+create.outer <- function(coords,method=1,buffer.adj=0,coords.radius=0.01,max.fractal.dimension=1.1,plot.outer=T,counter.clockwise=T,output.path=NULL){#
+	# Function to extract the coordinates matrix (numeric mode) from a class Polygon, Polygons, SpatialPolygons, or SpatialPolygonsDataFrame object that containins a single polygon.#
+	# Do not use this function if the inout spatial object contains more than coordinates matrix.#
+	sp2coords <- function(x){#
+		if(is(x,"SpatialPolygonsDataFrame") | is(x,"SpatialPolygons")){#
+			result <- x@polygons[[1]]@Polygons[[1]]@coords#
+		}#
+		if(is(x,"Polygons")){#
+			result <- x@Polygons[[1]]@coords#
+		}#
+		if(is(x,"Polygon") | is(x,"SpatialPoints")){#
+			result <- x@coords#
+		}#
+		unname(result)#
+	}#
+	### Convert a coordinates matrix into a SpatialPolygons object in circles centered at input coordinates, and radius specified by r#
+	coords2sp.poly <- function(coords.mat,r=0.01){#
+		colnames(coords.mat) <- c("x","y")#
+		circles.list <- apply(X=coords.mat,MARGIN=1,FUN=function(x){sampSurf::spCircle(radius=r,centerPoint=x)[[1]]})#
+		res          <- do.call(raster::bind,circles.list)#
+		res#
+	}#
+	### Fractal dimension of perimeter-area relationship, a metric of polygon complexity with values from 1 (simple euclidean shapes likes squares and circles) tp approaching 2 for increasingly complex polygons.#
+	# More info: http://www.umass.edu/landeco/teaching/landscape_ecology/schedule/chapter9_metrics.pdf#
+	# Input must be a SpatialPolygons object#
+	fracD <- function(x){#
+		# area in meters squared#
+		x.area      <- geosphere::areaPolygon(x)#
+		# perimeter in meters#
+		x.perimeter <- geosphere::perimeter(x)#
+		(2*log10(x.perimeter))/(log10(x.area))#
+	}#
+	#### For a SpatialPolygonsDataFrame, extract the lowest-level polygons and hold each as a feature in a SpatialPolygons object.#
+	extract.base.polygons <- function(spdf){#
+		for(i in 1:nrow(spdf)){#
+			sp.temp <- spdf@polygons[[i]]#
+			for(j in 1:length(sp.temp@Polygons)){#
+				id.temp <- paste0(i,".",j)#
+				polygons.ij <- sp::SpatialPolygons(list(sp::Polygons(list(sp.temp@Polygons[[j]]),ID=id.temp)))#
+				if(i==1 & j==1){#
+					polygons.all <- polygons.ij#
+				} else {#
+					polygons.all <- raster::bind(polygons.all,polygons.ij)#
+				}#
+			}#
+		}#
+		### Preserve crs definition#
+		raster::crs(polygons.all) <- raster::crs(spdf)#
+		### object returned#
+		polygons.all#
+	}#
+	input.coords <- coords#
+	### Check which type of object is being supplied to coords and define coords accordingly#
+	if(is(input.coords,"character")){#
+		coords   <- data.matrix(read.table(input.coords,header=F))#
+	}#
+	if(is(input.coords,"matrix") | is(input.coords,"data.frame")){#
+		coords       <- data.matrix(input.coords)#
+		mode(coords) <- "numeric"#
+	}#
+	## High resolution global map of political regions.#
+	spdf_world_10             <- rnaturalearth::ne_countries(scale=10)#
+	## Character string defining the Coordinate Reference System (CRS) in WKT format#
+	# crs.string <- rgdal::showWKT(sp::proj4string(spdf_world_10))#
+	# crs.string <- "+init=epsg:4326 +proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0"#
+	crs.string <- "+init=EPSG:4326"#
+	wkt.string <- rgdal::showWKT(crs.string)#
+	### Define CRS using wkt format#
+	raster::crs(spdf_world_10)   <- crs.string#
+	### SpatialPoints object holding coords#
+	points.sp <- sp::SpatialPoints(coords)#
+	raster::crs(points.sp) <- crs.string#
+	### SpatialPolygons object holding circles with centerpoints at coords#
+	circles.poly <- coords2sp.poly(coords.mat=coords,r=coords.radius)#
+	raster::crs(circles.poly) <- crs.string#
+	### Spatial data frame for the map features that intersect with the input coords#
+	unique.features.at.circles <- do.call(rbind,unique(sp::over(circles.poly, spdf_world_10,returnList=T)))#
+	### spdf row indices for the unique regions in unique.features.at.circles#
+	indices_unique.features.at.circles <- which(spdf_world_10$sov_a3 %in% unique(unique.features.at.circles$sov_a3))#
+	### Corresponding SpatialPolygonsDateFrame object#
+	spdf_unique.features.at.circles <- spdf_world_10[indices_unique.features.at.circles,]#
+	### Restructuring the heirarchy of lowest-level polygons, treating them as separate features of one SpatialPolygons object.#
+	## The purpose of this is to be able to use sp::over() to search for polygons that intersect with coords.#
+	base.polygons.sp <- extract.base.polygons(spdf_unique.features.at.circles)#
+	### Get the feature indices for the polygons that intersect with circles representing input coordinates#
+	indices_polygons.at.circles <- sp::over(circles.poly,base.polygons.sp)#
+	### Check if any NA values in indices_unique.polygons.at.circles, which occurs when one more of the input circles does not intersect any polygons (i.e. they fall in the ocean).#
+	### If NAs exist, try increasing the value of r parameter of coords2sp.poly function.#
+	if(any(is.na(indices_polygons.at.circles))){#
+		problem.points <- unname(which(is.na(indices_polygons.at.circles)))#
+		stop(paste0("sample(s) coords[",paste(problem.points,collapse=" "),",]  does not intersect map. Try increasing coords.radius or remove sample(s) from input"))#
+	}#
+	### Extract polygons in base.polygons.sp that intersect circles.poly#
+	sp_unique.polygons.at.circles      <- base.polygons.sp[unique(indices_polygons.at.circles)]#
+	sp_unique.polygons.without.circles <- base.polygons.sp[-unique(indices_polygons.at.circles)]#
+	if(method %in% c(1,2)){#
+		#### Method 1 for getting maps.coords.list#
+		### Two column numerical matrix of the coordinates of polygons that intersect input points#
+		coords.polygons.with.points <- unique(round(do.call(rbind,lapply(X=1:length(sp_unique.polygons.at.circles),FUN=function(x){sp2coords(sp::polygons(sp_unique.polygons.at.circles)[x])})),digits=3))#
+		####
+		if(method==1){#
+			coords.for.alphahull <- coords.polygons.with.points#
+			#buffer.width <- ((-0.75)+buffer.adj)#
+		}#
+		if(method==2){#
+			coords.for.alphahull <- unique(coords)#
+			#buffer.width <- buffer.adj#
+		}#
+		### initiallizing the while loop#
+		alpha.lower <- 1#
+		alpha.upper <- 50#
+		i=1; areas.equal <- FALSE; alpha <- alpha.upper; alpha.tol <- 0.1#
+		### Run while loop to find a low value of alpha that also generates a simple polygon (not self-intersecting or filled with holes) when input coordinates are supplied to ahull.#
+		# A polygon is considered simple if supplying the ahull polygon to gBuffer with buffer.width=0 produces a polygon with the same area as the input polygon. This works because gBuffer produces simple polygons even if the result clips the input polygon.#
+		while(((alpha.upper-alpha.lower)>alpha.tol) & (i < 100)){#
+			hull.alpha         <- alphahull::ahull(coords.for.alphahull,alpha=alpha)#
+			hull.alpha.coords  <- rbind(hull.alpha$arcs[,1:2],hull.alpha$arcs[1,1:2])#
+			hull.alpha.sp      <- sp::SpatialPoints(hull.alpha.coords)#
+			hull.alpha.polygon <- sp::SpatialPolygons(list(sp::Polygons(list(sp::Polygon(hull.alpha.sp)),ID="alpha.hull")))#
+			if(rgeos::gIsSimple(hull.alpha.polygon)){#
+				### Test hull.alpha.polygon is simple#
+				# geosphere::areaPolygon(hull.alpha.polygon) == geosphere::areaPolygon(gBuffer(hull.alpha.polygon,width=0))#
+				### Create a polygon encompassing hull.alpha.polygon, with size determined by the value of buffer.width#
+				# Note: Do not set the crs of hull.alpha.polygon because gBuffer function would introduce distortions associated with the projection. In reality this might not be be a big deal but I'm not sure.#
+				buffer.poly        <- rgeos::gBuffer(hull.alpha.polygon,width=((-0.75)+buffer.adj))#
+				### Same as buffer.poly except points are added at midpoints of edges longer than max_distance; process repeated until all edges less than. This can make it easier to visualize the border of the output polygon, but otherwise this isnt useful.#
+				outer.poly         <- smoothr::densify(buffer.poly,max_distance=(0.25*alpha))#
+				### Run this test before switching back to Euclidean space#
+				### Set CRS of outer.poly (now we are back in Euclidean space); this must be done before using function sp::over()#
+				raster::crs(outer.poly) <- crs.string#
+				### Test that the output coordinates define a simple polygon.#
+				test.simple        <- all(c(rgeos::gIsSimple(outer.poly), rgeos::gIsSimple(hull.alpha.polygon)))#
+				### Test if all of the input points are in the output polygon#
+				test.coverage      <- (!any(is.na(sp::over(points.sp,outer.poly))))#
+			} else {#
+				test.simple   <- FALSE#
+				test.coverage <- FALSE#
+			}#
+			if(test.simple & test.coverage){#
+				alpha.upper <- min(alpha.upper,alpha)#
+			} else {#
+				alpha.lower <- max(alpha.lower,alpha)#
+			}#
+			### save a copy of the current alpha value to initialize the next while loop#
+			alpha.i <- alpha#
+			alpha   <- median(c(alpha.lower,alpha.upper))#
+			i=(i+1)#
+		}#
+		fractal.dimension  <- fracD(outer.poly)#
+		alpha          <- alpha.i#
+		while(fractal.dimension > max.fractal.dimension){#
+			alpha              <- (alpha+0.1)#
+			hull.alpha         <- alphahull::ahull(coords.for.alphahull,alpha=alpha)#
+			hull.alpha.coords  <- rbind(hull.alpha$arcs[,1:2],hull.alpha$arcs[1,1:2])#
+			hull.alpha.sp      <- sp::SpatialPoints(hull.alpha.coords)#
+			hull.alpha.polygon <- sp::SpatialPolygons(list(sp::Polygons(list(sp::Polygon(hull.alpha.sp)),ID="alpha.hull")))#
+			buffer.poly        <- rgeos::gBuffer(hull.alpha.polygon,width=((-0.75)+buffer.adj))#
+			outer.poly         <- smoothr::densify(buffer.poly,max_distance=(0.25*alpha))#
+			fractal.dimension  <- fracD(outer.poly)#
+		}#
+		raster::crs(outer.poly) <- crs.string#
+	} else {#
+		if(method==3){#
+			### Minimum convex polygon that contains the maps with points.#
+			polygons.mcp <- suppressWarnings(adehabitatHR::mcp(points.sp,percent=100))#
+			mcp.coords   <- unique(sp2coords(polygons.mcp))#
+			### Generate the alpha-hull of the polygons with points#
+			hull.alpha         <- alphahull::ahull(mcp.coords,alpha=1)#
+			hull.alpha.coords  <- rbind(hull.alpha$arcs[,1:2],hull.alpha$arcs[1,1:2])#
+			hull.alpha.sp      <- sp::SpatialPoints(hull.alpha.coords)#
+			hull.alpha.polygon <- sp::SpatialPolygons(list(sp::Polygons(list(sp::Polygon(hull.alpha.sp)),ID="alpha.hull")))#
+			buffer.width       <- (0.5+buffer.adj)#
+			### Create a polygon encompassing hull.alpha.polygon, with size determined by the value of buffer.width#
+			buffer.poly        <- rgeos::gBuffer(hull.alpha.polygon,width=buffer.width)#
+			### Same as buffer.poly except points are added at midpoints of edges longer than max_distance; process repeated until all edges less than. This can make it easier to visualize the border of the output polygon, but otherwise this isnt useful.#
+			outer.poly         <- smoothr::densify(buffer.poly,max_distance=(0.25*alpha))#
+			raster::crs(outer.poly) <- crs.string#
+		} else {#
+			stop("set method to 1, 2, or 3")#
+		}#
+	}#
+	outer     <- unname(sp2coords(outer.poly))#
+	if(counter.clockwise){#
+		outer <- cbind(rev(outer[,1]),rev(outer[,2]))#
+	}#
+	### Show the relationship between the outer coordinates, the input coordinates, and geographic regions#
+	if(plot.outer){#
+		### Turns off current graphics devices before plotting. This seems to help prevent the new plots from inheriting graphical parameters from the current device.#
+		if(!is.null(dev.list())){#
+			dev.off()#
+		}#
+		### Plots in slightly different ways depending depending on the method used.#
+		if(method %in% c(1,2)){#
+			### Plot the outer coordinates in white to define the extent#
+			plot(sp::SpatialPoints(outer),col="white")#
+			#plot(submaps.with.points.sp,add=T,col="gray90")#
+			plot(spdf_world_10,add=T)#
+			if(method==1){#
+			### Add a layer containing the regions of the basemap that include at least one point (regions in gray)#
+				plot(spdf_unique.features.at.circles,add=T,col="gray90")#
+				plot(sp_unique.polygons.without.circles,add=T,col="white")#
+			}#
+			### Add green crosshairs for output coordinates (the outer file for eems)#
+			plot(sp::SpatialPoints(outer),col="green",add=T)#
+			### Add black circles for locations of the input coordinates#
+			plot(points.sp,add=T,pch=20)#
+			### Add text/legend to show what the green crosshairs are#
+			mtext("+ = coordinates written to output.path (if set)",col="green",adj=0.75,line=1.5,cex=0.8)#
+			mtext(paste0("P:A fractal dimension of area inscribed by output coordinates",round(fractal.dimension,digits=3)),adj=0.1,line=0.5,cex=0.8)#
+			### Add map axes#
+			maps::map.axes()#
+		} else {#
+			plot(SpatialPoints(outer),col="white")#
+			extent.sp <- SpatialPoints(rbind(outer,coords))#
+			plot(spdf_world_10,add=T)#
+			plot(SpatialPoints(outer),col="green",add=T)#
+			plot(points.sp,add=T,pch=20)#
+			mtext("+ outer (coordinates written to output.path)",col="green",adj=0.1,line=0.25,cex=0.8)#
+			maps::map.axes()#
+		}#
+	}#
+	### Write outer file to output.path#
+	if(!is.null(output.path)){#
+		write.table(outer,output.path,row.names=F,col.names=F,sep=" ",quote=F)#
+	}#
+	### return a list including a matrix of the coordinates in the output file and a SpatialPolygons object of the output coordinates#
+	list(outer,outer.poly)#
+}
+test <- create.outer(coords="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/EEMS/EEMS_Katie/mainland_maculilabris.coord",method=2,max.fractal.dimension=1.105)
+# required packages#
+# library(sp)                 ### Used for everything#
+# library(maps)               ### map.axes function#
+# library(rgeos)              ### gBuffer and gArea function#
+# library(rgdal)              ### showWKT function#
+# library(raster)             ### crs and bind function#
+# library(smoothr)            ### densify function for adding outer points by interpolating along perimeter#
+# library(sampSurf)           ### spCircle function#
+# library(geosphere)          ### perimeter and areaPolygon functions#
+# library(alphahull)          ### ahull function#
+# library(adehabitatHR)       ### function to generate minimum convex polygon#
+# library(rnaturalearth)      ### Global geographic vectors#
+# library(rnaturalearthhires) ### high resolution data for rnaturalearth package#
+#
+#' @param coords Two column numeric matrix containing longitude and latitude of the samples in decimal degree format, or a character string with path to the input .coords file used for eems; the input file must be space separated and without a header.#
+#' @param alpha Value of alpha parameter (Default is 1). Increase alpha incrementally by about 0.1 until the polygon plot corresponding to the outer coordinates is simple polygon (as opposed to a complex, self-intersecting polygon).#
+#' @param buffer.adj This argument is not yet implemented. A number between 0 and 1 that determines the size of the buffer region surrounding the points supplied by coords.#
+#' @param method A number (1, 2, or 3) determining how the output coordinates will be generated.#
+#' If method=1 (the default) produces a potentially more useful result, and uses the alpha hull of geographic regions that intersect with input coordinates. This method may be slow if input coordinates include large sampling gaps. In such cases increases the value of alpha.start.#
+#' If method=2 is similar to method 1, except that the output coordinates are only determined from the input coordinates (and buffer setting), rather than from the regions of the base map (political geography from natural earth dataset) that intersect the input coordinates. Either method should be fine for EEMS, but method 1 tends to look nicer.#
+#' If method=3 is fast and uses the minimum convex polygon of input coodinates as a starting point.#
+#' @param coords.radius Number specifying the radius (in degrees) to use around input coordinates when determining spatial intersections. Increasing the value of this parameter can be useful if coordinates are located offshore of regions outlined in basemaps (high resolution Natural Earth dataset).#
+#' @param max.fractal.dimension Value between 1 and 2 contolling the shape complexity of the polygon with the output coordinates. Values near 1 have low complexity (e.g., circles, squares), and shape complexity increases as max.fractal.dimension approaches 2. The default value 1.1 seems to work well for most cases. Ignored if method=3.#
+#' @param plot.outer Logical indicating if the points defining the output ".outer" table should be plotted in green, as well as the ".coords" (coords) points in black.#
+#' @param counter.clockwise Should the output cooordinates be ordered counterclockwise. Default is TRUE and is the required format for EEMS.#
+#' @param output.path Character string with path where to save coordinates. Default is NULL.#
+#' @result A two column numerical matrix containing the longitude and latitude of the output polygon. The matrix written to output.path can be used as the ".outer" polygon used by EEMS. A map is plotted to visualize the results.#
+create.outer <- function(coords,method=1,buffer.adj=0,coords.radius=0.01,max.fractal.dimension=1.1,plot.outer=T,counter.clockwise=T,output.path=NULL){#
+	# Function to extract the coordinates matrix (numeric mode) from a class Polygon, Polygons, SpatialPolygons, or SpatialPolygonsDataFrame object that containins a single polygon.#
+	# Do not use this function if the inout spatial object contains more than coordinates matrix.#
+	sp2coords <- function(x){#
+		if(is(x,"SpatialPolygonsDataFrame") | is(x,"SpatialPolygons")){#
+			result <- x@polygons[[1]]@Polygons[[1]]@coords#
+		}#
+		if(is(x,"Polygons")){#
+			result <- x@Polygons[[1]]@coords#
+		}#
+		if(is(x,"Polygon") | is(x,"SpatialPoints")){#
+			result <- x@coords#
+		}#
+		unname(result)#
+	}#
+	### Convert a coordinates matrix into a SpatialPolygons object in circles centered at input coordinates, and radius specified by r#
+	coords2sp.poly <- function(coords.mat,r=0.01){#
+		colnames(coords.mat) <- c("x","y")#
+		circles.list <- apply(X=coords.mat,MARGIN=1,FUN=function(x){sampSurf::spCircle(radius=r,centerPoint=x)[[1]]})#
+		res          <- do.call(raster::bind,circles.list)#
+		res#
+	}#
+	### Fractal dimension of perimeter-area relationship, a metric of polygon complexity with values from 1 (simple euclidean shapes likes squares and circles) tp approaching 2 for increasingly complex polygons.#
+	# More info: http://www.umass.edu/landeco/teaching/landscape_ecology/schedule/chapter9_metrics.pdf#
+	# Input must be a SpatialPolygons object#
+	fracD <- function(x){#
+		# area in meters squared#
+		x.area      <- geosphere::areaPolygon(x)#
+		# perimeter in meters#
+		x.perimeter <- geosphere::perimeter(x)#
+		(2*log10(x.perimeter))/(log10(x.area))#
+	}#
+	#### For a SpatialPolygonsDataFrame, extract the lowest-level polygons and hold each as a feature in a SpatialPolygons object.#
+	extract.base.polygons <- function(spdf){#
+		for(i in 1:nrow(spdf)){#
+			sp.temp <- spdf@polygons[[i]]#
+			for(j in 1:length(sp.temp@Polygons)){#
+				id.temp <- paste0(i,".",j)#
+				polygons.ij <- sp::SpatialPolygons(list(sp::Polygons(list(sp.temp@Polygons[[j]]),ID=id.temp)))#
+				if(i==1 & j==1){#
+					polygons.all <- polygons.ij#
+				} else {#
+					polygons.all <- raster::bind(polygons.all,polygons.ij)#
+				}#
+			}#
+		}#
+		### Preserve crs definition#
+		raster::crs(polygons.all) <- raster::crs(spdf)#
+		### object returned#
+		polygons.all#
+	}#
+	input.coords <- coords#
+	### Check which type of object is being supplied to coords and define coords accordingly#
+	if(is(input.coords,"character")){#
+		coords   <- data.matrix(read.table(input.coords,header=F))#
+	}#
+	if(is(input.coords,"matrix") | is(input.coords,"data.frame")){#
+		coords       <- data.matrix(input.coords)#
+		mode(coords) <- "numeric"#
+	}#
+	## High resolution global map of political regions.#
+	spdf_world_10             <- rnaturalearth::ne_countries(scale=10)#
+	## Character string defining the Coordinate Reference System (CRS) in WKT format#
+	# crs.string <- rgdal::showWKT(sp::proj4string(spdf_world_10))#
+	# crs.string <- "+init=epsg:4326 +proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0"#
+	crs.string <- "+init=EPSG:4326"#
+	wkt.string <- rgdal::showWKT(crs.string)#
+	### Define CRS using wkt format#
+	raster::crs(spdf_world_10)   <- crs.string#
+	### SpatialPoints object holding coords#
+	points.sp <- sp::SpatialPoints(coords)#
+	raster::crs(points.sp) <- crs.string#
+	### SpatialPolygons object holding circles with centerpoints at coords#
+	circles.poly <- coords2sp.poly(coords.mat=coords,r=coords.radius)#
+	raster::crs(circles.poly) <- crs.string#
+	### Spatial data frame for the map features that intersect with the input coords#
+	unique.features.at.circles <- do.call(rbind,unique(sp::over(circles.poly, spdf_world_10,returnList=T)))#
+	### spdf row indices for the unique regions in unique.features.at.circles#
+	indices_unique.features.at.circles <- which(spdf_world_10$sov_a3 %in% unique(unique.features.at.circles$sov_a3))#
+	### Corresponding SpatialPolygonsDateFrame object#
+	spdf_unique.features.at.circles <- spdf_world_10[indices_unique.features.at.circles,]#
+	### Restructuring the heirarchy of lowest-level polygons, treating them as separate features of one SpatialPolygons object.#
+	## The purpose of this is to be able to use sp::over() to search for polygons that intersect with coords.#
+	base.polygons.sp <- extract.base.polygons(spdf_unique.features.at.circles)#
+	### Get the feature indices for the polygons that intersect with circles representing input coordinates#
+	indices_polygons.at.circles <- sp::over(circles.poly,base.polygons.sp)#
+	### Check if any NA values in indices_unique.polygons.at.circles, which occurs when one more of the input circles does not intersect any polygons (i.e. they fall in the ocean).#
+	### If NAs exist, try increasing the value of r parameter of coords2sp.poly function.#
+	if(any(is.na(indices_polygons.at.circles))){#
+		problem.points <- unname(which(is.na(indices_polygons.at.circles)))#
+		stop(paste0("sample(s) coords[",paste(problem.points,collapse=" "),",]  does not intersect map. Try increasing coords.radius or remove sample(s) from input"))#
+	}#
+	### Extract polygons in base.polygons.sp that intersect circles.poly#
+	sp_unique.polygons.at.circles      <- base.polygons.sp[unique(indices_polygons.at.circles)]#
+	sp_unique.polygons.without.circles <- base.polygons.sp[-unique(indices_polygons.at.circles)]#
+	if(method %in% c(1,2)){#
+		#### Method 1 for getting maps.coords.list#
+		### Two column numerical matrix of the coordinates of polygons that intersect input points#
+		coords.polygons.with.points <- unique(round(do.call(rbind,lapply(X=1:length(sp_unique.polygons.at.circles),FUN=function(x){sp2coords(sp::polygons(sp_unique.polygons.at.circles)[x])})),digits=3))#
+		####
+		if(method==1){#
+			coords.for.alphahull <- coords.polygons.with.points#
+			#buffer.width <- ((-0.75)+buffer.adj)#
+		}#
+		if(method==2){#
+			coords.for.alphahull <- unique(coords)#
+			#buffer.width <- buffer.adj#
+		}#
+		### initiallizing the while loop#
+		alpha.lower <- 1#
+		alpha.upper <- 50#
+		i=1; areas.equal <- FALSE; alpha <- alpha.upper; alpha.tol <- 0.1#
+		### Run while loop to find a low value of alpha that also generates a simple polygon (not self-intersecting or filled with holes) when input coordinates are supplied to ahull.#
+		# A polygon is considered simple if supplying the ahull polygon to gBuffer with buffer.width=0 produces a polygon with the same area as the input polygon. This works because gBuffer produces simple polygons even if the result clips the input polygon.#
+		while(((alpha.upper-alpha.lower)>alpha.tol) & (i < 100)){#
+			hull.alpha         <- alphahull::ahull(coords.for.alphahull,alpha=alpha)#
+			hull.alpha.coords  <- rbind(hull.alpha$arcs[,1:2],hull.alpha$arcs[1,1:2])#
+			hull.alpha.sp      <- sp::SpatialPoints(hull.alpha.coords)#
+			hull.alpha.polygon <- sp::SpatialPolygons(list(sp::Polygons(list(sp::Polygon(hull.alpha.sp)),ID="alpha.hull")))#
+			if(rgeos::gIsSimple(hull.alpha.polygon)){#
+				### Test hull.alpha.polygon is simple#
+				# geosphere::areaPolygon(hull.alpha.polygon) == geosphere::areaPolygon(gBuffer(hull.alpha.polygon,width=0))#
+				### Create a polygon encompassing hull.alpha.polygon, with size determined by the value of buffer.width#
+				# Note: Do not set the crs of hull.alpha.polygon because gBuffer function would introduce distortions associated with the projection. In reality this might not be be a big deal but I'm not sure.#
+				buffer.poly        <- rgeos::gBuffer(hull.alpha.polygon,width=((-0.75)+buffer.adj))#
+				### Same as buffer.poly except points are added at midpoints of edges longer than max_distance; process repeated until all edges less than. This can make it easier to visualize the border of the output polygon, but otherwise this isnt useful.#
+				outer.poly         <- smoothr::densify(buffer.poly,max_distance=(0.25*alpha))#
+				### Run this test before switching back to Euclidean space#
+				### Set CRS of outer.poly (now we are back in Euclidean space); this must be done before using function sp::over()#
+				raster::crs(outer.poly) <- crs.string#
+				### Test that the output coordinates define a simple polygon.#
+				test.simple        <- all(c(rgeos::gIsSimple(outer.poly), rgeos::gIsSimple(hull.alpha.polygon)))#
+				### Test if all of the input points are in the output polygon#
+				test.coverage      <- (!any(is.na(sp::over(points.sp,outer.poly))))#
+			} else {#
+				test.simple   <- FALSE#
+				test.coverage <- FALSE#
+			}#
+			if(test.simple & test.coverage){#
+				alpha.upper <- min(alpha.upper,alpha)#
+			} else {#
+				alpha.lower <- max(alpha.lower,alpha)#
+			}#
+			### save a copy of the current alpha value to initialize the next while loop#
+			alpha.i <- alpha#
+			alpha   <- median(c(alpha.lower,alpha.upper))#
+			i=(i+1)#
+		}#
+		fractal.dimension  <- fracD(outer.poly)#
+		alpha          <- alpha.i#
+		while(fractal.dimension > max.fractal.dimension){#
+			alpha              <- (alpha+0.1)#
+			hull.alpha         <- alphahull::ahull(coords.for.alphahull,alpha=alpha)#
+			hull.alpha.coords  <- rbind(hull.alpha$arcs[,1:2],hull.alpha$arcs[1,1:2])#
+			hull.alpha.sp      <- sp::SpatialPoints(hull.alpha.coords)#
+			hull.alpha.polygon <- sp::SpatialPolygons(list(sp::Polygons(list(sp::Polygon(hull.alpha.sp)),ID="alpha.hull")))#
+			buffer.poly        <- rgeos::gBuffer(hull.alpha.polygon,width=((-0.75)+buffer.adj))#
+			outer.poly         <- smoothr::densify(buffer.poly,max_distance=(0.25*alpha))#
+			fractal.dimension  <- fracD(outer.poly)#
+		}#
+		raster::crs(outer.poly) <- crs.string#
+	} else {#
+		if(method==3){#
+			### Minimum convex polygon that contains the maps with points.#
+			polygons.mcp <- suppressWarnings(adehabitatHR::mcp(points.sp,percent=100))#
+			mcp.coords   <- unique(sp2coords(polygons.mcp))#
+			### Generate the alpha-hull of the polygons with points#
+			hull.alpha         <- alphahull::ahull(mcp.coords,alpha=1)#
+			hull.alpha.coords  <- rbind(hull.alpha$arcs[,1:2],hull.alpha$arcs[1,1:2])#
+			hull.alpha.sp      <- sp::SpatialPoints(hull.alpha.coords)#
+			hull.alpha.polygon <- sp::SpatialPolygons(list(sp::Polygons(list(sp::Polygon(hull.alpha.sp)),ID="alpha.hull")))#
+			buffer.width       <- (0.5+buffer.adj)#
+			### Create a polygon encompassing hull.alpha.polygon, with size determined by the value of buffer.width#
+			buffer.poly        <- rgeos::gBuffer(hull.alpha.polygon,width=buffer.width)#
+			### Same as buffer.poly except points are added at midpoints of edges longer than max_distance; process repeated until all edges less than. This can make it easier to visualize the border of the output polygon, but otherwise this isnt useful.#
+			outer.poly         <- smoothr::densify(buffer.poly,max_distance=(0.25*alpha))#
+			raster::crs(outer.poly) <- crs.string#
+		} else {#
+			stop("set method to 1, 2, or 3")#
+		}#
+	}#
+	outer     <- unname(sp2coords(outer.poly))#
+	if(counter.clockwise){#
+		outer <- cbind(rev(outer[,1]),rev(outer[,2]))#
+	}#
+	### Show the relationship between the outer coordinates, the input coordinates, and geographic regions#
+	if(plot.outer){#
+		### Turns off current graphics devices before plotting. This seems to help prevent the new plots from inheriting graphical parameters from the current device.#
+		if(!is.null(dev.list())){#
+			dev.off()#
+		}#
+		### Plots in slightly different ways depending depending on the method used.#
+		if(method %in% c(1,2)){#
+			### Plot the outer coordinates in white to define the extent#
+			plot(sp::SpatialPoints(outer),col="white")#
+			#plot(submaps.with.points.sp,add=T,col="gray90")#
+			plot(spdf_world_10,add=T)#
+			if(method==1){#
+			### Add a layer containing the regions of the basemap that include at least one point (regions in gray)#
+				plot(spdf_unique.features.at.circles,add=T,col="gray90")#
+				plot(sp_unique.polygons.without.circles,add=T,col="white")#
+			}#
+			### Add green crosshairs for output coordinates (the outer file for eems)#
+			plot(sp::SpatialPoints(outer),col="green",add=T)#
+			### Add black circles for locations of the input coordinates#
+			plot(points.sp,add=T,pch=20)#
+			### Add text/legend to show what the green crosshairs are#
+			mtext("+ = coordinates written to output.path (if set)",col="green",adj=0.15,line=1.5,cex=0.8)#
+			mtext(paste0("P:A fractal dimension of area inscribed by output coordinates",round(fractal.dimension,digits=3)),adj=0.1,line=0.5,cex=0.8)#
+			### Add map axes#
+			maps::map.axes()#
+		} else {#
+			plot(SpatialPoints(outer),col="white")#
+			extent.sp <- SpatialPoints(rbind(outer,coords))#
+			plot(spdf_world_10,add=T)#
+			plot(SpatialPoints(outer),col="green",add=T)#
+			plot(points.sp,add=T,pch=20)#
+			mtext("+ outer (coordinates written to output.path)",col="green",adj=0.1,line=0.25,cex=0.8)#
+			maps::map.axes()#
+		}#
+	}#
+	### Write outer file to output.path#
+	if(!is.null(output.path)){#
+		write.table(outer,output.path,row.names=F,col.names=F,sep=" ",quote=F)#
+	}#
+	### return a list including a matrix of the coordinates in the output file and a SpatialPolygons object of the output coordinates#
+	list(outer,outer.poly)#
+}
+test <- create.outer(coords="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/EEMS/EEMS_Katie/mainland_maculilabris.coord",method=2,max.fractal.dimension=1.105)
+# required packages#
+# library(sp)                 ### Used for everything#
+# library(maps)               ### map.axes function#
+# library(rgeos)              ### gBuffer and gArea function#
+# library(rgdal)              ### showWKT function#
+# library(raster)             ### crs and bind function#
+# library(smoothr)            ### densify function for adding outer points by interpolating along perimeter#
+# library(sampSurf)           ### spCircle function#
+# library(geosphere)          ### perimeter and areaPolygon functions#
+# library(alphahull)          ### ahull function#
+# library(adehabitatHR)       ### function to generate minimum convex polygon#
+# library(rnaturalearth)      ### Global geographic vectors#
+# library(rnaturalearthhires) ### high resolution data for rnaturalearth package#
+#
+#' @param coords Two column numeric matrix containing longitude and latitude of the samples in decimal degree format, or a character string with path to the input .coords file used for eems; the input file must be space separated and without a header.#
+#' @param alpha Value of alpha parameter (Default is 1). Increase alpha incrementally by about 0.1 until the polygon plot corresponding to the outer coordinates is simple polygon (as opposed to a complex, self-intersecting polygon).#
+#' @param buffer.adj This argument is not yet implemented. A number between 0 and 1 that determines the size of the buffer region surrounding the points supplied by coords.#
+#' @param method A number (1, 2, or 3) determining how the output coordinates will be generated.#
+#' If method=1 (the default) produces a potentially more useful result, and uses the alpha hull of geographic regions that intersect with input coordinates. This method may be slow if input coordinates include large sampling gaps. In such cases increases the value of alpha.start.#
+#' If method=2 is similar to method 1, except that the output coordinates are only determined from the input coordinates (and buffer setting), rather than from the regions of the base map (political geography from natural earth dataset) that intersect the input coordinates. Either method should be fine for EEMS, but method 1 tends to look nicer.#
+#' If method=3 is fast and uses the minimum convex polygon of input coodinates as a starting point.#
+#' @param coords.radius Number specifying the radius (in degrees) to use around input coordinates when determining spatial intersections. Increasing the value of this parameter can be useful if coordinates are located offshore of regions outlined in basemaps (high resolution Natural Earth dataset).#
+#' @param max.fractal.dimension Value between 1 and 2 contolling the shape complexity of the polygon with the output coordinates. Values near 1 have low complexity (e.g., circles, squares), and shape complexity increases as max.fractal.dimension approaches 2. The default value 1.1 seems to work well for most cases. Ignored if method=3.#
+#' @param plot.outer Logical indicating if the points defining the output ".outer" table should be plotted in green, as well as the ".coords" (coords) points in black.#
+#' @param counter.clockwise Should the output cooordinates be ordered counterclockwise. Default is TRUE and is the required format for EEMS.#
+#' @param output.path Character string with path where to save coordinates. Default is NULL.#
+#' @result A two column numerical matrix containing the longitude and latitude of the output polygon. The matrix written to output.path can be used as the ".outer" polygon used by EEMS. A map is plotted to visualize the results.#
+create.outer <- function(coords,method=1,buffer.adj=0,coords.radius=0.01,max.fractal.dimension=1.1,plot.outer=T,counter.clockwise=T,output.path=NULL){#
+	# Function to extract the coordinates matrix (numeric mode) from a class Polygon, Polygons, SpatialPolygons, or SpatialPolygonsDataFrame object that containins a single polygon.#
+	# Do not use this function if the inout spatial object contains more than coordinates matrix.#
+	sp2coords <- function(x){#
+		if(is(x,"SpatialPolygonsDataFrame") | is(x,"SpatialPolygons")){#
+			result <- x@polygons[[1]]@Polygons[[1]]@coords#
+		}#
+		if(is(x,"Polygons")){#
+			result <- x@Polygons[[1]]@coords#
+		}#
+		if(is(x,"Polygon") | is(x,"SpatialPoints")){#
+			result <- x@coords#
+		}#
+		unname(result)#
+	}#
+	### Convert a coordinates matrix into a SpatialPolygons object in circles centered at input coordinates, and radius specified by r#
+	coords2sp.poly <- function(coords.mat,r=0.01){#
+		colnames(coords.mat) <- c("x","y")#
+		circles.list <- apply(X=coords.mat,MARGIN=1,FUN=function(x){sampSurf::spCircle(radius=r,centerPoint=x)[[1]]})#
+		res          <- do.call(raster::bind,circles.list)#
+		res#
+	}#
+	### Fractal dimension of perimeter-area relationship, a metric of polygon complexity with values from 1 (simple euclidean shapes likes squares and circles) tp approaching 2 for increasingly complex polygons.#
+	# More info: http://www.umass.edu/landeco/teaching/landscape_ecology/schedule/chapter9_metrics.pdf#
+	# Input must be a SpatialPolygons object#
+	fracD <- function(x){#
+		# area in meters squared#
+		x.area      <- geosphere::areaPolygon(x)#
+		# perimeter in meters#
+		x.perimeter <- geosphere::perimeter(x)#
+		(2*log10(x.perimeter))/(log10(x.area))#
+	}#
+	#### For a SpatialPolygonsDataFrame, extract the lowest-level polygons and hold each as a feature in a SpatialPolygons object.#
+	extract.base.polygons <- function(spdf){#
+		for(i in 1:nrow(spdf)){#
+			sp.temp <- spdf@polygons[[i]]#
+			for(j in 1:length(sp.temp@Polygons)){#
+				id.temp <- paste0(i,".",j)#
+				polygons.ij <- sp::SpatialPolygons(list(sp::Polygons(list(sp.temp@Polygons[[j]]),ID=id.temp)))#
+				if(i==1 & j==1){#
+					polygons.all <- polygons.ij#
+				} else {#
+					polygons.all <- raster::bind(polygons.all,polygons.ij)#
+				}#
+			}#
+		}#
+		### Preserve crs definition#
+		raster::crs(polygons.all) <- raster::crs(spdf)#
+		### object returned#
+		polygons.all#
+	}#
+	input.coords <- coords#
+	### Check which type of object is being supplied to coords and define coords accordingly#
+	if(is(input.coords,"character")){#
+		coords   <- data.matrix(read.table(input.coords,header=F))#
+	}#
+	if(is(input.coords,"matrix") | is(input.coords,"data.frame")){#
+		coords       <- data.matrix(input.coords)#
+		mode(coords) <- "numeric"#
+	}#
+	## High resolution global map of political regions.#
+	spdf_world_10             <- rnaturalearth::ne_countries(scale=10)#
+	## Character string defining the Coordinate Reference System (CRS) in WKT format#
+	# crs.string <- rgdal::showWKT(sp::proj4string(spdf_world_10))#
+	# crs.string <- "+init=epsg:4326 +proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0"#
+	crs.string <- "+init=EPSG:4326"#
+	wkt.string <- rgdal::showWKT(crs.string)#
+	### Define CRS using wkt format#
+	raster::crs(spdf_world_10)   <- crs.string#
+	### SpatialPoints object holding coords#
+	points.sp <- sp::SpatialPoints(coords)#
+	raster::crs(points.sp) <- crs.string#
+	### SpatialPolygons object holding circles with centerpoints at coords#
+	circles.poly <- coords2sp.poly(coords.mat=coords,r=coords.radius)#
+	raster::crs(circles.poly) <- crs.string#
+	### Spatial data frame for the map features that intersect with the input coords#
+	unique.features.at.circles <- do.call(rbind,unique(sp::over(circles.poly, spdf_world_10,returnList=T)))#
+	### spdf row indices for the unique regions in unique.features.at.circles#
+	indices_unique.features.at.circles <- which(spdf_world_10$sov_a3 %in% unique(unique.features.at.circles$sov_a3))#
+	### Corresponding SpatialPolygonsDateFrame object#
+	spdf_unique.features.at.circles <- spdf_world_10[indices_unique.features.at.circles,]#
+	### Restructuring the heirarchy of lowest-level polygons, treating them as separate features of one SpatialPolygons object.#
+	## The purpose of this is to be able to use sp::over() to search for polygons that intersect with coords.#
+	base.polygons.sp <- extract.base.polygons(spdf_unique.features.at.circles)#
+	### Get the feature indices for the polygons that intersect with circles representing input coordinates#
+	indices_polygons.at.circles <- sp::over(circles.poly,base.polygons.sp)#
+	### Check if any NA values in indices_unique.polygons.at.circles, which occurs when one more of the input circles does not intersect any polygons (i.e. they fall in the ocean).#
+	### If NAs exist, try increasing the value of r parameter of coords2sp.poly function.#
+	if(any(is.na(indices_polygons.at.circles))){#
+		problem.points <- unname(which(is.na(indices_polygons.at.circles)))#
+		stop(paste0("sample(s) coords[",paste(problem.points,collapse=" "),",]  does not intersect map. Try increasing coords.radius or remove sample(s) from input"))#
+	}#
+	### Extract polygons in base.polygons.sp that intersect circles.poly#
+	sp_unique.polygons.at.circles      <- base.polygons.sp[unique(indices_polygons.at.circles)]#
+	sp_unique.polygons.without.circles <- base.polygons.sp[-unique(indices_polygons.at.circles)]#
+	if(method %in% c(1,2)){#
+		#### Method 1 for getting maps.coords.list#
+		### Two column numerical matrix of the coordinates of polygons that intersect input points#
+		coords.polygons.with.points <- unique(round(do.call(rbind,lapply(X=1:length(sp_unique.polygons.at.circles),FUN=function(x){sp2coords(sp::polygons(sp_unique.polygons.at.circles)[x])})),digits=3))#
+		####
+		if(method==1){#
+			coords.for.alphahull <- coords.polygons.with.points#
+			#buffer.width <- ((-0.75)+buffer.adj)#
+		}#
+		if(method==2){#
+			coords.for.alphahull <- unique(coords)#
+			#buffer.width <- buffer.adj#
+		}#
+		### initiallizing the while loop#
+		alpha.lower <- 1#
+		alpha.upper <- 50#
+		i=1; areas.equal <- FALSE; alpha <- alpha.upper; alpha.tol <- 0.1#
+		### Run while loop to find a low value of alpha that also generates a simple polygon (not self-intersecting or filled with holes) when input coordinates are supplied to ahull.#
+		# A polygon is considered simple if supplying the ahull polygon to gBuffer with buffer.width=0 produces a polygon with the same area as the input polygon. This works because gBuffer produces simple polygons even if the result clips the input polygon.#
+		while(((alpha.upper-alpha.lower)>alpha.tol) & (i < 100)){#
+			hull.alpha         <- alphahull::ahull(coords.for.alphahull,alpha=alpha)#
+			hull.alpha.coords  <- rbind(hull.alpha$arcs[,1:2],hull.alpha$arcs[1,1:2])#
+			hull.alpha.sp      <- sp::SpatialPoints(hull.alpha.coords)#
+			hull.alpha.polygon <- sp::SpatialPolygons(list(sp::Polygons(list(sp::Polygon(hull.alpha.sp)),ID="alpha.hull")))#
+			if(rgeos::gIsSimple(hull.alpha.polygon)){#
+				### Test hull.alpha.polygon is simple#
+				# geosphere::areaPolygon(hull.alpha.polygon) == geosphere::areaPolygon(gBuffer(hull.alpha.polygon,width=0))#
+				### Create a polygon encompassing hull.alpha.polygon, with size determined by the value of buffer.width#
+				# Note: Do not set the crs of hull.alpha.polygon because gBuffer function would introduce distortions associated with the projection. In reality this might not be be a big deal but I'm not sure.#
+				buffer.poly        <- rgeos::gBuffer(hull.alpha.polygon,width=((-0.75)+buffer.adj))#
+				### Same as buffer.poly except points are added at midpoints of edges longer than max_distance; process repeated until all edges less than. This can make it easier to visualize the border of the output polygon, but otherwise this isnt useful.#
+				outer.poly         <- smoothr::densify(buffer.poly,max_distance=(0.25*alpha))#
+				### Run this test before switching back to Euclidean space#
+				### Set CRS of outer.poly (now we are back in Euclidean space); this must be done before using function sp::over()#
+				raster::crs(outer.poly) <- crs.string#
+				### Test that the output coordinates define a simple polygon.#
+				test.simple        <- all(c(rgeos::gIsSimple(outer.poly), rgeos::gIsSimple(hull.alpha.polygon)))#
+				### Test if all of the input points are in the output polygon#
+				test.coverage      <- (!any(is.na(sp::over(points.sp,outer.poly))))#
+			} else {#
+				test.simple   <- FALSE#
+				test.coverage <- FALSE#
+			}#
+			if(test.simple & test.coverage){#
+				alpha.upper <- min(alpha.upper,alpha)#
+			} else {#
+				alpha.lower <- max(alpha.lower,alpha)#
+			}#
+			### save a copy of the current alpha value to initialize the next while loop#
+			alpha.i <- alpha#
+			alpha   <- median(c(alpha.lower,alpha.upper))#
+			i=(i+1)#
+		}#
+		fractal.dimension  <- fracD(outer.poly)#
+		alpha          <- alpha.i#
+		while(fractal.dimension > max.fractal.dimension){#
+			alpha              <- (alpha+0.1)#
+			hull.alpha         <- alphahull::ahull(coords.for.alphahull,alpha=alpha)#
+			hull.alpha.coords  <- rbind(hull.alpha$arcs[,1:2],hull.alpha$arcs[1,1:2])#
+			hull.alpha.sp      <- sp::SpatialPoints(hull.alpha.coords)#
+			hull.alpha.polygon <- sp::SpatialPolygons(list(sp::Polygons(list(sp::Polygon(hull.alpha.sp)),ID="alpha.hull")))#
+			buffer.poly        <- rgeos::gBuffer(hull.alpha.polygon,width=((-0.75)+buffer.adj))#
+			outer.poly         <- smoothr::densify(buffer.poly,max_distance=(0.25*alpha))#
+			fractal.dimension  <- fracD(outer.poly)#
+		}#
+		raster::crs(outer.poly) <- crs.string#
+	} else {#
+		if(method==3){#
+			### Minimum convex polygon that contains the maps with points.#
+			polygons.mcp <- suppressWarnings(adehabitatHR::mcp(points.sp,percent=100))#
+			mcp.coords   <- unique(sp2coords(polygons.mcp))#
+			### Generate the alpha-hull of the polygons with points#
+			hull.alpha         <- alphahull::ahull(mcp.coords,alpha=1)#
+			hull.alpha.coords  <- rbind(hull.alpha$arcs[,1:2],hull.alpha$arcs[1,1:2])#
+			hull.alpha.sp      <- sp::SpatialPoints(hull.alpha.coords)#
+			hull.alpha.polygon <- sp::SpatialPolygons(list(sp::Polygons(list(sp::Polygon(hull.alpha.sp)),ID="alpha.hull")))#
+			buffer.width       <- (0.5+buffer.adj)#
+			### Create a polygon encompassing hull.alpha.polygon, with size determined by the value of buffer.width#
+			buffer.poly        <- rgeos::gBuffer(hull.alpha.polygon,width=buffer.width)#
+			### Same as buffer.poly except points are added at midpoints of edges longer than max_distance; process repeated until all edges less than. This can make it easier to visualize the border of the output polygon, but otherwise this isnt useful.#
+			outer.poly         <- smoothr::densify(buffer.poly,max_distance=(0.25*alpha))#
+			raster::crs(outer.poly) <- crs.string#
+		} else {#
+			stop("set method to 1, 2, or 3")#
+		}#
+	}#
+	outer     <- unname(sp2coords(outer.poly))#
+	if(counter.clockwise){#
+		outer <- cbind(rev(outer[,1]),rev(outer[,2]))#
+	}#
+	### Show the relationship between the outer coordinates, the input coordinates, and geographic regions#
+	if(plot.outer){#
+		### Turns off current graphics devices before plotting. This seems to help prevent the new plots from inheriting graphical parameters from the current device.#
+		if(!is.null(dev.list())){#
+			dev.off()#
+		}#
+		### Plots in slightly different ways depending depending on the method used.#
+		if(method %in% c(1,2)){#
+			### Plot the outer coordinates in white to define the extent#
+			plot(sp::SpatialPoints(outer),col="white")#
+			#plot(submaps.with.points.sp,add=T,col="gray90")#
+			plot(spdf_world_10,add=T)#
+			if(method==1){#
+			### Add a layer containing the regions of the basemap that include at least one point (regions in gray)#
+				plot(spdf_unique.features.at.circles,add=T,col="gray90")#
+				plot(sp_unique.polygons.without.circles,add=T,col="white")#
+			}#
+			### Add green crosshairs for output coordinates (the outer file for eems)#
+			plot(sp::SpatialPoints(outer),col="green",add=T)#
+			### Add black circles for locations of the input coordinates#
+			plot(points.sp,add=T,pch=20)#
+			### Add text/legend to show what the green crosshairs are#
+			mtext("+ = coordinates written to output.path (if set)",col="green",adj=0.3,line=1.5,cex=0.8)#
+			mtext(paste0("P:A fractal dimension of area inscribed by output coordinates",round(fractal.dimension,digits=3)),adj=0.1,line=0.5,cex=0.8)#
+			### Add map axes#
+			maps::map.axes()#
+		} else {#
+			plot(SpatialPoints(outer),col="white")#
+			extent.sp <- SpatialPoints(rbind(outer,coords))#
+			plot(spdf_world_10,add=T)#
+			plot(SpatialPoints(outer),col="green",add=T)#
+			plot(points.sp,add=T,pch=20)#
+			mtext("+ outer (coordinates written to output.path)",col="green",adj=0.1,line=0.25,cex=0.8)#
+			maps::map.axes()#
+		}#
+	}#
+	### Write outer file to output.path#
+	if(!is.null(output.path)){#
+		write.table(outer,output.path,row.names=F,col.names=F,sep=" ",quote=F)#
+	}#
+	### return a list including a matrix of the coordinates in the output file and a SpatialPolygons object of the output coordinates#
+	list(outer,outer.poly)#
+}
+test <- create.outer(coords="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/EEMS/EEMS_Katie/mainland_maculilabris.coord",method=2,max.fractal.dimension=1.105)
+# required packages#
+# library(sp)                 ### Used for everything#
+# library(maps)               ### map.axes function#
+# library(rgeos)              ### gBuffer and gArea function#
+# library(rgdal)              ### showWKT function#
+# library(raster)             ### crs and bind function#
+# library(smoothr)            ### densify function for adding outer points by interpolating along perimeter#
+# library(sampSurf)           ### spCircle function#
+# library(geosphere)          ### perimeter and areaPolygon functions#
+# library(alphahull)          ### ahull function#
+# library(adehabitatHR)       ### function to generate minimum convex polygon#
+# library(rnaturalearth)      ### Global geographic vectors#
+# library(rnaturalearthhires) ### high resolution data for rnaturalearth package#
+#
+#' @param coords Two column numeric matrix containing longitude and latitude of the samples in decimal degree format, or a character string with path to the input .coords file used for eems; the input file must be space separated and without a header.#
+#' @param alpha Value of alpha parameter (Default is 1). Increase alpha incrementally by about 0.1 until the polygon plot corresponding to the outer coordinates is simple polygon (as opposed to a complex, self-intersecting polygon).#
+#' @param buffer.adj This argument is not yet implemented. A number between 0 and 1 that determines the size of the buffer region surrounding the points supplied by coords.#
+#' @param method A number (1, 2, or 3) determining how the output coordinates will be generated.#
+#' If method=1 (the default) produces a potentially more useful result, and uses the alpha hull of geographic regions that intersect with input coordinates. This method may be slow if input coordinates include large sampling gaps. In such cases increases the value of alpha.start.#
+#' If method=2 is similar to method 1, except that the output coordinates are only determined from the input coordinates (and buffer setting), rather than from the regions of the base map (political geography from natural earth dataset) that intersect the input coordinates. Either method should be fine for EEMS, but method 1 tends to look nicer.#
+#' If method=3 is fast and uses the minimum convex polygon of input coodinates as a starting point.#
+#' @param coords.radius Number specifying the radius (in degrees) to use around input coordinates when determining spatial intersections. Increasing the value of this parameter can be useful if coordinates are located offshore of regions outlined in basemaps (high resolution Natural Earth dataset).#
+#' @param max.fractal.dimension Value between 1 and 2 contolling the shape complexity of the polygon with the output coordinates. Values near 1 have low complexity (e.g., circles, squares), and shape complexity increases as max.fractal.dimension approaches 2. The default value 1.1 seems to work well for most cases. Ignored if method=3.#
+#' @param plot.outer Logical indicating if the points defining the output ".outer" table should be plotted in green, as well as the ".coords" (coords) points in black.#
+#' @param counter.clockwise Should the output cooordinates be ordered counterclockwise. Default is TRUE and is the required format for EEMS.#
+#' @param output.path Character string with path where to save coordinates. Default is NULL.#
+#' @result A two column numerical matrix containing the longitude and latitude of the output polygon. The matrix written to output.path can be used as the ".outer" polygon used by EEMS. A map is plotted to visualize the results.#
+create.outer <- function(coords,method=1,buffer.adj=0,coords.radius=0.01,max.fractal.dimension=1.1,plot.outer=T,counter.clockwise=T,output.path=NULL){#
+	# Function to extract the coordinates matrix (numeric mode) from a class Polygon, Polygons, SpatialPolygons, or SpatialPolygonsDataFrame object that containins a single polygon.#
+	# Do not use this function if the inout spatial object contains more than coordinates matrix.#
+	sp2coords <- function(x){#
+		if(is(x,"SpatialPolygonsDataFrame") | is(x,"SpatialPolygons")){#
+			result <- x@polygons[[1]]@Polygons[[1]]@coords#
+		}#
+		if(is(x,"Polygons")){#
+			result <- x@Polygons[[1]]@coords#
+		}#
+		if(is(x,"Polygon") | is(x,"SpatialPoints")){#
+			result <- x@coords#
+		}#
+		unname(result)#
+	}#
+	### Convert a coordinates matrix into a SpatialPolygons object in circles centered at input coordinates, and radius specified by r#
+	coords2sp.poly <- function(coords.mat,r=0.01){#
+		colnames(coords.mat) <- c("x","y")#
+		circles.list <- apply(X=coords.mat,MARGIN=1,FUN=function(x){sampSurf::spCircle(radius=r,centerPoint=x)[[1]]})#
+		res          <- do.call(raster::bind,circles.list)#
+		res#
+	}#
+	### Fractal dimension of perimeter-area relationship, a metric of polygon complexity with values from 1 (simple euclidean shapes likes squares and circles) tp approaching 2 for increasingly complex polygons.#
+	# More info: http://www.umass.edu/landeco/teaching/landscape_ecology/schedule/chapter9_metrics.pdf#
+	# Input must be a SpatialPolygons object#
+	fracD <- function(x){#
+		# area in meters squared#
+		x.area      <- geosphere::areaPolygon(x)#
+		# perimeter in meters#
+		x.perimeter <- geosphere::perimeter(x)#
+		(2*log10(x.perimeter))/(log10(x.area))#
+	}#
+	#### For a SpatialPolygonsDataFrame, extract the lowest-level polygons and hold each as a feature in a SpatialPolygons object.#
+	extract.base.polygons <- function(spdf){#
+		for(i in 1:nrow(spdf)){#
+			sp.temp <- spdf@polygons[[i]]#
+			for(j in 1:length(sp.temp@Polygons)){#
+				id.temp <- paste0(i,".",j)#
+				polygons.ij <- sp::SpatialPolygons(list(sp::Polygons(list(sp.temp@Polygons[[j]]),ID=id.temp)))#
+				if(i==1 & j==1){#
+					polygons.all <- polygons.ij#
+				} else {#
+					polygons.all <- raster::bind(polygons.all,polygons.ij)#
+				}#
+			}#
+		}#
+		### Preserve crs definition#
+		raster::crs(polygons.all) <- raster::crs(spdf)#
+		### object returned#
+		polygons.all#
+	}#
+	input.coords <- coords#
+	### Check which type of object is being supplied to coords and define coords accordingly#
+	if(is(input.coords,"character")){#
+		coords   <- data.matrix(read.table(input.coords,header=F))#
+	}#
+	if(is(input.coords,"matrix") | is(input.coords,"data.frame")){#
+		coords       <- data.matrix(input.coords)#
+		mode(coords) <- "numeric"#
+	}#
+	## High resolution global map of political regions.#
+	spdf_world_10             <- rnaturalearth::ne_countries(scale=10)#
+	## Character string defining the Coordinate Reference System (CRS) in WKT format#
+	# crs.string <- rgdal::showWKT(sp::proj4string(spdf_world_10))#
+	# crs.string <- "+init=epsg:4326 +proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0"#
+	crs.string <- "+init=EPSG:4326"#
+	wkt.string <- rgdal::showWKT(crs.string)#
+	### Define CRS using wkt format#
+	raster::crs(spdf_world_10)   <- crs.string#
+	### SpatialPoints object holding coords#
+	points.sp <- sp::SpatialPoints(coords)#
+	raster::crs(points.sp) <- crs.string#
+	### SpatialPolygons object holding circles with centerpoints at coords#
+	circles.poly <- coords2sp.poly(coords.mat=coords,r=coords.radius)#
+	raster::crs(circles.poly) <- crs.string#
+	### Spatial data frame for the map features that intersect with the input coords#
+	unique.features.at.circles <- do.call(rbind,unique(sp::over(circles.poly, spdf_world_10,returnList=T)))#
+	### spdf row indices for the unique regions in unique.features.at.circles#
+	indices_unique.features.at.circles <- which(spdf_world_10$sov_a3 %in% unique(unique.features.at.circles$sov_a3))#
+	### Corresponding SpatialPolygonsDateFrame object#
+	spdf_unique.features.at.circles <- spdf_world_10[indices_unique.features.at.circles,]#
+	### Restructuring the heirarchy of lowest-level polygons, treating them as separate features of one SpatialPolygons object.#
+	## The purpose of this is to be able to use sp::over() to search for polygons that intersect with coords.#
+	base.polygons.sp <- extract.base.polygons(spdf_unique.features.at.circles)#
+	### Get the feature indices for the polygons that intersect with circles representing input coordinates#
+	indices_polygons.at.circles <- sp::over(circles.poly,base.polygons.sp)#
+	### Check if any NA values in indices_unique.polygons.at.circles, which occurs when one more of the input circles does not intersect any polygons (i.e. they fall in the ocean).#
+	### If NAs exist, try increasing the value of r parameter of coords2sp.poly function.#
+	if(any(is.na(indices_polygons.at.circles))){#
+		problem.points <- unname(which(is.na(indices_polygons.at.circles)))#
+		stop(paste0("sample(s) coords[",paste(problem.points,collapse=" "),",]  does not intersect map. Try increasing coords.radius or remove sample(s) from input"))#
+	}#
+	### Extract polygons in base.polygons.sp that intersect circles.poly#
+	sp_unique.polygons.at.circles      <- base.polygons.sp[unique(indices_polygons.at.circles)]#
+	sp_unique.polygons.without.circles <- base.polygons.sp[-unique(indices_polygons.at.circles)]#
+	if(method %in% c(1,2)){#
+		#### Method 1 for getting maps.coords.list#
+		### Two column numerical matrix of the coordinates of polygons that intersect input points#
+		coords.polygons.with.points <- unique(round(do.call(rbind,lapply(X=1:length(sp_unique.polygons.at.circles),FUN=function(x){sp2coords(sp::polygons(sp_unique.polygons.at.circles)[x])})),digits=3))#
+		####
+		if(method==1){#
+			coords.for.alphahull <- coords.polygons.with.points#
+			#buffer.width <- ((-0.75)+buffer.adj)#
+		}#
+		if(method==2){#
+			coords.for.alphahull <- unique(coords)#
+			#buffer.width <- buffer.adj#
+		}#
+		### initiallizing the while loop#
+		alpha.lower <- 1#
+		alpha.upper <- 50#
+		i=1; areas.equal <- FALSE; alpha <- alpha.upper; alpha.tol <- 0.1#
+		### Run while loop to find a low value of alpha that also generates a simple polygon (not self-intersecting or filled with holes) when input coordinates are supplied to ahull.#
+		# A polygon is considered simple if supplying the ahull polygon to gBuffer with buffer.width=0 produces a polygon with the same area as the input polygon. This works because gBuffer produces simple polygons even if the result clips the input polygon.#
+		while(((alpha.upper-alpha.lower)>alpha.tol) & (i < 100)){#
+			hull.alpha         <- alphahull::ahull(coords.for.alphahull,alpha=alpha)#
+			hull.alpha.coords  <- rbind(hull.alpha$arcs[,1:2],hull.alpha$arcs[1,1:2])#
+			hull.alpha.sp      <- sp::SpatialPoints(hull.alpha.coords)#
+			hull.alpha.polygon <- sp::SpatialPolygons(list(sp::Polygons(list(sp::Polygon(hull.alpha.sp)),ID="alpha.hull")))#
+			if(rgeos::gIsSimple(hull.alpha.polygon)){#
+				### Test hull.alpha.polygon is simple#
+				# geosphere::areaPolygon(hull.alpha.polygon) == geosphere::areaPolygon(gBuffer(hull.alpha.polygon,width=0))#
+				### Create a polygon encompassing hull.alpha.polygon, with size determined by the value of buffer.width#
+				# Note: Do not set the crs of hull.alpha.polygon because gBuffer function would introduce distortions associated with the projection. In reality this might not be be a big deal but I'm not sure.#
+				buffer.poly        <- rgeos::gBuffer(hull.alpha.polygon,width=((-0.75)+buffer.adj))#
+				### Same as buffer.poly except points are added at midpoints of edges longer than max_distance; process repeated until all edges less than. This can make it easier to visualize the border of the output polygon, but otherwise this isnt useful.#
+				outer.poly         <- smoothr::densify(buffer.poly,max_distance=(0.25*alpha))#
+				### Run this test before switching back to Euclidean space#
+				### Set CRS of outer.poly (now we are back in Euclidean space); this must be done before using function sp::over()#
+				raster::crs(outer.poly) <- crs.string#
+				### Test that the output coordinates define a simple polygon.#
+				test.simple        <- all(c(rgeos::gIsSimple(outer.poly), rgeos::gIsSimple(hull.alpha.polygon)))#
+				### Test if all of the input points are in the output polygon#
+				test.coverage      <- (!any(is.na(sp::over(points.sp,outer.poly))))#
+			} else {#
+				test.simple   <- FALSE#
+				test.coverage <- FALSE#
+			}#
+			if(test.simple & test.coverage){#
+				alpha.upper <- min(alpha.upper,alpha)#
+			} else {#
+				alpha.lower <- max(alpha.lower,alpha)#
+			}#
+			### save a copy of the current alpha value to initialize the next while loop#
+			alpha.i <- alpha#
+			alpha   <- median(c(alpha.lower,alpha.upper))#
+			i=(i+1)#
+		}#
+		fractal.dimension  <- fracD(outer.poly)#
+		alpha          <- alpha.i#
+		while(fractal.dimension > max.fractal.dimension){#
+			alpha              <- (alpha+0.1)#
+			hull.alpha         <- alphahull::ahull(coords.for.alphahull,alpha=alpha)#
+			hull.alpha.coords  <- rbind(hull.alpha$arcs[,1:2],hull.alpha$arcs[1,1:2])#
+			hull.alpha.sp      <- sp::SpatialPoints(hull.alpha.coords)#
+			hull.alpha.polygon <- sp::SpatialPolygons(list(sp::Polygons(list(sp::Polygon(hull.alpha.sp)),ID="alpha.hull")))#
+			buffer.poly        <- rgeos::gBuffer(hull.alpha.polygon,width=((-0.75)+buffer.adj))#
+			outer.poly         <- smoothr::densify(buffer.poly,max_distance=(0.25*alpha))#
+			fractal.dimension  <- fracD(outer.poly)#
+		}#
+		raster::crs(outer.poly) <- crs.string#
+	} else {#
+		if(method==3){#
+			### Minimum convex polygon that contains the maps with points.#
+			polygons.mcp <- suppressWarnings(adehabitatHR::mcp(points.sp,percent=100))#
+			mcp.coords   <- unique(sp2coords(polygons.mcp))#
+			### Generate the alpha-hull of the polygons with points#
+			hull.alpha         <- alphahull::ahull(mcp.coords,alpha=1)#
+			hull.alpha.coords  <- rbind(hull.alpha$arcs[,1:2],hull.alpha$arcs[1,1:2])#
+			hull.alpha.sp      <- sp::SpatialPoints(hull.alpha.coords)#
+			hull.alpha.polygon <- sp::SpatialPolygons(list(sp::Polygons(list(sp::Polygon(hull.alpha.sp)),ID="alpha.hull")))#
+			buffer.width       <- (0.5+buffer.adj)#
+			### Create a polygon encompassing hull.alpha.polygon, with size determined by the value of buffer.width#
+			buffer.poly        <- rgeos::gBuffer(hull.alpha.polygon,width=buffer.width)#
+			### Same as buffer.poly except points are added at midpoints of edges longer than max_distance; process repeated until all edges less than. This can make it easier to visualize the border of the output polygon, but otherwise this isnt useful.#
+			outer.poly         <- smoothr::densify(buffer.poly,max_distance=(0.25*alpha))#
+			raster::crs(outer.poly) <- crs.string#
+		} else {#
+			stop("set method to 1, 2, or 3")#
+		}#
+	}#
+	outer     <- unname(sp2coords(outer.poly))#
+	if(counter.clockwise){#
+		outer <- cbind(rev(outer[,1]),rev(outer[,2]))#
+	}#
+	### Show the relationship between the outer coordinates, the input coordinates, and geographic regions#
+	if(plot.outer){#
+		### Turns off current graphics devices before plotting. This seems to help prevent the new plots from inheriting graphical parameters from the current device.#
+		if(!is.null(dev.list())){#
+			dev.off()#
+		}#
+		### Plots in slightly different ways depending depending on the method used.#
+		if(method %in% c(1,2)){#
+			### Plot the outer coordinates in white to define the extent#
+			plot(sp::SpatialPoints(outer),col="white")#
+			#plot(submaps.with.points.sp,add=T,col="gray90")#
+			plot(spdf_world_10,add=T)#
+			if(method==1){#
+			### Add a layer containing the regions of the basemap that include at least one point (regions in gray)#
+				plot(spdf_unique.features.at.circles,add=T,col="gray90")#
+				plot(sp_unique.polygons.without.circles,add=T,col="white")#
+			}#
+			### Add green crosshairs for output coordinates (the outer file for eems)#
+			plot(sp::SpatialPoints(outer),col="green",add=T)#
+			### Add black circles for locations of the input coordinates#
+			plot(points.sp,add=T,pch=20)#
+			### Add text/legend to show what the green crosshairs are#
+			mtext("+ = coordinates written to output.path (if set)",col="green",adj=0.1,line=1.5,cex=0.8)#
+			mtext(paste0("P:A fractal dimension of area inscribed by output coordinates",round(fractal.dimension,digits=3)),adj=0.1,line=0.5,cex=0.8)#
+			### Add map axes#
+			maps::map.axes()#
+		} else {#
+			plot(SpatialPoints(outer),col="white")#
+			extent.sp <- SpatialPoints(rbind(outer,coords))#
+			plot(spdf_world_10,add=T)#
+			plot(SpatialPoints(outer),col="green",add=T)#
+			plot(points.sp,add=T,pch=20)#
+			mtext("+ outer (coordinates written to output.path)",col="green",adj=0.1,line=0.25,cex=0.8)#
+			maps::map.axes()#
+		}#
+	}#
+	### Write outer file to output.path#
+	if(!is.null(output.path)){#
+		write.table(outer,output.path,row.names=F,col.names=F,sep=" ",quote=F)#
+	}#
+	### return a list including a matrix of the coordinates in the output file and a SpatialPolygons object of the output coordinates#
+	list(outer,outer.poly)#
+}
+test <- create.outer(coords="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/EEMS/EEMS_Katie/mainland_maculilabris.coord",method=2,max.fractal.dimension=1.105)
+# required packages#
+# library(sp)                 ### Used for everything#
+# library(maps)               ### map.axes function#
+# library(rgeos)              ### gBuffer and gArea function#
+# library(rgdal)              ### showWKT function#
+# library(raster)             ### crs and bind function#
+# library(smoothr)            ### densify function for adding outer points by interpolating along perimeter#
+# library(sampSurf)           ### spCircle function#
+# library(geosphere)          ### perimeter and areaPolygon functions#
+# library(alphahull)          ### ahull function#
+# library(adehabitatHR)       ### function to generate minimum convex polygon#
+# library(rnaturalearth)      ### Global geographic vectors#
+# library(rnaturalearthhires) ### high resolution data for rnaturalearth package#
+#
+#' @param coords Two column numeric matrix containing longitude and latitude of the samples in decimal degree format, or a character string with path to the input .coords file used for eems; the input file must be space separated and without a header.#
+#' @param alpha Value of alpha parameter (Default is 1). Increase alpha incrementally by about 0.1 until the polygon plot corresponding to the outer coordinates is simple polygon (as opposed to a complex, self-intersecting polygon).#
+#' @param buffer.adj This argument is not yet implemented. A number between 0 and 1 that determines the size of the buffer region surrounding the points supplied by coords.#
+#' @param method A number (1, 2, or 3) determining how the output coordinates will be generated.#
+#' If method=1 (the default) produces a potentially more useful result, and uses the alpha hull of geographic regions that intersect with input coordinates. This method may be slow if input coordinates include large sampling gaps. In such cases increases the value of alpha.start.#
+#' If method=2 is similar to method 1, except that the output coordinates are only determined from the input coordinates (and buffer setting), rather than from the regions of the base map (political geography from natural earth dataset) that intersect the input coordinates. Either method should be fine for EEMS, but method 1 tends to look nicer.#
+#' If method=3 is fast and uses the minimum convex polygon of input coodinates as a starting point.#
+#' @param coords.radius Number specifying the radius (in degrees) to use around input coordinates when determining spatial intersections. Increasing the value of this parameter can be useful if coordinates are located offshore of regions outlined in basemaps (high resolution Natural Earth dataset).#
+#' @param max.fractal.dimension Value between 1 and 2 contolling the shape complexity of the polygon with the output coordinates. Values near 1 have low complexity (e.g., circles, squares), and shape complexity increases as max.fractal.dimension approaches 2. The default value 1.1 seems to work well for most cases. Ignored if method=3.#
+#' @param plot.outer Logical indicating if the points defining the output ".outer" table should be plotted in green, as well as the ".coords" (coords) points in black.#
+#' @param counter.clockwise Should the output cooordinates be ordered counterclockwise. Default is TRUE and is the required format for EEMS.#
+#' @param output.path Character string with path where to save coordinates. Default is NULL.#
+#' @result A two column numerical matrix containing the longitude and latitude of the output polygon. The matrix written to output.path can be used as the ".outer" polygon used by EEMS. A map is plotted to visualize the results.#
+create.outer <- function(coords,method=1,buffer.adj=0,coords.radius=0.01,max.fractal.dimension=1.1,plot.outer=T,counter.clockwise=T,output.path=NULL){#
+	# Function to extract the coordinates matrix (numeric mode) from a class Polygon, Polygons, SpatialPolygons, or SpatialPolygonsDataFrame object that containins a single polygon.#
+	# Do not use this function if the inout spatial object contains more than coordinates matrix.#
+	sp2coords <- function(x){#
+		if(is(x,"SpatialPolygonsDataFrame") | is(x,"SpatialPolygons")){#
+			result <- x@polygons[[1]]@Polygons[[1]]@coords#
+		}#
+		if(is(x,"Polygons")){#
+			result <- x@Polygons[[1]]@coords#
+		}#
+		if(is(x,"Polygon") | is(x,"SpatialPoints")){#
+			result <- x@coords#
+		}#
+		unname(result)#
+	}#
+	### Convert a coordinates matrix into a SpatialPolygons object in circles centered at input coordinates, and radius specified by r#
+	coords2sp.poly <- function(coords.mat,r=0.01){#
+		colnames(coords.mat) <- c("x","y")#
+		circles.list <- apply(X=coords.mat,MARGIN=1,FUN=function(x){sampSurf::spCircle(radius=r,centerPoint=x)[[1]]})#
+		res          <- do.call(raster::bind,circles.list)#
+		res#
+	}#
+	### Fractal dimension of perimeter-area relationship, a metric of polygon complexity with values from 1 (simple euclidean shapes likes squares and circles) tp approaching 2 for increasingly complex polygons.#
+	# More info: http://www.umass.edu/landeco/teaching/landscape_ecology/schedule/chapter9_metrics.pdf#
+	# Input must be a SpatialPolygons object#
+	fracD <- function(x){#
+		# area in meters squared#
+		x.area      <- geosphere::areaPolygon(x)#
+		# perimeter in meters#
+		x.perimeter <- geosphere::perimeter(x)#
+		(2*log10(x.perimeter))/(log10(x.area))#
+	}#
+	#### For a SpatialPolygonsDataFrame, extract the lowest-level polygons and hold each as a feature in a SpatialPolygons object.#
+	extract.base.polygons <- function(spdf){#
+		for(i in 1:nrow(spdf)){#
+			sp.temp <- spdf@polygons[[i]]#
+			for(j in 1:length(sp.temp@Polygons)){#
+				id.temp <- paste0(i,".",j)#
+				polygons.ij <- sp::SpatialPolygons(list(sp::Polygons(list(sp.temp@Polygons[[j]]),ID=id.temp)))#
+				if(i==1 & j==1){#
+					polygons.all <- polygons.ij#
+				} else {#
+					polygons.all <- raster::bind(polygons.all,polygons.ij)#
+				}#
+			}#
+		}#
+		### Preserve crs definition#
+		raster::crs(polygons.all) <- raster::crs(spdf)#
+		### object returned#
+		polygons.all#
+	}#
+	input.coords <- coords#
+	### Check which type of object is being supplied to coords and define coords accordingly#
+	if(is(input.coords,"character")){#
+		coords   <- data.matrix(read.table(input.coords,header=F))#
+	}#
+	if(is(input.coords,"matrix") | is(input.coords,"data.frame")){#
+		coords       <- data.matrix(input.coords)#
+		mode(coords) <- "numeric"#
+	}#
+	## High resolution global map of political regions.#
+	spdf_world_10             <- rnaturalearth::ne_countries(scale=10)#
+	## Character string defining the Coordinate Reference System (CRS) in WKT format#
+	# crs.string <- rgdal::showWKT(sp::proj4string(spdf_world_10))#
+	# crs.string <- "+init=epsg:4326 +proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0"#
+	crs.string <- "+init=EPSG:4326"#
+	wkt.string <- rgdal::showWKT(crs.string)#
+	### Define CRS using wkt format#
+	raster::crs(spdf_world_10)   <- crs.string#
+	### SpatialPoints object holding coords#
+	points.sp <- sp::SpatialPoints(coords)#
+	raster::crs(points.sp) <- crs.string#
+	### SpatialPolygons object holding circles with centerpoints at coords#
+	circles.poly <- coords2sp.poly(coords.mat=coords,r=coords.radius)#
+	raster::crs(circles.poly) <- crs.string#
+	### Spatial data frame for the map features that intersect with the input coords#
+	unique.features.at.circles <- do.call(rbind,unique(sp::over(circles.poly, spdf_world_10,returnList=T)))#
+	### spdf row indices for the unique regions in unique.features.at.circles#
+	indices_unique.features.at.circles <- which(spdf_world_10$sov_a3 %in% unique(unique.features.at.circles$sov_a3))#
+	### Corresponding SpatialPolygonsDateFrame object#
+	spdf_unique.features.at.circles <- spdf_world_10[indices_unique.features.at.circles,]#
+	### Restructuring the heirarchy of lowest-level polygons, treating them as separate features of one SpatialPolygons object.#
+	## The purpose of this is to be able to use sp::over() to search for polygons that intersect with coords.#
+	base.polygons.sp <- extract.base.polygons(spdf_unique.features.at.circles)#
+	### Get the feature indices for the polygons that intersect with circles representing input coordinates#
+	indices_polygons.at.circles <- sp::over(circles.poly,base.polygons.sp)#
+	### Check if any NA values in indices_unique.polygons.at.circles, which occurs when one more of the input circles does not intersect any polygons (i.e. they fall in the ocean).#
+	### If NAs exist, try increasing the value of r parameter of coords2sp.poly function.#
+	if(any(is.na(indices_polygons.at.circles))){#
+		problem.points <- unname(which(is.na(indices_polygons.at.circles)))#
+		stop(paste0("sample(s) coords[",paste(problem.points,collapse=" "),",]  does not intersect map. Try increasing coords.radius or remove sample(s) from input"))#
+	}#
+	### Extract polygons in base.polygons.sp that intersect circles.poly#
+	sp_unique.polygons.at.circles      <- base.polygons.sp[unique(indices_polygons.at.circles)]#
+	sp_unique.polygons.without.circles <- base.polygons.sp[-unique(indices_polygons.at.circles)]#
+	if(method %in% c(1,2)){#
+		#### Method 1 for getting maps.coords.list#
+		### Two column numerical matrix of the coordinates of polygons that intersect input points#
+		coords.polygons.with.points <- unique(round(do.call(rbind,lapply(X=1:length(sp_unique.polygons.at.circles),FUN=function(x){sp2coords(sp::polygons(sp_unique.polygons.at.circles)[x])})),digits=3))#
+		####
+		if(method==1){#
+			coords.for.alphahull <- coords.polygons.with.points#
+			#buffer.width <- ((-0.75)+buffer.adj)#
+		}#
+		if(method==2){#
+			coords.for.alphahull <- unique(coords)#
+			#buffer.width <- buffer.adj#
+		}#
+		### initiallizing the while loop#
+		alpha.lower <- 1#
+		alpha.upper <- 50#
+		i=1; areas.equal <- FALSE; alpha <- alpha.upper; alpha.tol <- 0.1#
+		### Run while loop to find a low value of alpha that also generates a simple polygon (not self-intersecting or filled with holes) when input coordinates are supplied to ahull.#
+		# A polygon is considered simple if supplying the ahull polygon to gBuffer with buffer.width=0 produces a polygon with the same area as the input polygon. This works because gBuffer produces simple polygons even if the result clips the input polygon.#
+		while(((alpha.upper-alpha.lower)>alpha.tol) & (i < 100)){#
+			hull.alpha         <- alphahull::ahull(coords.for.alphahull,alpha=alpha)#
+			hull.alpha.coords  <- rbind(hull.alpha$arcs[,1:2],hull.alpha$arcs[1,1:2])#
+			hull.alpha.sp      <- sp::SpatialPoints(hull.alpha.coords)#
+			hull.alpha.polygon <- sp::SpatialPolygons(list(sp::Polygons(list(sp::Polygon(hull.alpha.sp)),ID="alpha.hull")))#
+			if(rgeos::gIsSimple(hull.alpha.polygon)){#
+				### Test hull.alpha.polygon is simple#
+				# geosphere::areaPolygon(hull.alpha.polygon) == geosphere::areaPolygon(gBuffer(hull.alpha.polygon,width=0))#
+				### Create a polygon encompassing hull.alpha.polygon, with size determined by the value of buffer.width#
+				# Note: Do not set the crs of hull.alpha.polygon because gBuffer function would introduce distortions associated with the projection. In reality this might not be be a big deal but I'm not sure.#
+				buffer.poly        <- rgeos::gBuffer(hull.alpha.polygon,width=((-0.75)+buffer.adj))#
+				### Same as buffer.poly except points are added at midpoints of edges longer than max_distance; process repeated until all edges less than. This can make it easier to visualize the border of the output polygon, but otherwise this isnt useful.#
+				outer.poly         <- smoothr::densify(buffer.poly,max_distance=(0.25*alpha))#
+				### Run this test before switching back to Euclidean space#
+				### Set CRS of outer.poly (now we are back in Euclidean space); this must be done before using function sp::over()#
+				raster::crs(outer.poly) <- crs.string#
+				### Test that the output coordinates define a simple polygon.#
+				test.simple        <- all(c(rgeos::gIsSimple(outer.poly), rgeos::gIsSimple(hull.alpha.polygon)))#
+				### Test if all of the input points are in the output polygon#
+				test.coverage      <- (!any(is.na(sp::over(points.sp,outer.poly))))#
+			} else {#
+				test.simple   <- FALSE#
+				test.coverage <- FALSE#
+			}#
+			if(test.simple & test.coverage){#
+				alpha.upper <- min(alpha.upper,alpha)#
+			} else {#
+				alpha.lower <- max(alpha.lower,alpha)#
+			}#
+			### save a copy of the current alpha value to initialize the next while loop#
+			alpha.i <- alpha#
+			alpha   <- median(c(alpha.lower,alpha.upper))#
+			i=(i+1)#
+		}#
+		fractal.dimension  <- fracD(outer.poly)#
+		alpha          <- alpha.i#
+		while(fractal.dimension > max.fractal.dimension){#
+			alpha              <- (alpha+0.1)#
+			hull.alpha         <- alphahull::ahull(coords.for.alphahull,alpha=alpha)#
+			hull.alpha.coords  <- rbind(hull.alpha$arcs[,1:2],hull.alpha$arcs[1,1:2])#
+			hull.alpha.sp      <- sp::SpatialPoints(hull.alpha.coords)#
+			hull.alpha.polygon <- sp::SpatialPolygons(list(sp::Polygons(list(sp::Polygon(hull.alpha.sp)),ID="alpha.hull")))#
+			buffer.poly        <- rgeos::gBuffer(hull.alpha.polygon,width=((-0.75)+buffer.adj))#
+			outer.poly         <- smoothr::densify(buffer.poly,max_distance=(0.25*alpha))#
+			fractal.dimension  <- fracD(outer.poly)#
+		}#
+		raster::crs(outer.poly) <- crs.string#
+	} else {#
+		if(method==3){#
+			### Minimum convex polygon that contains the maps with points.#
+			polygons.mcp <- suppressWarnings(adehabitatHR::mcp(points.sp,percent=100))#
+			mcp.coords   <- unique(sp2coords(polygons.mcp))#
+			### Generate the alpha-hull of the polygons with points#
+			hull.alpha         <- alphahull::ahull(mcp.coords,alpha=1)#
+			hull.alpha.coords  <- rbind(hull.alpha$arcs[,1:2],hull.alpha$arcs[1,1:2])#
+			hull.alpha.sp      <- sp::SpatialPoints(hull.alpha.coords)#
+			hull.alpha.polygon <- sp::SpatialPolygons(list(sp::Polygons(list(sp::Polygon(hull.alpha.sp)),ID="alpha.hull")))#
+			buffer.width       <- (0.5+buffer.adj)#
+			### Create a polygon encompassing hull.alpha.polygon, with size determined by the value of buffer.width#
+			buffer.poly        <- rgeos::gBuffer(hull.alpha.polygon,width=buffer.width)#
+			### Same as buffer.poly except points are added at midpoints of edges longer than max_distance; process repeated until all edges less than. This can make it easier to visualize the border of the output polygon, but otherwise this isnt useful.#
+			outer.poly         <- smoothr::densify(buffer.poly,max_distance=(0.25*alpha))#
+			raster::crs(outer.poly) <- crs.string#
+		} else {#
+			stop("set method to 1, 2, or 3")#
+		}#
+	}#
+	outer     <- unname(sp2coords(outer.poly))#
+	if(counter.clockwise){#
+		outer <- cbind(rev(outer[,1]),rev(outer[,2]))#
+	}#
+	### Show the relationship between the outer coordinates, the input coordinates, and geographic regions#
+	if(plot.outer){#
+		### Turns off current graphics devices before plotting. This seems to help prevent the new plots from inheriting graphical parameters from the current device.#
+		if(!is.null(dev.list())){#
+			dev.off()#
+		}#
+		### Plots in slightly different ways depending depending on the method used.#
+		if(method %in% c(1,2)){#
+			### Plot the outer coordinates in white to define the extent#
+			plot(sp::SpatialPoints(outer),col="white")#
+			#plot(submaps.with.points.sp,add=T,col="gray90")#
+			plot(spdf_world_10,add=T)#
+			if(method==1){#
+			### Add a layer containing the regions of the basemap that include at least one point (regions in gray)#
+				plot(spdf_unique.features.at.circles,add=T,col="gray90")#
+				plot(sp_unique.polygons.without.circles,add=T,col="white")#
+			}#
+			### Add green crosshairs for output coordinates (the outer file for eems)#
+			plot(sp::SpatialPoints(outer),col="green",add=T)#
+			### Add black circles for locations of the input coordinates#
+			plot(points.sp,add=T,pch=20)#
+			### Add text/legend to show what the green crosshairs are#
+			mtext("+ = coordinates written to output.path (if set)",col="green",adj=0,line=1.5,cex=0.8)#
+			mtext(paste0("P:A fractal dimension of area inscribed by output coordinates",round(fractal.dimension,digits=3)),adj=0.1,line=0.5,cex=0.8)#
+			### Add map axes#
+			maps::map.axes()#
+		} else {#
+			plot(SpatialPoints(outer),col="white")#
+			extent.sp <- SpatialPoints(rbind(outer,coords))#
+			plot(spdf_world_10,add=T)#
+			plot(SpatialPoints(outer),col="green",add=T)#
+			plot(points.sp,add=T,pch=20)#
+			mtext("+ outer (coordinates written to output.path)",col="green",adj=0.1,line=0.25,cex=0.8)#
+			maps::map.axes()#
+		}#
+	}#
+	### Write outer file to output.path#
+	if(!is.null(output.path)){#
+		write.table(outer,output.path,row.names=F,col.names=F,sep=" ",quote=F)#
+	}#
+	### return a list including a matrix of the coordinates in the output file and a SpatialPolygons object of the output coordinates#
+	list(outer,outer.poly)#
+}
+test <- create.outer(coords="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/EEMS/EEMS_Katie/mainland_maculilabris.coord",method=2,max.fractal.dimension=1.105)
+# required packages#
+# library(sp)                 ### Used for everything#
+# library(maps)               ### map.axes function#
+# library(rgeos)              ### gBuffer and gArea function#
+# library(rgdal)              ### showWKT function#
+# library(raster)             ### crs and bind function#
+# library(smoothr)            ### densify function for adding outer points by interpolating along perimeter#
+# library(sampSurf)           ### spCircle function#
+# library(geosphere)          ### perimeter and areaPolygon functions#
+# library(alphahull)          ### ahull function#
+# library(adehabitatHR)       ### function to generate minimum convex polygon#
+# library(rnaturalearth)      ### Global geographic vectors#
+# library(rnaturalearthhires) ### high resolution data for rnaturalearth package#
+#
+#' @param coords Two column numeric matrix containing longitude and latitude of the samples in decimal degree format, or a character string with path to the input .coords file used for eems; the input file must be space separated and without a header.#
+#' @param alpha Value of alpha parameter (Default is 1). Increase alpha incrementally by about 0.1 until the polygon plot corresponding to the outer coordinates is simple polygon (as opposed to a complex, self-intersecting polygon).#
+#' @param buffer.adj This argument is not yet implemented. A number between 0 and 1 that determines the size of the buffer region surrounding the points supplied by coords.#
+#' @param method A number (1, 2, or 3) determining how the output coordinates will be generated.#
+#' If method=1 (the default) produces a potentially more useful result, and uses the alpha hull of geographic regions that intersect with input coordinates. This method may be slow if input coordinates include large sampling gaps. In such cases increases the value of alpha.start.#
+#' If method=2 is similar to method 1, except that the output coordinates are only determined from the input coordinates (and buffer setting), rather than from the regions of the base map (political geography from natural earth dataset) that intersect the input coordinates. Either method should be fine for EEMS, but method 1 tends to look nicer.#
+#' If method=3 is fast and uses the minimum convex polygon of input coodinates as a starting point.#
+#' @param coords.radius Number specifying the radius (in degrees) to use around input coordinates when determining spatial intersections. Increasing the value of this parameter can be useful if coordinates are located offshore of regions outlined in basemaps (high resolution Natural Earth dataset).#
+#' @param max.fractal.dimension Value between 1 and 2 contolling the shape complexity of the polygon with the output coordinates. Values near 1 have low complexity (e.g., circles, squares), and shape complexity increases as max.fractal.dimension approaches 2. The default value 1.1 seems to work well for most cases. Ignored if method=3.#
+#' @param plot.outer Logical indicating if the points defining the output ".outer" table should be plotted in green, as well as the ".coords" (coords) points in black.#
+#' @param counter.clockwise Should the output cooordinates be ordered counterclockwise. Default is TRUE and is the required format for EEMS.#
+#' @param output.path Character string with path where to save coordinates. Default is NULL.#
+#' @result A two column numerical matrix containing the longitude and latitude of the output polygon. The matrix written to output.path can be used as the ".outer" polygon used by EEMS. A map is plotted to visualize the results.#
+create.outer <- function(coords,method=1,buffer.adj=0,coords.radius=0.01,max.fractal.dimension=1.1,plot.outer=T,counter.clockwise=T,output.path=NULL){#
+	# Function to extract the coordinates matrix (numeric mode) from a class Polygon, Polygons, SpatialPolygons, or SpatialPolygonsDataFrame object that containins a single polygon.#
+	# Do not use this function if the inout spatial object contains more than coordinates matrix.#
+	sp2coords <- function(x){#
+		if(is(x,"SpatialPolygonsDataFrame") | is(x,"SpatialPolygons")){#
+			result <- x@polygons[[1]]@Polygons[[1]]@coords#
+		}#
+		if(is(x,"Polygons")){#
+			result <- x@Polygons[[1]]@coords#
+		}#
+		if(is(x,"Polygon") | is(x,"SpatialPoints")){#
+			result <- x@coords#
+		}#
+		unname(result)#
+	}#
+	### Convert a coordinates matrix into a SpatialPolygons object in circles centered at input coordinates, and radius specified by r#
+	coords2sp.poly <- function(coords.mat,r=0.01){#
+		colnames(coords.mat) <- c("x","y")#
+		circles.list <- apply(X=coords.mat,MARGIN=1,FUN=function(x){sampSurf::spCircle(radius=r,centerPoint=x)[[1]]})#
+		res          <- do.call(raster::bind,circles.list)#
+		res#
+	}#
+	### Fractal dimension of perimeter-area relationship, a metric of polygon complexity with values from 1 (simple euclidean shapes likes squares and circles) tp approaching 2 for increasingly complex polygons.#
+	# More info: http://www.umass.edu/landeco/teaching/landscape_ecology/schedule/chapter9_metrics.pdf#
+	# Input must be a SpatialPolygons object#
+	fracD <- function(x){#
+		# area in meters squared#
+		x.area      <- geosphere::areaPolygon(x)#
+		# perimeter in meters#
+		x.perimeter <- geosphere::perimeter(x)#
+		(2*log10(x.perimeter))/(log10(x.area))#
+	}#
+	#### For a SpatialPolygonsDataFrame, extract the lowest-level polygons and hold each as a feature in a SpatialPolygons object.#
+	extract.base.polygons <- function(spdf){#
+		for(i in 1:nrow(spdf)){#
+			sp.temp <- spdf@polygons[[i]]#
+			for(j in 1:length(sp.temp@Polygons)){#
+				id.temp <- paste0(i,".",j)#
+				polygons.ij <- sp::SpatialPolygons(list(sp::Polygons(list(sp.temp@Polygons[[j]]),ID=id.temp)))#
+				if(i==1 & j==1){#
+					polygons.all <- polygons.ij#
+				} else {#
+					polygons.all <- raster::bind(polygons.all,polygons.ij)#
+				}#
+			}#
+		}#
+		### Preserve crs definition#
+		raster::crs(polygons.all) <- raster::crs(spdf)#
+		### object returned#
+		polygons.all#
+	}#
+	input.coords <- coords#
+	### Check which type of object is being supplied to coords and define coords accordingly#
+	if(is(input.coords,"character")){#
+		coords   <- data.matrix(read.table(input.coords,header=F))#
+	}#
+	if(is(input.coords,"matrix") | is(input.coords,"data.frame")){#
+		coords       <- data.matrix(input.coords)#
+		mode(coords) <- "numeric"#
+	}#
+	## High resolution global map of political regions.#
+	spdf_world_10             <- rnaturalearth::ne_countries(scale=10)#
+	## Character string defining the Coordinate Reference System (CRS) in WKT format#
+	# crs.string <- rgdal::showWKT(sp::proj4string(spdf_world_10))#
+	# crs.string <- "+init=epsg:4326 +proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0"#
+	crs.string <- "+init=EPSG:4326"#
+	wkt.string <- rgdal::showWKT(crs.string)#
+	### Define CRS using wkt format#
+	raster::crs(spdf_world_10)   <- crs.string#
+	### SpatialPoints object holding coords#
+	points.sp <- sp::SpatialPoints(coords)#
+	raster::crs(points.sp) <- crs.string#
+	### SpatialPolygons object holding circles with centerpoints at coords#
+	circles.poly <- coords2sp.poly(coords.mat=coords,r=coords.radius)#
+	raster::crs(circles.poly) <- crs.string#
+	### Spatial data frame for the map features that intersect with the input coords#
+	unique.features.at.circles <- do.call(rbind,unique(sp::over(circles.poly, spdf_world_10,returnList=T)))#
+	### spdf row indices for the unique regions in unique.features.at.circles#
+	indices_unique.features.at.circles <- which(spdf_world_10$sov_a3 %in% unique(unique.features.at.circles$sov_a3))#
+	### Corresponding SpatialPolygonsDateFrame object#
+	spdf_unique.features.at.circles <- spdf_world_10[indices_unique.features.at.circles,]#
+	### Restructuring the heirarchy of lowest-level polygons, treating them as separate features of one SpatialPolygons object.#
+	## The purpose of this is to be able to use sp::over() to search for polygons that intersect with coords.#
+	base.polygons.sp <- extract.base.polygons(spdf_unique.features.at.circles)#
+	### Get the feature indices for the polygons that intersect with circles representing input coordinates#
+	indices_polygons.at.circles <- sp::over(circles.poly,base.polygons.sp)#
+	### Check if any NA values in indices_unique.polygons.at.circles, which occurs when one more of the input circles does not intersect any polygons (i.e. they fall in the ocean).#
+	### If NAs exist, try increasing the value of r parameter of coords2sp.poly function.#
+	if(any(is.na(indices_polygons.at.circles))){#
+		problem.points <- unname(which(is.na(indices_polygons.at.circles)))#
+		stop(paste0("sample(s) coords[",paste(problem.points,collapse=" "),",]  does not intersect map. Try increasing coords.radius or remove sample(s) from input"))#
+	}#
+	### Extract polygons in base.polygons.sp that intersect circles.poly#
+	sp_unique.polygons.at.circles      <- base.polygons.sp[unique(indices_polygons.at.circles)]#
+	sp_unique.polygons.without.circles <- base.polygons.sp[-unique(indices_polygons.at.circles)]#
+	if(method %in% c(1,2)){#
+		#### Method 1 for getting maps.coords.list#
+		### Two column numerical matrix of the coordinates of polygons that intersect input points#
+		coords.polygons.with.points <- unique(round(do.call(rbind,lapply(X=1:length(sp_unique.polygons.at.circles),FUN=function(x){sp2coords(sp::polygons(sp_unique.polygons.at.circles)[x])})),digits=3))#
+		####
+		if(method==1){#
+			coords.for.alphahull <- coords.polygons.with.points#
+			#buffer.width <- ((-0.75)+buffer.adj)#
+		}#
+		if(method==2){#
+			coords.for.alphahull <- unique(coords)#
+			#buffer.width <- buffer.adj#
+		}#
+		### initiallizing the while loop#
+		alpha.lower <- 1#
+		alpha.upper <- 50#
+		i=1; areas.equal <- FALSE; alpha <- alpha.upper; alpha.tol <- 0.1#
+		### Run while loop to find a low value of alpha that also generates a simple polygon (not self-intersecting or filled with holes) when input coordinates are supplied to ahull.#
+		# A polygon is considered simple if supplying the ahull polygon to gBuffer with buffer.width=0 produces a polygon with the same area as the input polygon. This works because gBuffer produces simple polygons even if the result clips the input polygon.#
+		while(((alpha.upper-alpha.lower)>alpha.tol) & (i < 100)){#
+			hull.alpha         <- alphahull::ahull(coords.for.alphahull,alpha=alpha)#
+			hull.alpha.coords  <- rbind(hull.alpha$arcs[,1:2],hull.alpha$arcs[1,1:2])#
+			hull.alpha.sp      <- sp::SpatialPoints(hull.alpha.coords)#
+			hull.alpha.polygon <- sp::SpatialPolygons(list(sp::Polygons(list(sp::Polygon(hull.alpha.sp)),ID="alpha.hull")))#
+			if(rgeos::gIsSimple(hull.alpha.polygon)){#
+				### Test hull.alpha.polygon is simple#
+				# geosphere::areaPolygon(hull.alpha.polygon) == geosphere::areaPolygon(gBuffer(hull.alpha.polygon,width=0))#
+				### Create a polygon encompassing hull.alpha.polygon, with size determined by the value of buffer.width#
+				# Note: Do not set the crs of hull.alpha.polygon because gBuffer function would introduce distortions associated with the projection. In reality this might not be be a big deal but I'm not sure.#
+				buffer.poly        <- rgeos::gBuffer(hull.alpha.polygon,width=((-0.75)+buffer.adj))#
+				### Same as buffer.poly except points are added at midpoints of edges longer than max_distance; process repeated until all edges less than. This can make it easier to visualize the border of the output polygon, but otherwise this isnt useful.#
+				outer.poly         <- smoothr::densify(buffer.poly,max_distance=(0.25*alpha))#
+				### Run this test before switching back to Euclidean space#
+				### Set CRS of outer.poly (now we are back in Euclidean space); this must be done before using function sp::over()#
+				raster::crs(outer.poly) <- crs.string#
+				### Test that the output coordinates define a simple polygon.#
+				test.simple        <- all(c(rgeos::gIsSimple(outer.poly), rgeos::gIsSimple(hull.alpha.polygon)))#
+				### Test if all of the input points are in the output polygon#
+				test.coverage      <- (!any(is.na(sp::over(points.sp,outer.poly))))#
+			} else {#
+				test.simple   <- FALSE#
+				test.coverage <- FALSE#
+			}#
+			if(test.simple & test.coverage){#
+				alpha.upper <- min(alpha.upper,alpha)#
+			} else {#
+				alpha.lower <- max(alpha.lower,alpha)#
+			}#
+			### save a copy of the current alpha value to initialize the next while loop#
+			alpha.i <- alpha#
+			alpha   <- median(c(alpha.lower,alpha.upper))#
+			i=(i+1)#
+		}#
+		fractal.dimension  <- fracD(outer.poly)#
+		alpha          <- alpha.i#
+		while(fractal.dimension > max.fractal.dimension){#
+			alpha              <- (alpha+0.1)#
+			hull.alpha         <- alphahull::ahull(coords.for.alphahull,alpha=alpha)#
+			hull.alpha.coords  <- rbind(hull.alpha$arcs[,1:2],hull.alpha$arcs[1,1:2])#
+			hull.alpha.sp      <- sp::SpatialPoints(hull.alpha.coords)#
+			hull.alpha.polygon <- sp::SpatialPolygons(list(sp::Polygons(list(sp::Polygon(hull.alpha.sp)),ID="alpha.hull")))#
+			buffer.poly        <- rgeos::gBuffer(hull.alpha.polygon,width=((-0.75)+buffer.adj))#
+			outer.poly         <- smoothr::densify(buffer.poly,max_distance=(0.25*alpha))#
+			fractal.dimension  <- fracD(outer.poly)#
+		}#
+		raster::crs(outer.poly) <- crs.string#
+	} else {#
+		if(method==3){#
+			### Minimum convex polygon that contains the maps with points.#
+			polygons.mcp <- suppressWarnings(adehabitatHR::mcp(points.sp,percent=100))#
+			mcp.coords   <- unique(sp2coords(polygons.mcp))#
+			### Generate the alpha-hull of the polygons with points#
+			hull.alpha         <- alphahull::ahull(mcp.coords,alpha=1)#
+			hull.alpha.coords  <- rbind(hull.alpha$arcs[,1:2],hull.alpha$arcs[1,1:2])#
+			hull.alpha.sp      <- sp::SpatialPoints(hull.alpha.coords)#
+			hull.alpha.polygon <- sp::SpatialPolygons(list(sp::Polygons(list(sp::Polygon(hull.alpha.sp)),ID="alpha.hull")))#
+			buffer.width       <- (0.5+buffer.adj)#
+			### Create a polygon encompassing hull.alpha.polygon, with size determined by the value of buffer.width#
+			buffer.poly        <- rgeos::gBuffer(hull.alpha.polygon,width=buffer.width)#
+			### Same as buffer.poly except points are added at midpoints of edges longer than max_distance; process repeated until all edges less than. This can make it easier to visualize the border of the output polygon, but otherwise this isnt useful.#
+			outer.poly         <- smoothr::densify(buffer.poly,max_distance=(0.25*alpha))#
+			raster::crs(outer.poly) <- crs.string#
+		} else {#
+			stop("set method to 1, 2, or 3")#
+		}#
+	}#
+	outer     <- unname(sp2coords(outer.poly))#
+	if(counter.clockwise){#
+		outer <- cbind(rev(outer[,1]),rev(outer[,2]))#
+	}#
+	### Show the relationship between the outer coordinates, the input coordinates, and geographic regions#
+	if(plot.outer){#
+		### Turns off current graphics devices before plotting. This seems to help prevent the new plots from inheriting graphical parameters from the current device.#
+		if(!is.null(dev.list())){#
+			dev.off()#
+		}#
+		### Plots in slightly different ways depending depending on the method used.#
+		if(method %in% c(1,2)){#
+			### Plot the outer coordinates in white to define the extent#
+			plot(sp::SpatialPoints(outer),col="white")#
+			#plot(submaps.with.points.sp,add=T,col="gray90")#
+			plot(spdf_world_10,add=T)#
+			if(method==1){#
+			### Add a layer containing the regions of the basemap that include at least one point (regions in gray)#
+				plot(spdf_unique.features.at.circles,add=T,col="gray90")#
+				plot(sp_unique.polygons.without.circles,add=T,col="white")#
+			}#
+			### Add green crosshairs for output coordinates (the outer file for eems)#
+			plot(sp::SpatialPoints(outer),col="green",add=T)#
+			### Add black circles for locations of the input coordinates#
+			plot(points.sp,add=T,pch=20)#
+			### Add text/legend to show what the green crosshairs are#
+			mtext("+ = coordinates written to output.path (if set)",col="green",adj=0,line=1.5,cex=0.8)#
+			mtext(paste0("P:A fractal dimension of area inscribed by output coordinates",round(fractal.dimension,digits=3)),adj=0,line=0.5,cex=0.8)#
+			### Add map axes#
+			maps::map.axes()#
+		} else {#
+			plot(SpatialPoints(outer),col="white")#
+			extent.sp <- SpatialPoints(rbind(outer,coords))#
+			plot(spdf_world_10,add=T)#
+			plot(SpatialPoints(outer),col="green",add=T)#
+			plot(points.sp,add=T,pch=20)#
+			mtext("+ outer (coordinates written to output.path)",col="green",adj=0.1,line=0.25,cex=0.8)#
+			maps::map.axes()#
+		}#
+	}#
+	### Write outer file to output.path#
+	if(!is.null(output.path)){#
+		write.table(outer,output.path,row.names=F,col.names=F,sep=" ",quote=F)#
+	}#
+	### return a list including a matrix of the coordinates in the output file and a SpatialPolygons object of the output coordinates#
+	list(outer,outer.poly)#
+}
+test <- create.outer(coords="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/EEMS/EEMS_Katie/mainland_maculilabris.coord",method=2,max.fractal.dimension=1.105)
+?ploidy()
+dev.off()
+my.name <- readline(prompt="Enter name: ")
+my.name
+response <- readline(prompt="Write result to output.path? Enter 'yes' or 'no'")
+user.response <- readline(prompt="Write result to output.path? Enter 'yes' or 'no': ")
+user.response <- readline(prompt="Write result to output.path? Enter 'yes' or 'no': ")
+user.response <- readline(prompt="Write result to output.path? Enter 'yes' or 'no': ")
+user.response
+user.response2 <- readline(prompt="Write result to output.path? Enter 'yes' or 'no': ")
+user.response2
+exists(user.response2)
+exists(user.response)
+exists("user.response")
+exists("user.response2")
+user.response <- readline(prompt="Write result to output.path? yes/no: )
+user.response <- readline(prompt="Write result to output.path? yes/no: ")
+user.response %in% c("yes","no")
+user.response == "yes"
+library(devtools)
+setwd("Documents/misc.wrappers")
+devtools::document()
+devtools::document()
+devtools::document()
+library(rEEMSplots)
+BiocManager::install("dipetkov/eems/tree/master/plotting/rEEMSplots")
+BiocManager::install_github("dipetkov/eems/tree/master/plotting/rEEMSplots")
+remotes::install_github("dipetkov/eems/tree/master/plotting/rEEMSplots")
+devtools::document()
+devtools::document()
+devtools::document()
+devtools::document()
+devtools::document()
+devtools::document()
+devtools::document()
+devtools::document()
+devtools::document()
+devtools::document()
+BiocManager::install("JeffWeinell/misc.wrappers",auth_token="323d9e4cd00247a39a805dbb66f37db6403cfb8b")
+remotes::install_github("r-lib/rappdirs")
+library(rappdirs)
+config.dir <- user_config_dir(appname="eemswrapper")
+config.name
+config.dir
+list.files("~/Library/Application Support/")
+user_config_dir()
+list.files("/panfs/pfs.local/home/j926w878/programs/eems-master/")
+list.files("/Users/alyssaleinweber/Documents/eems-master")
+runeems_snps.exe.path <- paste0(eems_master.dirpath,"/runeems_snps/src/runeems_snps")
+eems_master.dirpath <- ""/panfs/pfs.local/home/j926w878/programs/eems-master/"
+eems_master.dirpath <- "/panfs/pfs.local/home/j926w878/programs/eems-master/
+eems_master.dirpath <- "/panfs/pfs.local/home/j926w878/programs/eems-master/"
+runeems_snps.exe.path <- paste0(eems_master.dirpath,"/runeems_snps/src/runeems_snps")
+runeems_snps.exe.path
+file.exists(runeems_snps.exe.path)
+runeems_snps.exe.path <- paste0(eems_master.dirpath,"/runeems_snps/src/runeems_snps")
+file.exists(runeems_snps.exe.path)
+eems_master.dirpath
+eems_master.dirpath <- "/Users/alyssaleinweber/Documents/eems-master"
+eems_master.dirpath
+runeems_snps.exe.path <- paste0(eems_master.dirpath,"/runeems_snps/src/runeems_snps")
+file.exists(runeems_snps.exe.path)
+packageVersion('misc.wrappers')
+packageVersion('misc.wrappers')
+user_config_dir(appname, appauthor)
+user_config_dir("R_misc_wrappers", appauthor)
+user_config_dir("R_misc_wrappers", version=packageVersion('misc.wrappers'))
+getwd()
+devtools::document()
+!check.if.executable(runeems_snps.exe.path)
+check.if.executable(runeems_snps.exe.path)
+check.if.executable(runeems_snps.exe.path)
+runeems_snps.exe.path
+check.if.executable <- function(exe.path){#
+	res <- system(paste("command -v",paste0("'",exe.path,"'"),">/dev/null 2>&1 || { echo >&2 ''; exit 1; }"))#
+	res#
+}
+check.if.executable(runeems_snps.exe.path)
+devtools::document()
+rm(list = c("check.if.executable"))
+devtools::document()
+!check.if.executable(runeems_snps.exe.path)
+check.if.executable(runeems_snps.exe.path)
+!(check.if.executable(runeems_snps.exe.path)==0)
+check.if.executable(runeems_snps.exe.path)!=0
+runeems_snps.exe.path
+exe.path <- runeems_snps.exe.path
+exe.paths <- c("/Users/alyssaleinweber/Documents/eems-master/runeems_snps/src/runeems_snps","/Users/alyssaleinweber/Documents/eems-master/bed2diffs/src/bed2diffs")
+files.exist <- sapply(exe.paths,FUN=file.exists)
+files.exist
+!all(files.exist)
+all(files.exist)
+files.executable <- sapply(exe.paths,FUN=check.if.executable)
+files.executable
+which(files.executable!=0)
+exe.paths[which(files.executable!=0)]
+paste0(exe.paths[which(files.executable!=0)]," not executable")
+paste0("not executable: ",exe.paths[which(files.executable!=0)])
+warning(paste0("not executable: ",exe.paths[which(files.executable!=0)]))
+eems.settings.dir <- user_config_dir("R_misc_wrappers", version=packageVersion("misc.wrappers"))
+eems.settings.dir
+settings.dir <- user_config_dir("R_misc_wrappers", version=packageVersion("misc.wrappers"))
+settings.dir
+list.files(settings.dir)
+dir.exists(settings.dir)
+Sys.info()["sysname"]
+settings.dir
+directory <- settings.dir
+.Platform$OS.type
+.Platform$OS.type!="windows"
+.Platform$OS.type!="unix"
+path.expand(directory)
+path.expand(directory)
+directory
+user_config_dir("R_misc_wrappers", version=packageVersion("misc.wrappers"))
+path.expand(user_config_dir("R_misc_wrappers", version=packageVersion("misc.wrappers")))
+settings.dir <- path.expand(user_config_dir("R_misc_wrappers", version=packageVersion("misc.wrappers")))
+settinfs.dir
+settings.dir
+directory <- settings.dir
+if(.Platform$OS.type!="windows"){#
+		system(paste0("mkdir -p ",directory))#
+	}
+?dir.create()
+dir.create(settings.dir,recursive=T)
+list.files(settings.dir)
+is.null(list.files(settings.dir))
+length(list.files(settings.dir)==0)
+length(list.files(settings.dir))==0
+length(list.files(settings.dir))
+basename(exe.paths)
+cbind(basename(exe.paths),exe.paths)
+settings.dir
+settings.file <- paste0(settings.dir,"/exepaths.txt")
+settings.file
+file.exists(settings.file)
+settings.mat  <- cbind(basename(exe.paths),exe.paths)
+settings.mat
+write.table(settings.mat,settings.file,col.names=F,row.names=F,quote=F)
+current.settings.mat <- read.table(settings.file,sep=" ")
+current.settings.mat
+write.table(settings.mat,settings.file,col.names=F,row.names=F,quote=T)
+current.settings.mat
+current.settings.mat <- read.table(settings.file,sep=" ")
+current.settings.mat
+colnames(settings.mat) <- c("program","exe_path")
+write.table(settings.mat,settings.file,col.names=T,row.names=F,quote=T)
+current.settings.mat <- read.table(settings.file,sep=" ",header=T)
+current.settings.mat
+current.settings.mat <- cbind(current.settings.mat,rep(1,nrow(current.settings.mat)))
+current.settings.mat
+current.settings.mat <- cbind(current.settings.mat,version=rep(1,nrow(current.settings.mat)))
+current.settings.mat
+current.settings.mat <- read.table(settings.file,sep=" ",header=T)
+current.settings.mat <- cbind(current.settings.mat,version=rep(0,nrow(current.settings.mat)))
+current.settings.mat
+add.settings.mat     <- cbind(settings.mat,version=rep(1,nrow(settings.mat)))
+add.settings.mat
+settings.mat
+class(current.settings.mat)
+rbind(current.settings.mat,add.settings.mat)
+current.settings.mat <- read.table(settings.file,sep=" ",header=T)#
+		current.settings.mat <- cbind(current.settings.mat,path.version=rep(0,nrow(current.settings.mat)))#
+		add.settings.mat     <- cbind(settings.mat,path.version=rep(1,nrow(settings.mat)))#
+		rbind(current.settings.mat,add.settings.mat)
+combined.settings.mat <- rbind(current.settings.mat,add.settings.mat)
+class(combined.settings.mat)
+order(combined.settings.mat[,"program"])
+c(order(combined.settings.mat[,"program"]), order(combined.settings.mat[,"path.version"],decreasing=T))
+order(combined.settings.mat[,"program"],combined.settings.mat[,"path.version"])
+order(combined.settings.mat[,"program"],combined.settings.mat[,"path.version"],decreasing=T)
+combined.settings.mat.order <- [order(combined.settings.mat[,"program"],combined.settings.mat[,"path.version"],decreasing=T),]
+combined.settings.mat.order <- combined.settings.mat[order(combined.settings.mat[,"program"],combined.settings.mat[,"path.version"],decreasing=T),]
+combined.settings.mat.order
+unique(combined.settings.mat[,"program"])
+match(unique(combined.settings.mat.order[,"program"]),combined.settings.mat.order[,"program"])
+use.settings.mat <- combined.settings.mat.order[match(unique(combined.settings.mat.order[,"program"]),combined.settings.mat.order[,"program"]),]
+use.settings.mat
+use.settings.mat <- combined.settings.mat.order[match(unique(combined.settings.mat.order[,"program"]),combined.settings.mat.order[,"program"]),c(1:2)]
+use.settings.mat
+write.table(use.settings.mat,settings.file,col.names=T,row.names=F,quote=T)
+write.table(use.settings.mat[1,],settings.file,col.names=T,row.names=F,quote=T)
+current.settings.mat  <- read.table(settings.file,sep=" ",header=T)
+current.settings.mat
+settings.file  <- paste0(path.expand(user_config_dir("R_misc_wrappers", version=packageVersion("misc.wrappers"))),"/exepaths.txt")
+settings.file
+settings.mat  <- read.table(settings.file,sep=" ",header=T)
+settings.mat
+programs <- c("runeems_snps","bed2diffs")
+programs %in% settings.mat[,"program"]
+settings.mat[,"program"] %in% programs
+any(settings.mat[,"program"] %in% programs)
+if(any(settings.mat[,"program"] %in% programs)){#
+			paths.defined   <- settings.mat[(settings.mat[,"program"] %in% programs),]#
+		}
+paths.defined
+paths.undefined <- setdiff(programs,settings.mat[,"program"])
+setdiff(programs,settings.mat[,"program"])
+paths.defined
+paths.defined <- settings.mat[(settings.mat[,"program"] %in% programs),"exe_path"]
+paths.defined
+paths.defined.mat <- settings.mat[(settings.mat[,"program"] %in% programs),"exe_path"]#
+			paths.defined <- paths.defined.mat[,"exe_path"]#
+			names(paths.defined) <- paths.defined.mat[,"program"]
+paths.defined.mat    <- settings.mat[(settings.mat[,"program"] %in% programs),"exe_path"]
+paths.defined.mat
+paths.defined.mat    <- settings.mat[(settings.mat[,"program"] %in% programs),]
+paths.defined.mat
+paths.defined        <- paths.defined.mat[,"exe_path"]
+paths.defined
+names(paths.defined) <- paths.defined.mat[,"program"]
+paths.defined
+length(paths.undefined)!=0
+paths.undefined
+NAstring <- rep(NA,length(paths.undefined))
+NAstring
+colnames(paths.undefined) <- paths.undefined
+names(paths.undefined) <- paths.undefined
+paths.undefined
+names(NAstring) <- paths.undefined
+NAstring
+devtools::document()
+devtools::document()
+devtools::document()
+devtools::document()
+devtools::document()
+devtools::document()
+exepaths_miscwrappers("runeems_snps")
+exepaths_miscwrappers("runeems_sats")
+exe.path
+exe.path=NULL
+if(is.null(exe.path)){#
+		exe.path <- exepaths_miscwrappers("runeems_snps")#
+		if(is.na(exe.path)){#
+			"exe.path is NULL but has not been defined previously. Use config_miscwrappers function to define the full path to the runeems_snps executable")#
+		}#
+	}
+is.na(exe.path)
+if(is.null(exe.path)){#
+		exe.path <- exepaths_miscwrappers("runeems_snps")#
+		if(is.na(exe.path)){#
+			stop("exe.path is NULL and runeems_snps has not been defined previously. Use config_miscwrappers function to define the full path to the runeems_snps executable")#
+		}#
+	}
+if(is.null(exe.path)){#
+		exe.path <- exepaths_miscwrappers("runeems_snps")#
+		if(is.na(exe.path)){#
+			warning("exe.path is NULL and runeems_snps has not been defined previously. Use config_miscwrappers function to define the full path to the runeems_snps executable")#
+		}#
+	}
+if(is.null(exe.path)){#
+		exe.path <- exepaths_miscwrappers("runeems_sats")#
+		if(is.na(exe.path)){#
+			stop("exe.path is NULL and runeems_snps has not been defined previously. Use config_miscwrappers function to define the full path to the runeems_snps executable")#
+		}#
+	}
+if(is.null(exe.path)){#
+		exe.path <- exepaths_miscwrappers("runeems_sats")#
+		if(is.na(exe.path)){#
+			warning("exe.path is NULL and runeems_snps has not been defined previously. Use config_miscwrappers function to define the full path to the runeems_snps executable")#
+		}#
+	}
+exe.path=NULL
+if(is.null(exe.path)){#
+		exe.path <- exepaths_miscwrappers("runeems_sats")#
+		if(is.na(exe.path)){#
+			warning("exe.path is NULL and runeems_snps has not been defined previously. Use config_miscwrappers function to define the full path to the runeems_snps executable")#
+		}#
+	}

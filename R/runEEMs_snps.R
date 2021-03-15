@@ -1,10 +1,10 @@
-#' @title runEEMs function
+#' @title runEEMs_snps function
 #' 
 #' 
 #' Wrapper function for running EEMS. Optionally generates the '*.outer' file from the '*.coords' file automatically.
 #' 
 #' 
-#' @param eems.exe.path Character string with path to eems executable.
+#' @param exe.path Character string with path to runeems_snps executable, or NULL (the default) if you've defined the EEMS path with the function config_miscwrappers. Use paths_misc.wrappers() to check if this path has been set.
 #' @param input.data An object of class genind or vcfR, or a character string with path to a diffs file.
 #' @param coord Character string with path to coordinates file, which has two columns with longitude and latitude coordinates (decimal degree format) of individuals in the genind object. Columns should be space separated.
 #' @param outer Either NULL (the default) or a character string with path to the '*.outer' file, which has two columns with longitude and latitude coordinates (decimal degree format) defining the perimeter of a polygon covering the region to model with EEMS. See EEMS documentation.
@@ -30,11 +30,17 @@
 #' @param nchains Number of chains to run. Default is 3.
 #' @param setup.only If the function should setup data, parameters, and output directories but not run EEMS. Default is TRUE
 #' @return Nothing is returned.
-#' @export runEEMs
-runEEMs <- function(eems.exe.path, input.data, coord, outer=NULL, ask.use.outer=T, data.type="diffs", output.dirpath, n.sites, ploidy=2, nDemes=300, numMCMCIter = 10000000, numBurnIter = 1000000, numThinIter = 9999, nchains=3, setup.only=T){
+#' @export runEEMs_snps
+runEEMs_snps <- function(exe.path=NULL, input.data, coord, outer=NULL, ask.use.outer=T, data.type="diffs", output.dirpath, n.sites, ploidy=2, nDemes=300, numMCMCIter = 10000000, numBurnIter = 1000000, numThinIter = 9999, nchains=3, setup.only=T){
  # data.dirname <- paste0(sample(c(letters,LETTERS,0:9),size=10,replace=T),collapse="")
  # data.dirpath <- paste0(tempdir(),"/",data.dirname)
  # dir.create(data.dirpath)
+	if(is.null(exe.path)){
+		exe.path <- exepaths_miscwrappers("runeems_snps")
+		if(is.na(exe.path)){
+			stop("exe.path is NULL and runeems_snps has not been defined previously. Use config_miscwrappers function to define the full path to the runeems_snps executable")
+		}
+	}
 	input.data <- data
 	if(dir.exists(output.dirpath)){
 		stop(paste("Output directory:",output.dirpath,"already exists. Use a new output.dirpath"))
@@ -137,13 +143,13 @@ runEEMs <- function(eems.exe.path, input.data, coord, outer=NULL, ask.use.outer=
 		param.lines <- c(L1,L2,L3,L4,L5,L6,L7,L8,L9)
 		writeLines(param.lines,params.files.path[i])
 	}
-	command.write <- c("#!/bin/bash",paste(eems.exe.path,"--params",params.files.path))
+	command.write <- c("#!/bin/bash",paste(exe.path,"--params",params.files.path))
 	writeLines(command.write,paste0(output.dirpath,"/runeems_snps.sh"))
 	if(!setup.only){
 		command.exe   <- gsub(" & $","",paste(command.write,collapse=" & "))
 		system(command.exe)
 	}
-} ### End runEEMs function
+} ### End runEEMs_snps function
 
 
 
