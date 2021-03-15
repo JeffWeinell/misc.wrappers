@@ -43,7 +43,7 @@ runEEMs_snps <- function(exe.path=NULL, input.data, coord, outer=NULL, ask.use.o
 	input.data <- data
 	if(dir.exists(output.dirpath)){
 		command.to.remove.directory <- paste0("unlink(",output.dirpath,",recursive=T)")
-		stop(paste("Output directory:",output.dirpath,"already exists. Use a new output.dirpath or run '' "))
+		stop(paste("Output directory:",output.dirpath,"already exists. Use a new output.dirpath or run '",command.to.remove.directory,"'"))
 	} else {
 		dir.create(output.dirpath)
 	}
@@ -104,9 +104,9 @@ runEEMs_snps <- function(exe.path=NULL, input.data, coord, outer=NULL, ask.use.o
 	### Check if input.data is an object of class genind
 	if(is(input.data,"genind")){
 		data.diffs <- misc.wrappers::genind2diffs(genind.obj=input.data,output.file=paste0(input.dirpath,"/data.diffs"))
-		diffs      <- data.diffs["diffs"]
-		nIndiv     <- c(data.diffs["nIndiv"])
-		nSites     <- data.diffs["nSites"]
+		diffs      <- data.diffs[["diffs"]]
+		nIndiv     <- c(data.diffs[["nIndiv"]])
+		nSites     <- data.diffs[["nSites"]]
 	} else {
 		# stop("input.data must be an object of class 'vcfR' or 'genind'")
 		if(is(input.data,"character")){
@@ -118,6 +118,7 @@ runEEMs_snps <- function(exe.path=NULL, input.data, coord, outer=NULL, ask.use.o
 				diffs      <- data.diffs[["diffs"]]
 				nIndiv     <- data.diffs[["nIndiv"]]
 				nSites     <- data.diffs[["nSites"]]
+				file.exists()
 			} else {
 				data.diffs <- read.table(input.data,sep=" ",header=F)
 				### Check that the diffs file has the correct dimmensions

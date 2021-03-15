@@ -241,13 +241,13 @@ create.outer <- function(coords,method=1,buffer.adj=0,coords.radius=0.01,max.fra
 	if(!is.null(output.path)){
 		# If ask.use and plot.outer are both TRUE, then prompt the user to confirm that they want to write the outer coordinates to output.path.
 		if(ask.use & plot.outer){
-			user.response <- readline(prompt="Write result to output.path? yes/no: ")
+			user.response <- readline(prompt="Use outer habitat coordinates? (yes/no): ")
 			if(user.response %in% c("yes","no")){
 				if(user.response == "yes"){
 					write.table(outer,output.path,row.names=F,col.names=F,sep=" ",quote=F)
 				}
 			} else {
-				stop("aborting. unrecognized response to promt; expected yes/no response")
+				stop("aborting. unrecognized response to promt; expected (yes/no) response")
 			}
 		} else {
 			write.table(outer,output.path,row.names=F,col.names=F,sep=" ",quote=F)
