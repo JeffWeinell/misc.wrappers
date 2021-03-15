@@ -28,9 +28,10 @@
 #' @param numThinIter Number of iterations to ignore before sampling the next MCMC iteration. Default is 9999. This can be a single number or a numeric vector of length nchains.
 #' @param nchains Number of chains to run. Default is 3.
 #' @param setup.only If the function should setup data, parameters, and output directories but not run EEMS. Default is TRUE
+#' @param ... Arguments to pass to create.outer. See ?create.outer() for a possibly arguments and values.
 #' @return Nothing is returned.
 #' @export runEEMs_snps
-runEEMs_snps <- function(output.dirpath, data, coord, outer=NULL, exe.path=NULL, ask.use.outer=TRUE, n.sites=NULL, pl=2, nDemes=300, numMCMCIter = 10000000, numBurnIter = 1000000, numThinIter = 9999, nchains=3, setup.only=TRUE){
+runEEMs_snps <- function(output.dirpath, data, coord, outer=NULL, exe.path=NULL, ask.use.outer=TRUE, n.sites=NULL, pl=2, nDemes=300, numMCMCIter = 10000000, numBurnIter = 1000000, numThinIter = 9999, nchains=3, setup.only=TRUE,...){
  # data.dirname <- paste0(sample(c(letters,LETTERS,0:9),size=10,replace=T),collapse="")
  # data.dirpath <- paste0(tempdir(),"/",data.dirname)
  # dir.create(data.dirpath)
@@ -75,6 +76,8 @@ runEEMs_snps <- function(output.dirpath, data, coord, outer=NULL, exe.path=NULL,
 			numThinIter = rep(numThinIter,nchains)
 		}
 	}
+	### Set the additional arguments list.
+	additional.args <- list(...)
 	### Set input.data equal to data argument
 	input.data <- data
 	### Create directories in output.dirpath to hold a copy of the input (data) files, parameter files, and mcmc output
@@ -136,7 +139,7 @@ runEEMs_snps <- function(output.dirpath, data, coord, outer=NULL, exe.path=NULL,
 	if(!is.null(outer)){
 		system(paste("cp",outer,paste0(input.dirpath,"/data.outer")))
 	} else {
-		data_outer <- misc.wrappers::create.outer(coords=coord,plot.outer=ask.use.outer,ask.use=ask.use.outer,output.path=paste0(input.dirpath,"/data.outer"))
+		data_outer <- misc.wrappers::create.outer(coords=coord,plot.outer=ask.use.outer,ask.use=ask.use.outer,output.path=paste0(input.dirpath,"/data.outer"),additional.args)
 	}
 	### Generate diffs file, saving to input.dirpath with name "data.diffs"
 	# data.diffs <- genind2diffs(genind.obj=genind,output.file=paste0(input.dirpath,"/data.diffs"))
@@ -163,7 +166,9 @@ runEEMs_snps <- function(output.dirpath, data, coord, outer=NULL, exe.path=NULL,
 		command.exe   <- gsub(" & $","",paste(command.write,collapse=" & "))
 		system(command.exe)
 	} else {
-		return(paste("Analysis setup complete. To begin, run bash script:",output.dirpath))
+		print(paste0("Analysis setup complete. To begin, run bash script: '",output.dirpath,"/runeems_snps.sh'"))
 	}
+	return(paste0(output.dirpath,"/runeems_snps.sh"))
 } ### End runEEMs_snps function
+
 

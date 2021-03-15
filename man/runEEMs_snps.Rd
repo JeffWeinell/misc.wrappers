@@ -20,7 +20,8 @@ runEEMs_snps(
   numBurnIter = 1e+06,
   numThinIter = 9999,
   nchains = 3,
-  setup.only = TRUE
+  setup.only = TRUE,
+  ...
 )
 }
 \arguments{
@@ -61,6 +62,8 @@ If you don't want to use the automatically generated *.outer file, you can creat
 \item{nchains}{Number of chains to run. Default is 3.}
 
 \item{setup.only}{If the function should setup data, parameters, and output directories but not run EEMS. Default is TRUE}
+
+\item{...}{Arguments to pass to create.outer. See ?create.outer() for a possibly arguments and values.}
 }
 \value{
 Nothing is returned.
