@@ -41,7 +41,7 @@ runEEMs_snps <- function(output.dirpath, data, coord, outer=NULL, exe.path=NULL,
 		}
 	}
 	if(dir.exists(output.dirpath)){
-		command.to.remove.directory <- paste0("unlink(",output.dirpath,",recursive=T)")
+		command.to.remove.directory <- paste0("unlink('",output.dirpath,"',recursive=T)")
 		stop(paste("Output directory:",output.dirpath,"already exists. Use a new output.dirpath or run '",command.to.remove.directory,"'"))
 	} else {
 		dir.create(output.dirpath)
@@ -162,8 +162,8 @@ runEEMs_snps <- function(output.dirpath, data, coord, outer=NULL, exe.path=NULL,
 	if(!setup.only){
 		command.exe   <- gsub(" & $","",paste(command.write,collapse=" & "))
 		system(command.exe)
+	} else {
+		return(paste("Analysis setup complete. To begin, run bash script:",output.dirpath))
 	}
 } ### End runEEMs_snps function
-
-
 

@@ -1,129 +1,3 @@
-test <- spTransform(spdf_world_10,crs.string)
-wkt(spdf_world_10)
-wkt(spdf_world_10) <- crs.string
-spdf_world_10             <- rnaturalearth::ne_countries(scale=10)
-wkt(spdf_world_10)
-?CRS()
-CRS(spdf_world_10)
-spdf_world_10             <- rnaturalearth::ne_countries(scale=10)
-CRS(spdf_world_10)
-crs(spdf_world_10)
-"+init=epsg:4326 +proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0"
-crs.string <- "+init=epsg:4326 +proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0"
-raster::crs(spdf_world_10)   <- crs.string
-class(spdf_world_10)
-class(rnaturalearth::ne_countries(scale=10))
-crs(spdf_world_10)
-update.packages("sp")
-CRS(4326)
-CRS("4326")
-CRS("EPSG:4326")
-crs(spdf_world_10) <- "+init=EPSG:4326"
-crs(spdf_world_10)
-spdf_world_10             <- rnaturalearth::ne_countries(scale=10)#
-	## Character string defining the Coordinate Reference System (CRS) in WKT format#
-	# crs.string <- rgdal::showWKT(sp::proj4string(spdf_world_10))#
-	# crs.string <- "+init=epsg:4326 +proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0"#
-	crs.string <- "+init=EPSG:4326"#
-	### Define CRS using wkt format#
-	raster::crs(spdf_world_10)   <- crs.string
-points.sp <- sp::SpatialPoints(coords)#
-	raster::crs(points.sp) <- crs.string#
-	### SpatialPolygons object holding circles with centerpoints at coords#
-	circles.poly <- coords2sp.poly(coords.mat=coords,r=coords.radius)#
-	raster::crs(circles.poly) <- crs.string#
-	### Spatial data frame for the map features that intersect with the input coords#
-	unique.features.at.circles <- do.call(rbind,unique(sp::over(circles.poly, spdf_world_10,returnList=T)))#
-	### spdf row indices for the unique regions in unique.features.at.circles#
-	indices_unique.features.at.circles <- which(spdf_world_10$sov_a3 %in% unique(unique.features.at.circles$sov_a3))#
-	### Corresponding SpatialPolygonsDateFrame object#
-	spdf_unique.features.at.circles <- spdf_world_10[indices_unique.features.at.circles,]#
-	### Restructuring the heirarchy of lowest-level polygons, treating them as separate features of one SpatialPolygons object.#
-	## The purpose of this is to be able to use sp::over() to search for polygons that intersect with coords.#
-	base.polygons.sp <- extract.base.polygons(spdf_unique.features.at.circles)#
-	### Get the feature indices for the polygons that intersect with circles representing input coordinates#
-	indices_polygons.at.circles <- sp::over(circles.poly,base.polygons.sp)#
-	### Check if any NA values in indices_unique.polygons.at.circles, which occurs when one more of the input circles does not intersect any polygons (i.e. they fall in the ocean).#
-	### If NAs exist, try increasing the value of r parameter of coords2sp.poly function.#
-	if(any(is.na(indices_polygons.at.circles))){#
-		problem.points <- unname(which(is.na(indices_polygons.at.circles)))#
-		stop(paste0("sample(s) coords[",paste(problem.points,collapse=" "),",]  does not intersect map. Try increasing coords.radius or remove sample(s) from input"))#
-	}
-sp_unique.polygons.at.circles      <- base.polygons.sp[unique(indices_polygons.at.circles)]#
-	sp_unique.polygons.without.circles <- base.polygons.sp[-unique(indices_polygons.at.circles)]
-crs(sp_unique.polygons.at.circles)
-coords.polygons.with.points <- unique(round(do.call(rbind,lapply(X=1:length(sp_unique.polygons.at.circles),FUN=function(x){sp2coords(sp::polygons(sp_unique.polygons.at.circles)[x])})),digits=3))
-if(method==1){#
-			coords.for.alphahull <- coords.polygons.with.points#
-			#buffer.width <- ((-0.75)+buffer.adj)#
-		}#
-		if(method==3){#
-			coords.for.alphahull <- unique(coords)#
-			#buffer.width <- buffer.adj#
-		}
-alpha.lower <- 1#
-		alpha.upper <- 50#
-		i=1; areas.equal <- FALSE; alpha <- alpha.upper; alpha.tol <- 0.1
-hull.alpha         <- alphahull::ahull(coords.for.alphahull,alpha=alpha)#
-			hull.alpha.coords  <- rbind(hull.alpha$arcs[,1:2],hull.alpha$arcs[1,1:2])#
-			hull.alpha.sp      <- sp::SpatialPoints(hull.alpha.coords)#
-			hull.alpha.polygon <- sp::SpatialPolygons(list(sp::Polygons(list(sp::Polygon(hull.alpha.sp)),ID="alpha.hull")))
-crs(hull.alpha.polygon)
-raster::crs(hull.alpha.polygon) <- crs.string
-crs(hull.alpha.polygon)
-buffer.poly        <- rgeos::gBuffer(hull.alpha.polygon,width=((-0.75)+buffer.adj))
-alpha
-crs(buffer.poly)
-plot(buffer.poly)
-outer.poly         <- smoothr::densify(buffer.poly,max_distance=(0.25*alpha))
-plot(outer.poly,add=T,border="red")
-raster::crs(outer.poly)
-plot(points.sp,add=T,pch=20)
-alpha <- 2
-hull.alpha         <- alphahull::ahull(coords.for.alphahull,alpha=alpha)#
-			hull.alpha.coords  <- rbind(hull.alpha$arcs[,1:2],hull.alpha$arcs[1,1:2])#
-			hull.alpha.sp      <- sp::SpatialPoints(hull.alpha.coords)#
-			hull.alpha.polygon <- sp::SpatialPolygons(list(sp::Polygons(list(sp::Polygon(hull.alpha.sp)),ID="alpha.hull")))#
-			### Set CRS of hull.alpha.polygon#
-			raster::crs(hull.alpha.polygon) <- crs.string#
-			#buffer.poly0       <- rgeos::gBuffer(hull.alpha.polygon,width=0)#
-			### Create a polygon encompassing hull.alpha.polygon, with size determined by the value of buffer.width#
-			# Note: this may generate a warning while alpha is large enough that some polygon points fall off the global map. This is okay though, because alpha will be refined.#
-			buffer.poly        <- rgeos::gBuffer(hull.alpha.polygon,width=((-0.75)+buffer.adj))
-CRS(buffer.poly)
-proj4string(buffer.poly)
-proj4string(spdf_world_10)
-crs(buffer.poly)
-showWKT(crs(buffer.poly))
-rgdal::showWKT(sp::proj4string(crs.string))
-rgdal::showWKT(crs.string)
-?CRS()
-?geosphere::destPoint()
-hull.alpha.polygon <- sp::SpatialPolygons(list(sp::Polygons(list(sp::Polygon(hull.alpha.sp)),ID="alpha.hull")))
-crs(hull.alpha.polygon)
-buffer.poly        <- rgeos::gBuffer(hull.alpha.polygon,width=((-0.75)+buffer.adj))
-library(devtools)
-devtools::install_github("valentinitnelav/geobuffer")
-library(geobuffer)
-?geobuffer()
-?geobuffer_pts()
-test <- geobuffer_pts(hull.alpha.sp,width=10000)
-test <- geobuffer_pts(xy=hull.alpha.sp,dist_m=10000)
-crs(hull.alpha.sp)
-projects.alpha.points <- hull.alpha.sp; crs(projects.alpha.points) <- crs.string
-test <- geobuffer_pts(xy=projects.alpha.points,dist_m=10000)
-projected.alpha.points <- hull.alpha.sp; crs(projected.alpha.points) <- crs.string#
-			geodessic.buffered.points <- geobuffer_pts(xy=projected.alpha.points,dist_m=10000)#
-			geodessic.buffered.poly <- sp::SpatialPolygons(list(sp::Polygons(list(sp::Polygon(geodessic.buffered.points)),ID="geo.buff.pts")))
-buffer.poly        <- rgeos::gBuffer(hull.alpha.polygon,width=((-0.75)+buffer.adj))
-plot(geodessic.buffered.poly)
-alpha
-plot(buffer.poly)
-alpha.lower <- 1#
-		alpha.upper <- 50#
-		i=1; areas.equal <- FALSE; alpha <- alpha.upper; alpha.tol <- 0.1#
-		### Run while loop to find a low value of alpha that also generates a simple polygon (not self-intersecting or filled with holes) when input coordinates are supplied to ahull.
-alpha=1
 hull.alpha         <- alphahull::ahull(coords.for.alphahull,alpha=alpha)#
 			hull.alpha.coords  <- rbind(hull.alpha$arcs[,1:2],hull.alpha$arcs[1,1:2])#
 			hull.alpha.sp      <- sp::SpatialPoints(hull.alpha.coords)#
@@ -6597,18 +6471,1474 @@ create.outer <- function(coords,method=1,buffer.adj=0,coords.radius=0.01,max.fra
 test <- create.outer(coords="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/EEMS/EEMS_Katie/mainland_maculilabris.coord",method=2,max.fractal.dimension=1.105)
 ?ploidy()
 dev.off()
-library(devtools)
-devtools::install_github("JeffWeinell/misc.wrappers",auth_token="323d9e4cd00247a39a805dbb66f37db6403cfb8b")
 library(misc.wrappers)
 test <- runEEMs_snps(input.data="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/Oxyrhabdium_populations.snps_28Feb2021.vcf",coord="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/EEMS/Oxyrhabdium.coord",output.dirpath="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/EEMS/EEMS_Oxyrhabdium")
+#' @title runEEMs_snps function#
+#' #
+#' #
+#' Wrapper function for running EEMS. Optionally generates the '*.outer' file from the '*.coords' file automatically.#
+#' #
+#' #
+#' @param exe.path Character string with path to runeems_snps executable, or NULL (the default) if you've defined the EEMS path with the function config_miscwrappers. Use paths_misc.wrappers() to check if this path has been set.#
+#' @param input.data An object of class genind or vcfR, or a character string with path to a diffs file.#
+#' @param coord Character string with path to coordinates file, which has two columns with longitude and latitude coordinates (decimal degree format) of individuals in the genind object. Columns should be space separated.#
+#' @param outer Either NULL (the default) or a character string with path to the '*.outer' file, which has two columns with longitude and latitude coordinates (decimal degree format) defining the perimeter of a polygon covering the region to model with EEMS. See EEMS documentation.#
+#' If NULL, this function will generate a "*.outer" file automatically; the user will be prompted to accept the auto-generated *.outer file prior to running eems.#
+#' If you don't want to use the automatically generated *.outer file, you can create a custom one here: https://www.keene.edu/campus/maps/tool/#
+#' @param ask.use.outer When outer = NULL, this logical determines if the auto-generated outer coordinates should be plotted, at which point the user must confirm if they want to use the coordinates. Default is TRUE.#
+#' @param output.dirpath Character string with path to directory where EEMS input and output files should be saved. This directory must not exist prior to running this function, but its parent directory must exist.#
+#' Files and directories generated by this function:#
+#'    /output.dirpath/#
+#'    /output.dirpath/data#
+#'    /output.dirpath/data/data.coord#
+#'    /output.dirpath/data/data.diffs#
+#'    /output.dirpath/data/data.outer#
+#'    /output.dirpath/mcmc    ### This will contain as many mcmc subdirectories as the value of nchains.#
+#'    /output.dirpath/params  ### This will contain as many parameter files as the value of nchains.#
+#' @param n.sites The number of sites. Determined automatically if input data is a genind or vcf object/file, but must be supplied if input.data is a path to a diffs matrix.#
+#' @param ploidy Ploidy of individuals. Default is 2.#
+#' @param nDemes Number of demes. Default is 300. This can be a single number or a numeric vector of length nchains with value to use for each chain.#
+#' @param numMCMCIter Number of MCMC iterations (i.e., chain length).Default is 10000000. This can be a single number or a numeric vector of length nchains.#
+#' @param numBurnIter Number of Burnin iterations (i.e., chain length). Default is 1000000. This can be a single number or a numeric vector of length nchains.#
+#' @param numThinIter Number of iterations to ignore before sampling the next MCMC iteration. Default is 9999. This can be a single number or a numeric vector of length nchains.#
+#' @param nchains Number of chains to run. Default is 3.#
+#' @param setup.only If the function should setup data, parameters, and output directories but not run EEMS. Default is TRUE#
+#' @return Nothing is returned.#
+#' @export runEEMs_snps#
+runEEMs_snps <- function(exe.path=NULL, input.data, coord, outer=NULL, ask.use.outer=T, output.dirpath, n.sites, ploidy=2, nDemes=300, numMCMCIter = 10000000, numBurnIter = 1000000, numThinIter = 9999, nchains=3, setup.only=T){#
+ # data.dirname <- paste0(sample(c(letters,LETTERS,0:9),size=10,replace=T),collapse="")#
+ # data.dirpath <- paste0(tempdir(),"/",data.dirname)#
+ # dir.create(data.dirpath)#
+	if(is.null(exe.path)){#
+		exe.path <- exepaths_miscwrappers("runeems_snps")#
+		if(is.na(exe.path)){#
+			stop("exe.path is NULL and runeems_snps has not been defined previously. Use config_miscwrappers function to define the full path to the runeems_snps executable")#
+		}#
+	}#
+	input.data <- data#
+	if(dir.exists(output.dirpath)){#
+		command.to.remove.directory <- paste0("unlink(",output.dirpath,",recursive=T)")#
+		stop(paste("Output directory:",output.dirpath,"already exists. Use a new output.dirpath or run '",command.to.remove.directory,"'"))#
+	} else {#
+		dir.create(output.dirpath)#
+	}#
+	### Check input arguments and stop if wrong format.#
+	if(length(nDemes)!=1 | length(nDemes)!= length(nchains)){#
+		stop("nDemes should have length 1 or length equal to nchains")#
+	} else {#
+		if(length(nDemes)==1){#
+			nDemes = rep(nDemes,nchains)#
+		}#
+	}#
+	if(length(numMCMCIter)!=1 | length(numMCMCIter)!= length(nchains)){#
+		stop("numMCMCIter should have length 1 or length equal to nchains")#
+	} else {#
+		if(length(numMCMCIter)==1){#
+			numMCMCIter = rep(numMCMCIter,nchains)#
+		}#
+	}#
+	if(length(numBurnIter)!=1 | length(numBurnIter)!= length(nchains)){#
+		stop("numBurnIter should have length 1 or length equal to nchains")#
+	} else {#
+		if(length(numBurnIter)==1){#
+			numBurnIter = rep(numBurnIter,nchains)#
+		}#
+	}#
+	if(length(numThinIter)!=1 | length(numThinIter)!= length(nchains)){#
+		stop("numThinIter should have length 1 or length equal to nchains")#
+	} else {#
+		if(length(numThinIter)==1){#
+			numThinIter = rep(numThinIter,nchains)#
+		}#
+	}#
+	### Create directories in output.dirpath to hold a copy of the input (data) files, parameter files, and mcmc output#
+	# Create input directory containing copy of input files#
+	input.dirpath <- paste0(output.dirpath,"/data")#
+	dir.create(input.dirpath)#
+	# Create output mcmc directory and subdirectories#
+	mcmcpath         <- paste0(output.dirpath,"/mcmc")#
+	mcmcpath.subdirs <- paste0(mcmcpath,"/",paste0(nDemes,"Demes-chain",1:nchains))#
+	dir.create(mcmcpath)#
+	sapply(X=mcmcpath.subdirs,FUN=dir.create)#
+	# Create directory to hold params files#
+	params.path <- paste0(output.dirpath,"/params")#
+	dir.create(params.path)#
+	# Copy *.coord file to input.dirpath and rename as "data.coord"#
+	system(paste("cp",coord,paste0(input.dirpath,"/data.coord")))#
+	# If path to the outer file is NULL, generate one automatically, otherwise copy it to input.dirpath and rename as "data.outer"#
+	if(is.null(outer)){#
+		data_outer <- misc.wrappers::create.outer(coords=coord,plot.outer=ask.use.outer,ask.use=ask.use.outer,output.path=paste0(input.dirpath,"/data.outer"))#
+	} else {#
+		system(paste("cp",outer,paste0(input.dirpath,"/data.outer")))#
+	}#
+	### Check if input.data is an object of class vcfR#
+	if(is(input.data,"vcfR")){#
+		genind     <- vcfR::vcfR2genind(input.data)#
+		input.data <- genind#
+	}#
+	### Check if input.data is an object of class genind#
+	if(is(input.data,"genind")){#
+		data.diffs <- misc.wrappers::genind2diffs(genind.obj=input.data,output.file=paste0(input.dirpath,"/data.diffs"))#
+		diffs      <- data.diffs[["diffs"]]#
+		nIndiv     <- c(data.diffs[["nIndiv"]])#
+		nSites     <- data.diffs[["nSites"]]#
+	} else {#
+		# stop("input.data must be an object of class 'vcfR' or 'genind'")#
+		if(is(input.data,"character")){#
+			first.line <- readLines(input.data,n=1)#
+			if(grep("VCF",first.line)==1){#
+				vcf.data   <- vcfR::read.vcfR(input.data)#
+				genind     <- vcfR::vcfR2genind(vcf.data)#
+				data.diffs <- misc.wrappers::genind2diffs(genind.obj=genind,ploidy=ploidy,output.file=paste0(input.dirpath,"/data.diffs"))#
+				diffs      <- data.diffs[["diffs"]]#
+				nIndiv     <- data.diffs[["nIndiv"]]#
+				nSites     <- data.diffs[["nSites"]]#
+				file.exists()#
+			} else {#
+				data.diffs <- read.table(input.data,sep=" ",header=F)#
+				### Check that the diffs file has the correct dimmensions#
+				if(ncol(data.diffs)==nrow(data.diffs)){#
+					nIndiv     <- ncol(data.diffs)#
+					if(is.null(n.sites)){#
+						stop("n.sites must be supplied when input.data is a diffs file")#
+					} else {#
+						nSites     <- as.numeric(n.sites)#
+					}#
+					system(paste("cp",input.data,paste0(input.dirpath,"/data.diffs")))#
+				} else {#
+					stop("input.data path must be VCF or diffs file")#
+				}#
+			}#
+		}#
+	}#
+	### Generate diffs file, saving to input.dirpath with name "data.diffs"#
+	# data.diffs <- genind2diffs(genind.obj=genind,output.file=paste0(input.dirpath,"/data.diffs"))#
+	# diffs      <- data.diffs["diffs"]#
+	# nIndiv     <- c(data.diffs["nIndiv"])#
+	# nSites     <- data.diffs["nSites"]#
+# #	params.files.path <- paste0(params.path,"/params-chain",1:nchains,"_",nDemes,".ini")#
+# #	for(i in 1:nchains){#
+# #		L1 <- paste0("datapath = ",paste0(input.dirpath,"/data"))#
+# #		L2 <- paste0("mcmcpath = ",mcmcpath.subdirs[i])#
+# #		L3 <- paste0("nIndiv = ",as.integer(nIndiv))#
+# #		L4 <- paste0("nSites = ",as.integer(nSites))#
+# #		L5 <- paste0("nDemes = ",as.integer(nDemes[i]))#
+# #		L6 <- paste0("diploid = ",TRUE)#
+# #		L7 <- paste0("numMCMCIter = ",as.integer(numMCMCIter[i]))#
+# #		L8 <- paste0("numBurnIter = ",as.integer(numBurnIter[i]))#
+# #		L9 <- paste0("numThinIter = ",as.integer(numThinIter[i]))#
+# #		param.lines <- c(L1,L2,L3,L4,L5,L6,L7,L8,L9)#
+# #		writeLines(param.lines,params.files.path[i])#
+# #	}#
+# #	command.write <- c("#!/bin/bash",paste(exe.path,"--params",params.files.path))#
+# #	writeLines(command.write,paste0(output.dirpath,"/runeems_snps.sh"))#
+# #	if(!setup.only){#
+# #		command.exe   <- gsub(" & $","",paste(command.write,collapse=" & "))#
+# #		system(command.exe)#
+# #	}#
+} ### End runEEMs_snps function
 test <- runEEMs_snps(input.data="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/Oxyrhabdium_populations.snps_28Feb2021.vcf",coord="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/EEMS/Oxyrhabdium.coord",output.dirpath="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/EEMS/EEMS_Oxyrhabdium")
-input.data
-install.packages("spatstat")
-install.packages("utf8")
+input.data="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/Oxyrhabdium_populations.snps_28Feb2021.vcf"
+is(input.data,"vcfR")
+is(input.data,"genind")
+is(input.data,"character")
+input.dirpath = "/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/EEMS/EEMS_Oxyrhabdium/data"
+### Check if input.data is an object of class vcfR#
+	if(is(input.data,"vcfR")){#
+		genind     <- vcfR::vcfR2genind(input.data)#
+		input.data <- genind#
+	}#
+	### Check if input.data is an object of class genind#
+	if(is(input.data,"genind")){#
+		data.diffs <- misc.wrappers::genind2diffs(genind.obj=input.data,output.file=paste0(input.dirpath,"/data.diffs"))#
+		diffs      <- data.diffs[["diffs"]]#
+		nIndiv     <- c(data.diffs[["nIndiv"]])#
+		nSites     <- data.diffs[["nSites"]]#
+	} else {#
+		# stop("input.data must be an object of class 'vcfR' or 'genind'")#
+		if(is(input.data,"character")){#
+			first.line <- readLines(input.data,n=1)#
+			if(grep("VCF",first.line)==1){#
+				vcf.data   <- vcfR::read.vcfR(input.data)#
+				genind     <- vcfR::vcfR2genind(vcf.data)#
+				data.diffs <- misc.wrappers::genind2diffs(genind.obj=genind,ploidy=ploidy,output.file=paste0(input.dirpath,"/data.diffs"))#
+				diffs      <- data.diffs[["diffs"]]#
+				nIndiv     <- data.diffs[["nIndiv"]]#
+				nSites     <- data.diffs[["nSites"]]#
+				file.exists()#
+			} else {#
+				data.diffs <- read.table(input.data,sep=" ",header=F)#
+				### Check that the diffs file has the correct dimmensions#
+				if(ncol(data.diffs)==nrow(data.diffs)){#
+					nIndiv     <- ncol(data.diffs)#
+					if(is.null(n.sites)){#
+						stop("n.sites must be supplied when input.data is a diffs file")#
+					} else {#
+						nSites     <- as.numeric(n.sites)#
+					}#
+					system(paste("cp",input.data,paste0(input.dirpath,"/data.diffs")))#
+				} else {#
+					stop("input.data path must be VCF or diffs file")#
+				}#
+			}#
+		}#
+	}
+first.line <- readLines(input.data,n=1)
+firtst.line
+first.line
+grep("VCF",first.line)==1
+vcf.data   <- vcfR::read.vcfR(input.data)
+genind     <- vcfR::vcfR2genind(vcf.data)
+genind
+ploidy
+ploidy=2
+data.diffs <- misc.wrappers::genind2diffs(genind.obj=genind,ploidy=ploidy,output.file=paste0(input.dirpath,"/data.diffs"))
+library(misc.wrappers)
+#' @title runEEMs_snps function#
+#' #
+#' #
+#' Wrapper function for running EEMS. Optionally generates the '*.outer' file from the '*.coords' file automatically.#
+#' #
+#' #
+#' @param exe.path Character string with path to runeems_snps executable, or NULL (the default) if you've defined the EEMS path with the function config_miscwrappers. Use paths_misc.wrappers() to check if this path has been set.#
+#' @param input.data An object of class genind or vcfR, or a character string with path to a diffs file.#
+#' @param coord Character string with path to coordinates file, which has two columns with longitude and latitude coordinates (decimal degree format) of individuals in the genind object. Columns should be space separated.#
+#' @param outer Either NULL (the default) or a character string with path to the '*.outer' file, which has two columns with longitude and latitude coordinates (decimal degree format) defining the perimeter of a polygon covering the region to model with EEMS. See EEMS documentation.#
+#' If NULL, this function will generate a "*.outer" file automatically; the user will be prompted to accept the auto-generated *.outer file prior to running eems.#
+#' If you don't want to use the automatically generated *.outer file, you can create a custom one here: https://www.keene.edu/campus/maps/tool/#
+#' @param ask.use.outer When outer = NULL, this logical determines if the auto-generated outer coordinates should be plotted, at which point the user must confirm if they want to use the coordinates. Default is TRUE.#
+#' @param output.dirpath Character string with path to directory where EEMS input and output files should be saved. This directory must not exist prior to running this function, but its parent directory must exist.#
+#' Files and directories generated by this function:#
+#'    /output.dirpath/#
+#'    /output.dirpath/data#
+#'    /output.dirpath/data/data.coord#
+#'    /output.dirpath/data/data.diffs#
+#'    /output.dirpath/data/data.outer#
+#'    /output.dirpath/mcmc    ### This will contain as many mcmc subdirectories as the value of nchains.#
+#'    /output.dirpath/params  ### This will contain as many parameter files as the value of nchains.#
+#' @param n.sites The number of sites. Determined automatically if input data is a genind or vcf object/file, but must be supplied if input.data is a path to a diffs matrix.#
+#' @param pl Ploidy. Default is 2.#
+#' @param nDemes Number of demes. Default is 300. This can be a single number or a numeric vector of length nchains with value to use for each chain.#
+#' @param numMCMCIter Number of MCMC iterations (i.e., chain length).Default is 10000000. This can be a single number or a numeric vector of length nchains.#
+#' @param numBurnIter Number of Burnin iterations (i.e., chain length). Default is 1000000. This can be a single number or a numeric vector of length nchains.#
+#' @param numThinIter Number of iterations to ignore before sampling the next MCMC iteration. Default is 9999. This can be a single number or a numeric vector of length nchains.#
+#' @param nchains Number of chains to run. Default is 3.#
+#' @param setup.only If the function should setup data, parameters, and output directories but not run EEMS. Default is TRUE#
+#' @return Nothing is returned.#
+#' @export runEEMs_snps#
+runEEMs_snps <- function(exe.path=NULL, input.data, coord, outer=NULL, ask.use.outer=T, output.dirpath, n.sites, pl=2, nDemes=300, numMCMCIter = 10000000, numBurnIter = 1000000, numThinIter = 9999, nchains=3, setup.only=T){#
+ # data.dirname <- paste0(sample(c(letters,LETTERS,0:9),size=10,replace=T),collapse="")#
+ # data.dirpath <- paste0(tempdir(),"/",data.dirname)#
+ # dir.create(data.dirpath)#
+	if(is.null(exe.path)){#
+		exe.path <- exepaths_miscwrappers("runeems_snps")#
+		if(is.na(exe.path)){#
+			stop("exe.path is NULL and runeems_snps has not been defined previously. Use config_miscwrappers function to define the full path to the runeems_snps executable")#
+		}#
+	}#
+	input.data <- data#
+	if(dir.exists(output.dirpath)){#
+		command.to.remove.directory <- paste0("unlink(",output.dirpath,",recursive=T)")#
+		stop(paste("Output directory:",output.dirpath,"already exists. Use a new output.dirpath or run '",command.to.remove.directory,"'"))#
+	} else {#
+		dir.create(output.dirpath)#
+	}#
+	### Check input arguments and stop if wrong format.#
+	if(length(nDemes)!=1 | length(nDemes)!= length(nchains)){#
+		stop("nDemes should have length 1 or length equal to nchains")#
+	} else {#
+		if(length(nDemes)==1){#
+			nDemes = rep(nDemes,nchains)#
+		}#
+	}#
+	if(length(numMCMCIter)!=1 | length(numMCMCIter)!= length(nchains)){#
+		stop("numMCMCIter should have length 1 or length equal to nchains")#
+	} else {#
+		if(length(numMCMCIter)==1){#
+			numMCMCIter = rep(numMCMCIter,nchains)#
+		}#
+	}#
+	if(length(numBurnIter)!=1 | length(numBurnIter)!= length(nchains)){#
+		stop("numBurnIter should have length 1 or length equal to nchains")#
+	} else {#
+		if(length(numBurnIter)==1){#
+			numBurnIter = rep(numBurnIter,nchains)#
+		}#
+	}#
+	if(length(numThinIter)!=1 | length(numThinIter)!= length(nchains)){#
+		stop("numThinIter should have length 1 or length equal to nchains")#
+	} else {#
+		if(length(numThinIter)==1){#
+			numThinIter = rep(numThinIter,nchains)#
+		}#
+	}#
+	### Create directories in output.dirpath to hold a copy of the input (data) files, parameter files, and mcmc output#
+	# Create input directory containing copy of input files#
+	input.dirpath <- paste0(output.dirpath,"/data")#
+	dir.create(input.dirpath)#
+	# Create output mcmc directory and subdirectories#
+	mcmcpath         <- paste0(output.dirpath,"/mcmc")#
+	mcmcpath.subdirs <- paste0(mcmcpath,"/",paste0(nDemes,"Demes-chain",1:nchains))#
+	dir.create(mcmcpath)#
+	sapply(X=mcmcpath.subdirs,FUN=dir.create)#
+	# Create directory to hold params files#
+	params.path <- paste0(output.dirpath,"/params")#
+	dir.create(params.path)#
+	# Copy *.coord file to input.dirpath and rename as "data.coord"#
+	system(paste("cp",coord,paste0(input.dirpath,"/data.coord")))#
+	# If path to the outer file is NULL, generate one automatically, otherwise copy it to input.dirpath and rename as "data.outer"#
+	if(is.null(outer)){#
+		data_outer <- misc.wrappers::create.outer(coords=coord,plot.outer=ask.use.outer,ask.use=ask.use.outer,output.path=paste0(input.dirpath,"/data.outer"))#
+	} else {#
+		system(paste("cp",outer,paste0(input.dirpath,"/data.outer")))#
+	}#
+	### Check if input.data is an object of class vcfR#
+	if(is(input.data,"vcfR")){#
+		genind     <- vcfR::vcfR2genind(input.data)#
+		input.data <- genind#
+	}#
+	### Check if input.data is an object of class genind#
+	if(is(input.data,"genind")){#
+		data.diffs <- misc.wrappers::genind2diffs(genind.obj=input.data,output.file=paste0(input.dirpath,"/data.diffs"))#
+		diffs      <- data.diffs[["diffs"]]#
+		nIndiv     <- data.diffs[["nIndiv"]]#
+		nSites     <- data.diffs[["nSites"]]#
+	} else {#
+		# stop("input.data must be an object of class 'vcfR' or 'genind'")#
+		if(is(input.data,"character")){#
+			first.line <- readLines(input.data,n=1)#
+			if(grep("VCF",first.line)==1){#
+				vcf.data   <- vcfR::read.vcfR(input.data)#
+				genind     <- vcfR::vcfR2genind(vcf.data)#
+				data.diffs <- misc.wrappers::genind2diffs(genind.obj=genind,ploidy=as.numeric(pl),output.file=paste0(input.dirpath,"/data.diffs"))#
+				diffs      <- data.diffs[["diffs"]]#
+				nIndiv     <- data.diffs[["nIndiv"]]#
+				nSites     <- data.diffs[["nSites"]]#
+				file.exists()#
+			} else {#
+				data.diffs <- read.table(input.data,sep=" ",header=F)#
+				### Check that the diffs file has the correct dimmensions#
+				if(ncol(data.diffs)==nrow(data.diffs)){#
+					nIndiv     <- ncol(data.diffs)#
+					if(is.null(n.sites)){#
+						stop("n.sites must be supplied when input.data is a diffs file")#
+					} else {#
+						nSites     <- as.numeric(n.sites)#
+					}#
+					system(paste("cp",input.data,paste0(input.dirpath,"/data.diffs")))#
+				} else {#
+					stop("input.data path must be VCF or diffs file")#
+				}#
+			}#
+		}#
+	}#
+	### Generate diffs file, saving to input.dirpath with name "data.diffs"#
+	# data.diffs <- genind2diffs(genind.obj=genind,output.file=paste0(input.dirpath,"/data.diffs"))#
+	# diffs      <- data.diffs["diffs"]#
+	# nIndiv     <- c(data.diffs["nIndiv"])#
+	# nSites     <- data.diffs["nSites"]#
+# #	params.files.path <- paste0(params.path,"/params-chain",1:nchains,"_",nDemes,".ini")#
+# #	for(i in 1:nchains){#
+# #		L1 <- paste0("datapath = ",paste0(input.dirpath,"/data"))#
+# #		L2 <- paste0("mcmcpath = ",mcmcpath.subdirs[i])#
+# #		L3 <- paste0("nIndiv = ",as.integer(nIndiv))#
+# #		L4 <- paste0("nSites = ",as.integer(nSites))#
+# #		L5 <- paste0("nDemes = ",as.integer(nDemes[i]))#
+# #		L6 <- paste0("diploid = ",TRUE)#
+# #		L7 <- paste0("numMCMCIter = ",as.integer(numMCMCIter[i]))#
+# #		L8 <- paste0("numBurnIter = ",as.integer(numBurnIter[i]))#
+# #		L9 <- paste0("numThinIter = ",as.integer(numThinIter[i]))#
+# #		param.lines <- c(L1,L2,L3,L4,L5,L6,L7,L8,L9)#
+# #		writeLines(param.lines,params.files.path[i])#
+# #	}#
+# #	command.write <- c("#!/bin/bash",paste(exe.path,"--params",params.files.path))#
+# #	writeLines(command.write,paste0(output.dirpath,"/runeems_snps.sh"))#
+# #	if(!setup.only){#
+# #		command.exe   <- gsub(" & $","",paste(command.write,collapse=" & "))#
+# #		system(command.exe)#
+# #	}#
+} ### End runEEMs_snps function
+test <- runEEMs_snps(input.data="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/Oxyrhabdium_populations.snps_28Feb2021.vcf",coord="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/EEMS/Oxyrhabdium.coord",output.dirpath="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/EEMS/EEMS_Oxyrhabdium")
+#' @title runEEMs_snps function#
+#' #
+#' #
+#' Wrapper function for running EEMS. Optionally generates the '*.outer' file from the '*.coords' file automatically.#
+#' #
+#' #
+#' @param exe.path Character string with path to runeems_snps executable, or NULL (the default) if you've defined the EEMS path with the function config_miscwrappers. Use paths_misc.wrappers() to check if this path has been set.#
+#' @param input.data An object of class genind or vcfR, or a character string with path to a diffs file.#
+#' @param coord Character string with path to coordinates file, which has two columns with longitude and latitude coordinates (decimal degree format) of individuals in the genind object. Columns should be space separated.#
+#' @param outer Either NULL (the default) or a character string with path to the '*.outer' file, which has two columns with longitude and latitude coordinates (decimal degree format) defining the perimeter of a polygon covering the region to model with EEMS. See EEMS documentation.#
+#' If NULL, this function will generate a "*.outer" file automatically; the user will be prompted to accept the auto-generated *.outer file prior to running eems.#
+#' If you don't want to use the automatically generated *.outer file, you can create a custom one here: https://www.keene.edu/campus/maps/tool/#
+#' @param ask.use.outer When outer = NULL, this logical determines if the auto-generated outer coordinates should be plotted, at which point the user must confirm if they want to use the coordinates. Default is TRUE.#
+#' @param output.dirpath Character string with path to directory where EEMS input and output files should be saved. This directory must not exist prior to running this function, but its parent directory must exist.#
+#' Files and directories generated by this function:#
+#'    /output.dirpath/#
+#'    /output.dirpath/data#
+#'    /output.dirpath/data/data.coord#
+#'    /output.dirpath/data/data.diffs#
+#'    /output.dirpath/data/data.outer#
+#'    /output.dirpath/mcmc    ### This will contain as many mcmc subdirectories as the value of nchains.#
+#'    /output.dirpath/params  ### This will contain as many parameter files as the value of nchains.#
+#' @param n.sites The number of sites. Determined automatically if input data is a genind or vcf object/file, but must be supplied if input.data is a path to a diffs matrix.#
+#' @param pl Ploidy. Default is 2.#
+#' @param nDemes Number of demes. Default is 300. This can be a single number or a numeric vector of length nchains with value to use for each chain.#
+#' @param numMCMCIter Number of MCMC iterations (i.e., chain length).Default is 10000000. This can be a single number or a numeric vector of length nchains.#
+#' @param numBurnIter Number of Burnin iterations (i.e., chain length). Default is 1000000. This can be a single number or a numeric vector of length nchains.#
+#' @param numThinIter Number of iterations to ignore before sampling the next MCMC iteration. Default is 9999. This can be a single number or a numeric vector of length nchains.#
+#' @param nchains Number of chains to run. Default is 3.#
+#' @param setup.only If the function should setup data, parameters, and output directories but not run EEMS. Default is TRUE#
+#' @return Nothing is returned.#
+#' @export runEEMs_snps#
+runEEMs_snps <- function(exe.path=NULL, input.data, coord, outer=NULL, ask.use.outer=T, output.dirpath, n.sites, pl=2, nDemes=300, numMCMCIter = 10000000, numBurnIter = 1000000, numThinIter = 9999, nchains=3, setup.only=T){#
+ # data.dirname <- paste0(sample(c(letters,LETTERS,0:9),size=10,replace=T),collapse="")#
+ # data.dirpath <- paste0(tempdir(),"/",data.dirname)#
+ # dir.create(data.dirpath)#
+	if(is.null(exe.path)){#
+		exe.path <- exepaths_miscwrappers("runeems_snps")#
+		if(is.na(exe.path)){#
+			stop("exe.path is NULL and runeems_snps has not been defined previously. Use config_miscwrappers function to define the full path to the runeems_snps executable")#
+		}#
+	}#
+	input.data <- data#
+	if(dir.exists(output.dirpath)){#
+		command.to.remove.directory <- paste0("unlink(",output.dirpath,",recursive=T)")#
+		stop(paste("Output directory:",output.dirpath,"already exists. Use a new output.dirpath or run '",command.to.remove.directory,"'"))#
+	} else {#
+		dir.create(output.dirpath)#
+	}#
+	### Check input arguments and stop if wrong format.#
+	if(length(nDemes)!=1 | length(nDemes)!= length(nchains)){#
+		stop("nDemes should have length 1 or length equal to nchains")#
+	} else {#
+		if(length(nDemes)==1){#
+			nDemes = rep(nDemes,nchains)#
+		}#
+	}#
+	if(length(numMCMCIter)!=1 | length(numMCMCIter)!= length(nchains)){#
+		stop("numMCMCIter should have length 1 or length equal to nchains")#
+	} else {#
+		if(length(numMCMCIter)==1){#
+			numMCMCIter = rep(numMCMCIter,nchains)#
+		}#
+	}#
+	if(length(numBurnIter)!=1 | length(numBurnIter)!= length(nchains)){#
+		stop("numBurnIter should have length 1 or length equal to nchains")#
+	} else {#
+		if(length(numBurnIter)==1){#
+			numBurnIter = rep(numBurnIter,nchains)#
+		}#
+	}#
+	if(length(numThinIter)!=1 | length(numThinIter)!= length(nchains)){#
+		stop("numThinIter should have length 1 or length equal to nchains")#
+	} else {#
+		if(length(numThinIter)==1){#
+			numThinIter = rep(numThinIter,nchains)#
+		}#
+	}#
+	### Create directories in output.dirpath to hold a copy of the input (data) files, parameter files, and mcmc output#
+	# Create input directory containing copy of input files#
+	input.dirpath <- paste0(output.dirpath,"/data")#
+	dir.create(input.dirpath)#
+	# Create output mcmc directory and subdirectories#
+	mcmcpath         <- paste0(output.dirpath,"/mcmc")#
+	mcmcpath.subdirs <- paste0(mcmcpath,"/",paste0(nDemes,"Demes-chain",1:nchains))#
+	dir.create(mcmcpath)#
+	sapply(X=mcmcpath.subdirs,FUN=dir.create)#
+	# Create directory to hold params files#
+	params.path <- paste0(output.dirpath,"/params")#
+	dir.create(params.path)#
+	# Copy *.coord file to input.dirpath and rename as "data.coord"#
+	system(paste("cp",coord,paste0(input.dirpath,"/data.coord")))#
+	### Check if input.data is an object of class vcfR#
+	if(is(input.data,"vcfR")){#
+		genind     <- vcfR::vcfR2genind(input.data)#
+		input.data <- genind#
+	}#
+	### Check if input.data is an object of class genind#
+	if(is(input.data,"genind")){#
+		data.diffs <- misc.wrappers::genind2diffs(genind.obj=input.data,output.file=paste0(input.dirpath,"/data.diffs"))#
+		diffs      <- data.diffs[["diffs"]]#
+		nIndiv     <- data.diffs[["nIndiv"]]#
+		nSites     <- data.diffs[["nSites"]]#
+	} else {#
+		# stop("input.data must be an object of class 'vcfR' or 'genind'")#
+		if(is(input.data,"character")){#
+			first.line <- readLines(input.data,n=1)#
+			if(grep("VCF",first.line)==1){#
+				vcf.data   <- vcfR::read.vcfR(input.data)#
+				genind     <- vcfR::vcfR2genind(vcf.data)#
+				data.diffs <- misc.wrappers::genind2diffs(genind.obj=genind,ploidy=as.numeric(pl),output.file=paste0(input.dirpath,"/data.diffs"))#
+				diffs      <- data.diffs[["diffs"]]#
+				nIndiv     <- data.diffs[["nIndiv"]]#
+				nSites     <- data.diffs[["nSites"]]#
+				file.exists()#
+			} else {#
+				data.diffs <- read.table(input.data,sep=" ",header=F)#
+				### Check that the diffs file has the correct dimmensions#
+				if(ncol(data.diffs)==nrow(data.diffs)){#
+					nIndiv     <- ncol(data.diffs)#
+					if(is.null(n.sites)){#
+						stop("n.sites must be supplied when input.data is a diffs file")#
+					} else {#
+						nSites     <- as.numeric(n.sites)#
+					}#
+					system(paste("cp",input.data,paste0(input.dirpath,"/data.diffs")))#
+				} else {#
+					stop("input.data path must be VCF or diffs file")#
+				}#
+			}#
+		}#
+	}#
+	# If path to the outer file is NULL, generate one automatically, otherwise copy it to input.dirpath and rename as "data.outer"#
+	if(!is.null(outer)){#
+		system(paste("cp",outer,paste0(input.dirpath,"/data.outer")))#
+	} else {#
+		data_outer <- misc.wrappers::create.outer(coords=coord,plot.outer=ask.use.outer,ask.use=ask.use.outer,output.path=paste0(input.dirpath,"/data.outer"))#
+	}#
+	### Generate diffs file, saving to input.dirpath with name "data.diffs"#
+	# data.diffs <- genind2diffs(genind.obj=genind,output.file=paste0(input.dirpath,"/data.diffs"))#
+	# diffs      <- data.diffs["diffs"]#
+	# nIndiv     <- c(data.diffs["nIndiv"])#
+	# nSites     <- data.diffs["nSites"]#
+# #	params.files.path <- paste0(params.path,"/params-chain",1:nchains,"_",nDemes,".ini")#
+# #	for(i in 1:nchains){#
+# #		L1 <- paste0("datapath = ",paste0(input.dirpath,"/data"))#
+# #		L2 <- paste0("mcmcpath = ",mcmcpath.subdirs[i])#
+# #		L3 <- paste0("nIndiv = ",as.integer(nIndiv))#
+# #		L4 <- paste0("nSites = ",as.integer(nSites))#
+# #		L5 <- paste0("nDemes = ",as.integer(nDemes[i]))#
+# #		L6 <- paste0("diploid = ",TRUE)#
+# #		L7 <- paste0("numMCMCIter = ",as.integer(numMCMCIter[i]))#
+# #		L8 <- paste0("numBurnIter = ",as.integer(numBurnIter[i]))#
+# #		L9 <- paste0("numThinIter = ",as.integer(numThinIter[i]))#
+# #		param.lines <- c(L1,L2,L3,L4,L5,L6,L7,L8,L9)#
+# #		writeLines(param.lines,params.files.path[i])#
+# #	}#
+# #	command.write <- c("#!/bin/bash",paste(exe.path,"--params",params.files.path))#
+# #	writeLines(command.write,paste0(output.dirpath,"/runeems_snps.sh"))#
+# #	if(!setup.only){#
+# #		command.exe   <- gsub(" & $","",paste(command.write,collapse=" & "))#
+# #		system(command.exe)#
+# #	}#
+} ### End runEEMs_snps function
+test <- runEEMs_snps(input.data="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/Oxyrhabdium_populations.snps_28Feb2021.vcf",coord="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/EEMS/Oxyrhabdium.coord",output.dirpath="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/EEMS/EEMS_Oxyrhabdium")
+#' @title runEEMs_snps function#
+#' #
+#' #
+#' Wrapper function for running EEMS. Optionally generates the '*.outer' file from the '*.coords' file automatically.#
+#' #
+#' #
+#' @param exe.path Character string with path to runeems_snps executable, or NULL (the default) if you've defined the EEMS path with the function config_miscwrappers. Use paths_misc.wrappers() to check if this path has been set.#
+#' @param input.data An object of class genind or vcfR, or a character string with path to a diffs file.#
+#' @param coord Character string with path to coordinates file, which has two columns with longitude and latitude coordinates (decimal degree format) of individuals in the genind object. Columns should be space separated.#
+#' @param outer Either NULL (the default) or a character string with path to the '*.outer' file, which has two columns with longitude and latitude coordinates (decimal degree format) defining the perimeter of a polygon covering the region to model with EEMS. See EEMS documentation.#
+#' If NULL, this function will generate a "*.outer" file automatically; the user will be prompted to accept the auto-generated *.outer file prior to running eems.#
+#' If you don't want to use the automatically generated *.outer file, you can create a custom one here: https://www.keene.edu/campus/maps/tool/#
+#' @param ask.use.outer When outer = NULL, this logical determines if the auto-generated outer coordinates should be plotted, at which point the user must confirm if they want to use the coordinates. Default is TRUE.#
+#' @param output.dirpath Character string with path to directory where EEMS input and output files should be saved. This directory must not exist prior to running this function, but its parent directory must exist.#
+#' Files and directories generated by this function:#
+#'    /output.dirpath/#
+#'    /output.dirpath/data#
+#'    /output.dirpath/data/data.coord#
+#'    /output.dirpath/data/data.diffs#
+#'    /output.dirpath/data/data.outer#
+#'    /output.dirpath/mcmc    ### This will contain as many mcmc subdirectories as the value of nchains.#
+#'    /output.dirpath/params  ### This will contain as many parameter files as the value of nchains.#
+#' @param n.sites The number of sites. Determined automatically if input data is a genind or vcf object/file, but must be supplied if input.data is a path to a diffs matrix.#
+#' @param pl Ploidy. Default is 2.#
+#' @param nDemes Number of demes. Default is 300. This can be a single number or a numeric vector of length nchains with value to use for each chain.#
+#' @param numMCMCIter Number of MCMC iterations (i.e., chain length).Default is 10000000. This can be a single number or a numeric vector of length nchains.#
+#' @param numBurnIter Number of Burnin iterations (i.e., chain length). Default is 1000000. This can be a single number or a numeric vector of length nchains.#
+#' @param numThinIter Number of iterations to ignore before sampling the next MCMC iteration. Default is 9999. This can be a single number or a numeric vector of length nchains.#
+#' @param nchains Number of chains to run. Default is 3.#
+#' @param setup.only If the function should setup data, parameters, and output directories but not run EEMS. Default is TRUE#
+#' @return Nothing is returned.#
+#' @export runEEMs_snps#
+runEEMs_snps <- function(exe.path=NULL, input.data, coord, outer=NULL, ask.use.outer=T, output.dirpath, n.sites, pl=2, nDemes=300, numMCMCIter = 10000000, numBurnIter = 1000000, numThinIter = 9999, nchains=3, setup.only=T){#
+ # data.dirname <- paste0(sample(c(letters,LETTERS,0:9),size=10,replace=T),collapse="")#
+ # data.dirpath <- paste0(tempdir(),"/",data.dirname)#
+ # dir.create(data.dirpath)#
+	if(is.null(exe.path)){#
+		exe.path <- exepaths_miscwrappers("runeems_snps")#
+		if(is.na(exe.path)){#
+			stop("exe.path is NULL and runeems_snps has not been defined previously. Use config_miscwrappers function to define the full path to the runeems_snps executable")#
+		}#
+	}#
+	input.data <- data#
+	if(dir.exists(output.dirpath)){#
+		command.to.remove.directory <- paste0("unlink(",output.dirpath,",recursive=T)")#
+		stop(paste("Output directory:",output.dirpath,"already exists. Use a new output.dirpath or run '",command.to.remove.directory,"'"))#
+	} else {#
+		dir.create(output.dirpath)#
+	}#
+	### Check input arguments and stop if wrong format.#
+	if(length(nDemes)!=1 | length(nDemes)!= length(nchains)){#
+		stop("nDemes should have length 1 or length equal to nchains")#
+	} else {#
+		if(length(nDemes)==1){#
+			nDemes = rep(nDemes,nchains)#
+		}#
+	}#
+	if(length(numMCMCIter)!=1 | length(numMCMCIter)!= length(nchains)){#
+		stop("numMCMCIter should have length 1 or length equal to nchains")#
+	} else {#
+		if(length(numMCMCIter)==1){#
+			numMCMCIter = rep(numMCMCIter,nchains)#
+		}#
+	}#
+	if(length(numBurnIter)!=1 | length(numBurnIter)!= length(nchains)){#
+		stop("numBurnIter should have length 1 or length equal to nchains")#
+	} else {#
+		if(length(numBurnIter)==1){#
+			numBurnIter = rep(numBurnIter,nchains)#
+		}#
+	}#
+	if(length(numThinIter)!=1 | length(numThinIter)!= length(nchains)){#
+		stop("numThinIter should have length 1 or length equal to nchains")#
+	} else {#
+		if(length(numThinIter)==1){#
+			numThinIter = rep(numThinIter,nchains)#
+		}#
+	}#
+	### Create directories in output.dirpath to hold a copy of the input (data) files, parameter files, and mcmc output#
+	# Create input directory containing copy of input files#
+	input.dirpath <- paste0(output.dirpath,"/data")#
+	dir.create(input.dirpath)#
+	# Create output mcmc directory and subdirectories#
+	mcmcpath         <- paste0(output.dirpath,"/mcmc")#
+	mcmcpath.subdirs <- paste0(mcmcpath,"/",paste0(nDemes,"Demes-chain",1:nchains))#
+	dir.create(mcmcpath)#
+	sapply(X=mcmcpath.subdirs,FUN=dir.create)#
+	# Create directory to hold params files#
+	params.path <- paste0(output.dirpath,"/params")#
+	dir.create(params.path)#
+	# Copy *.coord file to input.dirpath and rename as "data.coord"#
+	system(paste("cp",coord,paste0(input.dirpath,"/data.coord")))#
+	### Check if input.data is an object of class vcfR#
+	if(is(input.data,"vcfR")){#
+		genind     <- vcfR::vcfR2genind(input.data)#
+		input.data <- genind#
+	}#
+	### Check if input.data is an object of class genind#
+	if(is(input.data,"genind")){#
+		data.diffs <- misc.wrappers::genind2diffs(genind.obj=input.data,output.file=paste0(input.dirpath,"/data.diffs"))#
+		diffs      <- data.diffs[["diffs"]]#
+		nIndiv     <- data.diffs[["nIndiv"]]#
+		nSites     <- data.diffs[["nSites"]]#
+	} else {#
+		# stop("input.data must be an object of class 'vcfR' or 'genind'")#
+		if(is(input.data,"character")){#
+			first.line <- readLines(input.data,n=1)#
+			if(grep("VCF",first.line)==1){#
+				vcf.data   <- vcfR::read.vcfR(input.data)#
+				genind     <- vcfR::vcfR2genind(vcf.data)#
+				data.diffs <- misc.wrappers::genind2diffs(genind.obj=genind,ploidy=as.numeric(pl),output.file=paste0(input.dirpath,"/data.diffs"))#
+				if(!file.exists(paste0(input.dirpath,"/data.diffs"))){#
+					stop("data.diffs does not exist")#
+				}#
+				diffs      <- data.diffs[["diffs"]]#
+				nIndiv     <- data.diffs[["nIndiv"]]#
+				nSites     <- data.diffs[["nSites"]]#
+			} else {#
+				data.diffs <- read.table(input.data,sep=" ",header=F)#
+				### Check that the diffs file has the correct dimmensions#
+				if(ncol(data.diffs)==nrow(data.diffs)){#
+					nIndiv     <- ncol(data.diffs)#
+					if(is.null(n.sites)){#
+						stop("n.sites must be supplied when input.data is a diffs file")#
+					} else {#
+						nSites     <- as.numeric(n.sites)#
+					}#
+					system(paste("cp",input.data,paste0(input.dirpath,"/data.diffs")))#
+				} else {#
+					stop("input.data path must be VCF or diffs file")#
+				}#
+			}#
+		}#
+	}#
+	# If path to the outer file is NULL, generate one automatically, otherwise copy it to input.dirpath and rename as "data.outer"#
+	if(!is.null(outer)){#
+		system(paste("cp",outer,paste0(input.dirpath,"/data.outer")))#
+	} else {#
+		data_outer <- misc.wrappers::create.outer(coords=coord,plot.outer=ask.use.outer,ask.use=ask.use.outer,output.path=paste0(input.dirpath,"/data.outer"))#
+	}#
+	### Generate diffs file, saving to input.dirpath with name "data.diffs"#
+	# data.diffs <- genind2diffs(genind.obj=genind,output.file=paste0(input.dirpath,"/data.diffs"))#
+	# diffs      <- data.diffs["diffs"]#
+	# nIndiv     <- c(data.diffs["nIndiv"])#
+	# nSites     <- data.diffs["nSites"]#
+# #	params.files.path <- paste0(params.path,"/params-chain",1:nchains,"_",nDemes,".ini")#
+# #	for(i in 1:nchains){#
+# #		L1 <- paste0("datapath = ",paste0(input.dirpath,"/data"))#
+# #		L2 <- paste0("mcmcpath = ",mcmcpath.subdirs[i])#
+# #		L3 <- paste0("nIndiv = ",as.integer(nIndiv))#
+# #		L4 <- paste0("nSites = ",as.integer(nSites))#
+# #		L5 <- paste0("nDemes = ",as.integer(nDemes[i]))#
+# #		L6 <- paste0("diploid = ",TRUE)#
+# #		L7 <- paste0("numMCMCIter = ",as.integer(numMCMCIter[i]))#
+# #		L8 <- paste0("numBurnIter = ",as.integer(numBurnIter[i]))#
+# #		L9 <- paste0("numThinIter = ",as.integer(numThinIter[i]))#
+# #		param.lines <- c(L1,L2,L3,L4,L5,L6,L7,L8,L9)#
+# #		writeLines(param.lines,params.files.path[i])#
+# #	}#
+# #	command.write <- c("#!/bin/bash",paste(exe.path,"--params",params.files.path))#
+# #	writeLines(command.write,paste0(output.dirpath,"/runeems_snps.sh"))#
+# #	if(!setup.only){#
+# #		command.exe   <- gsub(" & $","",paste(command.write,collapse=" & "))#
+# #		system(command.exe)#
+# #	}#
+} ### End runEEMs_snps function
+test <- runEEMs_snps(input.data="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/Oxyrhabdium_populations.snps_28Feb2021.vcf",coord="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/EEMS/Oxyrhabdium.coord",output.dirpath="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/EEMS/EEMS_Oxyrhabdium")
+input.dirpath = "/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/EEMS/EEMS_Oxyrhabdium/data"
+if(!file.exists(paste0(input.dirpath,"/data.diffs"))){#
+					stop("data.diffs does not exist")#
+				}
+#' @title runEEMs_snps function#
+#' #
+#' #
+#' Wrapper function for running EEMS. Optionally generates the '*.outer' file from the '*.coords' file automatically.#
+#' #
+#' #
+#' @param exe.path Character string with path to runeems_snps executable, or NULL (the default) if you've defined the EEMS path with the function config_miscwrappers. Use paths_misc.wrappers() to check if this path has been set.#
+#' @param input.data An object of class genind or vcfR, or a character string with path to a diffs file.#
+#' @param coord Character string with path to coordinates file, which has two columns with longitude and latitude coordinates (decimal degree format) of individuals in the genind object. Columns should be space separated.#
+#' @param outer Either NULL (the default) or a character string with path to the '*.outer' file, which has two columns with longitude and latitude coordinates (decimal degree format) defining the perimeter of a polygon covering the region to model with EEMS. See EEMS documentation.#
+#' If NULL, this function will generate a "*.outer" file automatically; the user will be prompted to accept the auto-generated *.outer file prior to running eems.#
+#' If you don't want to use the automatically generated *.outer file, you can create a custom one here: https://www.keene.edu/campus/maps/tool/#
+#' @param ask.use.outer When outer = NULL, this logical determines if the auto-generated outer coordinates should be plotted, at which point the user must confirm if they want to use the coordinates. Default is TRUE.#
+#' @param output.dirpath Character string with path to directory where EEMS input and output files should be saved. This directory must not exist prior to running this function, but its parent directory must exist.#
+#' Files and directories generated by this function:#
+#'    /output.dirpath/#
+#'    /output.dirpath/data#
+#'    /output.dirpath/data/data.coord#
+#'    /output.dirpath/data/data.diffs#
+#'    /output.dirpath/data/data.outer#
+#'    /output.dirpath/mcmc    ### This will contain as many mcmc subdirectories as the value of nchains.#
+#'    /output.dirpath/params  ### This will contain as many parameter files as the value of nchains.#
+#' @param n.sites The number of sites. Determined automatically if input data is a genind or vcf object/file, but must be supplied if input.data is a path to a diffs matrix.#
+#' @param pl Ploidy. Default is 2.#
+#' @param nDemes Number of demes. Default is 300. This can be a single number or a numeric vector of length nchains with value to use for each chain.#
+#' @param numMCMCIter Number of MCMC iterations (i.e., chain length).Default is 10000000. This can be a single number or a numeric vector of length nchains.#
+#' @param numBurnIter Number of Burnin iterations (i.e., chain length). Default is 1000000. This can be a single number or a numeric vector of length nchains.#
+#' @param numThinIter Number of iterations to ignore before sampling the next MCMC iteration. Default is 9999. This can be a single number or a numeric vector of length nchains.#
+#' @param nchains Number of chains to run. Default is 3.#
+#' @param setup.only If the function should setup data, parameters, and output directories but not run EEMS. Default is TRUE#
+#' @return Nothing is returned.#
+#' @export runEEMs_snps#
+runEEMs_snps <- function(exe.path=NULL, input.data, coord, outer=NULL, ask.use.outer=T, output.dirpath, n.sites, pl=2, nDemes=300, numMCMCIter = 10000000, numBurnIter = 1000000, numThinIter = 9999, nchains=3, setup.only=T){#
+ # data.dirname <- paste0(sample(c(letters,LETTERS,0:9),size=10,replace=T),collapse="")#
+ # data.dirpath <- paste0(tempdir(),"/",data.dirname)#
+ # dir.create(data.dirpath)#
+	if(is.null(exe.path)){#
+		exe.path <- exepaths_miscwrappers("runeems_snps")#
+		if(is.na(exe.path)){#
+			stop("exe.path is NULL and runeems_snps has not been defined previously. Use config_miscwrappers function to define the full path to the runeems_snps executable")#
+		}#
+	}#
+	input.data <- data#
+	if(dir.exists(output.dirpath)){#
+		command.to.remove.directory <- paste0("unlink(",output.dirpath,",recursive=T)")#
+		stop(paste("Output directory:",output.dirpath,"already exists. Use a new output.dirpath or run '",command.to.remove.directory,"'"))#
+	} else {#
+		dir.create(output.dirpath)#
+	}#
+	### Check input arguments and stop if wrong format.#
+	if(length(nDemes)!=1 | length(nDemes)!= length(nchains)){#
+		stop("nDemes should have length 1 or length equal to nchains")#
+	} else {#
+		if(length(nDemes)==1){#
+			nDemes = rep(nDemes,nchains)#
+		}#
+	}#
+	if(length(numMCMCIter)!=1 | length(numMCMCIter)!= length(nchains)){#
+		stop("numMCMCIter should have length 1 or length equal to nchains")#
+	} else {#
+		if(length(numMCMCIter)==1){#
+			numMCMCIter = rep(numMCMCIter,nchains)#
+		}#
+	}#
+	if(length(numBurnIter)!=1 | length(numBurnIter)!= length(nchains)){#
+		stop("numBurnIter should have length 1 or length equal to nchains")#
+	} else {#
+		if(length(numBurnIter)==1){#
+			numBurnIter = rep(numBurnIter,nchains)#
+		}#
+	}#
+	if(length(numThinIter)!=1 | length(numThinIter)!= length(nchains)){#
+		stop("numThinIter should have length 1 or length equal to nchains")#
+	} else {#
+		if(length(numThinIter)==1){#
+			numThinIter = rep(numThinIter,nchains)#
+		}#
+	}#
+	### Create directories in output.dirpath to hold a copy of the input (data) files, parameter files, and mcmc output#
+	# Create input directory containing copy of input files#
+	input.dirpath <- paste0(output.dirpath,"/data")#
+	dir.create(input.dirpath)#
+	# Create output mcmc directory and subdirectories#
+	mcmcpath         <- paste0(output.dirpath,"/mcmc")#
+	mcmcpath.subdirs <- paste0(mcmcpath,"/",paste0(nDemes,"Demes-chain",1:nchains))#
+	dir.create(mcmcpath)#
+	sapply(X=mcmcpath.subdirs,FUN=dir.create)#
+	# Create directory to hold params files#
+	params.path <- paste0(output.dirpath,"/params")#
+	dir.create(params.path)#
+	# Copy *.coord file to input.dirpath and rename as "data.coord"#
+	system(paste("cp",coord,paste0(input.dirpath,"/data.coord")))#
+	#### TEMPORARY TEST #####
+	if(!is(input.data,"character")){#
+		stop("data.diffs does not exist")#
+	}#
+#
+	### Check if input.data is an object of class vcfR#
+	if(is(input.data,"vcfR")){#
+		genind     <- vcfR::vcfR2genind(input.data)#
+		input.data <- genind#
+	}#
+#
+	#### TEMPORARY TEST #####
+	if(!is(input.data,"character")){#
+		stop("data.diffs does not exist")#
+	}#
+#
+	### Check if input.data is an object of class genind#
+	if(is(input.data,"genind")){#
+		data.diffs <- misc.wrappers::genind2diffs(genind.obj=input.data,output.file=paste0(input.dirpath,"/data.diffs"))#
+		diffs      <- data.diffs[["diffs"]]#
+		nIndiv     <- data.diffs[["nIndiv"]]#
+		nSites     <- data.diffs[["nSites"]]#
+	} else {#
+		# stop("input.data must be an object of class 'vcfR' or 'genind'")#
+	#### TEMPORARY TEST #####
+	if(!is(input.data,"character")){#
+		stop("data.diffs does not exist")#
+	}#
+		if(is(input.data,"character")){#
+			first.line <- readLines(input.data,n=1)#
+			if(grep("VCF",first.line)==1){#
+				vcf.data   <- vcfR::read.vcfR(input.data)#
+				genind     <- vcfR::vcfR2genind(vcf.data)#
+				data.diffs <- misc.wrappers::genind2diffs(genind.obj=genind,ploidy=as.numeric(pl),output.file=paste0(input.dirpath,"/data.diffs"))#
+				if(!file.exists(paste0(input.dirpath,"/data.diffs"))){#
+					stop("data.diffs does not exist")#
+				}#
+				diffs      <- data.diffs[["diffs"]]#
+				nIndiv     <- data.diffs[["nIndiv"]]#
+				nSites     <- data.diffs[["nSites"]]#
+			} else {#
+				data.diffs <- read.table(input.data,sep=" ",header=F)#
+				### Check that the diffs file has the correct dimmensions#
+				if(ncol(data.diffs)==nrow(data.diffs)){#
+					nIndiv     <- ncol(data.diffs)#
+					if(is.null(n.sites)){#
+						stop("n.sites must be supplied when input.data is a diffs file")#
+					} else {#
+						nSites     <- as.numeric(n.sites)#
+					}#
+					system(paste("cp",input.data,paste0(input.dirpath,"/data.diffs")))#
+				} else {#
+					stop("input.data path must be VCF or diffs file")#
+				}#
+			}#
+		}#
+	}#
+	# If path to the outer file is NULL, generate one automatically, otherwise copy it to input.dirpath and rename as "data.outer"#
+	if(!is.null(outer)){#
+		system(paste("cp",outer,paste0(input.dirpath,"/data.outer")))#
+	} else {#
+		data_outer <- misc.wrappers::create.outer(coords=coord,plot.outer=ask.use.outer,ask.use=ask.use.outer,output.path=paste0(input.dirpath,"/data.outer"))#
+	}#
+	### Generate diffs file, saving to input.dirpath with name "data.diffs"#
+	# data.diffs <- genind2diffs(genind.obj=genind,output.file=paste0(input.dirpath,"/data.diffs"))#
+	# diffs      <- data.diffs["diffs"]#
+	# nIndiv     <- c(data.diffs["nIndiv"])#
+	# nSites     <- data.diffs["nSites"]#
+# #	params.files.path <- paste0(params.path,"/params-chain",1:nchains,"_",nDemes,".ini")#
+# #	for(i in 1:nchains){#
+# #		L1 <- paste0("datapath = ",paste0(input.dirpath,"/data"))#
+# #		L2 <- paste0("mcmcpath = ",mcmcpath.subdirs[i])#
+# #		L3 <- paste0("nIndiv = ",as.integer(nIndiv))#
+# #		L4 <- paste0("nSites = ",as.integer(nSites))#
+# #		L5 <- paste0("nDemes = ",as.integer(nDemes[i]))#
+# #		L6 <- paste0("diploid = ",TRUE)#
+# #		L7 <- paste0("numMCMCIter = ",as.integer(numMCMCIter[i]))#
+# #		L8 <- paste0("numBurnIter = ",as.integer(numBurnIter[i]))#
+# #		L9 <- paste0("numThinIter = ",as.integer(numThinIter[i]))#
+# #		param.lines <- c(L1,L2,L3,L4,L5,L6,L7,L8,L9)#
+# #		writeLines(param.lines,params.files.path[i])#
+# #	}#
+# #	command.write <- c("#!/bin/bash",paste(exe.path,"--params",params.files.path))#
+# #	writeLines(command.write,paste0(output.dirpath,"/runeems_snps.sh"))#
+# #	if(!setup.only){#
+# #		command.exe   <- gsub(" & $","",paste(command.write,collapse=" & "))#
+# #		system(command.exe)#
+# #	}#
+} ### End runEEMs_snps function
+test <- runEEMs_snps(input.data="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/Oxyrhabdium_populations.snps_28Feb2021.vcf",coord="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/EEMS/Oxyrhabdium.coord",output.dirpath="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/EEMS/EEMS_Oxyrhabdium")
+#' @title runEEMs_snps function#
+#' #
+#' #
+#' Wrapper function for running EEMS. Optionally generates the '*.outer' file from the '*.coords' file automatically.#
+#' #
+#' #
+#' @param exe.path Character string with path to runeems_snps executable, or NULL (the default) if you've defined the EEMS path with the function config_miscwrappers. Use paths_misc.wrappers() to check if this path has been set.#
+#' @param input.data An object of class genind or vcfR, or a character string with path to a diffs file.#
+#' @param coord Character string with path to coordinates file, which has two columns with longitude and latitude coordinates (decimal degree format) of individuals in the genind object. Columns should be space separated.#
+#' @param outer Either NULL (the default) or a character string with path to the '*.outer' file, which has two columns with longitude and latitude coordinates (decimal degree format) defining the perimeter of a polygon covering the region to model with EEMS. See EEMS documentation.#
+#' If NULL, this function will generate a "*.outer" file automatically; the user will be prompted to accept the auto-generated *.outer file prior to running eems.#
+#' If you don't want to use the automatically generated *.outer file, you can create a custom one here: https://www.keene.edu/campus/maps/tool/#
+#' @param ask.use.outer When outer = NULL, this logical determines if the auto-generated outer coordinates should be plotted, at which point the user must confirm if they want to use the coordinates. Default is TRUE.#
+#' @param output.dirpath Character string with path to directory where EEMS input and output files should be saved. This directory must not exist prior to running this function, but its parent directory must exist.#
+#' Files and directories generated by this function:#
+#'    /output.dirpath/#
+#'    /output.dirpath/data#
+#'    /output.dirpath/data/data.coord#
+#'    /output.dirpath/data/data.diffs#
+#'    /output.dirpath/data/data.outer#
+#'    /output.dirpath/mcmc    ### This will contain as many mcmc subdirectories as the value of nchains.#
+#'    /output.dirpath/params  ### This will contain as many parameter files as the value of nchains.#
+#' @param n.sites The number of sites. Determined automatically if input data is a genind or vcf object/file, but must be supplied if input.data is a path to a diffs matrix.#
+#' @param pl Ploidy. Default is 2.#
+#' @param nDemes Number of demes. Default is 300. This can be a single number or a numeric vector of length nchains with value to use for each chain.#
+#' @param numMCMCIter Number of MCMC iterations (i.e., chain length).Default is 10000000. This can be a single number or a numeric vector of length nchains.#
+#' @param numBurnIter Number of Burnin iterations (i.e., chain length). Default is 1000000. This can be a single number or a numeric vector of length nchains.#
+#' @param numThinIter Number of iterations to ignore before sampling the next MCMC iteration. Default is 9999. This can be a single number or a numeric vector of length nchains.#
+#' @param nchains Number of chains to run. Default is 3.#
+#' @param setup.only If the function should setup data, parameters, and output directories but not run EEMS. Default is TRUE#
+#' @return Nothing is returned.#
+#' @export runEEMs_snps#
+runEEMs_snps <- function(exe.path=NULL, input.data, coord, outer=NULL, ask.use.outer=T, output.dirpath, n.sites, pl=2, nDemes=300, numMCMCIter = 10000000, numBurnIter = 1000000, numThinIter = 9999, nchains=3, setup.only=T){#
+ # data.dirname <- paste0(sample(c(letters,LETTERS,0:9),size=10,replace=T),collapse="")#
+ # data.dirpath <- paste0(tempdir(),"/",data.dirname)#
+ # dir.create(data.dirpath)#
+	if(is.null(exe.path)){#
+		exe.path <- exepaths_miscwrappers("runeems_snps")#
+		if(is.na(exe.path)){#
+			stop("exe.path is NULL and runeems_snps has not been defined previously. Use config_miscwrappers function to define the full path to the runeems_snps executable")#
+		}#
+	}#
+	input.data <- data#
+	if(dir.exists(output.dirpath)){#
+		command.to.remove.directory <- paste0("unlink(",output.dirpath,",recursive=T)")#
+		stop(paste("Output directory:",output.dirpath,"already exists. Use a new output.dirpath or run '",command.to.remove.directory,"'"))#
+	} else {#
+		dir.create(output.dirpath)#
+	}#
+	### Check input arguments and stop if wrong format.#
+	if(length(nDemes)!=1 | length(nDemes)!= length(nchains)){#
+		stop("nDemes should have length 1 or length equal to nchains")#
+	} else {#
+		if(length(nDemes)==1){#
+			nDemes = rep(nDemes,nchains)#
+		}#
+	}#
+	if(length(numMCMCIter)!=1 | length(numMCMCIter)!= length(nchains)){#
+		stop("numMCMCIter should have length 1 or length equal to nchains")#
+	} else {#
+		if(length(numMCMCIter)==1){#
+			numMCMCIter = rep(numMCMCIter,nchains)#
+		}#
+	}#
+	if(length(numBurnIter)!=1 | length(numBurnIter)!= length(nchains)){#
+		stop("numBurnIter should have length 1 or length equal to nchains")#
+	} else {#
+		if(length(numBurnIter)==1){#
+			numBurnIter = rep(numBurnIter,nchains)#
+		}#
+	}#
+	if(length(numThinIter)!=1 | length(numThinIter)!= length(nchains)){#
+		stop("numThinIter should have length 1 or length equal to nchains")#
+	} else {#
+		if(length(numThinIter)==1){#
+			numThinIter = rep(numThinIter,nchains)#
+		}#
+	}#
+	### Create directories in output.dirpath to hold a copy of the input (data) files, parameter files, and mcmc output#
+	# Create input directory containing copy of input files#
+	input.dirpath <- paste0(output.dirpath,"/data")#
+	dir.create(input.dirpath)#
+	# Create output mcmc directory and subdirectories#
+	mcmcpath         <- paste0(output.dirpath,"/mcmc")#
+	mcmcpath.subdirs <- paste0(mcmcpath,"/",paste0(nDemes,"Demes-chain",1:nchains))#
+	dir.create(mcmcpath)#
+	sapply(X=mcmcpath.subdirs,FUN=dir.create)#
+	# Create directory to hold params files#
+	params.path <- paste0(output.dirpath,"/params")#
+	dir.create(params.path)#
+	# Copy *.coord file to input.dirpath and rename as "data.coord"#
+	system(paste("cp",coord,paste0(input.dirpath,"/data.coord")))#
+	#### TEMPORARY TEST #####
+	if(!is(input.data,"character")){#
+		stop(paste0("stop1 ",class(input.data)))#
+	}#
+#
+	### Check if input.data is an object of class vcfR#
+	if(is(input.data,"vcfR")){#
+		genind     <- vcfR::vcfR2genind(input.data)#
+		input.data <- genind#
+	}#
+#
+	#### TEMPORARY TEST #####
+	if(!is(input.data,"character")){#
+		stop(paste0("stop2 ",class(input.data)))#
+	}#
+#
+	### Check if input.data is an object of class genind#
+	if(is(input.data,"genind")){#
+		data.diffs <- misc.wrappers::genind2diffs(genind.obj=input.data,output.file=paste0(input.dirpath,"/data.diffs"))#
+		diffs      <- data.diffs[["diffs"]]#
+		nIndiv     <- data.diffs[["nIndiv"]]#
+		nSites     <- data.diffs[["nSites"]]#
+	} else {#
+		# stop("input.data must be an object of class 'vcfR' or 'genind'")#
+	#### TEMPORARY TEST #####
+	if(!is(input.data,"character")){#
+		stop(paste0("stop3 ",class(input.data)))#
+	}#
+		if(is(input.data,"character")){#
+			first.line <- readLines(input.data,n=1)#
+			if(grep("VCF",first.line)==1){#
+				vcf.data   <- vcfR::read.vcfR(input.data)#
+				genind     <- vcfR::vcfR2genind(vcf.data)#
+				data.diffs <- misc.wrappers::genind2diffs(genind.obj=genind,ploidy=as.numeric(pl),output.file=paste0(input.dirpath,"/data.diffs"))#
+				if(!file.exists(paste0(input.dirpath,"/data.diffs"))){#
+					stop("data.diffs does not exist")#
+				}#
+				diffs      <- data.diffs[["diffs"]]#
+				nIndiv     <- data.diffs[["nIndiv"]]#
+				nSites     <- data.diffs[["nSites"]]#
+			} else {#
+				data.diffs <- read.table(input.data,sep=" ",header=F)#
+				### Check that the diffs file has the correct dimmensions#
+				if(ncol(data.diffs)==nrow(data.diffs)){#
+					nIndiv     <- ncol(data.diffs)#
+					if(is.null(n.sites)){#
+						stop("n.sites must be supplied when input.data is a diffs file")#
+					} else {#
+						nSites     <- as.numeric(n.sites)#
+					}#
+					system(paste("cp",input.data,paste0(input.dirpath,"/data.diffs")))#
+				} else {#
+					stop("input.data path must be VCF or diffs file")#
+				}#
+			}#
+		}#
+	}#
+	# If path to the outer file is NULL, generate one automatically, otherwise copy it to input.dirpath and rename as "data.outer"#
+	if(!is.null(outer)){#
+		system(paste("cp",outer,paste0(input.dirpath,"/data.outer")))#
+	} else {#
+		data_outer <- misc.wrappers::create.outer(coords=coord,plot.outer=ask.use.outer,ask.use=ask.use.outer,output.path=paste0(input.dirpath,"/data.outer"))#
+	}#
+	### Generate diffs file, saving to input.dirpath with name "data.diffs"#
+	# data.diffs <- genind2diffs(genind.obj=genind,output.file=paste0(input.dirpath,"/data.diffs"))#
+	# diffs      <- data.diffs["diffs"]#
+	# nIndiv     <- c(data.diffs["nIndiv"])#
+	# nSites     <- data.diffs["nSites"]#
+# #	params.files.path <- paste0(params.path,"/params-chain",1:nchains,"_",nDemes,".ini")#
+# #	for(i in 1:nchains){#
+# #		L1 <- paste0("datapath = ",paste0(input.dirpath,"/data"))#
+# #		L2 <- paste0("mcmcpath = ",mcmcpath.subdirs[i])#
+# #		L3 <- paste0("nIndiv = ",as.integer(nIndiv))#
+# #		L4 <- paste0("nSites = ",as.integer(nSites))#
+# #		L5 <- paste0("nDemes = ",as.integer(nDemes[i]))#
+# #		L6 <- paste0("diploid = ",TRUE)#
+# #		L7 <- paste0("numMCMCIter = ",as.integer(numMCMCIter[i]))#
+# #		L8 <- paste0("numBurnIter = ",as.integer(numBurnIter[i]))#
+# #		L9 <- paste0("numThinIter = ",as.integer(numThinIter[i]))#
+# #		param.lines <- c(L1,L2,L3,L4,L5,L6,L7,L8,L9)#
+# #		writeLines(param.lines,params.files.path[i])#
+# #	}#
+# #	command.write <- c("#!/bin/bash",paste(exe.path,"--params",params.files.path))#
+# #	writeLines(command.write,paste0(output.dirpath,"/runeems_snps.sh"))#
+# #	if(!setup.only){#
+# #		command.exe   <- gsub(" & $","",paste(command.write,collapse=" & "))#
+# #		system(command.exe)#
+# #	}#
+} ### End runEEMs_snps function
+test <- runEEMs_snps(input.data="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/Oxyrhabdium_populations.snps_28Feb2021.vcf",coord="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/EEMS/Oxyrhabdium.coord",output.dirpath="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/EEMS/EEMS_Oxyrhabdium")
+test <- runEEMs_snps(input.data="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/Oxyrhabdium_populations.snps_28Feb2021.vcf",coord="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/EEMS/Oxyrhabdium.coord",output.dirpath="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/EEMS/EEMS_Oxyrhabdium")
 dev.off()
-devtools::install_github("JeffWeinell/misc.wrappers",auth_token="323d9e4cd00247a39a805dbb66f37db6403cfb8b")
-devtools::document()
+exe.path=NULL; input.data; coord; outer=NULL; ask.use.outer=T; data.type="diffs"; output.dirpath; n.sites; pl=2; nDemes=300; numMCMCIter = 10000000; numBurnIter = 1000000; numThinIter = 9999; nchains=3; setup.only=T
+input.data="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/Oxyrhabdium_populations.snps_28Feb2021.vcf";coord="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/EEMS/Oxyrhabdium.coord";output.dirpath="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/EEMS/EEMS_Oxyrhabdium", exe.path=NULL; outer=NULL; ask.use.outer=T; data.type="diffs"; n.sites; pl=2; nDemes=300; numMCMCIter = 10000000; numBurnIter = 1000000; numThinIter = 9999; nchains=3; setup.only=T
+input.data="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/Oxyrhabdium_populations.snps_28Feb2021.vcf";coord="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/EEMS/Oxyrhabdium.coord";output.dirpath="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/EEMS/EEMS_Oxyrhabdium";exe.path=NULL; outer=NULL; ask.use.outer=T; data.type="diffs"; n.sites; pl=2; nDemes=300; numMCMCIter = 10000000; numBurnIter = 1000000; numThinIter = 9999; nchains=3; setup.only=T
+input.data="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/Oxyrhabdium_populations.snps_28Feb2021.vcf";coord="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/EEMS/Oxyrhabdium.coord";output.dirpath="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/EEMS/EEMS_Oxyrhabdium";exe.path=NULL; outer=NULL; ask.use.outer=T; data.type="diffs"; n.sites=NULL; pl=2; nDemes=300; numMCMCIter = 10000000; numBurnIter = 1000000; numThinIter = 9999; nchains=3; setup.only=T
+if(is.null(exe.path)){#
+		exe.path <- exepaths_miscwrappers("runeems_snps")#
+		if(is.na(exe.path)){#
+			stop("exe.path is NULL and runeems_snps has not been defined previously. Use config_miscwrappers function to define the full path to the runeems_snps executable")#
+		}#
+	}#
+	input.data <- data#
+	if(dir.exists(output.dirpath)){#
+		command.to.remove.directory <- paste0("unlink(",output.dirpath,",recursive=T)")#
+		stop(paste("Output directory:",output.dirpath,"already exists. Use a new output.dirpath or run '",command.to.remove.directory,"'"))#
+	} else {#
+		dir.create(output.dirpath)#
+	}#
+	### Check input arguments and stop if wrong format.#
+	if(length(nDemes)!=1 | length(nDemes)!= length(nchains)){#
+		stop("nDemes should have length 1 or length equal to nchains")#
+	} else {#
+		if(length(nDemes)==1){#
+			nDemes = rep(nDemes,nchains)#
+		}#
+	}#
+	if(length(numMCMCIter)!=1 | length(numMCMCIter)!= length(nchains)){#
+		stop("numMCMCIter should have length 1 or length equal to nchains")#
+	} else {#
+		if(length(numMCMCIter)==1){#
+			numMCMCIter = rep(numMCMCIter,nchains)#
+		}#
+	}#
+	if(length(numBurnIter)!=1 | length(numBurnIter)!= length(nchains)){#
+		stop("numBurnIter should have length 1 or length equal to nchains")#
+	} else {#
+		if(length(numBurnIter)==1){#
+			numBurnIter = rep(numBurnIter,nchains)#
+		}#
+	}#
+	if(length(numThinIter)!=1 | length(numThinIter)!= length(nchains)){#
+		stop("numThinIter should have length 1 or length equal to nchains")#
+	} else {#
+		if(length(numThinIter)==1){#
+			numThinIter = rep(numThinIter,nchains)#
+		}#
+	}
+if(is.null(exe.path)){#
+		exe.path <- exepaths_miscwrappers("runeems_snps")#
+		if(is.na(exe.path)){#
+			stop("exe.path is NULL and runeems_snps has not been defined previously. Use config_miscwrappers function to define the full path to the runeems_snps executable")#
+		}#
+	}#
+	input.data <- data#
+	if(dir.exists(output.dirpath)){#
+		command.to.remove.directory <- paste0("unlink(",output.dirpath,",recursive=T)")#
+		stop(paste("Output directory:",output.dirpath,"already exists. Use a new output.dirpath or run '",command.to.remove.directory,"'"))#
+	} else {#
+		dir.create(output.dirpath)#
+	}#
+	### Check input arguments and stop if wrong format.#
+	if(length(nDemes)!=1 | length(nDemes)!= length(nchains)){#
+		stop("nDemes should have length 1 or length equal to nchains")#
+	} else {#
+		if(length(nDemes)==1){#
+			nDemes = rep(nDemes,nchains)#
+		}#
+	}#
+	if(length(numMCMCIter)!=1 | length(numMCMCIter)!= length(nchains)){#
+		stop("numMCMCIter should have length 1 or length equal to nchains")#
+	} else {#
+		if(length(numMCMCIter)==1){#
+			numMCMCIter = rep(numMCMCIter,nchains)#
+		}#
+	}#
+	if(length(numBurnIter)!=1 | length(numBurnIter)!= length(nchains)){#
+		stop("numBurnIter should have length 1 or length equal to nchains")#
+	} else {#
+		if(length(numBurnIter)==1){#
+			numBurnIter = rep(numBurnIter,nchains)#
+		}#
+	}#
+	if(length(numThinIter)!=1 | length(numThinIter)!= length(nchains)){#
+		stop("numThinIter should have length 1 or length equal to nchains")#
+	} else {#
+		if(length(numThinIter)==1){#
+			numThinIter = rep(numThinIter,nchains)#
+		}#
+	}
+numThinIter
+nchains
+if(is.null(exe.path)){#
+		exe.path <- exepaths_miscwrappers("runeems_snps")#
+		if(is.na(exe.path)){#
+			stop("exe.path is NULL and runeems_snps has not been defined previously. Use config_miscwrappers function to define the full path to the runeems_snps executable")#
+		}#
+	}
+exe.path
+data="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/Oxyrhabdium_populations.snps_28Feb2021.vcf"
+input.data <- data
+if(dir.exists(output.dirpath)){#
+		command.to.remove.directory <- paste0("unlink(",output.dirpath,",recursive=T)")#
+		stop(paste("Output directory:",output.dirpath,"already exists. Use a new output.dirpath or run '",command.to.remove.directory,"'"))#
+	} else {#
+		dir.create(output.dirpath)#
+	}
+if(dir.exists(output.dirpath)){#
+		command.to.remove.directory <- paste0("unlink(",output.dirpath,",recursive=T)")#
+		stop(paste("Output directory:",output.dirpath,"already exists. Use a new output.dirpath or run '",command.to.remove.directory,"'"))#
+	} else {#
+		dir.create(output.dirpath)#
+	}
+if(length(nDemes)!=1 | length(nDemes)!= length(nchains)){#
+		stop("nDemes should have length 1 or length equal to nchains")#
+	} else {#
+		if(length(nDemes)==1){#
+			nDemes = rep(nDemes,nchains)#
+		}#
+	}
+nDemes
+length(nchains)
+if(dir.exists(output.dirpath)){#
+		command.to.remove.directory <- paste0("unlink(",output.dirpath,",recursive=T)")#
+		stop(paste("Output directory:",output.dirpath,"already exists. Use a new output.dirpath or run '",command.to.remove.directory,"'"))#
+	} else {#
+		dir.create(output.dirpath)#
+	}
+if(length(nDemes)!=1 | length(nDemes)!= nchains){#
+		stop("nDemes should have length 1 or length equal to nchains")#
+	} else {#
+		if(length(nDemes)==1){#
+			nDemes = rep(nDemes,nchains)#
+		}#
+	}
+length(nDemes)
+nDemes
+nchains
+length(nDemes)!= nchains
+if(length(nDemes)!=1 & length(nDemes)!= nchains){#
+		stop("nDemes should have length 1 or length equal to nchains")#
+	} else {#
+		if(length(nDemes)==1){#
+			nDemes = rep(nDemes,nchains)#
+		}#
+	}
+if(length(numMCMCIter)!=1 & length(numMCMCIter)!= nchains){#
+		stop("numMCMCIter should have length 1 or length equal to nchains")#
+	} else {#
+		if(length(numMCMCIter)==1){#
+			numMCMCIter = rep(numMCMCIter,nchains)#
+		}#
+	}#
+	if(length(numBurnIter)!=1 & length(numBurnIter)!= nchains){#
+		stop("numBurnIter should have length 1 or length equal to nchains")#
+	} else {#
+		if(length(numBurnIter)==1){#
+			numBurnIter = rep(numBurnIter,nchains)#
+		}#
+	}#
+	if(length(numThinIter)!=1 & length(numThinIter)!= nchains){#
+		stop("numThinIter should have length 1 or length equal to nchains")#
+	} else {#
+		if(length(numThinIter)==1){#
+			numThinIter = rep(numThinIter,nchains)#
+		}#
+	}
+input.dirpath <- paste0(output.dirpath,"/data")#
+	dir.create(input.dirpath)
+input.data
+mcmcpath         <- paste0(output.dirpath,"/mcmc")#
+	mcmcpath.subdirs <- paste0(mcmcpath,"/",paste0(nDemes,"Demes-chain",1:nchains))#
+	dir.create(mcmcpath)#
+	sapply(X=mcmcpath.subdirs,FUN=dir.create)#
+	# Create directory to hold params files#
+	params.path <- paste0(output.dirpath,"/params")#
+	dir.create(params.path)#
+	# Copy *.coord file to input.dirpath and rename as "data.coord"#
+	system(paste("cp",coord,paste0(input.dirpath,"/data.coord")))
+!is(input.data,"character")
+class(input.data)
+is(input.data,"character")
+is(input.data,"vcfR")
+if(is(input.data,"vcfR")){#
+		genind     <- vcfR::vcfR2genind(input.data)#
+		input.data <- genind#
+	}
+if(!is(input.data,"character")){#
+		stop(paste0("stop2 ",class(input.data)))#
+	}
+if(is(input.data,"genind")){#
+		data.diffs <- misc.wrappers::genind2diffs(genind.obj=input.data,output.file=paste0(input.dirpath,"/data.diffs"))#
+		diffs      <- data.diffs[["diffs"]]#
+		nIndiv     <- data.diffs[["nIndiv"]]#
+		nSites     <- data.diffs[["nSites"]]#
+	}
+if(!is(input.data,"character")){#
+		stop(paste0("stop3 ",class(input.data)))#
+	}
+is(input.data,"character")
+#' @title runEEMs_snps function#
+#' #
+#' #
+#' Wrapper function for running EEMS. Optionally generates the '*.outer' file from the '*.coords' file automatically.#
+#' #
+#' #
+#' @param exe.path Character string with path to runeems_snps executable, or NULL (the default) if you've defined the EEMS path with the function config_miscwrappers. Use paths_misc.wrappers() to check if this path has been set.#
+#' @param data An object of class genind or vcfR, or a character string with path to a diffs file.#
+#' @param coord Character string with path to coordinates file, which has two columns with longitude and latitude coordinates (decimal degree format) of individuals in the genind object. Columns should be space separated.#
+#' @param outer Either NULL (the default) or a character string with path to the '*.outer' file, which has two columns with longitude and latitude coordinates (decimal degree format) defining the perimeter of a polygon covering the region to model with EEMS. See EEMS documentation.#
+#' If NULL, this function will generate a "*.outer" file automatically; the user will be prompted to accept the auto-generated *.outer file prior to running eems.#
+#' If you don't want to use the automatically generated *.outer file, you can create a custom one here: https://www.keene.edu/campus/maps/tool/#
+#' @param ask.use.outer When outer = NULL, this logical determines if the auto-generated outer coordinates should be plotted, at which point the user must confirm if they want to use the coordinates. Default is TRUE.#
+#' @param output.dirpath Character string with path to directory where EEMS input and output files should be saved. This directory must not exist prior to running this function, but its parent directory must exist.#
+#' Files and directories generated by this function:#
+#'    /output.dirpath/#
+#'    /output.dirpath/data#
+#'    /output.dirpath/data/data.coord#
+#'    /output.dirpath/data/data.diffs#
+#'    /output.dirpath/data/data.outer#
+#'    /output.dirpath/mcmc    ### This will contain as many mcmc subdirectories as the value of nchains.#
+#'    /output.dirpath/params  ### This will contain as many parameter files as the value of nchains.#
+#' @param n.sites The number of sites. Determined automatically if input data is a genind or vcf object/file, but must be supplied if input.data is a path to a diffs matrix.#
+#' @param pl Ploidy. Default is 2.#
+#' @param nDemes Number of demes. Default is 300. This can be a single number or a numeric vector of length nchains with value to use for each chain.#
+#' @param numMCMCIter Number of MCMC iterations (i.e., chain length).Default is 10000000. This can be a single number or a numeric vector of length nchains.#
+#' @param numBurnIter Number of Burnin iterations (i.e., chain length). Default is 1000000. This can be a single number or a numeric vector of length nchains.#
+#' @param numThinIter Number of iterations to ignore before sampling the next MCMC iteration. Default is 9999. This can be a single number or a numeric vector of length nchains.#
+#' @param nchains Number of chains to run. Default is 3.#
+#' @param setup.only If the function should setup data, parameters, and output directories but not run EEMS. Default is TRUE#
+#' @return Nothing is returned.#
+#' @export runEEMs_snps#
+runEEMs_snps <- function(exe.path=NULL, data, coord, outer=NULL, ask.use.outer=T, output.dirpath, n.sites=NULL, pl=2, nDemes=300, numMCMCIter = 10000000, numBurnIter = 1000000, numThinIter = 9999, nchains=3, setup.only=T){#
+ # data.dirname <- paste0(sample(c(letters,LETTERS,0:9),size=10,replace=T),collapse="")#
+ # data.dirpath <- paste0(tempdir(),"/",data.dirname)#
+ # dir.create(data.dirpath)#
+	if(is.null(exe.path)){#
+		exe.path <- exepaths_miscwrappers("runeems_snps")#
+		if(is.na(exe.path)){#
+			stop("exe.path is NULL and runeems_snps has not been defined previously. Use config_miscwrappers function to define the full path to the runeems_snps executable")#
+		}#
+	}#
+	if(dir.exists(output.dirpath)){#
+		command.to.remove.directory <- paste0("unlink(",output.dirpath,",recursive=T)")#
+		stop(paste("Output directory:",output.dirpath,"already exists. Use a new output.dirpath or run '",command.to.remove.directory,"'"))#
+	} else {#
+		dir.create(output.dirpath)#
+	}#
+	### Check input arguments and stop if wrong format.#
+	if(length(nDemes)!=1 & length(nDemes)!= nchains){#
+		stop("nDemes should have length 1 or length equal to nchains")#
+	} else {#
+		if(length(nDemes)==1){#
+			nDemes = rep(nDemes,nchains)#
+		}#
+	}#
+	if(length(numMCMCIter)!=1 & length(numMCMCIter)!= nchains){#
+		stop("numMCMCIter should have length 1 or length equal to nchains")#
+	} else {#
+		if(length(numMCMCIter)==1){#
+			numMCMCIter = rep(numMCMCIter,nchains)#
+		}#
+	}#
+	if(length(numBurnIter)!=1 & length(numBurnIter)!= nchains){#
+		stop("numBurnIter should have length 1 or length equal to nchains")#
+	} else {#
+		if(length(numBurnIter)==1){#
+			numBurnIter = rep(numBurnIter,nchains)#
+		}#
+	}#
+	if(length(numThinIter)!=1 & length(numThinIter)!= nchains){#
+		stop("numThinIter should have length 1 or length equal to nchains")#
+	} else {#
+		if(length(numThinIter)==1){#
+			numThinIter = rep(numThinIter,nchains)#
+		}#
+	}#
+	### Set input.data equal to data argument#
+	input.data <- data#
+	### Create directories in output.dirpath to hold a copy of the input (data) files, parameter files, and mcmc output#
+	# Create input directory containing copy of input files#
+	input.dirpath <- paste0(output.dirpath,"/data")#
+	dir.create(input.dirpath)#
+	# Create output mcmc directory and subdirectories#
+	mcmcpath         <- paste0(output.dirpath,"/mcmc")#
+	mcmcpath.subdirs <- paste0(mcmcpath,"/",paste0(nDemes,"Demes-chain",1:nchains))#
+	dir.create(mcmcpath)#
+	sapply(X=mcmcpath.subdirs,FUN=dir.create)#
+	# Create directory to hold params files#
+	params.path <- paste0(output.dirpath,"/params")#
+	dir.create(params.path)#
+	# Copy *.coord file to input.dirpath and rename as "data.coord"#
+	system(paste("cp",coord,paste0(input.dirpath,"/data.coord")))#
+#
+	### Check if input.data is an object of class vcfR#
+	if(is(input.data,"vcfR")){#
+		genind     <- vcfR::vcfR2genind(input.data)#
+		input.data <- genind#
+	}#
+#
+	### Check if input.data is an object of class genind#
+	if(is(input.data,"genind")){#
+		data.diffs <- misc.wrappers::genind2diffs(genind.obj=input.data,output.file=paste0(input.dirpath,"/data.diffs"))#
+		diffs      <- data.diffs[["diffs"]]#
+		nIndiv     <- data.diffs[["nIndiv"]]#
+		nSites     <- data.diffs[["nSites"]]#
+	} else {#
+		# stop("input.data must be an object of class 'vcfR' or 'genind'")#
+		if(is(input.data,"character")){#
+			first.line <- readLines(input.data,n=1)#
+			if(grep("VCF",first.line)==1){#
+				vcf.data   <- vcfR::read.vcfR(input.data)#
+				genind     <- vcfR::vcfR2genind(vcf.data)#
+				data.diffs <- misc.wrappers::genind2diffs(genind.obj=genind,ploidy=as.numeric(pl),output.file=paste0(input.dirpath,"/data.diffs"))#
+				if(!file.exists(paste0(input.dirpath,"/data.diffs"))){#
+					stop("data.diffs does not exist")#
+				}#
+				diffs      <- data.diffs[["diffs"]]#
+				nIndiv     <- data.diffs[["nIndiv"]]#
+				nSites     <- data.diffs[["nSites"]]#
+			} else {#
+				data.diffs <- read.table(input.data,sep=" ",header=F)#
+				### Check that the diffs file has the correct dimmensions#
+				if(ncol(data.diffs)==nrow(data.diffs)){#
+					nIndiv     <- ncol(data.diffs)#
+					if(is.null(n.sites)){#
+						stop("n.sites must be supplied when input.data is a diffs file")#
+					} else {#
+						nSites     <- as.numeric(n.sites)#
+					}#
+					system(paste("cp",input.data,paste0(input.dirpath,"/data.diffs")))#
+				} else {#
+					stop("input.data path must be VCF or diffs file")#
+				}#
+			}#
+		}#
+	}#
+	# If path to the outer file is NULL, generate one automatically, otherwise copy it to input.dirpath and rename as "data.outer"#
+	if(!is.null(outer)){#
+		system(paste("cp",outer,paste0(input.dirpath,"/data.outer")))#
+	} else {#
+		data_outer <- misc.wrappers::create.outer(coords=coord,plot.outer=ask.use.outer,ask.use=ask.use.outer,output.path=paste0(input.dirpath,"/data.outer"))#
+	}#
+	### Generate diffs file, saving to input.dirpath with name "data.diffs"#
+	# data.diffs <- genind2diffs(genind.obj=genind,output.file=paste0(input.dirpath,"/data.diffs"))#
+	# diffs      <- data.diffs["diffs"]#
+	# nIndiv     <- c(data.diffs["nIndiv"])#
+	# nSites     <- data.diffs["nSites"]#
+# #	params.files.path <- paste0(params.path,"/params-chain",1:nchains,"_",nDemes,".ini")#
+# #	for(i in 1:nchains){#
+# #		L1 <- paste0("datapath = ",paste0(input.dirpath,"/data"))#
+# #		L2 <- paste0("mcmcpath = ",mcmcpath.subdirs[i])#
+# #		L3 <- paste0("nIndiv = ",as.integer(nIndiv))#
+# #		L4 <- paste0("nSites = ",as.integer(nSites))#
+# #		L5 <- paste0("nDemes = ",as.integer(nDemes[i]))#
+# #		L6 <- paste0("diploid = ",TRUE)#
+# #		L7 <- paste0("numMCMCIter = ",as.integer(numMCMCIter[i]))#
+# #		L8 <- paste0("numBurnIter = ",as.integer(numBurnIter[i]))#
+# #		L9 <- paste0("numThinIter = ",as.integer(numThinIter[i]))#
+# #		param.lines <- c(L1,L2,L3,L4,L5,L6,L7,L8,L9)#
+# #		writeLines(param.lines,params.files.path[i])#
+# #	}#
+# #	command.write <- c("#!/bin/bash",paste(exe.path,"--params",params.files.path))#
+# #	writeLines(command.write,paste0(output.dirpath,"/runeems_snps.sh"))#
+# #	if(!setup.only){#
+# #		command.exe   <- gsub(" & $","",paste(command.write,collapse=" & "))#
+# #		system(command.exe)#
+# #	}#
+} ### End runEEMs_snps function
+test <- runEEMs_snps(data="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/Oxyrhabdium_populations.snps_28Feb2021.vcf",coord="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/EEMS/Oxyrhabdium.coord",output.dirpath="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/EEMS/EEMS_Oxyrhabdium")
+data.outer
+data_outer
+setwd("Documents/misc.wrapper")
+getwd()
 setwd("Documents/misc.wrappers")
+library(devtools)
+devtools::install_github("JeffWeinell/misc.wrappers",auth_token="323d9e4cd00247a39a805dbb66f37db6403cfb8b")
+devtools::install_github("JeffWeinell/misc.wrappers",auth_token="323d9e4cd00247a39a805dbb66f37db6403cfb8b")
 devtools::document()
+rm(list = c("runEEMs_snps"))
 devtools::document()
 devtools::install_github("JeffWeinell/misc.wrappers",auth_token="323d9e4cd00247a39a805dbb66f37db6403cfb8b")
+library(misc.wrappers)
