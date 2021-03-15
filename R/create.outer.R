@@ -19,54 +19,54 @@
 create.outer <- function(coords,method=1,buffer.adj=0,coords.radius=0.01,max.fractal.dimension=1.1,plot.outer=TRUE,ask.use=FALSE,counter.clockwise=TRUE,output.path=NULL){
 	# Function to extract the coordinates matrix (numeric mode) from a class Polygon, Polygons, SpatialPolygons, or SpatialPolygonsDataFrame object that containins a single polygon.
 	# Do not use this function if the inout spatial object contains more than coordinates matrix.
-	sp2coords <- function(x){
-		if(is(x,"SpatialPolygonsDataFrame") | is(x,"SpatialPolygons")){
-			result <- x@polygons[[1]]@Polygons[[1]]@coords
-		}
-		if(is(x,"Polygons")){
-			result <- x@Polygons[[1]]@coords
-		}
-		if(is(x,"Polygon") | is(x,"SpatialPoints")){
-			result <- x@coords
-		}
-		unname(result)
-	}
-	### Convert a coordinates matrix into a SpatialPolygons object in circles centered at input coordinates, and radius specified by r
-	coords2sp.poly <- function(coords.mat,r=0.01){
-		colnames(coords.mat) <- c("x","y")
-		circles.list <- apply(X=coords.mat,MARGIN=1,FUN=function(x){sampSurf::spCircle(radius=r,centerPoint=x)[[1]]})
-		res          <- do.call(raster::bind,circles.list)
-		res
-	}
-	### Fractal dimension of perimeter-area relationship, a metric of polygon complexity with values from 1 (simple euclidean shapes likes squares and circles) tp approaching 2 for increasingly complex polygons.
-	# More info: http://www.umass.edu/landeco/teaching/landscape_ecology/schedule/chapter9_metrics.pdf
-	# Input must be a SpatialPolygons object
-	fracD <- function(x){
-		# area in meters squared
-		x.area      <- geosphere::areaPolygon(x)
-		# perimeter in meters
-		x.perimeter <- geosphere::perimeter(x)
-		(2*log10(x.perimeter))/(log10(x.area))
-	}
-	#### For a SpatialPolygonsDataFrame, extract the lowest-level polygons and hold each as a feature in a SpatialPolygons object.
-	extract.base.polygons <- function(spdf){
-		for(i in 1:nrow(spdf)){
-			sp.temp <- spdf@polygons[[i]]
-			for(j in 1:length(sp.temp@Polygons)){
-				id.temp <- paste0(i,".",j)
-				polygons.ij <- sp::SpatialPolygons(list(sp::Polygons(list(sp.temp@Polygons[[j]]),ID=id.temp)))
-				if(i==1 & j==1){
-					polygons.all <- polygons.ij
-				} else {
-					polygons.all <- raster::bind(polygons.all,polygons.ij)
-				}
-			}
-		}
-		### Preserve crs definition
-		raster::crs(polygons.all) <- raster::crs(spdf)
-		### object returned
-		polygons.all
-	}
+	# sp2coords <- function(x){
+	# 	if(is(x,"SpatialPolygonsDataFrame") | is(x,"SpatialPolygons")){
+	# 		result <- x@polygons[[1]]@Polygons[[1]]@coords
+	# 	}
+	# 	if(is(x,"Polygons")){
+	# 		result <- x@Polygons[[1]]@coords
+	# 	}
+	# 	if(is(x,"Polygon") | is(x,"SpatialPoints")){
+	# 		result <- x@coords
+	# 	}
+	# 	unname(result)
+	# }
+	# ### Convert a coordinates matrix into a SpatialPolygons object in circles centered at input coordinates, and radius specified by r
+	# coords2sp.poly <- function(coords.mat,r=0.01){
+	# 	colnames(coords.mat) <- c("x","y")
+	# 	circles.list <- apply(X=coords.mat,MARGIN=1,FUN=function(x){sampSurf::spCircle(radius=r,centerPoint=x)[[1]]})
+	# 	res          <- do.call(raster::bind,circles.list)
+	# 	res
+	# }
+	# ### Fractal dimension of perimeter-area relationship, a metric of polygon complexity with values from 1 (simple euclidean shapes likes squares and circles) tp approaching 2 for increasingly complex polygons.
+	# # More info: http://www.umass.edu/landeco/teaching/landscape_ecology/schedule/chapter9_metrics.pdf
+	# # Input must be a SpatialPolygons object
+	# fracD <- function(x){
+	# 	# area in meters squared
+	# 	x.area      <- geosphere::areaPolygon(x)
+	# 	# perimeter in meters
+	# 	x.perimeter <- geosphere::perimeter(x)
+	# 	(2*log10(x.perimeter))/(log10(x.area))
+	# }
+	# #### For a SpatialPolygonsDataFrame, extract the lowest-level polygons and hold each as a feature in a SpatialPolygons object.
+	# extract.base.polygons <- function(spdf){
+	# 	for(i in 1:nrow(spdf)){
+	# 		sp.temp <- spdf@polygons[[i]]
+	# 		for(j in 1:length(sp.temp@Polygons)){
+	# 			id.temp <- paste0(i,".",j)
+	# 			polygons.ij <- sp::SpatialPolygons(list(sp::Polygons(list(sp.temp@Polygons[[j]]),ID=id.temp)))
+	# 			if(i==1 & j==1){
+	# 				polygons.all <- polygons.ij
+	# 			} else {
+	# 				polygons.all <- raster::bind(polygons.all,polygons.ij)
+	# 			}
+	# 		}
+	# 	}
+	# 	### Preserve crs definition
+	# 	raster::crs(polygons.all) <- raster::crs(spdf)
+	# 	### object returned
+	# 	polygons.all
+	# }
 	input.coords <- coords
 	### Check which type of object is being supplied to coords and define coords accordingly
 	if(is(input.coords,"character")){
@@ -82,7 +82,7 @@ create.outer <- function(coords,method=1,buffer.adj=0,coords.radius=0.01,max.fra
 	# crs.string <- rgdal::showWKT(sp::proj4string(spdf_world_10))
 	# crs.string <- "+init=epsg:4326 +proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0"
 	crs.string <- "+init=EPSG:4326"
-	wkt.string <- rgdal::showWKT(crs.string)
+	# wkt.string <- rgdal::showWKT(crs.string)
 	### Define CRS using wkt format
 	raster::crs(spdf_world_10)   <- crs.string
 	### SpatialPoints object holding coords

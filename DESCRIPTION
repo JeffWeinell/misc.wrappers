@@ -13,6 +13,6 @@ Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.1
-Imports: sp, maps, rgeos, rgdal, raster, smoothr, sampSurf, geosphere, alphahull, adehabitatHR, rnaturalearth, rnaturalearthhires, grid, gridExtra, reemsplots2, ggplot2, vcfR, adegenet, stringr,rappdirs
-Depends: R (>= 3.6.0)
+Imports: maps, rgeos, rgdal, raster, smoothr, sampSurf, geosphere, alphahull, adehabitatHR, rnaturalearth, rnaturalearthhires, grid, gridExtra, reemsplots2, ggplot2, vcfR, adegenet, stringr,rappdirs
+Depends: R (>= 3.6.0), sp
 Suggests: phytools, biofiles, DECIPHER, dplyr, GenomeInfoDb, GenomicRanges, igraph, IRanges, parallel, phangorn, RCurl, Rsamtools, stringr, tibble, utils, data.table, Biostrings, BSgenome
