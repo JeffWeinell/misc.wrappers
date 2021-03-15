@@ -95,10 +95,12 @@ runEEMs_snps <- function(exe.path=NULL, input.data, coord, outer=NULL, ask.use.o
 	} else {
 		system(paste("cp",outer,paste0(input.dirpath,"/data.outer")))
 	}
+	### Check if input.data is an object of class vcfR
 	if(is(input.data,"vcfR")){
 		genind     <- vcfR::vcfR2genind(input.data)
 		input.data <- genind
 	}
+	### Check if input.data is an object of class genind
 	if(is(input.data,"genind")){
 		data.diffs <- misc.wrappers::genind2diffs(genind.obj=input.data,output.file=paste0(input.dirpath,"/data.diffs"))
 		diffs      <- data.diffs["diffs"]
@@ -111,10 +113,10 @@ runEEMs_snps <- function(exe.path=NULL, input.data, coord, outer=NULL, ask.use.o
 			if(grep("VCF",first.line)==1){
 				vcf.data   <- vcfR::read.vcfR(input.data)
 				genind     <- vcfR::vcfR2genind(vcf.data)
-				data.diffs <- misc.wrappers::genind2diffs(genind.obj=genind,output.file=paste0(input.dirpath,"/data.diffs"))
-				diffs      <- data.diffs["diffs"]
-				nIndiv     <- c(data.diffs["nIndiv"])
-				nSites     <- data.diffs["nSites"]
+				data.diffs <- misc.wrappers::genind2diffs(genind.obj=genind,ploidy=ploidy,output.file=paste0(input.dirpath,"/data.diffs"))
+				diffs      <- data.diffs[["diffs"]]
+				nIndiv     <- data.diffs[["nIndiv"]]
+				nSites     <- data.diffs[["nSites"]]
 			} else {
 				data.diffs <- read.table(input.data,sep=" ",header=F)
 				### Check that the diffs file has the correct dimmensions
@@ -123,7 +125,7 @@ runEEMs_snps <- function(exe.path=NULL, input.data, coord, outer=NULL, ask.use.o
 					if(is.null(n.sites)){
 						stop("n.sites must be supplied when input.data is a diffs file")
 					} else {
-						nSites     <- n.sites
+						nSites     <- as.numeric(n.sites)
 					}
 					system(paste("cp",input.data,paste0(input.dirpath,"/data.diffs")))
 				} else {

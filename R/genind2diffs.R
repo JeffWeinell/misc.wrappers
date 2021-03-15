@@ -12,7 +12,7 @@
 #' @export genind2diffs
 genind2diffs <- function(genind.obj,ploidy=2,include.indv.names=F,output.file=NULL){
 	gen         <- genind.obj
-	ploidy(gen) <- ploidy
+	adegenet::ploidy(gen) <- ploidy
 	stopifnot(identical(gen@type, 'codom'))
 	Geno       <- gen@tab
 	## Names of loci that are not biallelic
