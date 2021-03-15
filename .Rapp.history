@@ -1,10 +1,3 @@
-crs(hull.alpha.sp)
-projects.alpha.points <- hull.alpha.sp; crs(projects.alpha.points) <- crs.string
-test <- geobuffer_pts(xy=projects.alpha.points,dist_m=10000)
-projected.alpha.points <- hull.alpha.sp; crs(projected.alpha.points) <- crs.string#
-			geodessic.buffered.points <- geobuffer_pts(xy=projected.alpha.points,dist_m=10000)#
-			geodessic.buffered.poly <- sp::SpatialPolygons(list(sp::Polygons(list(sp::Polygon(geodessic.buffered.points)),ID="geo.buff.pts")))
-buffer.poly        <- rgeos::gBuffer(hull.alpha.polygon,width=((-0.75)+buffer.adj))
 plot(geodessic.buffered.poly)
 alpha
 plot(buffer.poly)
@@ -6487,132 +6480,78 @@ test <- create.outer(coords="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdi
 ?ploidy()
 dev.off()
 library(devtools)#
-devtools::install_github("JeffWeinell/misc.wrappers",auth_token="323d9e4cd00247a39a805dbb66f37db6403cfb8b")
+devtools::install_github("JeffWeinell/misc.wrappers",auth_token="323d9e4cd00247a39a805dbb66f37db6403cfb8b")#
+library(misc.wrappers)
+test <- runEEMs_snps(input.data="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/Oxyrhabdium_populations.snps_28Feb2021.vcf",coord="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/EEMS/Oxyrhabdium.coord",output.dirpath="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/EEMS/EEMS_Oxyrhabdium")
 library(misc.wrappers)
 test <- runEEMs_snps(input.data="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/Oxyrhabdium_populations.snps_28Feb2021.vcf",coord="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/EEMS/Oxyrhabdium.coord",output.dirpath="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/EEMS/EEMS_Oxyrhabdium")
 test <- runEEMs_snps(input.data="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/Oxyrhabdium_populations.snps_28Feb2021.vcf",coord="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/EEMS/Oxyrhabdium.coord",output.dirpath="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/EEMS/EEMS_Oxyrhabdium")
-exe.path=NULL; input.data; coord; outer=NULL; ask.use.outer=T; data.type="diffs"; output.dirpath; n.sites; ploidy=2; nDemes=300; numMCMCIter = 10000000; numBurnIter = 1000000; numThinIter = 9999; nchains=3; setup.only=T
-exe.path=NULL; input.data="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/Oxyrhabdium_populations.snps_28Feb2021.vcf"; coord="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/EEMS/Oxyrhabdium.coord"; outer=NULL; ask.use.outer=T; data.type="diffs"; output.dirpath="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/EEMS/EEMS_Oxyrhabdium"; n.sites; ploidy=2; nDemes=300; numMCMCIter = 10000000; numBurnIter = 1000000; numThinIter = 9999; nchains=3; setup.only=T
-exe.path=NULL; input.data="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/Oxyrhabdium_populations.snps_28Feb2021.vcf"; coord="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/EEMS/Oxyrhabdium.coord"; outer=NULL; ask.use.outer=T; data.type="diffs"; output.dirpath="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/EEMS/EEMS_Oxyrhabdium"; n.sites=NULL; ploidy=2; nDemes=300; numMCMCIter = 10000000; numBurnIter = 1000000; numThinIter = 9999; nchains=3; setup.only=T
-first.line <- readLines(input.data,n=1)
-nchar(first.line)
-first.line
-grep("fileformat=VCF",first.line)
-grep("fileformat=VCF",first.line)==1
-grep("VCF",first.line)==1
-n.sites=NULL
-if(is.null(exe.path)){#
-		exe.path <- exepaths_miscwrappers("runeems_snps")#
-		if(is.na(exe.path)){#
-			stop("exe.path is NULL and runeems_snps has not been defined previously. Use config_miscwrappers function to define the full path to the runeems_snps executable")#
-		}#
-	}
-input.data <- data#
-	if(dir.exists(output.dirpath)){#
-		stop(paste("Output directory:",output.dirpath,"already exists. Use a new output.dirpath"))#
-	} else {#
-		dir.create(output.dirpath)#
-	}#
-	### Check input arguments and stop if wrong format.#
-	if(length(nDemes)!=1 | length(nDemes)!= length(nchains)){#
-		stop("nDemes should have length 1 or length equal to nchains")#
-	} else {#
-		if(length(nDemes)==1){#
-			nDemes = rep(nDemes,nchains)#
-		}#
-	}
-if(length(numMCMCIter)!=1 | length(numMCMCIter)!= length(nchains)){#
-		stop("numMCMCIter should have length 1 or length equal to nchains")#
-	} else {#
-		if(length(numMCMCIter)==1){#
-			numMCMCIter = rep(numMCMCIter,nchains)#
-		}#
-	}#
-	if(length(numBurnIter)!=1 | length(numBurnIter)!= length(nchains)){#
-		stop("numBurnIter should have length 1 or length equal to nchains")#
-	} else {#
-		if(length(numBurnIter)==1){#
-			numBurnIter = rep(numBurnIter,nchains)#
-		}#
-	}#
-	if(length(numThinIter)!=1 | length(numThinIter)!= length(nchains)){#
-		stop("numThinIter should have length 1 or length equal to nchains")#
-	} else {#
-		if(length(numThinIter)==1){#
-			numThinIter = rep(numThinIter,nchains)#
-		}#
-	}
-input.dirpath <- paste0(output.dirpath,"/data")
-dir.create(input.dirpath)
-mcmcpath         <- paste0(output.dirpath,"/mcmc")#
-	mcmcpath.subdirs <- paste0(mcmcpath,"/",paste0(nDemes,"Demes-chain",1:nchains))#
-	dir.create(mcmcpath)#
-	sapply(X=mcmcpath.subdirs,FUN=dir.create)
-?dir.create()
-con.dir.create <- sapply(X=mcmcpath.subdirs,FUN=dir.create)
-params.path <- paste0(output.dirpath,"/params")
-dir.create(params.path)
-system(paste("cp",coord,paste0(input.dirpath,"/data.coord")))
-is.null(outer)
-data_outer <- misc.wrappers::create.outer(coords=coord,method=1,buffer.adj=0,coords.radius=0.01,max.fractal.dimension=1.1,plot.outer=ask.use.outer,ask.use=ask.use.outer,output.path=paste("cp",outer,paste0(input.dirpath,"/data.outer")))
-ask.use.outer
-ask.use.outer
-paste("cp",outer,paste0(input.dirpath,"/data.outer"))
-data_outer <- misc.wrappers::create.outer(coords=coord,method=1,buffer.adj=0,coords.radius=0.01,max.fractal.dimension=1.1,plot.outer=ask.use.outer,ask.use=ask.use.outer,output.path=paste0(input.dirpath,"/data.outer"))
-paste0(input.dirpath,"/data.outer")
-coord
-coords=coord;plot.outer=ask.use.outer;ask.use=ask.use.outer;output.path=paste0(input.dirpath,"/data.outer")
-method=1;buffer.adj=0;coords.radius=0.01;max.fractal.dimension=1.1;counter.clockwise=TRUE
-input.coords <- coords
-input.coords
-if(is(input.coords,"character")){#
+test <- create.outer(coords="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/EEMS/Oxyrhabdium.coord")
+method=1;buffer.adj=0;coords.radius=0.01;max.fractal.dimension=1.1;plot.outer=TRUE;ask.use=FALSE;counter.clockwise=TRUE;output.path=NULL
+input.coords <- coords#
+	### Check which type of object is being supplied to coords and define coords accordingly#
+	if(is(input.coords,"character")){#
 		coords   <- data.matrix(read.table(input.coords,header=F))#
-	}
-coords[1:10,]
-if(is(input.coords,"matrix") | is(input.coords,"data.frame")){#
+	}#
+	if(is(input.coords,"matrix") | is(input.coords,"data.frame")){#
 		coords       <- data.matrix(input.coords)#
 		mode(coords) <- "numeric"#
 	}#
 	## High resolution global map of political regions.#
-	spdf_world_10             <- rnaturalearth::ne_countries(scale=10)
-crs.string <- "+init=EPSG:4326"#
-	wkt.string <- rgdal::showWKT(crs.string)
-raster::crs(spdf_world_10)   <- crs.string#
+	spdf_world_10             <- rnaturalearth::ne_countries(scale=10)#
+	## Character string defining the Coordinate Reference System (CRS) in WKT format#
+	# crs.string <- rgdal::showWKT(sp::proj4string(spdf_world_10))#
+	# crs.string <- "+init=epsg:4326 +proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0"#
+	crs.string <- "+init=EPSG:4326"#
+	# wkt.string <- rgdal::showWKT(crs.string)#
+	### Define CRS using wkt format#
+	raster::crs(spdf_world_10)   <- crs.string#
 	### SpatialPoints object holding coords#
 	points.sp <- sp::SpatialPoints(coords)#
-	raster::crs(points.sp) <- crs.string
-circles.poly <- coords2sp.poly(coords.mat=coords,r=coords.radius)#
-	raster::crs(circles.poly) <- crs.string
-unique.features.at.circles <- do.call(rbind,unique(sp::over(circles.poly, spdf_world_10,returnList=T)))#
+	raster::crs(points.sp) <- crs.string#
+	### SpatialPolygons object holding circles with centerpoints at coords#
+	circles.poly <- coords2sp.poly(coords.mat=coords,r=coords.radius)#
+	raster::crs(circles.poly) <- crs.string#
+	### Spatial data frame for the map features that intersect with the input coords#
+	unique.features.at.circles <- do.call(rbind,unique(sp::over(circles.poly, spdf_world_10,returnList=T)))#
 	### spdf row indices for the unique regions in unique.features.at.circles#
 	indices_unique.features.at.circles <- which(spdf_world_10$sov_a3 %in% unique(unique.features.at.circles$sov_a3))#
 	### Corresponding SpatialPolygonsDateFrame object#
-	spdf_unique.features.at.circles <- spdf_world_10[indices_unique.features.at.circles,]
-base.polygons.sp <- extract.base.polygons(spdf_unique.features.at.circles)#
+	spdf_unique.features.at.circles <- spdf_world_10[indices_unique.features.at.circles,]#
+	### Restructuring the heirarchy of lowest-level polygons, treating them as separate features of one SpatialPolygons object.#
+	## The purpose of this is to be able to use sp::over() to search for polygons that intersect with coords.#
+	base.polygons.sp <- extract.base.polygons(spdf_unique.features.at.circles)#
 	### Get the feature indices for the polygons that intersect with circles representing input coordinates#
 	indices_polygons.at.circles <- sp::over(circles.poly,base.polygons.sp)#
-	### Check if any NA values in indices_unique.polygons.at.circles, which occurs when one more of the input circles does not intersect any polygons (i.e. they fall in the ocean).
-if(any(is.na(indices_polygons.at.circles))){#
+	### Check if any NA values in indices_unique.polygons.at.circles, which occurs when one more of the input circles does not intersect any polygons (i.e. they fall in the ocean).#
+	### If NAs exist, try increasing the value of r parameter of coords2sp.poly function.#
+	if(any(is.na(indices_polygons.at.circles))){#
 		problem.points <- unname(which(is.na(indices_polygons.at.circles)))#
 		stop(paste0("sample(s) coords[",paste(problem.points,collapse=" "),",]  does not intersect map. Try increasing coords.radius or remove sample(s) from input"))#
-	}
-sp_unique.polygons.at.circles      <- base.polygons.sp[unique(indices_polygons.at.circles)]#
-	sp_unique.polygons.without.circles <- base.polygons.sp[-unique(indices_polygons.at.circles)]
-method %in% c(1,2)
-coords.polygons.with.points <- unique(round(do.call(rbind,lapply(X=1:length(sp_unique.polygons.at.circles),FUN=function(x){sp2coords(sp::polygons(sp_unique.polygons.at.circles)[x])})),digits=3))
-if(method==1){#
+	}#
+	### Extract polygons in base.polygons.sp that intersect circles.poly#
+	sp_unique.polygons.at.circles      <- base.polygons.sp[unique(indices_polygons.at.circles)]#
+	sp_unique.polygons.without.circles <- base.polygons.sp[-unique(indices_polygons.at.circles)]#
+	if(method %in% c(1,2)){#
+		#### Method 1 for getting maps.coords.list#
+		### Two column numerical matrix of the coordinates of polygons that intersect input points#
+		coords.polygons.with.points <- unique(round(do.call(rbind,lapply(X=1:length(sp_unique.polygons.at.circles),FUN=function(x){sp2coords(sp::polygons(sp_unique.polygons.at.circles)[x])})),digits=3))#
+		####
+		if(method==1){#
 			coords.for.alphahull <- coords.polygons.with.points#
 			#buffer.width <- ((-0.75)+buffer.adj)#
 		}#
 		if(method==2){#
 			coords.for.alphahull <- unique(coords)#
 			#buffer.width <- buffer.adj#
-		}
-alpha.lower <- 1#
-		alpha.upper <- 50
-i=1; areas.equal <- FALSE; alpha <- alpha.upper; alpha.tol <- 0.1
-((alpha.upper-alpha.lower)>alpha.tol) & (i < 100)
-while(((alpha.upper-alpha.lower)>alpha.tol) & (i < 100)){#
+		}#
+		### initiallizing the while loop#
+		alpha.lower <- 1#
+		alpha.upper <- 50#
+		i=1; areas.equal <- FALSE; alpha <- alpha.upper; alpha.tol <- 0.1#
+		### Run while loop to find a low value of alpha that also generates a simple polygon (not self-intersecting or filled with holes) when input coordinates are supplied to ahull.#
+		# A polygon is considered simple if supplying the ahull polygon to gBuffer with buffer.width=0 produces a polygon with the same area as the input polygon. This works because gBuffer produces simple polygons even if the result clips the input polygon.#
+		while(((alpha.upper-alpha.lower)>alpha.tol) & (i < 100)){#
 			hull.alpha         <- alphahull::ahull(coords.for.alphahull,alpha=alpha)#
 			hull.alpha.coords  <- rbind(hull.alpha$arcs[,1:2],hull.alpha$arcs[1,1:2])#
 			hull.alpha.sp      <- sp::SpatialPoints(hull.alpha.coords)#
@@ -6645,8 +6584,8 @@ while(((alpha.upper-alpha.lower)>alpha.tol) & (i < 100)){#
 			alpha.i <- alpha#
 			alpha   <- median(c(alpha.lower,alpha.upper))#
 			i=(i+1)#
-		}
-fractal.dimension  <- fracD(outer.poly)#
+		}#
+		fractal.dimension  <- fracD(outer.poly)#
 		alpha          <- alpha.i#
 		while(fractal.dimension > max.fractal.dimension){#
 			alpha              <- (alpha+0.1)#
@@ -6657,26 +6596,294 @@ fractal.dimension  <- fracD(outer.poly)#
 			buffer.poly        <- rgeos::gBuffer(hull.alpha.polygon,width=((-0.75)+buffer.adj))#
 			outer.poly         <- smoothr::densify(buffer.poly,max_distance=(0.25*alpha))#
 			fractal.dimension  <- fracD(outer.poly)#
-		}
-raster::crs(outer.poly) <- crs.string
-outer     <- unname(sp2coords(outer.poly))
-counter.clockwise
-outer <- cbind(rev(outer[,1]),rev(outer[,2]))
+		}#
+		raster::crs(outer.poly) <- crs.string#
+	} else {#
+		if(method==3){#
+			### Minimum convex polygon that contains the maps with points.#
+			polygons.mcp <- suppressWarnings(adehabitatHR::mcp(points.sp,percent=100))#
+			mcp.coords   <- unique(sp2coords(polygons.mcp))#
+			### Generate the alpha-hull of the polygons with points#
+			hull.alpha         <- alphahull::ahull(mcp.coords,alpha=1)#
+			hull.alpha.coords  <- rbind(hull.alpha$arcs[,1:2],hull.alpha$arcs[1,1:2])#
+			hull.alpha.sp      <- sp::SpatialPoints(hull.alpha.coords)#
+			hull.alpha.polygon <- sp::SpatialPolygons(list(sp::Polygons(list(sp::Polygon(hull.alpha.sp)),ID="alpha.hull")))#
+			buffer.width       <- (0.5+buffer.adj)#
+			### Create a polygon encompassing hull.alpha.polygon, with size determined by the value of buffer.width#
+			buffer.poly        <- rgeos::gBuffer(hull.alpha.polygon,width=buffer.width)#
+			### Same as buffer.poly except points are added at midpoints of edges longer than max_distance; process repeated until all edges less than. This can make it easier to visualize the border of the output polygon, but otherwise this isnt useful.#
+			outer.poly         <- smoothr::densify(buffer.poly,max_distance=(0.25*alpha))#
+			raster::crs(outer.poly) <- crs.string#
+		} else {#
+			stop("set method to 1, 2, or 3")#
+		}#
+	}#
+	outer     <- unname(sp2coords(outer.poly))#
+	if(counter.clockwise){#
+		outer <- cbind(rev(outer[,1]),rev(outer[,2]))#
+	}
+input.coords <- coords#
+	### Check which type of object is being supplied to coords and define coords accordingly#
+	if(is(input.coords,"character")){#
+		coords   <- data.matrix(read.table(input.coords,header=F))#
+	}#
+	if(is(input.coords,"matrix") | is(input.coords,"data.frame")){#
+		coords       <- data.matrix(input.coords)#
+		mode(coords) <- "numeric"#
+	}#
+	## High resolution global map of political regions.#
+	spdf_world_10             <- rnaturalearth::ne_countries(scale=10)#
+	## Character string defining the Coordinate Reference System (CRS) in WKT format#
+	# crs.string <- rgdal::showWKT(sp::proj4string(spdf_world_10))#
+	# crs.string <- "+init=epsg:4326 +proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0"#
+	crs.string <- "+init=EPSG:4326"#
+	# wkt.string <- rgdal::showWKT(crs.string)#
+	### Define CRS using wkt format#
+	raster::crs(spdf_world_10)   <- crs.string#
+	### SpatialPoints object holding coords#
+	points.sp <- sp::SpatialPoints(coords)#
+	raster::crs(points.sp) <- crs.string#
+	### SpatialPolygons object holding circles with centerpoints at coords#
+	circles.poly <- coords2sp.poly(coords.mat=coords,r=coords.radius)#
+	raster::crs(circles.poly) <- crs.string#
+	### Spatial data frame for the map features that intersect with the input coords#
+	unique.features.at.circles <- do.call(rbind,unique(sp::over(circles.poly, spdf_world_10,returnList=T)))#
+	### spdf row indices for the unique regions in unique.features.at.circles#
+	indices_unique.features.at.circles <- which(spdf_world_10$sov_a3 %in% unique(unique.features.at.circles$sov_a3))#
+	### Corresponding SpatialPolygonsDateFrame object#
+	spdf_unique.features.at.circles <- spdf_world_10[indices_unique.features.at.circles,]#
+	### Restructuring the heirarchy of lowest-level polygons, treating them as separate features of one SpatialPolygons object.#
+	## The purpose of this is to be able to use sp::over() to search for polygons that intersect with coords.#
+	base.polygons.sp <- extract.base.polygons(spdf_unique.features.at.circles)#
+	### Get the feature indices for the polygons that intersect with circles representing input coordinates#
+	indices_polygons.at.circles <- sp::over(circles.poly,base.polygons.sp)#
+	### Check if any NA values in indices_unique.polygons.at.circles, which occurs when one more of the input circles does not intersect any polygons (i.e. they fall in the ocean).#
+	### If NAs exist, try increasing the value of r parameter of coords2sp.poly function.#
+	if(any(is.na(indices_polygons.at.circles))){#
+		problem.points <- unname(which(is.na(indices_polygons.at.circles)))#
+		stop(paste0("sample(s) coords[",paste(problem.points,collapse=" "),",]  does not intersect map. Try increasing coords.radius or remove sample(s) from input"))#
+	}#
+	### Extract polygons in base.polygons.sp that intersect circles.poly#
+	sp_unique.polygons.at.circles      <- base.polygons.sp[unique(indices_polygons.at.circles)]#
+	sp_unique.polygons.without.circles <- base.polygons.sp[-unique(indices_polygons.at.circles)]
+coords="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/EEMS/Oxyrhabdium.coord"
+input.coords <- coords#
+	### Check which type of object is being supplied to coords and define coords accordingly#
+	if(is(input.coords,"character")){#
+		coords   <- data.matrix(read.table(input.coords,header=F))#
+	}#
+	if(is(input.coords,"matrix") | is(input.coords,"data.frame")){#
+		coords       <- data.matrix(input.coords)#
+		mode(coords) <- "numeric"#
+	}#
+	## High resolution global map of political regions.#
+	spdf_world_10             <- rnaturalearth::ne_countries(scale=10)#
+	## Character string defining the Coordinate Reference System (CRS) in WKT format#
+	# crs.string <- rgdal::showWKT(sp::proj4string(spdf_world_10))#
+	# crs.string <- "+init=epsg:4326 +proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0"#
+	crs.string <- "+init=EPSG:4326"#
+	# wkt.string <- rgdal::showWKT(crs.string)#
+	### Define CRS using wkt format#
+	raster::crs(spdf_world_10)   <- crs.string#
+	### SpatialPoints object holding coords#
+	points.sp <- sp::SpatialPoints(coords)#
+	raster::crs(points.sp) <- crs.string#
+	### SpatialPolygons object holding circles with centerpoints at coords#
+	circles.poly <- coords2sp.poly(coords.mat=coords,r=coords.radius)#
+	raster::crs(circles.poly) <- crs.string#
+	### Spatial data frame for the map features that intersect with the input coords#
+	unique.features.at.circles <- do.call(rbind,unique(sp::over(circles.poly, spdf_world_10,returnList=T)))#
+	### spdf row indices for the unique regions in unique.features.at.circles#
+	indices_unique.features.at.circles <- which(spdf_world_10$sov_a3 %in% unique(unique.features.at.circles$sov_a3))#
+	### Corresponding SpatialPolygonsDateFrame object#
+	spdf_unique.features.at.circles <- spdf_world_10[indices_unique.features.at.circles,]#
+	### Restructuring the heirarchy of lowest-level polygons, treating them as separate features of one SpatialPolygons object.#
+	## The purpose of this is to be able to use sp::over() to search for polygons that intersect with coords.#
+	base.polygons.sp <- extract.base.polygons(spdf_unique.features.at.circles)#
+	### Get the feature indices for the polygons that intersect with circles representing input coordinates#
+	indices_polygons.at.circles <- sp::over(circles.poly,base.polygons.sp)#
+	### Check if any NA values in indices_unique.polygons.at.circles, which occurs when one more of the input circles does not intersect any polygons (i.e. they fall in the ocean).#
+	### If NAs exist, try increasing the value of r parameter of coords2sp.poly function.#
+	if(any(is.na(indices_polygons.at.circles))){#
+		problem.points <- unname(which(is.na(indices_polygons.at.circles)))#
+		stop(paste0("sample(s) coords[",paste(problem.points,collapse=" "),",]  does not intersect map. Try increasing coords.radius or remove sample(s) from input"))#
+	}#
+	### Extract polygons in base.polygons.sp that intersect circles.poly#
+	sp_unique.polygons.at.circles      <- base.polygons.sp[unique(indices_polygons.at.circles)]#
+	sp_unique.polygons.without.circles <- base.polygons.sp[-unique(indices_polygons.at.circles)]
+coords.polygons.with.points <- unique(round(do.call(rbind,lapply(X=1:length(sp_unique.polygons.at.circles),FUN=function(x){sp2coords(sp::polygons(sp_unique.polygons.at.circles)[x])})),digits=3))#
+		####
+		if(method==1){#
+			coords.for.alphahull <- coords.polygons.with.points#
+			#buffer.width <- ((-0.75)+buffer.adj)#
+		}#
+		if(method==2){#
+			coords.for.alphahull <- unique(coords)#
+			#buffer.width <- buffer.adj#
+		}#
+		### initiallizing the while loop#
+		alpha.lower <- 1#
+		alpha.upper <- 50#
+		i=1; areas.equal <- FALSE; alpha <- alpha.upper; alpha.tol <- 0.1#
+		### Run while loop to find a low value of alpha that also generates a simple polygon (not self-intersecting or filled with holes) when input coordinates are supplied to ahull.#
+		# A polygon is considered simple if supplying the ahull polygon to gBuffer with buffer.width=0 produces a polygon with the same area as the input polygon. This works because gBuffer produces simple polygons even if the result clips the input polygon.#
+		while(((alpha.upper-alpha.lower)>alpha.tol) & (i < 100)){#
+			hull.alpha         <- alphahull::ahull(coords.for.alphahull,alpha=alpha)#
+			hull.alpha.coords  <- rbind(hull.alpha$arcs[,1:2],hull.alpha$arcs[1,1:2])#
+			hull.alpha.sp      <- sp::SpatialPoints(hull.alpha.coords)#
+			hull.alpha.polygon <- sp::SpatialPolygons(list(sp::Polygons(list(sp::Polygon(hull.alpha.sp)),ID="alpha.hull")))#
+			if(rgeos::gIsSimple(hull.alpha.polygon)){#
+				### Test hull.alpha.polygon is simple#
+				# geosphere::areaPolygon(hull.alpha.polygon) == geosphere::areaPolygon(gBuffer(hull.alpha.polygon,width=0))#
+				### Create a polygon encompassing hull.alpha.polygon, with size determined by the value of buffer.width#
+				# Note: Do not set the crs of hull.alpha.polygon because gBuffer function would introduce distortions associated with the projection. In reality this might not be be a big deal but I'm not sure.#
+				buffer.poly        <- rgeos::gBuffer(hull.alpha.polygon,width=((-0.75)+buffer.adj))#
+				### Same as buffer.poly except points are added at midpoints of edges longer than max_distance; process repeated until all edges less than. This can make it easier to visualize the border of the output polygon, but otherwise this isnt useful.#
+				outer.poly         <- smoothr::densify(buffer.poly,max_distance=(0.25*alpha))#
+				### Run this test before switching back to Euclidean space#
+				### Set CRS of outer.poly (now we are back in Euclidean space); this must be done before using function sp::over()#
+				raster::crs(outer.poly) <- crs.string#
+				### Test that the output coordinates define a simple polygon.#
+				test.simple        <- all(c(rgeos::gIsSimple(outer.poly), rgeos::gIsSimple(hull.alpha.polygon)))#
+				### Test if all of the input points are in the output polygon#
+				test.coverage      <- (!any(is.na(sp::over(points.sp,outer.poly))))#
+			} else {#
+				test.simple   <- FALSE#
+				test.coverage <- FALSE#
+			}#
+			if(test.simple & test.coverage){#
+				alpha.upper <- min(alpha.upper,alpha)#
+			} else {#
+				alpha.lower <- max(alpha.lower,alpha)#
+			}#
+			### save a copy of the current alpha value to initialize the next while loop#
+			alpha.i <- alpha#
+			alpha   <- median(c(alpha.lower,alpha.upper))#
+			i=(i+1)#
+		}#
+		fractal.dimension  <- fracD(outer.poly)#
+		alpha          <- alpha.i#
+		while(fractal.dimension > max.fractal.dimension){#
+			alpha              <- (alpha+0.1)#
+			hull.alpha         <- alphahull::ahull(coords.for.alphahull,alpha=alpha)#
+			hull.alpha.coords  <- rbind(hull.alpha$arcs[,1:2],hull.alpha$arcs[1,1:2])#
+			hull.alpha.sp      <- sp::SpatialPoints(hull.alpha.coords)#
+			hull.alpha.polygon <- sp::SpatialPolygons(list(sp::Polygons(list(sp::Polygon(hull.alpha.sp)),ID="alpha.hull")))#
+			buffer.poly        <- rgeos::gBuffer(hull.alpha.polygon,width=((-0.75)+buffer.adj))#
+			outer.poly         <- smoothr::densify(buffer.poly,max_distance=(0.25*alpha))#
+			fractal.dimension  <- fracD(outer.poly)#
+		}#
+		raster::crs(outer.poly) <- crs.string
+outer     <- unname(sp2coords(outer.poly))#
+	if(counter.clockwise){#
+		outer <- cbind(rev(outer[,1]),rev(outer[,2]))#
+	}
 plot.outer
-!is.null(dev.list())
+if(!is.null(dev.list())){#
+			dev.off()#
+		}
 method %in% c(1,2)
+method
 plot(sp::SpatialPoints(outer),col="white")
-class(SpatialPoints(outer))
-test <- sp::SpatialPoints(outer)
-plot(test)
-test
-library(sp)
-plot(test)
-plot(spdf_world_10,add=T)
-plot(spdf_unique.features.at.circles,add=T,col="gray90")
-plot(sp_unique.polygons.without.circles,add=T,col="white")
-plot(sp::SpatialPoints(outer),col="green",add=T)
-plot(points.sp,add=T,pch=20)
+plot(spdf_world_10,add=T)#
+			if(method==1){#
+			### Add a layer containing the regions of the basemap that include at least one point (regions in gray)#
+				plot(spdf_unique.features.at.circles,add=T,col="gray90")#
+				plot(sp_unique.polygons.without.circles,add=T,col="white")#
+			}#
+			### Add green crosshairs for output coordinates (the outer file for eems)#
+			plot(sp::SpatialPoints(outer),col="green",add=T)#
+			### Add black circles for locations of the input coordinates#
+			plot(points.sp,add=T,pch=20)#
+			### Add text/legend to show what the green crosshairs are#
+			mtext("+ = coordinates written to output.path (if set)",col="green",adj=0,line=1.5,cex=0.8)#
+			mtext(paste0("P:A fractal dimension of area inscribed by output coordinates",round(fractal.dimension,digits=3)),adj=0,line=0.5,cex=0.8)#
+			### Add map axes#
+			maps::map.axes()
+sp::plot(sp::SpatialPoints(outer),col="white")
 dev.off()
+sp::plot(sp::SpatialPoints(outer),col="white")#
+			#plot(submaps.with.points.sp,add=T,col="gray90")#
+			sp::plot(spdf_world_10,add=T)#
+			if(method==1){#
+			### Add a layer containing the regions of the basemap that include at least one point (regions in gray)#
+				sp::plot(spdf_unique.features.at.circles,add=T,col="gray90")#
+				sp::plot(sp_unique.polygons.without.circles,add=T,col="white")#
+			}#
+			### Add green crosshairs for output coordinates (the outer file for eems)#
+			sp::plot(sp::SpatialPoints(outer),col="green",add=T)#
+			### Add black circles for locations of the input coordinates#
+			sp::plot(points.sp,add=T,pch=20)#
+			### Add text/legend to show what the green crosshairs are#
+			mtext("+ = coordinates written to output.path (if set)",col="green",adj=0,line=1.5,cex=0.8)#
+			mtext(paste0("P:A fractal dimension of area inscribed by output coordinates",round(fractal.dimension,digits=3)),adj=0,line=0.5,cex=0.8)#
+			### Add map axes#
+			maps::map.axes()
+test <- list(outer,outer.poly)
+dim(test[[1]])
+test[[1]][1:10,]
+test[[2]]
+!is.null(output.path)
+getwd()
 setwd("Documents/misc.wrappers")
+devtools::document()
+devtools::install_github("JeffWeinell/misc.wrappers",auth_token="323d9e4cd00247a39a805dbb66f37db6403cfb8b")
+library(misc.wrappers)
+test <- runEEMs_snps(input.data="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/Oxyrhabdium_populations.snps_28Feb2021.vcf",coord="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/EEMS/Oxyrhabdium.coord",output.dirpath="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/EEMS/EEMS_Oxyrhabdium")
+test <- runEEMs_snps(input.data="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/Oxyrhabdium_populations.snps_28Feb2021.vcf",coord="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/EEMS/Oxyrhabdium.coord",output.dirpath="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/EEMS/EEMS_Oxyrhabdium")
+input.data
+input.data="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/Oxyrhabdium_populations.snps_28Feb2021.vcf"
+is(input.data,"vcfR")
+is(input.data,"genind")
+is(input.data,"genind")
+is(input.data,"character")
+first.line <- readLines(input.data,n=1)
+first.line
+grep("VCF",first.line)==1
+vcf.data   <- vcfR::read.vcfR(input.data)
+genind     <- vcfR::vcfR2genind(vcf.data)
+data.diffs <- misc.wrappers::genind2diffs(genind.obj=genind,output.file=paste0(input.dirpath,"/data.diffs"))
+library(adegenet)
+data.diffs <- misc.wrappers::genind2diffs(genind.obj=genind,ploidy=ploidy,output.file=paste0(input.dirpath,"/data.diffs"))
+genind.obj=genind;ploidy=2;output.file=paste0(input.dirpath,"/data.diffs")
+data.diffs <- misc.wrappers::genind2diffs(genind.obj=genind,ploidy=2)
+diffs      <- data.diffs["diffs"]
+dim(diffs)
+length(data.diffs)
+dim(data.diffs[[1]])
+names(data.diffs)
+dim(data.diffs["diffs"])
+dim(data.diffs[["diffs"]])
+diffs      <- data.diffs[["diffs"]]#
+				nIndiv     <- c(data.diffs[["nIndiv"])]#
+				nSites     <- data.diffs[["nSites"]]
+diffs      <- data.diffs[["diffs"]]#
+				nIndiv     <- c(data.diffs[["nIndiv"]])#
+				nSites     <- data.diffs[["nSites"]]
+nIndv
+nIndiv
+nsites
+nSites
+diffs[1:10,1:10]
+diffs      <- data.diffs[["diffs"]]#
+				nIndiv     <- data.diffs[["nIndiv"]]#
+				nSites     <- data.diffs[["nSites"]]
+nIndiv
+nSites
+devtools::document()
+dev.off()
+devtools::install_github("JeffWeinell/misc.wrappers",auth_token="323d9e4cd00247a39a805dbb66f37db6403cfb8b")
+library(misc.wrappers)
+test <- runEEMs_snps(input.data="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/Oxyrhabdium_populations.snps_28Feb2021.vcf",coord="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/EEMS/Oxyrhabdium.coord",output.dirpath="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/EEMS/EEMS_Oxyrhabdium")
+test <- runEEMs_snps(input.data="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/Oxyrhabdium_populations.snps_28Feb2021.vcf",coord="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/EEMS/Oxyrhabdium.coord",output.dirpath="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/EEMS/EEMS_Oxyrhabdium")
+input.data
+class(genind)
+input.dirpath
+input.dirpath <- "/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/EEMS/EEMS_Oxyrhabdium/data/"
+input.dirpath <- "/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/EEMS/EEMS_Oxyrhabdium/data"
+data.diffs <- misc.wrappers::genind2diffs(genind.obj=genind,ploidy=ploidy,output.file=paste0(input.dirpath,"/data.diffs"))
+diffs      <- data.diffs[["diffs"]]#
+				nIndiv     <- data.diffs[["nIndiv"]]#
+				nSites     <- data.diffs[["nSites"]]
+diffs
 devtools::document()

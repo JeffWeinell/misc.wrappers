@@ -371,7 +371,7 @@ test <- runEEMs_snps(input.data="/Users/alyssaleinweber/Documents/Chapter3_Oxyrh
 
 
 exe.path=NULL; input.data; coord; outer=NULL; ask.use.outer=T; data.type="diffs"; output.dirpath; n.sites; ploidy=2; nDemes=300; numMCMCIter = 10000000; numBurnIter = 1000000; numThinIter = 9999; nchains=3; setup.only=T
-
+output.file = "/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/EEMS/EEMS_Oxyrhabdium/data/data.diffs"
 ```
 
 <!--
