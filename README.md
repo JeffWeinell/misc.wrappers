@@ -366,6 +366,7 @@ plots.chain2.v2 <- lapply(X=plots.chain2,FUN=function(x){x+theme(plot.margin = u
 
 library(devtools)
 devtools::install_github("JeffWeinell/misc.wrappers",auth_token="323d9e4cd00247a39a805dbb66f37db6403cfb8b")
+library(misc.wrappers)
 test <- runEEMs_snps(input.data="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/Oxyrhabdium_populations.snps_28Feb2021.vcf",coord="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/EEMS/Oxyrhabdium.coord",output.dirpath="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/EEMS/EEMS_Oxyrhabdium")
 
 

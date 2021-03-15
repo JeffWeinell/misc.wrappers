@@ -92,7 +92,7 @@ runEEMs_snps <- function(exe.path=NULL, input.data, coord, outer=NULL, ask.use.o
 	system(paste("cp",coord,paste0(input.dirpath,"/data.coord")))
 	# If path to the outer file is NULL, generate one automatically, otherwise copy it to input.dirpath and rename as "data.outer"
 	if(is.null(outer)){
-		data_outer <- misc.wrappers::create.outer(coords,method=1,buffer.adj=0,coords.radius=0.01,max.fractal.dimension=1.1,plot.outer=ask.use.outer,ask.use=ask.use.outer,output.path=paste("cp",outer,paste0(input.dirpath,"/data.outer")))
+		data_outer <- misc.wrappers::create.outer(coords=coord,method=1,buffer.adj=0,coords.radius=0.01,max.fractal.dimension=1.1,plot.outer=ask.use.outer,ask.use=ask.use.outer,output.path=paste("cp",outer,paste0(input.dirpath,"/data.outer")))
 	} else {
 		system(paste("cp",outer,paste0(input.dirpath,"/data.outer")))
 	}
