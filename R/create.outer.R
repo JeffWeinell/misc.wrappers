@@ -177,8 +177,9 @@ create.outer <- function(coords,method=1,buffer.adj=0,coords.radius=0.01,max.fra
 			### Add black circles for locations of the input coordinates
 			sp::plot(points.sp,add=T,pch=20)
 			### Add text/legend to show what the green crosshairs are
-			mtext("+ = coordinates written to output.path (if set)",col="green",adj=0,line=1.5,cex=0.8)
-			mtext(paste0("P:A fractal dimension of area inscribed by output coordinates",round(fractal.dimension,digits=3)),adj=0,line=0.5,cex=0.8)
+			mtext("+ = habitat (.*outer) coordinates",col="green",adj=0,line=2.5,cex=0.8)
+			mtext(paste0("fractal dimension of habitat shape: ",round(fractal.dimension,digits=3)),adj=0,line=1.5,cex=0.8)
+			mtext(paste0("input settings: method = ",method,", max.fractal.dimension = ",max.fractal.dimension,", buffer.adj = ",buffer.adj),adj=0,line=0.5,cex=0.8)
 			### Add map axes
 			maps::map.axes()
 		} else {
@@ -187,7 +188,8 @@ create.outer <- function(coords,method=1,buffer.adj=0,coords.radius=0.01,max.fra
 			sp::plot(spdf_world_10,add=T)
 			sp::plot(sp::SpatialPoints(outer),col="green",add=T)
 			sp::plot(points.sp,add=T,pch=20)
-			mtext("+ outer (coordinates written to output.path)",col="green",adj=0.1,line=0.25,cex=0.8)
+			mtext("+ outer (coordinates written to output.path)",col="green",adj=0.1,line=1.5,cex=0.8)
+			mtext(paste0("input settings: method = ",method),adj=0,line=0.5,cex=0.8)
 			maps::map.axes()
 		}
 		if(!is.null(plot.output.path)){
