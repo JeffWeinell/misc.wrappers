@@ -15,7 +15,8 @@ create.outer(
   plot.outer = TRUE,
   ask.use = FALSE,
   counter.clockwise = TRUE,
-  output.path = NULL
+  output.path = NULL,
+  plot.output.path = NULL
 )
 }
 \arguments{
@@ -32,13 +33,15 @@ If method=3 is fast and uses the minimum convex polygon of input coodinates as a
 
 \item{max.fractal.dimension}{Value between 1 and 2 contolling the shape complexity of the polygon with the output coordinates. Values near 1 have low complexity (e.g., circles, squares), and shape complexity increases as max.fractal.dimension approaches 2. The default value 1.1 seems to work well for most cases. Ignored if method=3.}
 
-\item{plot.outer}{Logical indicating if the points defining the output ".outer" table should be plotted in green, as well as the ".coords" (coords) points in black.}
+\item{plot.outer}{Logical indicating if the points defining the output ".outer" table should be plotted.}
 
 \item{ask.use}{Logical indicating if, after plotting, the user should be asked if the output should be written to file. Default is FALSE. Ignored if output.path is NULL or if plot.outer is FALSE.}
 
 \item{counter.clockwise}{Should the output cooordinates be ordered counterclockwise. Default is TRUE and is the required format for EEMS.}
 
 \item{output.path}{Character string with path where to save coordinates. Default is NULL.}
+
+\item{plot.output.path}{Optional character string with path to save plot. Default is NULL. Ignored if plot.outer is FALSE.}
 }
 \value{
 A two column numerical matrix containing the longitude and latitude of the output polygon. The matrix written to output.path can be used as the ".outer" polygon used by EEMS. A map is plotted to visualize the results.

@@ -12,7 +12,6 @@ runeems_snps_setup(
   coord,
   outer = NULL,
   exe.path = NULL,
-  ask.use.outer = TRUE,
   n.sites = NULL,
   pl = 2,
   nDemes = 300,
@@ -43,8 +42,6 @@ If NULL, this function will generate a "}.outer" file automatically; the user wi
 If you don't want to use the automatically generated *.outer file, you can create a custom one here: https://www.keene.edu/campus/maps/tool/}
 
 \item{exe.path}{Character string with path to runeems_snps executable, or NULL (the default) if you've defined the EEMS path with the function config_miscwrappers. Use paths_misc.wrappers() to check if this path has been set.}
-
-\item{ask.use.outer}{When outer = NULL, this logical determines if the auto-generated outer coordinates should be plotted, at which point the user must confirm if they want to use the coordinates. Default is TRUE.}
 
 \item{n.sites}{The number of sites. Determined automatically if input data is a genind or vcf object/file, but must be supplied if input.data is a path to a diffs matrix.}
 

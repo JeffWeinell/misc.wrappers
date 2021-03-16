@@ -19,7 +19,6 @@
 #' If NULL, this function will generate a "*.outer" file automatically; the user will be prompted to accept the auto-generated *.outer file prior to running eems.
 #' If you don't want to use the automatically generated *.outer file, you can create a custom one here: https://www.keene.edu/campus/maps/tool/
 #' @param exe.path Character string with path to runeems_snps executable, or NULL (the default) if you've defined the EEMS path with the function config_miscwrappers. Use paths_misc.wrappers() to check if this path has been set.
-#' @param ask.use.outer When outer = NULL, this logical determines if the auto-generated outer coordinates should be plotted, at which point the user must confirm if they want to use the coordinates. Default is TRUE.
 #' @param n.sites The number of sites. Determined automatically if input data is a genind or vcf object/file, but must be supplied if input.data is a path to a diffs matrix.
 #' @param pl Ploidy. Default is 2.
 #' @param nDemes Number of demes. Default is 300. This can be a single number or a numeric vector of length nchains with value to use for each chain.
@@ -30,7 +29,7 @@
 #' @param ... Arguments to pass to create.outer. See ?create.outer() for a possibly arguments and values.
 #' @return Nothing is returned.
 #' @export runeems_snps_setup
-runeems_snps_setup <- function(output.dirpath, data, coord, outer=NULL, exe.path=NULL, ask.use.outer=TRUE, n.sites=NULL, pl=2, nDemes=300, numMCMCIter = 10000000, numBurnIter = 1000000, numThinIter = 9999, nchains=3,...){
+runeems_snps_setup <- function(output.dirpath, data, coord, outer=NULL, exe.path=NULL, n.sites=NULL, pl=2, nDemes=300, numMCMCIter = 10000000, numBurnIter = 1000000, numThinIter = 9999, nchains=3,...){
  # data.dirname <- paste0(sample(c(letters,LETTERS,0:9),size=10,replace=T),collapse="")
  # data.dirpath <- paste0(tempdir(),"/",data.dirname)
  # dir.create(data.dirpath)
@@ -93,13 +92,24 @@ runeems_snps_setup <- function(output.dirpath, data, coord, outer=NULL, exe.path
 	dir.create(params.path)
 	# Copy *.coord file to input.dirpath and rename as "data.coord"
 	system(paste("cp",coord,paste0(input.dirpath,"/data.coord")))
+	# Load coordinates matrix and determine number of individuals 
+	coords.df <- read.table(paste0(input.dirpath,"/data.coord"),header=F)
+	n.coords  <- nrow(coords.df)
 	### Check if input.data is an object of class vcfR
 	if(is(input.data,"vcfR")){
+		n.indv <- (length(colnames(attributes(input.data)[[3]]))-1)
+		if(n.coords!=n.indv){
+			stop(paste(n.coords,"individuals with coordinates but",n.indv,"individuals with snps"))
+		}
 		genind     <- vcfR::vcfR2genind(input.data)
 		input.data <- genind
 	}
 	### Check if input.data is an object of class genind
 	if(is(input.data,"genind")){
+		n.indv <- nrow(attributes(input.data)$tab)
+		if(n.coords!=n.indv){
+			stop(paste(n.coords,"individuals with coordinates but",n.indv,"individuals with snps"))
+		}
 		data.diffs <- misc.wrappers::genind2diffs(genind.obj=input.data,output.file=paste0(input.dirpath,"/data.diffs"))
 		diffs      <- data.diffs[["diffs"]]
 		nIndiv     <- data.diffs[["nIndiv"]]
@@ -109,6 +119,10 @@ runeems_snps_setup <- function(output.dirpath, data, coord, outer=NULL, exe.path
 			first.line <- readLines(input.data,n=1)
 			if(grep("VCF",first.line)==1){
 				vcf.data   <- vcfR::read.vcfR(input.data)
+				n.indv <- (length(colnames(attributes(vcf.data)[[3]]))-1)
+				if(n.coords!=n.indv){
+					stop(paste(n.coords,"individuals with coordinates but",n.indv,"individuals with snps"))
+				}
 				genind     <- vcfR::vcfR2genind(vcf.data)
 				data.diffs <- misc.wrappers::genind2diffs(genind.obj=genind,ploidy=as.numeric(pl),output.file=paste0(input.dirpath,"/data.diffs"))
 				if(!file.exists(paste0(input.dirpath,"/data.diffs"))){
@@ -119,6 +133,10 @@ runeems_snps_setup <- function(output.dirpath, data, coord, outer=NULL, exe.path
 				nSites     <- data.diffs[["nSites"]]
 			} else {
 				data.diffs <- read.table(input.data,sep=" ",header=F)
+				n.indv     <- ncol(data.diffs)
+				if(n.coords!=n.indv){
+					stop(paste(n.coords,"individuals with coordinates but",n.indv,"individuals in diffs matrix"))
+				}
 				### Check that the diffs file has the correct dimmensions
 				if(ncol(data.diffs)==nrow(data.diffs)){
 					nIndiv     <- ncol(data.diffs)
@@ -138,7 +156,7 @@ runeems_snps_setup <- function(output.dirpath, data, coord, outer=NULL, exe.path
 	if(!is.null(outer)){
 		system(paste("cp",outer,paste0(input.dirpath,"/data.outer")))
 	} else {
-		data_outer <- misc.wrappers::create.outer(coords=coord,plot.outer=ask.use.outer,ask.use=ask.use.outer,output.path=paste0(input.dirpath,"/data.outer"),additional.args)
+		data_outer <- misc.wrappers::create.outer(coords=coord,output.path=paste0(input.dirpath,"/data.outer"),plot.output.path=paste0(output.path,"/habitat_outer.pdf"),additional.args)
 	}
 	### Generate diffs file, saving to input.dirpath with name "data.diffs"
 	# data.diffs <- genind2diffs(genind.obj=genind,output.file=paste0(input.dirpath,"/data.diffs"))
@@ -164,13 +182,14 @@ runeems_snps_setup <- function(output.dirpath, data, coord, outer=NULL, exe.path
 	}
 	# command.write <- c("#!/bin/bash",paste(exe.path,"--params",params.files.path))
 	# writeLines(command.write,paste0(output.dirpath,"/runeems_snps.sh"))
-	if(!setup.only){
-		print(paste0("Analysis setup complete. To begin, run bash scripts: '",output.dirpath,"/runeems_snps_chain",1:nchains,".sh'"))
-		#command.exe   <- gsub(" & $","",paste(command.write,collapse=" & "))
-		#system(command.exe)
-	} else {
-		print(paste0("Analysis setup complete. To begin, run bash scripts: '",output.dirpath,"/runeems_snps_chain",1:nchains,".sh'"))
-	}
+	#if(!setup.only){
+	#	print(paste0("Analysis setup complete. To begin, run bash scripts: '",output.dirpath,"/runeems_snps_chain",1:nchains,".sh'"))
+	#	#command.exe   <- gsub(" & $","",paste(command.write,collapse=" & "))
+	#	#system(command.exe)
+	#} else {
+	#	print(paste0("Analysis setup complete. To begin, run bash scripts: '",output.dirpath,"/runeems_snps_chain",1:nchains,".sh'"))
+	#}
+	print(paste0("Analysis setup complete. To begin, run bash scripts: '",output.dirpath,"/runeems_snps_chain",1:nchains,".sh'"))
 	return(paste0(output.dirpath,"/runeems_snps.sh"))
 } ### End runEEMs_snps function
 

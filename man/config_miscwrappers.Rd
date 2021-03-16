@@ -6,12 +6,15 @@
 
 This function is used to tell misc.wrappers where an EEMS executable is located. You only need to run this function once for a particular EEMS program.}
 \usage{
-config_miscwrappers(exe.paths)
+config_miscwrappers(exe.paths = NULL)
 }
 \arguments{
 \item{exe.paths}{Character string or vector with the full path(s) to one or more EEMS executables.}
 
 \item{program}{A character string or character vector containing the names of the program(s) with their paths defined by \code{eems_exe} argument. Default "runeems_snps"; other options could include "str2diffs", "runeems_sats", "runeems_Fsts", "bed2diffs", "rEEMSplots" or a character vector including all or a subset of these. The programs must be executable first.}
+}
+\value{
+Updates settings and returns NULL if exe.paths is a valid character strings or vector of path(s); returns a dataframe with the all path settings if exe.paths is NULL.
 }
 \description{
 config_miscwrappers function

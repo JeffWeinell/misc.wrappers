@@ -10,63 +10,14 @@
 #' @param buffer.adj This argument is not yet implemented. A number between 0 and 1 that determines the size of the buffer region surrounding the points supplied by coords.
 #' @param coords.radius Number specifying the radius in degrees to use around input coordinates when determining spatial intersections (default 0.01). Increasing this value can be useful if coordinates are located offshore of regions outlined in the geography basemap.
 #' @param max.fractal.dimension Value between 1 and 2 contolling the shape complexity of the polygon with the output coordinates. Values near 1 have low complexity (e.g., circles, squares), and shape complexity increases as max.fractal.dimension approaches 2. The default value 1.1 seems to work well for most cases. Ignored if method=3.
-#' @param plot.outer Logical indicating if the points defining the output ".outer" table should be plotted in green, as well as the ".coords" (coords) points in black.
+#' @param plot.outer Logical indicating if the points defining the output ".outer" table should be plotted.
 #' @param ask.use Logical indicating if, after plotting, the user should be asked if the output should be written to file. Default is FALSE. Ignored if output.path is NULL or if plot.outer is FALSE.
 #' @param counter.clockwise Should the output cooordinates be ordered counterclockwise. Default is TRUE and is the required format for EEMS.
 #' @param output.path Character string with path where to save coordinates. Default is NULL.
+#' @param plot.output.path Optional character string with path to save plot. Default is NULL. Ignored if plot.outer is FALSE.
 #' @return A two column numerical matrix containing the longitude and latitude of the output polygon. The matrix written to output.path can be used as the ".outer" polygon used by EEMS. A map is plotted to visualize the results.
 #' @export create.outer
-create.outer <- function(coords,method=1,buffer.adj=0,coords.radius=0.01,max.fractal.dimension=1.1,plot.outer=TRUE,ask.use=FALSE,counter.clockwise=TRUE,output.path=NULL){
-	# Function to extract the coordinates matrix (numeric mode) from a class Polygon, Polygons, SpatialPolygons, or SpatialPolygonsDataFrame object that containins a single polygon.
-	# Do not use this function if the inout spatial object contains more than coordinates matrix.
-	# sp2coords <- function(x){
-	# 	if(is(x,"SpatialPolygonsDataFrame") | is(x,"SpatialPolygons")){
-	# 		result <- x@polygons[[1]]@Polygons[[1]]@coords
-	# 	}
-	# 	if(is(x,"Polygons")){
-	# 		result <- x@Polygons[[1]]@coords
-	# 	}
-	# 	if(is(x,"Polygon") | is(x,"SpatialPoints")){
-	# 		result <- x@coords
-	# 	}
-	# 	unname(result)
-	# }
-	# ### Convert a coordinates matrix into a SpatialPolygons object in circles centered at input coordinates, and radius specified by r
-	# coords2sp.poly <- function(coords.mat,r=0.01){
-	# 	colnames(coords.mat) <- c("x","y")
-	# 	circles.list <- apply(X=coords.mat,MARGIN=1,FUN=function(x){sampSurf::spCircle(radius=r,centerPoint=x)[[1]]})
-	# 	res          <- do.call(raster::bind,circles.list)
-	# 	res
-	# }
-	# ### Fractal dimension of perimeter-area relationship, a metric of polygon complexity with values from 1 (simple euclidean shapes likes squares and circles) tp approaching 2 for increasingly complex polygons.
-	# # More info: http://www.umass.edu/landeco/teaching/landscape_ecology/schedule/chapter9_metrics.pdf
-	# # Input must be a SpatialPolygons object
-	# fracD <- function(x){
-	# 	# area in meters squared
-	# 	x.area      <- geosphere::areaPolygon(x)
-	# 	# perimeter in meters
-	# 	x.perimeter <- geosphere::perimeter(x)
-	# 	(2*log10(x.perimeter))/(log10(x.area))
-	# }
-	# #### For a SpatialPolygonsDataFrame, extract the lowest-level polygons and hold each as a feature in a SpatialPolygons object.
-	# extract.base.polygons <- function(spdf){
-	# 	for(i in 1:nrow(spdf)){
-	# 		sp.temp <- spdf@polygons[[i]]
-	# 		for(j in 1:length(sp.temp@Polygons)){
-	# 			id.temp <- paste0(i,".",j)
-	# 			polygons.ij <- sp::SpatialPolygons(list(sp::Polygons(list(sp.temp@Polygons[[j]]),ID=id.temp)))
-	# 			if(i==1 & j==1){
-	# 				polygons.all <- polygons.ij
-	# 			} else {
-	# 				polygons.all <- raster::bind(polygons.all,polygons.ij)
-	# 			}
-	# 		}
-	# 	}
-	# 	### Preserve crs definition
-	# 	raster::crs(polygons.all) <- raster::crs(spdf)
-	# 	### object returned
-	# 	polygons.all
-	# }
+create.outer <- function(coords,method=1,buffer.adj=0,coords.radius=0.01,max.fractal.dimension=1.1,plot.outer=TRUE,ask.use=FALSE,counter.clockwise=TRUE,output.path=NULL,plot.output.path=NULL){
 	input.coords <- coords
 	### Check which type of object is being supplied to coords and define coords accordingly
 	if(is(input.coords,"character")){
@@ -204,10 +155,13 @@ create.outer <- function(coords,method=1,buffer.adj=0,coords.radius=0.01,max.fra
 	### Show the relationship between the outer coordinates, the input coordinates, and geographic regions
 	if(plot.outer){
 		### Turns off current graphics devices before plotting. This seems to help prevent the new plots from inheriting graphical parameters from the current device.
-		if(!is.null(dev.list())){
-			dev.off()
-		}
+		#if(!is.null(dev.list())){
+		#	dev.off()
+		#}
 		### Plots in slightly different ways depending depending on the method used.
+		if(!is.null(plot.output.path)){
+			pdf(plot.output.path)
+		}
 		if(method %in% c(1,2)){
 			### Plot the outer coordinates in white to define the extent
 			sp::plot(sp::SpatialPoints(outer),col="white")
@@ -235,6 +189,9 @@ create.outer <- function(coords,method=1,buffer.adj=0,coords.radius=0.01,max.fra
 			sp::plot(points.sp,add=T,pch=20)
 			mtext("+ outer (coordinates written to output.path)",col="green",adj=0.1,line=0.25,cex=0.8)
 			maps::map.axes()
+		}
+		if(!is.null(plot.output.path)){
+			dev.off()
 		}
 	}
 	### Write outer file to output.path

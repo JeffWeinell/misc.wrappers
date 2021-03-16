@@ -6,8 +6,6 @@ library(BiocManager)
 BiocManager::install("JeffWeinell/misc.wrappers",auth_token="323d9e4cd00247a39a805dbb66f37db6403cfb8b")
 ```
 
-
-
 <!--
 ```
 library(ade4)
@@ -169,9 +167,6 @@ Diffs_leporinum_Luzon <- genind2diffs(genind.obj=gen_leporinum_Luzon,output.file
 # write.table(leporinum.coord, "/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/EEMS/leporinum.coord", row.names=F,col.names=F,sep=" ",quote=F)
 # write.table(leporinum_Luzon.coord, "/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/EEMS/leporinum_Luzon.coord", row.names=F,col.names=F,sep=" ",quote=F)
 ```
-
-
-
 
 ```
 .libPaths("/panfs/pfs.local/home/j926w878/programs/R-packages")
@@ -401,6 +396,4 @@ Brazil.points.sampled <- spsample(spdf_Brazil_10, n=30, type="random")
 Brazil.coords.sampled <- sp2coords(Brazil.points.sampled)
 Brazil.test.random    <- create.outer(Brazil.coords.sampled)
 -->
-
-
 
