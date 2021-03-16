@@ -35,13 +35,13 @@ create.outer <- function(coords,method=1,buffer.adj=0,coords.radius=0.01,max.fra
 	crs.string <- "+init=EPSG:4326"
 	# wkt.string <- rgdal::showWKT(crs.string)
 	### Define CRS using wkt format
-	raster::crs(spdf_world_10)   <- crs.string
+	suppressWarnings(raster::crs(spdf_world_10)   <- crs.string)
 	### SpatialPoints object holding coords
 	points.sp <- sp::SpatialPoints(coords)
-	raster::crs(points.sp) <- crs.string
+	suppressWarnings(raster::crs(points.sp) <- crs.string)
 	### SpatialPolygons object holding circles with centerpoints at coords
 	circles.poly <- coords2sp.poly(coords.mat=coords,r=coords.radius)
-	raster::crs(circles.poly) <- crs.string
+	suppressWarnings(raster::crs(circles.poly) <- crs.string)
 	### Spatial data frame for the map features that intersect with the input coords
 	unique.features.at.circles <- do.call(rbind,unique(sp::over(circles.poly, spdf_world_10,returnList=T)))
 	### spdf row indices for the unique regions in unique.features.at.circles
@@ -96,7 +96,7 @@ create.outer <- function(coords,method=1,buffer.adj=0,coords.radius=0.01,max.fra
 				outer.poly         <- smoothr::densify(buffer.poly,max_distance=(0.25*alpha))
 				### Run this test before switching back to Euclidean space
 				### Set CRS of outer.poly (now we are back in Euclidean space); this must be done before using function sp::over()
-				raster::crs(outer.poly) <- crs.string
+				suppressWarnings(raster::crs(outer.poly) <- crs.string)
 				### Test that the output coordinates define a simple polygon.
 				test.simple        <- all(c(rgeos::gIsSimple(outer.poly), rgeos::gIsSimple(hull.alpha.polygon)))
 				### Test if all of the input points are in the output polygon
@@ -127,7 +127,7 @@ create.outer <- function(coords,method=1,buffer.adj=0,coords.radius=0.01,max.fra
 			outer.poly         <- smoothr::densify(buffer.poly,max_distance=(0.25*alpha))
 			fractal.dimension  <- fracD(outer.poly)
 		}
-		raster::crs(outer.poly) <- crs.string
+		suppressWarnings(raster::crs(outer.poly) <- crs.string)
 	} else {
 		if(method==3){
 			### Minimum convex polygon that contains the maps with points.
@@ -143,7 +143,7 @@ create.outer <- function(coords,method=1,buffer.adj=0,coords.radius=0.01,max.fra
 			buffer.poly        <- rgeos::gBuffer(hull.alpha.polygon,width=buffer.width)
 			### Same as buffer.poly except points are added at midpoints of edges longer than max_distance; process repeated until all edges less than. This can make it easier to visualize the border of the output polygon, but otherwise this isnt useful.
 			outer.poly         <- smoothr::densify(buffer.poly,max_distance=(0.25*alpha))
-			raster::crs(outer.poly) <- crs.string
+			suppressWarnings(raster::crs(outer.poly) <- crs.string)
 		} else {
 			stop("set method to 1, 2, or 3")
 		}

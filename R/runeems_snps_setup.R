@@ -41,7 +41,7 @@ runeems_snps_setup <- function(output.dirpath, data, coord, outer=NULL, exe.path
 	}
 	if(dir.exists(output.dirpath)){
 		command.to.remove.directory <- paste0("unlink('",output.dirpath,"',recursive=T)")
-		stop(paste("Output directory:",output.dirpath,"already exists. Use a new output.dirpath or run '",command.to.remove.directory,"'"))
+		stop(paste("Output directory already exists. Use a new output.dirpath or run '",command.to.remove.directory,"'"))
 	} else {
 		dir.create(output.dirpath)
 	}
@@ -189,7 +189,7 @@ runeems_snps_setup <- function(output.dirpath, data, coord, outer=NULL, exe.path
 	#} else {
 	#	print(paste0("Analysis setup complete. To begin, run bash scripts: '",output.dirpath,"/runeems_snps_chain",1:nchains,".sh'"))
 	#}
-	print(paste0("Analysis setup complete. To begin, run bash scripts: '",output.dirpath,"/runeems_snps_chain",1:nchains,".sh'"))
+	print(paste0("Setup complete. To run EEMs, run bash scripts: '",output.dirpath,"/runeems_snps_chain",1:nchains,".sh'"))
 	return(paste0(output.dirpath,"/runeems_snps.sh"))
 } ### End runEEMs_snps function
 
