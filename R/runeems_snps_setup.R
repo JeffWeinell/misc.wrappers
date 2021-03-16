@@ -156,7 +156,7 @@ runeems_snps_setup <- function(output.dirpath, data, coord, outer=NULL, exe.path
 	if(!is.null(outer)){
 		system(paste("cp",outer,paste0(input.dirpath,"/data.outer")))
 	} else {
-		data_outer <- misc.wrappers::create.outer(coords=coord,output.path=paste0(input.dirpath,"/data.outer"),plot.output.path=paste0(output.path,"/habitat_outer.pdf"),additional.args)
+		data_outer <- misc.wrappers::create.outer(coords=coord,output.path=paste0(input.dirpath,"/data.outer"),plot.output.path=paste0(output.dirpath,"/habitat_outer.pdf"),additional.args)
 	}
 	### Generate diffs file, saving to input.dirpath with name "data.diffs"
 	# data.diffs <- genind2diffs(genind.obj=genind,output.file=paste0(input.dirpath,"/data.diffs"))
