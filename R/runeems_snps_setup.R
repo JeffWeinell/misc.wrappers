@@ -1,4 +1,4 @@
-#' @title runEEMs_snps function
+#' @title runeems_snps_setup function
 #' 
 #' 
 #' Wrapper function for running EEMS. Optionally generates the '*.outer' file from the '*.coords' file automatically.
@@ -27,11 +27,10 @@
 #' @param numBurnIter Number of Burnin iterations (i.e., chain length). Default is 1000000. This can be a single number or a numeric vector of length nchains.
 #' @param numThinIter Number of iterations to ignore before sampling the next MCMC iteration. Default is 9999. This can be a single number or a numeric vector of length nchains.
 #' @param nchains Number of chains to run. Default is 3.
-#' @param setup.only If the function should setup data, parameters, and output directories but not run EEMS. Default is TRUE
 #' @param ... Arguments to pass to create.outer. See ?create.outer() for a possibly arguments and values.
 #' @return Nothing is returned.
-#' @export runEEMs_snps
-runEEMs_snps <- function(output.dirpath, data, coord, outer=NULL, exe.path=NULL, ask.use.outer=TRUE, n.sites=NULL, pl=2, nDemes=300, numMCMCIter = 10000000, numBurnIter = 1000000, numThinIter = 9999, nchains=3, setup.only=TRUE,...){
+#' @export runeems_snps_setup
+runeems_snps_setup <- function(output.dirpath, data, coord, outer=NULL, exe.path=NULL, ask.use.outer=TRUE, n.sites=NULL, pl=2, nDemes=300, numMCMCIter = 10000000, numBurnIter = 1000000, numThinIter = 9999, nchains=3,...){
  # data.dirname <- paste0(sample(c(letters,LETTERS,0:9),size=10,replace=T),collapse="")
  # data.dirpath <- paste0(tempdir(),"/",data.dirname)
  # dir.create(data.dirpath)
@@ -159,14 +158,18 @@ runEEMs_snps <- function(output.dirpath, data, coord, outer=NULL, exe.path=NULL,
 		L9 <- paste0("numThinIter = ",as.integer(numThinIter[i]))
 		param.lines <- c(L1,L2,L3,L4,L5,L6,L7,L8,L9)
 		writeLines(param.lines,params.files.path[i])
+		### Write a separate bash script for each chain.
+		command.write.i <- c("#!/bin/bash",paste(exe.path,"--params",params.files.path[i]))
+		writeLines(command.write.i,paste0(output.dirpath,"/runeems_snps_chain",i,".sh"))
 	}
-	command.write <- c("#!/bin/bash",paste(exe.path,"--params",params.files.path))
-	writeLines(command.write,paste0(output.dirpath,"/runeems_snps.sh"))
+	# command.write <- c("#!/bin/bash",paste(exe.path,"--params",params.files.path))
+	# writeLines(command.write,paste0(output.dirpath,"/runeems_snps.sh"))
 	if(!setup.only){
-		command.exe   <- gsub(" & $","",paste(command.write,collapse=" & "))
-		system(command.exe)
+		print(paste0("Analysis setup complete. To begin, run bash scripts: '",output.dirpath,"/runeems_snps_chain",1:nchains,".sh'"))
+		#command.exe   <- gsub(" & $","",paste(command.write,collapse=" & "))
+		#system(command.exe)
 	} else {
-		print(paste0("Analysis setup complete. To begin, run bash script: '",output.dirpath,"/runeems_snps.sh'"))
+		print(paste0("Analysis setup complete. To begin, run bash scripts: '",output.dirpath,"/runeems_snps_chain",1:nchains,".sh'"))
 	}
 	return(paste0(output.dirpath,"/runeems_snps.sh"))
 } ### End runEEMs_snps function
