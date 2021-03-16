@@ -41,7 +41,12 @@ runeems_snps_setup <- function(output.dirpath, data, coord, outer=NULL, exe.path
 	}
 	if(dir.exists(output.dirpath)){
 		command.to.remove.directory <- paste0("unlink('",output.dirpath,"',recursive=T)")
-		stop(paste("Output directory already exists. Use a new output.dirpath or run '",command.to.remove.directory,"'"))
+		stop(paste("Output directory already exists. Change output.dirpath or run '",command.to.remove.directory,"' to remove existing output.dirpath"))
+		# overwrite.key <- paste(sample(c(letters,LETTERS,0:9),size=20,replace=T),collapse="")
+		# confirm.overwrite <- readline(prompt=paste0("Output directory already exists. Enter this code: ",overwrite.key," to overwrite output.dirpath, or anything else to cancel: "))
+		# if(confirm.overwrite!=overwrite.key){
+		# 	stop()
+		# }
 	} else {
 		dir.create(output.dirpath)
 	}
@@ -75,7 +80,7 @@ runeems_snps_setup <- function(output.dirpath, data, coord, outer=NULL, exe.path
 		}
 	}
 	### Set the additional arguments list.
-	additional.args <- list(...)
+	# additional.args <- list(...)
 	### Set input.data equal to data argument
 	input.data <- data
 	### Create directories in output.dirpath to hold a copy of the input (data) files, parameter files, and mcmc output
@@ -156,7 +161,7 @@ runeems_snps_setup <- function(output.dirpath, data, coord, outer=NULL, exe.path
 	if(!is.null(outer)){
 		system(paste("cp",outer,paste0(input.dirpath,"/data.outer")))
 	} else {
-		data_outer <- misc.wrappers::create.outer(coords=coord,output.path=paste0(input.dirpath,"/data.outer"),plot.output.path=paste0(output.dirpath,"/habitat_outer.pdf"),additional.args)
+		data_outer <- misc.wrappers::create.outer(coords=coord,output.path=paste0(input.dirpath,"/data.outer"),plot.output.path=paste0(output.dirpath,"/habitat_outer.pdf"),...)
 	}
 	### Generate diffs file, saving to input.dirpath with name "data.diffs"
 	# data.diffs <- genind2diffs(genind.obj=genind,output.file=paste0(input.dirpath,"/data.diffs"))
