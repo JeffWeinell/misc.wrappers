@@ -8,8 +8,8 @@ Invokes the reemsplots2 function make_eems_plots, with additional functionality 
 \usage{
 plot_eems(
   mcmcdir,
-  coords = NULL,
   output.plot.path = NULL,
+  plot.coords = T,
   plot.geography = T,
   plot.oceans = T
 )
@@ -17,9 +17,9 @@ plot_eems(
 \arguments{
 \item{mcmcdir}{Character string to directory of a particular mcmc chain}
 
-\item{coords}{Optional character string to sample coordinates file.}
-
 \item{output.plot.path}{Character string with path where to save output. If NULL, the plot is printed but not saved.}
+
+\item{plot.coords}{Whether or not the sample}
 }
 \value{
 NULL; plots are printed to screen and saved to output.plot.path

@@ -3,11 +3,11 @@
 #' Invokes the reemsplots2 function make_eems_plots, with additional functionality such as adding island borders and points showing individual coordinates..
 #' 
 #' @param mcmcdir Character string to directory of a particular mcmc chain
-#' @param coords Optional character string to sample coordinates file.
+#' @param plot.coords Whether or not the sample
 #' @param output.plot.path Character string with path where to save output. If NULL, the plot is printed but not saved.
 #' @return NULL; plots are printed to screen and saved to output.plot.path
 #' @export plot_eems
-plot_eems <- function(mcmcdir,coords=NULL,output.plot.path=NULL,plot.geography=T,plot.oceans=T){
+plot_eems <- function(mcmcdir,output.plot.path=NULL,plot.coords=T,plot.geography=T,plot.oceans=T){
 	spdf_world_10    <- rnaturalearth::ne_countries(scale=10)
 	#spdf_oceans_10   <- invisible(rnaturalearth::ne_download(scale = 10, type = 'ocean', category = 'physical'))
 	# oceans <- misc.wrappers::spdf_oceans_10
@@ -87,7 +87,7 @@ plot_eems <- function(mcmcdir,coords=NULL,output.plot.path=NULL,plot.geography=T
 	#	pdf(output.plot.path)
 	#}
 	layout(matrix(1:2,ncol=2), width = c(2,1),height = c(1,1))
-	par(mar=c(2,2,1,1))
+	par(mar=c(4,4,1,1))
 	for(i in 1:4){
 		intersect.eems.unique.plot <-  sp::plot(eems.intersect.spdf[[i]],col=eems.intersect.spdf[[i]]$fill)
 		### Plot a legend. This doesnt quite work yet because the colors are not sorted properly.
@@ -101,9 +101,10 @@ plot_eems <- function(mcmcdir,coords=NULL,output.plot.path=NULL,plot.geography=T
 		if(plot.oceans){
 			ne_oceans.plot_10          <- sp::plot(spdf_oceans_10,add=T,border="black",lwd=1.5,col="white")
 		}
-		if(!is.null(coords)){
-			coordinates <- data.matrix(read.table(coords,header=F))
-			plot(coordinates,add=T,pch=20)
+		if(plot.coords){
+			coordinates <- sp::SpatialPoints(data.matrix(read.table(paste0(mcmcdir,"/rdistoDemes.txt"),header=F))[,1:2])
+			suppressWarnings(raster::crs(coordinates)     <- crs.string)
+			sp::plot(coordinates,add=T,pch=20)
 		}
 		maps::map.axes()
 		legend_image <- as.raster(matrix(rev(c("#994000","#CC5800","#FF8F33","#FFAD66","#FFCA99","#FFE6CC","#FBFBFB","#CCFDFF","#99F8FF","#66F0FF","#33E4FF","#00AACC","#007A99")), ncol=1))
@@ -114,9 +115,13 @@ plot_eems <- function(mcmcdir,coords=NULL,output.plot.path=NULL,plot.geography=T
 		if(i==1){
 			plot(c(0,2),c((log.minm*1.1),(log.maxm*1.4)),type = 'n', axes = F,xlab = "", ylab = "",main="")
 			rasterImage(legend_image, 0, log.minm, 1,log.maxm)
-			text(x=1.5, y = c(-2,-1,0,1,2), labels = c("-2","-1","0","1","2"),cex=1)
+			
+			ticks = seq(from=-5, to=5,by=1)
+			ticks.in.range <- ticks[ticks >= log.minm &  ticks <= log.maxm]
+			text(x=1.5, y = ticks.in.range, labels = as.character(ticks.in.range),cex=1)
 			text(x=-0.2,y=log.maxm+0.2,labels="log(m)",pos=4,cex=1.25)
-			segments(x0=rep(c(0,0.75),5),y0=c(-2,-2,-1,-1,0,0,1,1,2,2),x1=rep(c(0.25,1),5),col="white",lwd=1.5)
+			# segments(x0=rep(c(0,0.75),5),y0=c(-2,-2,-1,-1,0,0,1,1,2,2),x1=rep(c(0.25,1),5),col="white",lwd=1.5)
+			segments(x0=rep(c(0,0.75),length(ticks.in.range)),y0=sort(rep(ticks.in.range,2)),x1=rep(c(0.25,1),length(ticks.in.range)),col="white",lwd=1.5)
 		}
 		if(i==2){
 			plot(c(0,5),c(-1.5,1.5),type = 'n', axes = F,xlab = "", ylab = "",main="")
@@ -127,13 +132,19 @@ plot_eems <- function(mcmcdir,coords=NULL,output.plot.path=NULL,plot.geography=T
 		if(i==3){
 			plot(c(0,2),c((log.minq*1.1),(log.maxq*1.4)),type = 'n', axes = F,xlab = "", ylab = "",main="")
 			rasterImage(legend_image, 0, log.minq, 1,log.maxq)
-			text(x=1.5, y = c(-0.10,-0.05,0,0.05,0.10), labels = c("-0.10","-0.05","0.00","0.05","0.10"))
-			text(x=0,y=(log.maxq*1.2),labels="log(q)",pos=4)
+			ticks = round(seq(from=(-0.3), to=(0.3),by=(0.05)),digits=2)
+			ticks.in.range <- ticks[ticks >= log.minq &  ticks <= log.maxq]
+			# text(x=1.5, y = c(-0.10,-0.05,0,0.05,0.10), labels = c("-0.10","-0.05","0.00","0.05","0.10"))
+			text(x=1.5, y = ticks.in.range, labels = as.character(ticks.in.range),cex=1)
+			text(x=0.2,y=log.maxq+0.03,labels="log(q)",pos=4,cex=1)
+			# segments(x0=rep(c(0,0.75),2),y0=c(-0.9,-0.9,0.9,0.9),x1=rep(c(0.25,1),2),col="white",lwd=1.5)
+			segments(x0=rep(c(0,0.75),length(ticks.in.range)),y0=sort(rep(ticks.in.range,2)),x1=rep(c(0.25,1),length(ticks.in.range)),col="white",lwd=1.5)
 		}
 		if(i==4){
-			plot(c(0,5),c(-2,2),type = 'n', axes = F,xlab = "", ylab = "",main="")
+			plot(c(0,5),c(-1.5,1.5),type = 'n', axes = F,xlab = "", ylab = "",main="")
 			rasterImage(legend_image, 0, -1, 1,1)
-			text(x=1.1, y = c(-0.9,0.9), labels = c("P{log(q) < 0} = 0.9","P{log(q) > 0} = 0.9"),cex=0.8)
+			text(x=1.1, y = c(-0.9,0.9), labels = c("P{log(q) < 0} = 0.9","P{log(q) > 0} = 0.9"),pos=4,cex=0.8)
+			segments(x0=rep(c(0,0.75),2),y0=c(-0.9,-0.9,0.9,0.9),x1=rep(c(0.25,1),2),col="white",lwd=1.5)
 		}
 	}
 	#if(is.null(output.plot.path)){

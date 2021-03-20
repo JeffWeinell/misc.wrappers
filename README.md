@@ -359,6 +359,7 @@ plots.chain2.v2 <- lapply(X=plots.chain2,FUN=function(x){x+theme(plot.margin = u
 # CIRCLE = circumscribing circle index; based on the ratio of patch area to the area of the smallest circumscribing circle; providing a measure of overall patch elongation. A highly convoluted but narrow patch will have a relatively low related circumscribing circle index due to the relative compactness of the patch. Conversely, a narrow and elongated patch will have a relatively high circumscribing circle index. This index may be particularly useful for distinguishing patches that are both linear (narrow) and elongated.
 # CONTIG = contiguity index; method of assessing patch shape based on the spatial connectedness or contiguity of cells within a patch; large contiguous patches will result in larger contiguity index values.
 
+.libPaths("/panfs/pfs.local/home/j926w878/programs/R-packages")
 library(devtools)
 devtools::install_github("JeffWeinell/misc.wrappers",auth_token="323d9e4cd00247a39a805dbb66f37db6403cfb8b")
 # library(BiocManager)
