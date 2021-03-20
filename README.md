@@ -2,7 +2,7 @@
  Collection of wrappers for programs that I did not create.
 
 ### Package Description
-This package includes functions to fascilitate running the program runeems_snps. The main function is ```runeems_snps_setup```, which takes as input two files: (1) a SNPs dataset in VCF-format and (2) a two-column text file with longitude and latitude coordinates for each individual in the VCF file. Output of this function include all of the files and directories necessary for running EEMS. Bash files for running EEMS are also generated.
+This package includes functions to fascilitate running the program runeems_snps. The main function is ```runeems_snps_setup```, which takes as input two files: (1) a SNPs dataset in (Variant-Call Format) VCF and (2) a two-column text file with longitude and latitude coordinates for each individual in the VCF file. Output of this function include all of the files and directories necessary for running EEMS. Bash files for running EEMS are also generated.
 
 ### Download, unpack, and install EEMS
 Follow the instructions [here](https://github.com/dipetkov/eems) on how to download the EEMS repository, which includes several programs, including ```runeems_snps``` which you must install from source.
@@ -22,11 +22,34 @@ library(BiocManager)
 BiocManager::install("JeffWeinell/misc.wrappers")
 ```
 
-### Setup misc.wrappers 
-If runeems is installed on your system PATH, then you can skip this step. Otherwise, use the function ```config_miscwrappers``` to permanently tell misc.wrappers where to find EEMS executables.
+### Link misc.wrappers to runeems_snps executable
+If runeems_snps is installed on your PATH, then you can skip this step. Otherwise, use the function ```config_miscwrappers``` to tell misc.wrappers where to find runeems_snps. You only need to do this once.
 ```
 library(misc.wrappers)
-
-
+# Provide the full path to the runeems_snps executable
+config_miscwrappers(exe.paths="*/eems-master/runeems_snps/src/runeems_snps")
 ```
+
+### Generate runeems_snps input files
+```
+library(misc.wrappers)
+## runeems_snps_setup function
+runeems_snps_setup(output.dirpath="Path/To/Directory/That/Doesnt/Exist",data="Path/To/SNP/file.vcf",coord="Path/To/LonLat/of/Individuals/file.txt")
+```
+
+The output of ```runeems_snps_setup``` includes:
+
+  - `*.ini`
+  - `*.diffs` file, difference matrix, habitat.outer 
+
+### Example 
+
+
+
+
+
+
+
+
+
 
