@@ -89,7 +89,7 @@ runeems_snps_setup <- function(output.dirpath, data, coord, outer=NULL, exe.path
 	dir.create(input.dirpath)
 	# Create output mcmc directory and subdirectories
 	mcmcpath         <- paste0(output.dirpath,"/mcmc")
-	mcmcpath.subdirs <- paste0(mcmcpath,"/",paste0(nDemes,"Demes-chain",1:nchains))
+	mcmcpath.subdirs <- paste0(mcmcpath,"/",paste0("chain",1:nchains))
 	dir.create(mcmcpath)
 	sapply(X=mcmcpath.subdirs,FUN=dir.create)
 	# Create directory to hold params files
@@ -168,7 +168,7 @@ runeems_snps_setup <- function(output.dirpath, data, coord, outer=NULL, exe.path
 	# diffs      <- data.diffs["diffs"]
 	# nIndiv     <- c(data.diffs["nIndiv"])
 	# nSites     <- data.diffs["nSites"]
-	params.files.path <- paste0(params.path,"/params-chain",1:nchains,"_",nDemes,".ini")
+	params.files.path <- paste0(params.path,"/params-chain",1:nchains,".ini")
 	for(i in 1:nchains){
 		L1 <- paste0("datapath = ",paste0(input.dirpath,"/data"))
 		L2 <- paste0("mcmcpath = ",mcmcpath.subdirs[i])

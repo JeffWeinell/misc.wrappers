@@ -37,19 +37,14 @@ library(misc.wrappers)
 runeems_snps_setup(output.dirpath="Path/To/Directory/That/Doesnt/Exist",data="Path/To/SNP/file.vcf",coord="Path/To/LonLat/of/Individuals/file.txt")
 ```
 
-The output of ```runeems_snps_setup``` includes the following:
-  - `output.dirpath/`
-    - `habitat_outer.pdf`
-    - `data/`
-      - `data.diffs`
-      - `data.outer`
-      - `data.coords`
-    - `mcmc/`
-      - `XXXDemes-chain1/`
-      - `XXXDemes-chain*/`
-    - `params/`
-      - `params-chain1_XXX.ini`
-      - `params-chain*_XXX.ini`
+Running runeems_snps_setup will create the output directory defined by output.dirpath, which will contain:
+  - `habitat_outer.pdf`
+  - `data/data.diffs`
+  - `data/data.outer`
+  - `data/data.coords`
+  - `mcmc/chain*/`; one for each chain
+  - `params/params-chain*.ini`; one for each chain
+  - `runeems_snps_chain*.sh`; bash script for running EEMS to generate MCMC chain*
 
 
 
