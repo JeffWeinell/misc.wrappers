@@ -37,10 +37,29 @@ library(misc.wrappers)
 runeems_snps_setup(output.dirpath="Path/To/Directory/That/Doesnt/Exist",data="Path/To/SNP/file.vcf",coord="Path/To/LonLat/of/Individuals/file.txt")
 ```
 
-The output of ```runeems_snps_setup``` includes:
+The output of ```runeems_snps_setup``` includes the following:
+  - `output.dirpath/`
+    - `habitat_outer.pdf`
+    - `data/`
+      - `data.diffs`
+      - `data.outer`
+      - `data.coords`
+    - `mcmc/`
+      - `XXXDemes-chain1/`
+      - `XXXDemes-chain*/`
+    - `params/`
+      - `params-chain1_XXX.ini`
+      - `params-chain*_XXX.ini`
 
-  - `*.ini`
-  - `*.diffs` file, difference matrix, habitat.outer 
+
+
+
+  - `*.ini` files: parameter settings for each chain
+  - `data.diffs`: file containing the pairwise matrix of differences (distances)
+  - `data.outer`: file containing the coordinates defining the habitat region in which to estimate effective migration.
+  - `data.coords`: a copy of the input coordinates defining the location of samples in the VCF
+  `habitat_outer.pdf`: a pdf image showing the the region 
+  - 
 
 ### Example 
 
