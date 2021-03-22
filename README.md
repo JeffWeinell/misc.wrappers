@@ -36,7 +36,6 @@ library(misc.wrappers)
 ## runeems_snps_setup function
 runeems_snps_setup(output.dirpath="Path/To/Directory/That/Doesnt/Exist",data="Path/To/SNP/file.vcf",coord="Path/To/LonLat/of/Individuals/file.txt")
 ```
-
 Running runeems_snps_setup will create the output directory defined by output.dirpath, which will contain:
   - `habitat_outer.pdf`
   - `data/data.diffs`
@@ -46,17 +45,19 @@ Running runeems_snps_setup will create the output directory defined by output.di
   - `params/params-chain*.ini`; one for each chain
   - `runeems_snps_chain*.sh`; bash script for running EEMS to generate MCMC chain*
 
+### Visualizing results
+The function `make_eems_plots` from the reemsplots2 will plot the results, but the maps produced can be difficult to work with further because they are in ggplot objects. The function ``gg2raster`` will convert these to a raster brick object, and optionally save the raster as a geoTIFF file that can be read into GIS software such as QGIS.
+```
+# Generate the list of ggplot objects
+gg <- reemsplots2::make_eems_plots(mcmcpath = `/mcmc/chain*/`)
 
+# Create a raster brick object for each map and save each raster brick as a geoTIFF file.
+mrates1.brick <- eemsgg2raster(gg.obj=gg$mrates01,file.out="mrates1.tif")
+mrates2.brick <- eemsgg2raster(gg.obj=gg$mrates02,file.out="mrates2.tif")
+qrates1.brick <- eemsgg2raster(gg.obj=gg$qrates01,file.out="qrates1.tif")
+qrates2.brick <- eemsgg2raster(gg.obj=gg$qrates02,file.out="qrates2.tif")
+```
 
-
-  - `*.ini` files: parameter settings for each chain
-  - `data.diffs`: file containing the pairwise matrix of differences (distances)
-  - `data.outer`: file containing the coordinates defining the habitat region in which to estimate effective migration.
-  - `data.coords`: a copy of the input coordinates defining the location of samples in the VCF
-  `habitat_outer.pdf`: a pdf image showing the the region 
-  - 
-
-### Example 
 
 
 
