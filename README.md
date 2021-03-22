@@ -51,7 +51,7 @@ The function `make_eems_plots` from the reemsplots2 will plot the results, but t
 # Generate the list of ggplot objects
 gg <- reemsplots2::make_eems_plots(mcmcpath = `/mcmc/chain*/`)
 
-# Create a raster brick object for each map and save each raster brick as a geoTIFF file.
+# Create a raster brick object for each map and save each as a geoTIFF file.
 mrates1.brick <- eemsgg2raster(gg.obj=gg$mrates01,file.out="mrates1.tif")
 mrates2.brick <- eemsgg2raster(gg.obj=gg$mrates02,file.out="mrates2.tif")
 qrates1.brick <- eemsgg2raster(gg.obj=gg$qrates01,file.out="qrates1.tif")
