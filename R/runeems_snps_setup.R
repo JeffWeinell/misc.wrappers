@@ -1,7 +1,7 @@
 #' @title runeems_snps_setup function
 #' 
 #' 
-#' Wrapper function for running EEMS. Optionally generates the '*.outer' file from the '*.coords' file automatically.
+#' Wrapper function for preparing to run EEMS. A bash script is produced that will run EEMS. Optionally generates a '*.outer' file from the '*.coords' file.
 #' 
 #' 
 #' @param output.dirpath Character string with path to directory where EEMS input and output files should be saved. This directory must not exist prior to running this function, but its parent directory must exist.
