@@ -13,7 +13,7 @@
 #'    /output.dirpath/data/data.outer
 #'    /output.dirpath/mcmc    ### This will contain as many mcmc subdirectories as the value of nchains.
 #'    /output.dirpath/params  ### This will contain as many parameter files as the value of nchains.
-#' @param data An object of class genind or vcfR, or a character string with path to a diffs file.
+#' @param data An object of class genind or vcfR, or a character string with path to a diffs of vcf file
 #' @param coord Character string with path to coordinates file, which has two columns with longitude and latitude coordinates (decimal degree format) of individuals in the genind object. Columns should be space separated.
 #' @param outer Either NULL (the default) or a character string with path to the '*.outer' file, which has two columns with longitude and latitude coordinates (decimal degree format) defining the perimeter of a polygon covering the region to model with EEMS. See EEMS documentation.
 #' If NULL, this function will generate a "*.outer" file automatically; the user will be prompted to accept the auto-generated *.outer file prior to running eems.
@@ -124,7 +124,9 @@ runeems_snps_setup <- function(output.dirpath, data, coord, outer=NULL, exe.path
 			first.line <- readLines(input.data,n=1)
 			if(grep("VCF",first.line)==1){
 				vcf.data   <- vcfR::read.vcfR(input.data)
-				n.indv <- (length(colnames(attributes(vcf.data)[[3]]))-1)
+				gt.mat <- vcf.data@gt[,-1]
+				n.ind  <- ncol(gt.mat)
+				#n.indv <- (length(colnames(attributes(vcf.data)[[3]]))-1)
 				if(n.coords!=n.indv){
 					stop(paste(n.coords,"individuals with coordinates but",n.indv,"individuals with snps"))
 				}
