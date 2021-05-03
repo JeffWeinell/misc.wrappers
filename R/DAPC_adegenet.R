@@ -166,8 +166,11 @@ run_DAPC <- function(vcf, kmax=50, coords=NULL, reps=100,probs.out=NULL,save.as=
 			ydist           <- geosphere::distm(x=c(0,y.min),y=c(0,y.max))
 			tess3r.qmat     <- suppressWarnings(tess3r::as.qmatrix(q.matrix))
 			coords.mat      <- as.matrix(coords)
-			mapplot.initial <- plot(tess3r.qmat, coords.mat, method = "map.max", interpol = tess3r::FieldsKrigModel(10), main = paste0("Ancestry coefficients; K=",K), xlab = "", ylab = "",resolution = c(100,100), cex = 0.4,col.palette = my.palette, window=c(x.min,x.max,y.min,y.max),asp=xdist/ydist)
-			mapplot.i       <- plot(tess3r.qmat, coords.mat, method = "map.max", interpol = tess3r::FieldsKrigModel(10), main = paste0("Ancestry coefficients; K=",K), xlab = "", ylab = "",resolution = c(500,500), cex = 0.4,col.palette = my.palette, window=c(par("usr")[1],par("usr")[2],par("usr")[3],par("usr")[4]),asp=xdist/ydist)
+			#mapplot.initial <- plot(tess3r.qmat, coords.mat, method = "map.max", interpol = tess3r::FieldsKrigModel(10), main = paste0("Ancestry coefficients; K=",K), xlab = "", ylab = "",resolution = c(100,100), cex = 0.4,col.palette = my.palette, window=c(x.min,x.max,y.min,y.max),asp=xdist/ydist)
+			#mapplot.i       <- plot(tess3r.qmat, coords.mat, method = "map.max", interpol = tess3r::FieldsKrigModel(10), main = paste0("Ancestry coefficients; K=",K), xlab = "", ylab = "",resolution = c(500,500), cex = 0.4,col.palette = my.palette, window=c(par("usr")[1],par("usr")[2],par("usr")[3],par("usr")[4]),asp=xdist/ydist)
+			mapplot.initial <- plot(tess3r.qmat, coords.mat, main = "", xlab = "", ylab = "",resolution = c(2,2), col.palette = lapply(X=1:K,FUN=function(x){rep("#FFFFFF",9)}), cex=0,window=c(x.min,x.max,y.min,y.max),asp=xdist/ydist,add=FALSE)
+			mapplot.i       <- plot(tess3r.qmat, coords.mat, method = "map.max", interpol = tess3r::FieldsKrigModel(10), main = paste0("Ancestry coefficients; K=",K), xlab = "", ylab = "",resolution = c(500,500), cex = 0.4, col.palette = my.palette, window=par("usr"),asp=xdist/ydist,add=FALSE)
+			maps::map(add=TRUE)
 			mapplot[[i]]    <- recordPlot()
 		}
 	}
