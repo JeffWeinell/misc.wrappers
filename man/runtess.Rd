@@ -32,7 +32,7 @@ runtess(
 
 \item{max.iteration}{Max iterations. Default 500.}
 
-\item{save.as}{Where to save the output PDF. Default is NULL.}
+\item{save.as}{Where to save the output PDF. Default is NULL. **This argument is ignored in some environments. Instead, use dev.new(file="Where/To/Save/Output.pdf",height=6,width=10,noRStudioGD=TRUE) before calling 'runtess'. Then dev.off().}
 }
 \value{
 List of plots

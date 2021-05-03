@@ -10,10 +10,10 @@
 #' @param project Defualt 'new'
 #' @param iter Default 500
 #' @param CPU Defualt 2
-#' @param save.as Path where output PDF should be saved. Default NULL.
+#' @param save.as Character string with where to save the output PDF with plots of results. Default is NULL. **Important! This argument is ignored in some environments. Instead, use dev.new(file="Where/To/Save/Output.pdf",height=6,width=10,noRStudioGD=TRUE) before using run_SNMF. Then dev.off().
 #' @return List of plots
 #' @export run_SNMF
-run_SNMF <- function(vcf,coords=NULL,Krange=1:40,reps=100,entropy=TRUE,project="new",iter=500,CPU=2,save.as=NULL){
+run_SNMF <- function(vcf,coords=NULL,Krange=1:40,reps=100,entropy=TRUE,project="new",iter=500,save.as=NULL){
 	vcf.obj     <- vcfR::read.vcfR(vcf)
 	samplenames <- colnames(vcf.obj@gt)[-1]
 	numind      <- length(samplenames)
@@ -42,10 +42,14 @@ run_SNMF <- function(vcf,coords=NULL,Krange=1:40,reps=100,entropy=TRUE,project="
 	if(max(Krange) > maxK){
 		Krange <- 1:maxK
 	}
-	geno.temp.path <- paste0(tempfile(),".geno")
-	geno.obj       <- vcfR2geno(vcf=vcf,out=geno.temp.path)
-	snmf.obj       <- LEA::snmf(geno.temp.path,K=Krange, repetitions=reps,entropy=entropy,project="new",iterations=iter,CPU=CPU)
-	crossentropy.mat  <- t(do.call(cbind,lapply(X=Krange,FUN=function(x){LEA::cross.entropy(snmf.obj,K = x)})))
+	geno.temp.path   <- paste0(tempfile(),".geno")
+	geno.obj         <- vcfR2geno(vcf=vcf,out=geno.temp.path)
+	num.CPUs         <- parallel::detectCores()
+	if(!is.numeric(num.CPUs)){
+		num.CPUs <- 2
+	}
+	snmf.obj         <- LEA::snmf(geno.temp.path,K=Krange, repetitions=reps,entropy=entropy,project="new",iterations=iter,CPU=num.CPUs)
+	crossentropy.mat <- t(do.call(cbind,lapply(X=Krange,FUN=function(x){LEA::cross.entropy(snmf.obj,K = x)})))
 	rownames(crossentropy.mat) <- Krange
 	colnames(crossentropy.mat) <- paste0("rep",1:reps)
 	boxplot(t(crossentropy.mat))
@@ -132,7 +136,7 @@ run_SNMF <- function(vcf,coords=NULL,Krange=1:40,reps=100,entropy=TRUE,project="
 		rownames(q.matrix) <- samplenames
 		colnames(q.matrix) <- paste0("cluster",1:ncol(q.matrix))
 		posterior.df       <- data.frame(indv=rep(rownames(q.matrix),ncol(q.matrix)), pop=rep(colnames(q.matrix),each=nrow(q.matrix)), assignment=c(unlist(unname(q.matrix))))
-		posterior.gg       <- ggplot2::ggplot(posterior.df, aes(fill= pop, x= assignment, y=indv)) + geom_bar(position="stack", stat="identity") + theme_classic() + theme(axis.text.y = element_text(size = label.size), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank()) + ggplot2::labs(x = "Membership Probability",y="",fill="Cluster",title=paste0("K = ",K)) + scale_fill_manual(values=myCols[1:K])
+		posterior.gg       <- ggplot2::ggplot(posterior.df, ggplot2::aes(fill= pop, x= assignment, y=indv)) + ggplot2::geom_bar(position="stack", stat="identity") + ggplot2::theme_classic() + ggplot2::theme(axis.text.y = ggplot2::element_text(size = label.size), panel.grid.major = ggplot2::element_blank(), panel.grid.minor = ggplot2::element_blank(), panel.background = ggplot2::element_blank()) + ggplot2::labs(x = "Membership Probability",y="",fill="Cluster",title=paste0("K = ",K)) + ggplot2::scale_fill_manual(values=myCols[1:K])
 		plot(posterior.gg)
 		admixturePlot[[i]]   <- recordPlot()
 		
@@ -140,8 +144,8 @@ run_SNMF <- function(vcf,coords=NULL,Krange=1:40,reps=100,entropy=TRUE,project="
 			my.palette      <- tess3r::CreatePalette(myCols, 9)
 			xdist           <- geosphere::distm(x=c(x.min,0),y=c(x.max,0))
 			ydist           <- geosphere::distm(x=c(0,y.min),y=c(0,y.max))
-			mapplot.initial <- plot(suppressWarnings(tess3r::as.qmatrix(q.matrix)), as.matrix(coords), method = "map.max", interpol = FieldsKrigModel(10), main = paste0("Ancestry coefficients; K=",K), xlab = "", ylab = "",resolution = c(100,100), cex = 0.4,col.palette = my.palette, window=c(x.min,x.max,y.min,y.max),asp=xdist/ydist)
-			mapplot.i       <- plot(suppressWarnings(tess3r::as.qmatrix(q.matrix)), as.matrix(coords), method = "map.max", interpol = FieldsKrigModel(10), main = paste0("Ancestry coefficients; K=",K), xlab = "", ylab = "",resolution = c(500,500), cex = 0.4,col.palette = my.palette, window=c(par("usr")[1],par("usr")[2],par("usr")[3],par("usr")[4]),asp=xdist/ydist)
+			mapplot.initial <- plot(suppressWarnings(tess3r::as.qmatrix(q.matrix)), as.matrix(coords), method = "map.max", interpol = tess3r::FieldsKrigModel(10), main = paste0("Ancestry coefficients; K=",K), xlab = "", ylab = "",resolution = c(100,100), cex = 0.4,col.palette = my.palette, window=c(x.min,x.max,y.min,y.max),asp=xdist/ydist)
+			mapplot.i       <- plot(suppressWarnings(tess3r::as.qmatrix(q.matrix)), as.matrix(coords), method = "map.max", interpol = tess3r::FieldsKrigModel(10), main = paste0("Ancestry coefficients; K=",K), xlab = "", ylab = "",resolution = c(500,500), cex = 0.4,col.palette = my.palette, window=c(par("usr")[1],par("usr")[2],par("usr")[3],par("usr")[4]),asp=xdist/ydist)
 			mapplot[[i]]    <- recordPlot()
 		}
 	}

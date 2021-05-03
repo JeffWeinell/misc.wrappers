@@ -14,7 +14,6 @@ run_SNMF(
   entropy = TRUE,
   project = "new",
   iter = 500,
-  CPU = 2,
   save.as = NULL
 )
 }
@@ -33,9 +32,9 @@ run_SNMF(
 
 \item{iter}{Default 500}
 
-\item{CPU}{Defualt 2}
+\item{save.as}{Character string with where to save the output PDF with plots of results. Default is NULL. **Important! This argument is ignored in some environments. Instead, use dev.new(file="Where/To/Save/Output.pdf",height=6,width=10,noRStudioGD=TRUE) before using run_SNMF. Then dev.off().}
 
-\item{save.as}{Path where output PDF should be saved. Default NULL.}
+\item{CPU}{Defualt 2}
 }
 \value{
 List of plots

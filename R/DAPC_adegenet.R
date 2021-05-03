@@ -8,11 +8,11 @@
 #' @param coords Optional character string with path to a table with longitude and latitude of individuals in the vcf file, or a matrix or data frame with longitude and latitude columns. Default is NULL, in which case membership probabilities are not interpolated onto a map.
 #' @param reps Number indicating the number of replicates of 'find.clusters'. Default 100.
 #' @param probs.out NULL or a character string with location where to write a table containing the membership probabilities for the best K and alpha-optimized number of PCAs.
-#' @param save.as Character string with where to save the output PDF with plots of results.
+#' @param save.as Character string with where to save the output PDF with plots of results. Default is NULL. **Important! This argument is ignored in some environments. Instead, use dev.new(file="Where/To/Save/Output.pdf",height=6,width=10,noRStudioGD=TRUE) before using run_DAPC. Then dev.off().
 #' @return A list of plots.
 #' @export run_DAPC
 run_DAPC <- function(vcf, kmax=50, coords=NULL, reps=100,probs.out=NULL,save.as=NULL){
-	dev.new(width=10,height=6)
+	#dev.new(width=10,height=6)
 	vcf.obj     <- vcfR::read.vcfR(vcf,verbose=F)
 	samplenames <- colnames(vcf.obj@gt)[-1]
 	genind      <- suppressWarnings(vcfR::vcfR2genind(vcf.obj))
@@ -109,8 +109,8 @@ run_DAPC <- function(vcf, kmax=50, coords=NULL, reps=100,probs.out=NULL,save.as=
 	mtext(side=3,paste0("BIC (",reps," replicates of find.clusters) vs. number of clusters (K)"),line=1)
 	axis(1,at=1:max.clusters)
 	BICPlot    <- recordPlot()
-	best.npca    <- NULL
-	grp.mat      <- matrix(data=0,nrow=length(grp$grp),ncol=(max.clusters-1))
+	best.npca  <- NULL
+	grp.mat    <- matrix(data=0,nrow=length(grp$grp),ncol=(max.clusters-1))
 	for(K in 2:max.clusters){
 		i=(K-1)
 		grp.K         <- adegenet::find.clusters(genind, max.n.clust=max.clusters,n.pca=max.clusters,n.clust=K)
@@ -152,7 +152,7 @@ run_DAPC <- function(vcf, kmax=50, coords=NULL, reps=100,probs.out=NULL,save.as=
 		if(K>=15){
 			myCols          <- c(goodcolors(14,thresh=100,cbspace=""), sample(adegenet::funky(100), size=K-14))
 		}
-		posterior.gg        <- ggplot2::ggplot(posterior.df, aes(fill= pop, x= assignment, y=indv)) + geom_bar(position="stack", stat="identity") + theme_classic() + theme(axis.text.y = element_text(size = label.size), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank()) + ggplot2::labs(x = "Membership Probability",y="",fill="Cluster",title=paste0("K = ",K,"; PCs retained = ",best.npca[i])) + scale_fill_manual(values=myCols[1:K])
+		posterior.gg        <- ggplot2::ggplot(posterior.df, ggplot2::aes(fill= pop, x= assignment, y=indv)) + ggplot2::geom_bar(position="stack", stat="identity") + ggplot2::theme_classic() + ggplot2::theme(axis.text.y = ggplot2::element_text(size = label.size), panel.grid.major = ggplot2::element_blank(), panel.grid.minor = ggplot2::element_blank(), panel.background = ggplot2::element_blank()) + ggplot2::labs(x = "Membership Probability",y="",fill="Cluster",title=paste0("K = ",K,"; PCs retained = ",best.npca[i])) + ggplot2::scale_fill_manual(values=myCols[1:K])
 		plot(posterior.gg)
 		admixturePlot[[i]]   <- recordPlot()
 		par(mar=c(5,20,2,2.1),mfrow=c(1,1))
@@ -166,8 +166,8 @@ run_DAPC <- function(vcf, kmax=50, coords=NULL, reps=100,probs.out=NULL,save.as=
 			ydist           <- geosphere::distm(x=c(0,y.min),y=c(0,y.max))
 			tess3r.qmat     <- suppressWarnings(tess3r::as.qmatrix(q.matrix))
 			coords.mat      <- as.matrix(coords)
-			mapplot.initial <- plot(tess3r.qmat, coords.mat, method = "map.max", interpol = FieldsKrigModel(10), main = paste0("Ancestry coefficients; K=",K), xlab = "", ylab = "",resolution = c(100,100), cex = 0.4,col.palette = my.palette, window=c(x.min,x.max,y.min,y.max),asp=xdist/ydist)
-			mapplot.i       <- plot(tess3r.qmat, coords.mat, method = "map.max", interpol = FieldsKrigModel(10), main = paste0("Ancestry coefficients; K=",K), xlab = "", ylab = "",resolution = c(500,500), cex = 0.4,col.palette = my.palette, window=c(par("usr")[1],par("usr")[2],par("usr")[3],par("usr")[4]),asp=xdist/ydist)
+			mapplot.initial <- plot(tess3r.qmat, coords.mat, method = "map.max", interpol = tess3r::FieldsKrigModel(10), main = paste0("Ancestry coefficients; K=",K), xlab = "", ylab = "",resolution = c(100,100), cex = 0.4,col.palette = my.palette, window=c(x.min,x.max,y.min,y.max),asp=xdist/ydist)
+			mapplot.i       <- plot(tess3r.qmat, coords.mat, method = "map.max", interpol = tess3r::FieldsKrigModel(10), main = paste0("Ancestry coefficients; K=",K), xlab = "", ylab = "",resolution = c(500,500), cex = 0.4,col.palette = my.palette, window=c(par("usr")[1],par("usr")[2],par("usr")[3],par("usr")[4]),asp=xdist/ydist)
 			mapplot[[i]]    <- recordPlot()
 		}
 	}
@@ -181,7 +181,7 @@ run_DAPC <- function(vcf, kmax=50, coords=NULL, reps=100,probs.out=NULL,save.as=
 		posterior.bestK <- matrix(data=rep(1,numind),ncol=1)
 		rownames(posterior.bestK) <- samplenames
 	}
-	dev.off()
+	#dev.off()
 	if(!is.null(coords)){
 		result <- c(list(BICPlot,grp.plot2),admixturePlot,assignmentPlot,mapplot)
 	} else {
