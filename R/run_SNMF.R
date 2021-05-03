@@ -182,7 +182,13 @@ run_SNMF <- function(vcf,coords=NULL,Krange=1:40,reps=100,entropy=TRUE,project="
 		lapply(X=result,FUN=print)
 		dev.off()
 	}
-	result
+	# result
+	# result.grob <- lapply(X=result,FUN=grob)
+	# pl <- lapply(X=list(entropyPlot, mapplot),FUN=grob)
+	# ml <- marrangeGrob(pl, nrow=1, ncol=1)
+	# ggsave(save.as, ml)
+
+
 }
 #' @examples
 #'	library(ade4)
