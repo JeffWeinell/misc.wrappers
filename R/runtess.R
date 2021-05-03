@@ -1,4 +1,4 @@
-#' Filter (query) genotype by variation
+#' @title Filter (query) genotype by variation
 #' 
 #' Functon to test that a column of the genotypic matrix is a snp. Using default values for min.freqs this function tests if a site is a SNP.
 #' This function is used internally in several other functions.
@@ -6,7 +6,7 @@
 #' @param alignment.site Character vector containing alleles for each individual at a site.
 #' @param min.freqs Numerical vector with minimum frequency of the most common allele, minimum frequency of the second most common allele, ect.. The length of this vector determines how many individuals must have non-missing data.
 #' @return TRUE if site meets criteria specified by min.freqs, otherwise false.
-#' @export
+#' @export filter.var
 filter.var <- function(alignment.site,min.freqs=c(2,1,0,0)){
 	## Number of each type of character in a given column
 	allele.counts      <- table(tolower(alignment.site))
@@ -37,7 +37,7 @@ filter.var <- function(alignment.site,min.freqs=c(2,1,0,0)){
 	result
 }
 
-#' Reads a VCF object (including those not usually compatible with LEA) and returns a genotypic matrix equivalent to the lfmm-format used by LEA
+#' @title Reads a VCF object (including those not usually compatible with LEA) and returns a genotypic matrix equivalent to the lfmm-format used by LEA
 #' 
 #' The object returned by vcfR2lfmm can be used as input in the LEA function tess3.
 #' Optionally supply a character string with path where lfmm object will be saved
@@ -46,7 +46,7 @@ filter.var <- function(alignment.site,min.freqs=c(2,1,0,0)){
 #' @param vcf Character string with path to input VCF file.
 #' @param out Character string with path where output lfmm file should be saved. Default is NULL.
 #' @return Matrix with genotypes in lfmm format
-#' @export
+#' @export vcfR2lfmm
 vcfR2lfmm <- function(vcf,out=NULL){
 	vcf.obj   <- vcfR::read.vcfR(vcf,verbose=FALSE)
 	gt.mat    <- gsub(":.+","",vcf.obj@gt[,-1])
@@ -66,7 +66,7 @@ vcfR2lfmm <- function(vcf,out=NULL){
 	mat.temp5
 }
 
-#' Run tess3r and plot results
+#' @title Run tess3r and plot results
 #'
 #' This is a wrapper for several functions from the tess3r package. The benefit of using this function is that data can be supplied as a VCF file, and results are plotted in multiple useful ways.
 #' 
@@ -79,7 +79,7 @@ vcfR2lfmm <- function(vcf,out=NULL){
 #' @param max.iteration Max iterations. Default 500.
 #' @param save.as Where to save the output PDF. Default is NULL.
 #' @return List of plots
-#' @export
+#' @export runtess
 runtess <- function(vcf,coords=NULL,Krange=1:40,ploidy=2,mask=0.05,reps=100,max.iteration=500,save.as=NULL){
 	vcf.obj     <- vcfR::read.vcfR(vcf)
 	samplenames <- colnames(vcf.obj@gt)[-1]

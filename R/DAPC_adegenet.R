@@ -1,4 +1,4 @@
-#' Run DAPC and Plot
+#' @title Run DAPC and Plot
 #' 
 #' Run adagenet DAPC analyses and generate plots of BIC vs number of clusters, baplot of alpha optimum number of principle components at each K, admixture for each K, assignments at each K.
 #' If sample coordinates are supplied, this function interpolates cluster membership probabilities on a map, using functions from tess3r package.
@@ -10,7 +10,7 @@
 #' @param probs.out NULL or a character string with location where to write a table containing the membership probabilities for the best K and alpha-optimized number of PCAs.
 #' @param save.as Character string with where to save the output PDF with plots of results.
 #' @return A list of plots.
-#' @export
+#' @export run_DAPC
 run_DAPC <- function(vcf, kmax=50, coords=NULL, reps=100,probs.out=NULL,save.as=NULL){
 	dev.new(width=10,height=6)
 	vcf.obj     <- vcfR::read.vcfR(vcf,verbose=F)
@@ -244,7 +244,7 @@ run_DAPC <- function(vcf, kmax=50, coords=NULL, reps=100,probs.out=NULL,save.as=
 #'                            coords="Oxyrhabdium_AllSpecies_coords.txt",
 #'                            save.as="Oxyrhabdium_AllSpecies_BestSNP_DAPC_v3.pdf")
 
-#' Get Best SNP for each locus from VCF
+#' @title Get Best SNP for each locus from VCF
 #' 
 #' From a VCF with multiple sites/locus, create a VCF with only the best site/locus.
 #' The best site is the one with the least missing data. To break ties, take the first site among the best sites.
@@ -255,9 +255,10 @@ run_DAPC <- function(vcf, kmax=50, coords=NULL, reps=100,probs.out=NULL,save.as=
 #' @param indv.keep Character string with names of individuals to keep. Default is NULL (all individuals kept).
 #' @param min.n Minimum number of individuals required to keep a site. Default = 4.
 #' @param min.n0 Minimum number of individuals required to have the major allele to keep a site. Default = 2.
-#' @param min.n0 Minimum number of individuals required to have the minor allele to keep a site. Default = 1.
+#' @param min.n1 Minimum number of individuals required to have the minor allele to keep a site. Default = 1.
 #' @param which.site Character string indicating the method for choosing a site to keep for each locus (or chromosome). Default = "best", which is considered the one with the least missing data, or the first among sites tied for least missing data. Other options are "all.passing", which retains all sites (positions) that pass variation filters (min.n, min.0.n.0, min.1.n), "first" (first site kept at each locus), or "random".
-#' @return character vector with values of input arguments
+#' @return Character vector with values of input arguments
+#' @export vcf_getSNP
 vcf_getSNP     <- function(vcftools.path,vcf,out,indv.keep=NULL,min.n=4,min.n0=2,min.n1=1,which.site="best"){
 	vcf.obj    <- vcfR::read.vcfR(vcf)
 	# matrix with "fixed" columns, which are the columns with site-specific stats across all samples
@@ -368,13 +369,13 @@ vcf_getSNP     <- function(vcftools.path,vcf,out,indv.keep=NULL,min.n=4,min.n0=2
 #' vcf_getSNP(vcftools.path="/vcftools",vcf="Oxyrhabdium_AllSpecies_AllSNPs.vcf", indv.keep="indv_keep_Oxyrhabdium_both-modestum.txt", out="Oxyrhabdium_both-modestum_BestSNP.vcf", which.site="best")
 #####
 
-#' Hex to xyz colors
+#' @title Hex to xyz colors
 #' 
 #' Hex to xyz color coordinates
 #' 
 #' @param hex Character string with hex color code
 #' @return xyz color coordinates
-#' @export
+#' @export hex2dec
 hex2dec <- function(hex){
 	vhex  <- unlist(strsplit(hex,split=""))
 	if(length(vhex)==7){
@@ -386,13 +387,14 @@ hex2dec <- function(hex){
 	return(strtoi(c(part1,part2,part3)))
 }
 
-#' Cartesian color distance
+#' @title Cartesian color distance
 #'
 #' Cartesian distance between two colors supplied in hexidecimal
 #' 
 #' @param col1 Hex color code for color #1
 #' @param col2 Hex color code for color #2
 #' @return Number with cartesional color distance
+#' @export diffcol
 diffcol <- function(col1,col2){
 	if(is.character(col1) & is.character(col2)){
 		xyz1 <- hex2dec(col1)
@@ -409,13 +411,13 @@ diffcol <- function(col1,col2){
 	return(diff)
 }
 
-#' Powerset
+#' @title Powerset
 #' 
 #' Function to return the powerset for a numeric or character vector of set elements.
 #' 
-#' @param x
+#' @param x Numerical or character vector
 #' @return List with powerset of x
-#' @export
+#' @export pset
 pset <- function (x) {
 	m   <- length(x)
 	out <- list(x[c()])
@@ -425,13 +427,13 @@ pset <- function (x) {
 	out
 }
 
-#' Transform sRGB colorspace into colorblind colorspaces
+#' @title Transform sRGB colorspace into colorblind colorspaces
 #'
 #' Uses the model described here: https://ixora.io/projects/colorblindness/color-blindness-simulation-research/
 #'
 #' @param srgb Numerical vector with R,G,B color coordinates
 #' @return Numeric matrix with transformed RGB color coordinates. First row contains input coordinates. Second through fourth rows contain coordinates for Protanopia, Deuteranopia, and Tritanopia colors.
-#' @export
+#' @export rgb.cb
 rgb.cb <- function(srgb){
 	lrgb.list <- list(); length(lrgb.list) <- 3
 	if(any(srgb <= (0.04045*255))){
@@ -479,7 +481,7 @@ rgb.cb <- function(srgb){
 	result
 }
 
-#' Return a good set of colors to use for clusters in admixture plots.
+#' @title Return a good set of colors to use for clusters in admixture plots.
 #' 
 #' Generate an optimal set of colors for an admixture plot and particular K (number of clusters), while considering colorblindness.
 #' 
@@ -488,7 +490,7 @@ rgb.cb <- function(srgb){
 #' @param iter Number of times to try to find a set of colors that meet 'thresh'. 
 #' @param cbspace Character vector indicating which colorblind-transformed sets of colors should also meet thresh. Default is "prot","deut","trit", but it becomes difficult to find a passing color set when n > 4 using the defaults.
 #' @return Character vector of hex color codes.
-#' @export 
+#' @export goodcolors
 goodcolors <- function(n,thresh=65,iter=50,cbspace=c("prot","deut","trit")){
 	# "#33E8BB" "#C69A01" "#799525" "#030A34" "#091E57" "#4ED671" "#A4282F" "#2F08BA" "#5BD80A" "#CD0B50" "#B9C1F5"
 	# funky100          <- adegenet::funky(100)

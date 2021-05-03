@@ -1,4 +1,4 @@
-#' Wrapper for LEA snmf
+#' @title Wrapper for LEA snmf
 #' 
 #' Runs LEA function snmf function from VCF input file and optionally interpolates cluster assignments onto a map (if 'coords' argument is non-NULL).
 #' 
@@ -12,7 +12,7 @@
 #' @param CPU Defualt 2
 #' @param save.as Path where output PDF should be saved. Default NULL.
 #' @return List of plots
-#' @export 
+#' @export run_SNMF
 run_SNMF <- function(vcf,coords=NULL,Krange=1:40,reps=100,entropy=TRUE,project="new",iter=500,CPU=2,save.as=NULL){
 	vcf.obj     <- vcfR::read.vcfR(vcf)
 	samplenames <- colnames(vcf.obj@gt)[-1]
@@ -206,7 +206,7 @@ run_SNMF <- function(vcf,coords=NULL,Krange=1:40,reps=100,entropy=TRUE,project="
 #'	                         save.as="Oxyrhabdium_AllSpecies_BestSNP_sNMF_run1.pdf")
 
 
-#' Reads a VCF object (including those not usually compatible with LEA) and returns a genotypic matrix equivalent to the geno-format used by LEA
+#' @title Convert VCF object/file to genotypic matrix
 #' 
 #' The object returned by vcfR2geno can be used as input in the LEA function snmf
 #' Optionally supply a character string with path where geno object will be saved
@@ -215,7 +215,7 @@ run_SNMF <- function(vcf,coords=NULL,Krange=1:40,reps=100,entropy=TRUE,project="
 #' @param vcf Character string with path to input VCF file.
 #' @param out Character string with path where output geno file should be saved. Default is NULL.
 #' @return Matrix with genotypes in geno format
-#' @export
+#' @export vcfR2geno
 vcfR2geno <- function(vcf,out=NULL){
 	vcf.obj   <- vcfR::read.vcfR(vcf,verbose=FALSE)
 	gt.mat    <- gsub(":.+","",vcf.obj@gt[,-1])
