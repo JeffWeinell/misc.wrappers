@@ -157,70 +157,81 @@ run_SNMF <- function(vcf,coords=NULL,Krange=1:40,reps=100,entropy=TRUE,project="
 	}
 	result
 }
+#' @examples
+#'	library(ade4)
+#'	library(adegenet)
+#'	library(vcfR)
+#'	library(ggplot2)
+#'	library(maps)
+#'	library(geosphere)
+#'	library(tess3r)
+#'	library(LEA)
+#'	library(rworldmap)
+#'	library(JeffWeinell/misc.wrappers)
+#'	#source("DAPC_adegenet.R")
+#'	#source("runtess.R")
+#'	#source("run_SNMF.R")
+#'
+#'	dev.new(width=10,height=6)
+#'	leporinum <- run_SNMF(vcf="Oxyrhabdium-leporinum_BestSNP.vcf",
+#'	                      coords="Oxyrhabdium-leporinum_coords.txt",
+#'	                      save.as="Oxyrhabdium-leporinum_BestSNP_sNMF_run3.pdf")
+#'
+#'	modestum  <- run_SNMF(vcf="Oxyrhabdium-modestum_BestSNP.vcf",
+#'	                     coords="Oxyrhabdium-modestum_coords.txt",
+#'	                     save.as="Oxyrhabdium-modestum_BestSNP_sNMF_run1.pdf")
+#'
+#'	cfmodestum  <- run_SNMF(vcf="Oxyrhabdium-cf.modestum_BestSNP.vcf",
+#'	                     coords="Oxyrhabdium-cfmodestum_coords.txt",
+#'	                     save.as="Oxyrhabdium-cfmodestum_BestSNP_sNMF_run1.pdf")
+#'
+#'	cfmodestum_Luzon     <- run_SNMF(vcf="Oxyrhabdium-cf.modestum_Luzon_BestSNP.vcf",
+#'	                        coords="Oxyrhabdium-cfmodestum_Luzon_coords.txt",
+#'	                        save.as="Oxyrhabdium-cf.modestum_Luzon_BestSNP_sNMF_run1.pdf")
+#'
+#'	leporinum_Luzon <- run_SNMF(vcf="Oxyrhabdium-leporinum_Luzon_BestSNP.vcf",
+#'	                           coords="Oxyrhabdium-leporinum_Luzon_coords.txt",
+#'	                           save.as="Oxyrhabdium-leporinum_Luzon_BestSNP_sNMF_run1.pdf")
+#'
+#'	bothmodestum <- run_SNMF(vcf="Oxyrhabdium_both-modestum_BestSNP.vcf",
+#'	                           coords="Oxyrhabdium_bothmodestum_coords.txt",
+#'	                           save.as="Oxyrhabdium_both-modestum_BestSNP_sNMF_run1.pdf")
+#'
+#'	Oxyrhabdium <- run_SNMF(vcf="Oxyrhabdium_AllSpecies_BestSNP.vcf",
+#'	                            coords="Oxyrhabdium_AllSpecies_coords.txt",
+#'	                            save.as="Oxyrhabdium_AllSpecies_BestSNP_sNMF_v1.pdf")
+#'
+#'	Oxyrhabdium_AllSpecies <- run_SNMF(vcf="Oxyrhabdium_AllSpecies_BestSNP.vcf",
+#'	                         coords="Oxyrhabdium_AllSpecies_coords.txt",
+#'	                         save.as="Oxyrhabdium_AllSpecies_BestSNP_sNMF_run1.pdf")
 
 
-####### SNMF
-#if(FALSE){
-#	library(ade4)
-#	library(adegenet)
-#	library(vcfR)
-#	library(ggplot2)
-#	library(maps)
-#	library(geosphere)
-#	library(tess3r)
-#	library(LEA)
-#	library(rworldmap)
-#	#library(dartR)
-#	source("/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/DAPC/DAPC_adegenet.R")
-#	source("/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/runtess.R")
-#	source("/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/LEA/run_SNMF.R")
-#	####
-#	dev.new(width=10,height=6)
-#	leporinum <- run_SNMF(vcf="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/DAPC/Oxyrhabdium-leporinum_BestSNP.vcf",
-#	                      coords="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/tess3r/Oxyrhabdium-leporinum_coords.txt",
-#	                      save.as="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/LEA/Oxyrhabdium-leporinum_BestSNP_sNMF_run3.pdf")
-#
-#	modestum  <- run_SNMF(vcf="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/DAPC/Oxyrhabdium-modestum_BestSNP.vcf",
-#	                     coords="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/tess3r/Oxyrhabdium-modestum_coords.txt",
-#	                     save.as="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/LEA/Oxyrhabdium-modestum_BestSNP_sNMF_run1.pdf")
-#
-#	cfmodestum  <- run_SNMF(vcf="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/DAPC/Oxyrhabdium-cf.modestum_BestSNP.vcf",
-#	                     coords="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/tess3r/Oxyrhabdium-cfmodestum_coords.txt",
-#	                     save.as="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/LEA/Oxyrhabdium-cfmodestum_BestSNP_sNMF_run1.pdf")
-#
-#	cfmodestum_Luzon        <- run_SNMF(vcf="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/DAPC/Oxyrhabdium-cf.modestum_Luzon_BestSNP.vcf",
-#	                           coords="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/tess3r/Oxyrhabdium-cfmodestum_Luzon_coords.txt",
-#	                           save.as="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/LEA/Oxyrhabdium-cf.modestum_Luzon_BestSNP_sNMF_run1.pdf")
-#
-#	leporinum_Luzon <- run_SNMF(vcf="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/DAPC/Oxyrhabdium-leporinum_Luzon_BestSNP.vcf",
-#	                           coords="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/tess3r/Oxyrhabdium-leporinum_Luzon_coords.txt",
-#	                           save.as="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/LEA/Oxyrhabdium-leporinum_Luzon_BestSNP_sNMF_run1.pdf")
-#
-#	bothmodestum <- run_SNMF(vcf="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/DAPC/Oxyrhabdium_both-modestum_BestSNP.vcf",
-#	                           coords="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/tess3r/Oxyrhabdium_bothmodestum_coords.txt",
-#	                           save.as="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/LEA/Oxyrhabdium_both-modestum_BestSNP_sNMF_run1.pdf")
-#
-#	Oxyrhabdium <- run_SNMF(vcf="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/DAPC/Oxyrhabdium_AllSpecies_BestSNP.vcf",
-#	                            coords="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/tess3r/Oxyrhabdium_AllSpecies_coords.txt",
-#	                            save.as="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/LEA/Oxyrhabdium_AllSpecies_BestSNP_sNMF_v1.pdf")
-#
-#	setwd("/panfs/pfs.local/home/j926w878/scratch/scratch_v2/LEA/")
-#	Oxyrhabdium <- run_SNMF(vcf="/panfs/pfs.local/home/j926w878/work/ddRAD/snps_goodData/Oxyrhabdium_AllSpecies_BestSNP.vcf",
-#	                         coords="/panfs/pfs.local/home/j926w878/work/ddRAD/DAPC/Oxyrhabdium_AllSpecies_coords.txt",
-#	                         save.as="/panfs/pfs.local/home/j926w878/scratch/scratch_v2/LEA/Oxyrhabdium_AllSpecies_BestSNP_sNMF_run1.pdf")
-#
-#
-##' #library(sNMF)
-#' library(tess3r)
-#' library(ggplot2)
-#' library(rworldmap)
-#' library(LEA)
-#' library(geosphere)
-#' source("/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/DAPC/DAPC_adegenet.R")
-#' source("/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/runtess.R")
-#}
-#
-
+#' Reads a VCF object (including those not usually compatible with LEA) and returns a genotypic matrix equivalent to the geno-format used by LEA
+#' 
+#' The object returned by vcfR2geno can be used as input in the LEA function snmf
+#' Optionally supply a character string with path where geno object will be saved
+#' This function is used in the function run_SNMFR
+#' 
+#' @param vcf Character string with path to input VCF file.
+#' @param out Character string with path where output geno file should be saved. Default is NULL.
+#' @return Matrix with genotypes in geno format
+#' @export
+vcfR2geno <- function(vcf,out=NULL){
+	vcf.obj   <- vcfR::read.vcfR(vcf,verbose=FALSE)
+	gt.mat    <- gsub(":.+","",vcf.obj@gt[,-1])
+	mat.temp1 <- gsub("^0/0$","0",gt.mat)
+	mat.temp2 <- gsub("^1/1$","2",mat.temp1)
+	mat.temp3 <- gsub("^0/1$","1",mat.temp2)
+	mat.temp4 <- gsub("./.","9",mat.temp3,fixed=T)
+	if(length(unique(c(mat.temp4)))>4){
+		stop("Some sites with >2 alleles")
+	}
+	if(!is.null(out)){
+		lines.temp <- apply(mat.temp4,MARGIN=1,FUN=paste,collapse="")
+		writeLines(text=lines.temp,con=out)
+	}
+	mat.temp4
+}
 
 
 
