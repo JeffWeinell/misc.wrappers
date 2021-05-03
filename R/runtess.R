@@ -176,6 +176,8 @@ runtess <- function(vcf,coords=NULL,Krange=1:40,ploidy=2,mask=0.05,reps=100,max.
 		my.palette      <- tess3r::CreatePalette(myCols, 9)
 		xdist           <- geosphere::distm(x=c(x.min,0),y=c(x.max,0))
 		ydist           <- geosphere::distm(x=c(0,y.min),y=c(0,y.max))
+	#	extent.test     <- raster::raster(raster::extent(c(x.min,x.max,y.min,y.max)), ncol = 500, nrow = 500, vals = 1)
+	#	interpol.stack  <- InterpolRaster(coord, Q, raster.grid, interpolation.model)
 		mapplot.initial <- plot(suppressWarnings(tess3r::as.qmatrix(q.matrix)), as.matrix(coords), main = "", xlab = "", ylab = "",resolution = c(2,2), col.palette = lapply(X=1:K,FUN=function(x){rep("#FFFFFF",9)}), cex=0,window=c(x.min,x.max,y.min,y.max),asp=xdist/ydist,add=FALSE)
 		mapplot.i       <- plot(suppressWarnings(tess3r::as.qmatrix(q.matrix)), as.matrix(coords), method = "map.max", interpol = tess3r::FieldsKrigModel(10), main = paste0("Ancestry coefficients; K=",K), xlab = "", ylab = "",resolution = c(500,500), cex = 0.4, col.palette = my.palette, window=par("usr"),asp=xdist/ydist,add=FALSE)
 		maps::map(add=TRUE)
