@@ -159,7 +159,7 @@ run_SNMF <- function(vcf,coords=NULL,Krange=1:40,reps=100,entropy=TRUE,project="
 }
 
 
-####### Runs
+####### SNMF
 #if(FALSE){
 #	library(ade4)
 #	library(adegenet)
