@@ -101,7 +101,7 @@ runtess <- function(vcf,coords=NULL,Krange=1:40,ploidy=2,mask=0.05,reps=100,max.
 	crossentropy.mat <- do.call(rbind,lapply(X=1:length(tess.obj),FUN=function(x){matrix(unlist(tess.obj[[x]]["crossentropy"]),nrow=1)}))
 	rownames(crossentropy.mat) <- Krange
 	colnames(crossentropy.mat) <- paste0("rep",1:reps)
-	par(mfrow=c(1,1))
+	#par(mfrow=c(1,1))
 	mean.entropy <- apply(crossentropy.mat,MARGIN=1,FUN=mean,na.rm=TRUE)
 	range.entropy.mat <- do.call(rbind,lapply(X=1:nrow(crossentropy.mat),FUN=function(x){range(crossentropy.mat[x,],na.rm=TRUE)}))
 	if(any(diff(mean.entropy)>0)){
@@ -148,7 +148,7 @@ runtess <- function(vcf,coords=NULL,Krange=1:40,ploidy=2,mask=0.05,reps=100,max.
 #	entropyPlot <- recordPlot()
 	## List holding population assignment probabilities for each K
 	slist <- lapply(X=Krange,FUN=function(x){as.data.frame(tess3r::qmatrix(tess3=tess.obj, K = x))})
-	par(mar=c(5.1,4.1,4.1,2.1),mfrow=c(1,1))
+#	par(mar=c(5.1,4.1,4.1,2.1),mfrow=c(1,1))
 	Krange.plot    <- setdiff(Krange,1)
 	admixturePlot  <- list(); length(admixturePlot)   <- length(Krange.plot)
 	mapplot        <- list(); length(mapplot)         <- length(Krange.plot)

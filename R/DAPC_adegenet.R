@@ -51,7 +51,7 @@ run_DAPC <- function(vcf, kmax=50, coords=NULL, reps=100,probs.out=NULL,save.as=
 	Krange       <- 1:max.clusters
 	grp          <- adegenet::find.clusters(genind, max.n.clust=max.clusters,n.pca=max.clusters,choose.n.clust=F)
 	grp.list <- list(); length(grp.list) <- reps
-	par(mar=c(3.5,4,3,2.1))
+	# par(mar=c(3.5,4,3,2.1))
 	for(i in 1:reps){
 		grp.list[[i]] <- adegenet::find.clusters(genind, max.n.clust=max.clusters,n.pca=max.clusters,choose.n.clust=F)
 	}
@@ -132,11 +132,11 @@ run_DAPC <- function(vcf, kmax=50, coords=NULL, reps=100,probs.out=NULL,save.as=
 		best.npca     <- c(best.npca,alpha_optim.K$best)
 	}
 	##### Plot 2: BIC vs. K when number of PCs retained = alpha optimized 
-	par(mar=c(4,4,3,2.1))
+#	par(mar=c(4,4,3,2.1))
 	# names(best.npca) <- 2:max.clusters
-	best.npca.df <- data.frame(best.npca=best.npca,Kval=2:max.clusters)
+	best.npca.df      <- data.frame(best.npca=best.npca,Kval=2:max.clusters)
 	best.npca.df$Kval <- factor(best.npca.df$Kval)
-	grp.plot2    <- ggplot2::ggplot(data=best.npca.df, ggplot2::aes(x=Kval,y=best.npca)) + ggplot2::geom_bar(stat="identity",fill="lightgray") + ggplot2::labs(title= "alpha optimized # of PCs vs. number of clusters", x="Number of clusters", y = "Alpha optimized number of principle components to retain") + theme_classic() + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5))
+	grp.plot2         <- ggplot2::ggplot(data=best.npca.df, ggplot2::aes(x=Kval,y=best.npca)) + ggplot2::geom_bar(stat="identity",fill="lightgray") + ggplot2::labs(title= "alpha optimized # of PCs vs. number of clusters", x="Number of clusters", y = "Alpha optimized number of principle components to retain") + ggplot2::theme_classic() + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5))
 #	barplot(best.npca)
 #	mtext(text="Alpha optimized number of principle components to retain",side=2,line=2)
 #	mtext(text="Number of clusters",side=1,line=2)
@@ -145,11 +145,11 @@ run_DAPC <- function(vcf, kmax=50, coords=NULL, reps=100,probs.out=NULL,save.as=
 	admixturePlot  <- list(); length(admixturePlot)   <- max.clusters-1
 	assignmentPlot <- list(); length(assignmentPlot)  <- max.clusters-1
 	posterior.list <- list(); length(posterior.list)  <- max.clusters-1
-	mapplot        <- list(); length(mapplot)  <- max.clusters-1
+	mapplot        <- list(); length(mapplot)         <- max.clusters-1
 	
 	for(K in 2:max.clusters){
 		i=(K-1)
-		par(mar=c(5.1,4.1,4.1,2.1),mfrow=c(1,1))
+	#	par(mar=c(5.1,4.1,4.1,2.1),mfrow=c(1,1))
 		dapc.pcabest.K  <- adegenet::dapc(genind, grp.mat[,i],n.pca=best.npca[i],n.da=5)
 		posterior       <- dapc.pcabest.K$posterior
 		q.matrix        <- posterior
@@ -169,7 +169,7 @@ run_DAPC <- function(vcf, kmax=50, coords=NULL, reps=100,probs.out=NULL,save.as=
 		}
 		posterior.gg        <- ggplot2::ggplot(posterior.df, ggplot2::aes(fill= pop, x= assignment, y=indv)) + ggplot2::geom_bar(position="stack", stat="identity") + ggplot2::theme_classic() + ggplot2::theme(axis.text.y = ggplot2::element_text(size = label.size), panel.grid.major = ggplot2::element_blank(), panel.grid.minor = ggplot2::element_blank(), panel.background = ggplot2::element_blank()) + ggplot2::labs(x = "Membership Probability",y="",fill="Cluster",title=paste0("K = ",K,"; PCs retained = ",best.npca[i])) + ggplot2::scale_fill_manual(values=myCols[1:K])
 		admixturePlot[[i]]  <- posterior.gg
-		par(mar=c(5,20,2,2.1))
+	#	par(mar=c(5,20,2,2.1))
 		# test
 		#assignment.K  <- ggplot2::ggplot(data=posterior.df, ggplot2::aes(x= pop, y=indv, fill= assignment)) + ggplot2::geom_tile() + ggplot2::theme_classic() + ggplot2::theme(axis.text.y = ggplot2::element_text(size = label.size), panel.grid.major = ggplot2::element_blank(), panel.grid.minor = ggplot2::element_blank(), panel.background = ggplot2::element_blank()) + ggplot2::labs(title = paste0("K = ",K,"; PCs retained = ",best.npca[i]), x="cluster", y="") + ggplot2::scale_colour_gradientn(colours = c("yellow", "orange", "red")) # + scale_fill_brewer(palette = "YlOrRd",trans="probability")
 		#assignment.K   <- ggplot2::ggplot(data=posterior.df, ggplot2::aes(x= pop, y=indv), fill= assignment) + ggplot2::geom_tile() + ggplot2::theme_classic() + ggplot2::theme(axis.text.y = ggplot2::element_text(size = label.size), panel.grid.major = ggplot2::element_blank(), panel.grid.minor = ggplot2::element_blank(), panel.background = ggplot2::element_blank()) + ggplot2::labs(title = paste0("K = ",K,"; PCs retained = ",best.npca[i]), x="cluster", y="") + ggplot2::scale_fill_gradient2(low = "white", mid = "yellow", high = "red", midpoint = 0.5)  # ggplot2::scale_colour_gradient2(colours = c("yellow", "red")) # + scale_fill_brewer(palette = "YlOrRd",trans="probability")
@@ -182,7 +182,7 @@ run_DAPC <- function(vcf, kmax=50, coords=NULL, reps=100,probs.out=NULL,save.as=
 #		assignment.K        <- adegenet::assignplot(dapc.pcabest.K,cex.lab=(label.size/10))
 #		mtext(text=paste0("K = ",K,"; PCs retained = ",best.npca[i]))
 		assignmentPlot[[i]]  <- assignment.K
-		par(mar=c(5.1,4.1,4.1,2.1),mfrow=c(1,1))
+	#	par(mar=c(5.1,4.1,4.1,2.1),mfrow=c(1,1))
 		if(!is.null(coords)){
 			my.palette      <- tess3r::CreatePalette(myCols, 9)
 		#	xdist           <- geosphere::distm(x=c(x.min,0),y=c(x.max,0))

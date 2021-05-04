@@ -123,7 +123,7 @@ run_SNMF <- function(vcf,coords=NULL,Krange=1:40,reps=100,entropy=TRUE,project="
 	Krange.plot    <- setdiff(Krange,1)
 	admixturePlot  <- list(); length(admixturePlot)   <- length(Krange.plot)
 	mapplot        <- list(); length(mapplot)         <- length(Krange.plot)
-	par(mar=c(5.1,4.1,4.1,2.1),mfrow=c(1,1))
+	# par(mar=c(5.1,4.1,4.1,2.1),mfrow=c(1,1))
 	for(K in Krange.plot){
 		i=(K-1)
 		ce           <- LEA::cross.entropy(snmf.obj, K = K)
