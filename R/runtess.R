@@ -70,19 +70,27 @@ vcfR2lfmm <- function(vcf,out=NULL){
 #'
 #' This is a wrapper for several functions from the tess3r package. The benefit of using this function is that data can be supplied as a VCF file, and results are plotted in multiple useful ways.
 #' 
-#' @param vcf Path to input VCF file with SNP data
+#' @param vcf Path to input VCF file with SNP data.
 #' @param coords Either a character string with path to file containing coordinates (longitude in first column, latitude in second column), or matrix object with longitude and latitude columns.
-#' @param kmax Numerical vector with set of values to use for K.
+#' @param kmax Numerical vector with set of values to use for K. Default 40.
 #' @param reps Number of repititions. Default 100.
 #' @param save.as Where to save the output PDF. Default is NULL. **This argument is ignored in some environments. Instead, use dev.new(file="Where/To/Save/Output.pdf",height=6,width=10,noRStudioGD=TRUE) before calling 'runtess'. Then dev.off().
-#' @param ploidy Number of copies of each chromosome. Default 2.
-#' @param mask Proportion of input data to mask during each replicate when tess3 function is called
+#' @param mask Proportion of input data to mask during each replicate when tess3 function is called. Default 0.05.
 #' @param max.iteration Max iterations. Default 500.
 #' @return List of plots
 #' @export runtess
-runtess <- function(vcf,coords=NULL,kmax=40,reps=100,save.as=NULL,ploidy=2,mask=0.05,max.iteration=500){
+runtess <- function(vcf,coords=NULL,kmax=40,reps=100,save.as=NULL,mask=0.05,max.iteration=500){
+	if(!is.null(save.as)){
+		if(file.exists(save.as)){
+			stop("Output file already exists. Choose a different name.")
+		}
+	}
 	Krange=1:kmax
 	vcf.obj     <- vcfR::read.vcfR(vcf)
+	gt.mat      <- gsub(":.+","",vcf.obj@gt[,-1])
+	# Detect ploidy from genotype matrix of vcf
+	test.sample <- unlist(gt.mat)[!is.na(unlist(gt.mat))][1]
+	ploidy      <- length(unlist(strsplit(gt.mat[1],split="/",fixed=T)))
 	samplenames <- colnames(vcf.obj@gt)[-1]
 	numind      <- length(samplenames)
 	label.size  <- min((288/numind),7)

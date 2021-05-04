@@ -14,6 +14,11 @@
 #' @return List of plots
 #' @export run_SNMF
 run_SNMF <- function(vcf,coords=NULL,kmax=40,reps=100,entropy=TRUE,project="new",iter=500,save.as=NULL){
+	if(!is.null(save.as)){
+		if(file.exists(save.as)){
+			stop("Output file already exists. Choose a different name.")
+		}
+	}
 	Krange=1:kmax
 	vcf.obj     <- vcfR::read.vcfR(vcf)
 	samplenames <- colnames(vcf.obj@gt)[-1]

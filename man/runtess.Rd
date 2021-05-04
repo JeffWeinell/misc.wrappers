@@ -12,25 +12,22 @@ runtess(
   kmax = 40,
   reps = 100,
   save.as = NULL,
-  ploidy = 2,
   mask = 0.05,
   max.iteration = 500
 )
 }
 \arguments{
-\item{vcf}{Path to input VCF file with SNP data}
+\item{vcf}{Path to input VCF file with SNP data.}
 
 \item{coords}{Either a character string with path to file containing coordinates (longitude in first column, latitude in second column), or matrix object with longitude and latitude columns.}
 
-\item{kmax}{Numerical vector with set of values to use for K.}
+\item{kmax}{Numerical vector with set of values to use for K. Default 40.}
 
 \item{reps}{Number of repititions. Default 100.}
 
 \item{save.as}{Where to save the output PDF. Default is NULL. **This argument is ignored in some environments. Instead, use dev.new(file="Where/To/Save/Output.pdf",height=6,width=10,noRStudioGD=TRUE) before calling 'runtess'. Then dev.off().}
 
-\item{ploidy}{Number of copies of each chromosome. Default 2.}
-
-\item{mask}{Proportion of input data to mask during each replicate when tess3 function is called}
+\item{mask}{Proportion of input data to mask during each replicate when tess3 function is called. Default 0.05.}
 
 \item{max.iteration}{Max iterations. Default 500.}
 }
