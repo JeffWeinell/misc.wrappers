@@ -9,12 +9,12 @@ This is a wrapper for several functions from the tess3r package. The benefit of 
 runtess(
   vcf,
   coords = NULL,
-  Krange = 1:40,
+  kmax = 40,
+  reps = 100,
+  save.as = NULL,
   ploidy = 2,
   mask = 0.05,
-  reps = 100,
-  max.iteration = 500,
-  save.as = NULL
+  max.iteration = 500
 )
 }
 \arguments{
@@ -22,17 +22,17 @@ runtess(
 
 \item{coords}{Either a character string with path to file containing coordinates (longitude in first column, latitude in second column), or matrix object with longitude and latitude columns.}
 
-\item{Krange}{Numerical vector with set of values to use for K.}
+\item{kmax}{Numerical vector with set of values to use for K.}
+
+\item{reps}{Number of repititions. Default 100.}
+
+\item{save.as}{Where to save the output PDF. Default is NULL. **This argument is ignored in some environments. Instead, use dev.new(file="Where/To/Save/Output.pdf",height=6,width=10,noRStudioGD=TRUE) before calling 'runtess'. Then dev.off().}
 
 \item{ploidy}{Number of copies of each chromosome. Default 2.}
 
 \item{mask}{Proportion of input data to mask during each replicate when tess3 function is called}
 
-\item{reps}{Number of repititions. Default 100.}
-
 \item{max.iteration}{Max iterations. Default 500.}
-
-\item{save.as}{Where to save the output PDF. Default is NULL. **This argument is ignored in some environments. Instead, use dev.new(file="Where/To/Save/Output.pdf",height=6,width=10,noRStudioGD=TRUE) before calling 'runtess'. Then dev.off().}
 }
 \value{
 List of plots

@@ -2,10 +2,10 @@
 #' 
 #' Runs LEA function snmf function from VCF input file and optionally interpolates cluster assignments onto a map (if 'coords' argument is non-NULL).
 #' 
-#' @param vcf Path to vcf input file
-#' @param coords Default NULL
-#' @param Krange Default 1:40
-#' @param reps Default 100
+#' @param vcf Path to input VCF file with SNP data
+#' @param coords Either a character string with path to file containing coordinates (longitude in first column, latitude in second column), or matrix object with longitude and latitude columns.
+#' @param kmax Number indicating the maximum number of clusters to evaluate. Default is 40, which is converted using kmax = min(kmax, number of individuals-1)
+#' @param reps Number of repititions. Default 100.
 #' @param entropy Default TRUE
 #' @param project Defualt 'new'
 #' @param iter Default 500
@@ -13,7 +13,8 @@
 #' @param save.as Character string with where to save the output PDF with plots of results. Default is NULL. **Important! This argument is ignored in some environments. Instead, use dev.new(file="Where/To/Save/Output.pdf",height=6,width=10,noRStudioGD=TRUE) before using run_SNMF. Then dev.off().
 #' @return List of plots
 #' @export run_SNMF
-run_SNMF <- function(vcf,coords=NULL,Krange=1:40,reps=100,entropy=TRUE,project="new",iter=500,save.as=NULL){
+run_SNMF <- function(vcf,coords=NULL,kmax=40,reps=100,entropy=TRUE,project="new",iter=500,save.as=NULL){
+	Krange=1:kmax
 	vcf.obj     <- vcfR::read.vcfR(vcf)
 	samplenames <- colnames(vcf.obj@gt)[-1]
 	numind      <- length(samplenames)
@@ -122,6 +123,7 @@ run_SNMF <- function(vcf,coords=NULL,Krange=1:40,reps=100,entropy=TRUE,project="
 #	entropyPlot    <- recordPlot()
 	Krange.plot    <- setdiff(Krange,1)
 	admixturePlot  <- list(); length(admixturePlot)   <- length(Krange.plot)
+	assignmentPlot <- list(); length(assignmentPlot)  <- length(Krange.plot)
 	mapplot        <- list(); length(mapplot)         <- length(Krange.plot)
 	# par(mar=c(5.1,4.1,4.1,2.1),mfrow=c(1,1))
 	for(K in Krange.plot){
@@ -129,19 +131,28 @@ run_SNMF <- function(vcf,coords=NULL,Krange=1:40,reps=100,entropy=TRUE,project="
 		ce           <- LEA::cross.entropy(snmf.obj, K = K)
 		best         <- which.min(ce)
 	#	q.matrix.best <- suppressWarnings(tess3r::as.qmatrix(LEA::Q(snmf.obj,K=bestK,run=best)))
-		if(K < 5){
-			myCols          <- goodcolors(K,thresh=100)
+		if(FALSE){
+			if(K < 5){
+				myCols          <- goodcolors(K,thresh=100)
+			}
+			if(K >= 5 & K < 7){
+				myCols          <- goodcolors(K,thresh=100,cbspace="deut")
+			}
+			if(K >= 7 & K < 15){
+				myCols          <- goodcolors(K,thresh=100,cbspace="")
+			}
+			if(K>=15){
+				myCols          <- c(goodcolors(14,thresh=100,cbspace=""), sample(adegenet::funky(100), size=K-14))
+			}
 		}
-		if(K >= 5 & K < 7){
-			myCols          <- goodcolors(K,thresh=100,cbspace="deut")
+		if(K <= 15){
+			myCols          <- goodcolors2(n=K)
 		}
-		if(K >= 7 & K < 15){
-			myCols          <- goodcolors(K,thresh=100,cbspace="")
-		}
-		if(K>=15){
-			myCols          <- c(goodcolors(14,thresh=100,cbspace=""), sample(adegenet::funky(100), size=K-14))
+		if(K>15){
+			myCols          <- c(goodcolors2(n=K), sample(adegenet::funky(100), size=K-15))
 		}
 		
+
 		q.matrix           <- LEA::Q(snmf.obj,K=K,run=best)
 		rownames(q.matrix) <- samplenames
 		colnames(q.matrix) <- paste0("cluster",1:ncol(q.matrix))
@@ -151,6 +162,16 @@ run_SNMF <- function(vcf,coords=NULL,Krange=1:40,reps=100,entropy=TRUE,project="
 #		admixturePlot[[i]]   <- recordPlot()
 		admixturePlot[[i]]   <- posterior.gg
 		
+
+		indv.maxPosterior  <- apply(X=q.matrix, MARGIN=1, FUN=function(x){max(x)})
+		labels             <- rep("",nrow(posterior.df))
+		labels[posterior.df[,"assignment"] %in% indv.maxPosterior] <- "+"
+		assignment.K       <- ggplot2::ggplot(data=posterior.df, ggplot2::aes(x= pop, y=indv,fill=assignment)) + ggplot2::geom_tile(color="gray") + ggplot2::theme_classic() + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5), axis.text.y = ggplot2::element_text(size = label.size), panel.grid.major = ggplot2::element_blank(), panel.grid.minor = ggplot2::element_blank(), panel.background = ggplot2::element_blank(), legend.position = "none", ) + ggplot2::labs(title = paste0("K = ",K), x="Clusters", y="") + ggplot2::scale_fill_gradient2(low = "white", mid = "yellow", high = "red", midpoint = 0.5) + ggplot2::geom_text(label=labels)
+#		assignment.K        <- adegenet::assignplot(dapc.pcabest.K,cex.lab=(label.size/10))
+#		mtext(text=paste0("K = ",K,"; PCs retained = ",best.npca[i]))
+		assignmentPlot[[i]]  <- assignment.K
+	#	
+
 		if(!is.null(coords)){
 			my.palette      <- tess3r::CreatePalette(myCols, 9)
 			xdist           <- geosphere::distm(x=c(x.min,0),y=c(x.max,0))
@@ -178,9 +199,9 @@ run_SNMF <- function(vcf,coords=NULL,Krange=1:40,reps=100,entropy=TRUE,project="
 		}
 	}
 	if(!is.null(coords)){
-		result <- c(list(entropyPlot),admixturePlot,mapplot)
+		result <- c(list(entropyPlot),admixturePlot,assignmentPlot,mapplot)
 	} else {
-		result <- c(list(entropyPlot),admixturePlot)
+		result <- c(list(entropyPlot),admixturePlot,assignmentPlot)
 	}
 	if(!is.null(save.as)){
 		pdf(height=6,width=10,file=save.as,onefile=TRUE)

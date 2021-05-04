@@ -4,7 +4,7 @@
 #' If sample coordinates are supplied, this function interpolates cluster membership probabilities on a map, using functions from tess3r package.
 #' 
 #' @param vcf Character string with path to vcf file containing snp data
-#' @param kmax Number indicating the maximum number of clusters to evaluate. Default is NULL, in which case kmax is set to one less than the number of individuals.
+#' @param kmax Number indicating the maximum number of clusters to evaluate. Default is 40, which is converted using kmax = min(kmax, number of individuals-1)
 #' @param coords Optional character string with path to a table with longitude and latitude of individuals in the vcf file, or a matrix or data frame with longitude and latitude columns. Default is NULL, in which case membership probabilities are not interpolated onto a map.
 #' @param reps Number indicating the number of replicates of 'find.clusters'. Default 100.
 #' @param probs.out NULL or a character string with location where to write a table containing the membership probabilities for the best K and alpha-optimized number of PCAs.
@@ -146,7 +146,6 @@ run_DAPC <- function(vcf, kmax=50, coords=NULL, reps=100,probs.out=NULL,save.as=
 	assignmentPlot <- list(); length(assignmentPlot)  <- max.clusters-1
 	posterior.list <- list(); length(posterior.list)  <- max.clusters-1
 	mapplot        <- list(); length(mapplot)         <- max.clusters-1
-	
 	for(K in 2:max.clusters){
 		i=(K-1)
 	#	par(mar=c(5.1,4.1,4.1,2.1),mfrow=c(1,1))
@@ -155,17 +154,22 @@ run_DAPC <- function(vcf, kmax=50, coords=NULL, reps=100,probs.out=NULL,save.as=
 		q.matrix        <- posterior
 		posterior.list[[i]] <- posterior
 		posterior.df    <- data.frame(indv=rep(rownames(posterior),ncol(posterior)), pop=rep(colnames(posterior),each=nrow(posterior)), assignment=c(posterior))
-		if(K < 5){
-			myCols          <- goodcolors(K,thresh=100)
+		if(FALSE){
+			if(K < 5){
+				myCols          <- goodcolors(K,thresh=100)
+			}
+			if(K >= 5 & K < 7){
+				myCols          <- goodcolors(K,thresh=100,cbspace="deut")
+			}
+			if(K >= 7 & K < 15){
+				myCols          <- goodcolors(K,thresh=100,cbspace="")
+			}
 		}
-		if(K >= 5 & K < 7){
-			myCols          <- goodcolors(K,thresh=100,cbspace="deut")
+		if(K <= 15){
+			myCols          <- goodcolors2(n=K)
 		}
-		if(K >= 7 & K < 15){
-			myCols          <- goodcolors(K,thresh=100,cbspace="")
-		}
-		if(K>=15){
-			myCols          <- c(goodcolors(14,thresh=100,cbspace=""), sample(adegenet::funky(100), size=K-14))
+		if(K>15){
+			myCols          <- c(goodcolors2(n=K), sample(adegenet::funky(100), size=K-15))
 		}
 		posterior.gg        <- ggplot2::ggplot(posterior.df, ggplot2::aes(fill= pop, x= assignment, y=indv)) + ggplot2::geom_bar(position="stack", stat="identity") + ggplot2::theme_classic() + ggplot2::theme(axis.text.y = ggplot2::element_text(size = label.size), panel.grid.major = ggplot2::element_blank(), panel.grid.minor = ggplot2::element_blank(), panel.background = ggplot2::element_blank()) + ggplot2::labs(x = "Membership Probability",y="",fill="Cluster",title=paste0("K = ",K,"; PCs retained = ",best.npca[i])) + ggplot2::scale_fill_manual(values=myCols[1:K])
 		admixturePlot[[i]]  <- posterior.gg
@@ -178,7 +182,6 @@ run_DAPC <- function(vcf, kmax=50, coords=NULL, reps=100,probs.out=NULL,save.as=
 		labels             <- rep("",nrow(posterior.df))
 		labels[posterior.df[,"assignment"] %in% indv.maxPosterior] <- "+"
 		assignment.K       <- ggplot2::ggplot(data=posterior.df, ggplot2::aes(x= pop, y=indv,fill=assignment)) + ggplot2::geom_tile(color="gray") + ggplot2::theme_classic() + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5), axis.text.y = ggplot2::element_text(size = label.size), panel.grid.major = ggplot2::element_blank(), panel.grid.minor = ggplot2::element_blank(), panel.background = ggplot2::element_blank(), legend.position = "none", ) + ggplot2::labs(title = paste0("K = ",K,"; PCs retained = ", best.npca[i]), x="Clusters", y="") + ggplot2::scale_fill_gradient2(low = "white", mid = "yellow", high = "red", midpoint = 0.5) + ggplot2::geom_text(label=labels)
-
 #		assignment.K        <- adegenet::assignplot(dapc.pcabest.K,cex.lab=(label.size/10))
 #		mtext(text=paste0("K = ",K,"; PCs retained = ",best.npca[i]))
 		assignmentPlot[[i]]  <- assignment.K
@@ -634,6 +637,55 @@ goodcolors <- function(n,thresh=65,iter=50,cbspace=c("prot","deut","trit")){
 	result.hex <- vapply(X=1:nrow(result.rgb),FUN=function(x){rgb(result.rgb[x,1], result.rgb[x,2], result.rgb[x,3],maxColorValue=255)},FUN.VALUE="char")
 	result.hex
 }
+
+
+#' @title Return my favorite set of colors to use for clusters in admixture plots, for a particular value of K.
+#' 
+#' For each K (2-15), a particular result from the 'goodcolors' function that I like.
+#' 
+#' @param n Number of colors to include in the output set. Equal to K if using this function for population structure analyses that produce admixture plots or population assignment probabilities.
+#' @param plot.palette Whether or not to plot the color palette in the plotting window. Default FALSE.
+#' @export goodcolors2
+goodcolors2 <- function(n,plot.palette=FALSE){
+	if(n==1 | n > 15){
+		stop("'n' must be an integer >=2 and <=15")
+	}
+	cols2  <- c("#659DDE","#9A0C2B") # "#8BBC6F","#4B04E0"
+	cols3  <- c("#3DF1C9","#492E50","#FADD56")  # "#F1529B" "#FEF51B" "#2C27E8"
+	cols4  <- c("#009CC8","#F48E00","#4300E3","#9AE569") # c("#67F57A","#D7A003","#6E8C48","#C41D1B") # "#256D9E" "#EFFB0A" "#E41A3C" "#F98ACB"
+	cols5  <- c("#789D95","#EDCBD2","#3F04C7","#1E9A00","#B95AEC") # "#6A96F1" "#CBE589" "#BA0803" "#7CDBE0" "#DEA14C"
+	cols6  <- c("#BF3C2C","#6CD57D","#7D075C","#D7AB41","#E9D4F7","#481EE0") # c("#37175A","#DB8A83","#E91A00","#AA569D","#4385FD","#9AE8CF") # 
+	cols7  <- c("#424B13","#47E5F4","#511D49","#3F9876","#182D84","#AB5CC4","#90A930") # c("#382E69","#F7C665","#1DFC96","#200311","#9DCD2D","#3202E0","#851B20")
+	cols8  <- c("#EA7250","#9DDF5B","#B74CE0","#687235","#021025","#1BB1A1","#3F8187","#C7B7CE")
+	cols9  <- c("#8838BD","#997275","#E24911","#ACEB4F","#1DB756","#611D97","#6C7BCF","#125034","#F4ABD7")
+	cols10 <- c("#98ACD2","#6197ED","#7A478F","#986D65","#D9C452","#22553B","#B4993A","#0DF1FA","#E8971B","#36D8B9") # "#51BE1A" "#34A6A2" "#86D0E8" "#BDFD81" "#21594F" "#F1F9D6" "#678534" "#6B49C8" "#57191C" "#EC906B"
+	cols11 <- c("#33E8BB","#C69A01","#799525","#030A34","#091E57","#4ED671","#A4282F","#2F08BA","#5BD80A","#CD0B50","#B9C1F5") # "#5BBDFD" "#200042" "#616B8F" "#578B7C" "#4D59C3" "#B0FE9F" "#0B335C" "#7F780B" "#C55BD7" "#9F2502" "#D9EF1C"
+	cols12 <- c("#FE42DD","#68B206","#FFD4E9","#4FBF72","#567D96","#94245B","#226826","#B8CC94","#1752F7","#8B8C5B","#29A6CF","#2ADEC9") 
+	cols13 <- c("#0ACCF8","#9F9D46","#2FCA60","#3D31C8","#50087B","#A17D78","#C0B27E","#EA6EA5","#B21D00","#31E701","#AC1479","#0B3D98","#5DBB15") # "#FCED80" "#336AB6" "#8F3A8C" "#FA9304" "#3545B1" "#83FDF4" "#B6575B" "#232E32" "#AF9746" "#4CA612" "#ED7B66" "#C3C600" "#47B9F5" # "#5B45C8" "#63F469" "#F3B4C8" "#D9EFE8" "#C74B77" "#F1A655" "#813402" "#3D27C4" "#CCD427" "#27AD47" "#13117F" "#97753D" "#09C1B2"
+	cols14 <- c("#A9D12A","#1D5DB8","#F18249","#44EB9D","#3702AA","#0AF6FF","#48063C","#8DAFB0","#343E3D","#ED20FD","#D1B67D","#472B20","#F1A4CC","#CE1B4F") # "#FFA357" "#7AAD72" "#2D5AB4" "#E41B0B" "#51ECF5" "#007866" "#D43CB8" "#34E590" "#DC9F06" "#91827F" "#830638" "#B07527" "#F6BCC0" "#2B63EC" #### Change first color: "#62D236" "#FCED80" "#336AB6" "#8F3A8C" "#FA9304" "#3545B1" "#83FDF4" "#B6575B" "#232E32" "#AF9746" "#4CA612" "#ED7B66" "#C3C600" "#47B9F5"
+	cols15 <- c("#810890","#EFD814","#2D793E","#796ED5","#699866","#343E3D","#F6233D","#877D0E","#C9BAD5","#8BB0B1","#00C3C0","#522AA9","#21FF61","#EA8316","#F5C387")
+	cols16 <- NULL
+	cols17 <- NULL
+	cols18 <- NULL
+	cols19 <- NULL
+	cols20 <- NULL
+	cols21 <- NULL
+	cols22 <- NULL
+	cols23 <- NULL
+	cols24 <- NULL
+	cols25 <- NULL
+	colorList <- list(cols2 ,cols3 ,cols4 ,cols5 ,cols6 ,cols7 ,cols8 ,cols9 ,cols10,cols11,cols12,cols13,cols14,cols15,cols16,cols17,cols18,cols19,cols20,cols21,cols22,cols23,cols24,cols25)
+	result    <- colorList[[n-1]]
+	if(plot.palette){
+		dummydata        <- rep(1,n)
+		names(dummydata) <- 1:n
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)
+		text(x=c(bp), y=1.12, labels=result,srt=90)
+	}
+	result
+}
+
 
 
 

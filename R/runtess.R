@@ -72,15 +72,16 @@ vcfR2lfmm <- function(vcf,out=NULL){
 #' 
 #' @param vcf Path to input VCF file with SNP data
 #' @param coords Either a character string with path to file containing coordinates (longitude in first column, latitude in second column), or matrix object with longitude and latitude columns.
-#' @param Krange Numerical vector with set of values to use for K.
+#' @param kmax Numerical vector with set of values to use for K.
+#' @param reps Number of repititions. Default 100.
+#' @param save.as Where to save the output PDF. Default is NULL. **This argument is ignored in some environments. Instead, use dev.new(file="Where/To/Save/Output.pdf",height=6,width=10,noRStudioGD=TRUE) before calling 'runtess'. Then dev.off().
 #' @param ploidy Number of copies of each chromosome. Default 2.
 #' @param mask Proportion of input data to mask during each replicate when tess3 function is called
-#' @param reps Number of repititions. Default 100.
 #' @param max.iteration Max iterations. Default 500.
-#' @param save.as Where to save the output PDF. Default is NULL. **This argument is ignored in some environments. Instead, use dev.new(file="Where/To/Save/Output.pdf",height=6,width=10,noRStudioGD=TRUE) before calling 'runtess'. Then dev.off().
 #' @return List of plots
 #' @export runtess
-runtess <- function(vcf,coords=NULL,Krange=1:40,ploidy=2,mask=0.05,reps=100,max.iteration=500,save.as=NULL){
+runtess <- function(vcf,coords=NULL,kmax=40,reps=100,save.as=NULL,ploidy=2,mask=0.05,max.iteration=500){
+	Krange=1:kmax
 	vcf.obj     <- vcfR::read.vcfR(vcf)
 	samplenames <- colnames(vcf.obj@gt)[-1]
 	numind      <- length(samplenames)
@@ -114,26 +115,29 @@ runtess <- function(vcf,coords=NULL,Krange=1:40,ploidy=2,mask=0.05,reps=100,max.
 	# mode(crossentropy.df$Kval) <- "character"
 	crossentropy.df$Kval <- factor(crossentropy.df$Kval, levels=c(1:nrow(crossentropy.df)))
 	entropyPlot <- ggplot2::ggplot(crossentropy.df, ggplot2::aes(x=Kval, y=crossentropy)) + ggplot2::geom_boxplot(fill='lightgray', outlier.colour="black", outlier.shape=16,outlier.size=2, notch=FALSE) + ggplot2::theme_classic() + ggplot2::labs(title= paste0("Cross-entropy (",reps," replicates) vs. number of ancestral populations (K)"), x="Number of ancestral populations", y = "Cross-entropy") + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) + ggplot2::geom_vline(xintercept=bestK, linetype=2, color="black", size=0.25)
-	### Criteria 3: Which K value (for K>=2) yields the least variable entropy scores.
-	Entropy.variation <- apply(X=crossentropy.mat,MARGIN=1,FUN=var,na.rm=TRUE)
-	Kbest.criteria3   <- which(Entropy.variation==min(Entropy.variation[-1]))
-	### Criteria 4: t-tests for entropy of each pairwise adjacent K
-	for(i in 2:nrow(crossentropy.mat)){
-		if(Entropy.variation[Kbest.criteria3]==0){
-			Kbest.criteria4 <- NULL
-			break
-		}
-		t.test.i <- t.test(crossentropy.mat[i-1,],crossentropy.mat[i,])
-		pval.i   <- t.test.i$p.value
-		stat.i   <- t.test.i$statistic
-		if(pval.i < 0.05 & stat.i > 0){
-			next
-		} else {
-			if(i==nrow(crossentropy.mat)){
+	### Future feature
+	if(FALSE){
+		### Criteria 3: Which K value (for K>=2) yields the least variable entropy scores.
+		Entropy.variation <- apply(X=crossentropy.mat,MARGIN=1,FUN=var,na.rm=TRUE)
+		Kbest.criteria3   <- which(Entropy.variation==min(Entropy.variation[-1]))
+		### Criteria 4: t-tests for entropy of each pairwise adjacent K
+		for(i in 2:nrow(crossentropy.mat)){
+			if(Entropy.variation[Kbest.criteria3]==0){
 				Kbest.criteria4 <- NULL
-			} else{
-				Kbest.criteria4 <- (i-1)
 				break
+			}
+			t.test.i <- t.test(crossentropy.mat[i-1,],crossentropy.mat[i,])
+			pval.i   <- t.test.i$p.value
+			stat.i   <- t.test.i$statistic
+			if(pval.i < 0.05 & stat.i > 0){
+				next
+			} else {
+				if(i==nrow(crossentropy.mat)){
+					Kbest.criteria4 <- NULL
+				} else{
+					Kbest.criteria4 <- (i-1)
+					break
+				}
 			}
 		}
 	}
@@ -151,6 +155,7 @@ runtess <- function(vcf,coords=NULL,Krange=1:40,ploidy=2,mask=0.05,reps=100,max.
 #	par(mar=c(5.1,4.1,4.1,2.1),mfrow=c(1,1))
 	Krange.plot    <- setdiff(Krange,1)
 	admixturePlot  <- list(); length(admixturePlot)   <- length(Krange.plot)
+	assignmentPlot <- list(); length(assignmentPlot)  <- length(Krange.plot)
 	mapplot        <- list(); length(mapplot)         <- length(Krange.plot)
 	x.min <- min((coords[,1]-0.5))
 	x.max <- max((coords[,1]+0.5))
@@ -166,20 +171,37 @@ runtess <- function(vcf,coords=NULL,Krange=1:40,ploidy=2,mask=0.05,reps=100,max.
 		rownames(q.matrix) <- samplenames
 		colnames(q.matrix) <- paste0("cluster",1:ncol(q.matrix))
 		posterior.df       <- data.frame(indv=rep(rownames(q.matrix),ncol(q.matrix)), pop=rep(colnames(q.matrix),each=nrow(q.matrix)), assignment=c(unlist(unname(q.matrix))))
-		if(K < 5){
-			myCols          <- goodcolors(K,thresh=100)
+		if(FALSE){
+			if(K < 5){
+				myCols          <- goodcolors(K,thresh=100)
+			}
+			if(K >= 5 & K < 7){
+				myCols          <- goodcolors(K,thresh=100,cbspace="deut")
+			}
+			if(K >= 7 & K < 15){
+				myCols          <- goodcolors(K,thresh=100,cbspace="")
+			}
+			if(K>=15){
+				myCols          <- c(goodcolors(14,thresh=100,cbspace=""), sample(adegenet::funky(100), size=K-14))
+			}
 		}
-		if(K >= 5 & K < 7){
-			myCols          <- goodcolors(K,thresh=100,cbspace="deut")
+		if(K <= 15){
+			myCols          <- goodcolors2(n=K)
 		}
-		if(K >= 7 & K < 15){
-			myCols          <- goodcolors(K,thresh=100,cbspace="")
-		}
-		if(K>=15){
-			myCols          <- c(goodcolors(14,thresh=100,cbspace=""), sample(adegenet::funky(100), size=K-14))
+		if(K>15){
+			myCols          <- c(goodcolors2(n=K), sample(adegenet::funky(100), size=K-15))
 		}
 		posterior.gg        <- ggplot2::ggplot(posterior.df, ggplot2::aes(fill= pop, x= assignment, y=indv)) + ggplot2::geom_bar(position="stack", stat="identity") + ggplot2::theme_classic() + ggplot2::theme(axis.text.y = ggplot2::element_text(size = label.size), panel.grid.major = ggplot2::element_blank(), panel.grid.minor = ggplot2::element_blank(), panel.background = ggplot2::element_blank()) + ggplot2::labs(x = "Membership Probability",y="",fill="Cluster",title=paste0("K = ",K)) + ggplot2::scale_fill_manual(values=myCols[1:K])
 		admixturePlot[[i]]  <- posterior.gg
+
+		indv.maxPosterior  <- apply(X=q.matrix, MARGIN=1, FUN=function(x){max(x)})
+		labels             <- rep("",nrow(posterior.df))
+		labels[posterior.df[,"assignment"] %in% indv.maxPosterior] <- "+"
+		assignment.K       <- ggplot2::ggplot(data=posterior.df, ggplot2::aes(x= pop, y=indv,fill=assignment)) + ggplot2::geom_tile(color="gray") + ggplot2::theme_classic() + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5), axis.text.y = ggplot2::element_text(size = label.size), panel.grid.major = ggplot2::element_blank(), panel.grid.minor = ggplot2::element_blank(), panel.background = ggplot2::element_blank(), legend.position = "none", ) + ggplot2::labs(title = paste0("K = ",K), x="Clusters", y="") + ggplot2::scale_fill_gradient2(low = "white", mid = "yellow", high = "red", midpoint = 0.5) + ggplot2::geom_text(label=labels)
+#		assignment.K        <- adegenet::assignplot(dapc.pcabest.K,cex.lab=(label.size/10))
+#		mtext(text=paste0("K = ",K,"; PCs retained = ",best.npca[i]))
+		assignmentPlot[[i]]  <- assignment.K
+
 		#plot(posterior.gg)
 		#admixturePlot[[i]]   <- recordPlot()
 		my.palette      <- tess3r::CreatePalette(myCols, 9)
@@ -202,7 +224,7 @@ runtess <- function(vcf,coords=NULL,Krange=1:40,ploidy=2,mask=0.05,reps=100,max.
 #		plot(mapplot.i + ggplot2::theme_classic())
 		#mapplot[[i]]    <- recordPlot()
 	}
-	result <- c(list(entropyPlot),admixturePlot,mapplot)
+	result <- c(list(entropyPlot),admixturePlot,assignmentPlot,mapplot)
 	if(!is.null(save.as)){
 		pdf(height=6,width=10,file=save.as,onefile=TRUE)
 		lapply(X=result,FUN=print)

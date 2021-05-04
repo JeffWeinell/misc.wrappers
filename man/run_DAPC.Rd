@@ -19,7 +19,7 @@ run_DAPC(
 \arguments{
 \item{vcf}{Character string with path to vcf file containing snp data}
 
-\item{kmax}{Number indicating the maximum number of clusters to evaluate. Default is NULL, in which case kmax is set to one less than the number of individuals.}
+\item{kmax}{Number indicating the maximum number of clusters to evaluate. Default is 40, which is converted using kmax = min(kmax, number of individuals-1)}
 
 \item{coords}{Optional character string with path to a table with longitude and latitude of individuals in the vcf file, or a matrix or data frame with longitude and latitude columns. Default is NULL, in which case membership probabilities are not interpolated onto a map.}
 

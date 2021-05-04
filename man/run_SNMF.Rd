@@ -9,7 +9,7 @@ Runs LEA function snmf function from VCF input file and optionally interpolates 
 run_SNMF(
   vcf,
   coords = NULL,
-  Krange = 1:40,
+  kmax = 40,
   reps = 100,
   entropy = TRUE,
   project = "new",
@@ -18,13 +18,13 @@ run_SNMF(
 )
 }
 \arguments{
-\item{vcf}{Path to vcf input file}
+\item{vcf}{Path to input VCF file with SNP data}
 
-\item{coords}{Default NULL}
+\item{coords}{Either a character string with path to file containing coordinates (longitude in first column, latitude in second column), or matrix object with longitude and latitude columns.}
 
-\item{Krange}{Default 1:40}
+\item{kmax}{Number indicating the maximum number of clusters to evaluate. Default is 40, which is converted using kmax = min(kmax, number of individuals-1)}
 
-\item{reps}{Default 100}
+\item{reps}{Number of repititions. Default 100.}
 
 \item{entropy}{Default TRUE}
 
