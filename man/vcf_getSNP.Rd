@@ -5,7 +5,8 @@
 \title{Get Best SNP for each locus from VCF
 
 From a VCF with multiple sites/locus, create a VCF with only the best site/locus.
-The best site is the one with the least missing data. To break ties, take the first site among the best sites.}
+The best site is the one with the least missing data. To break ties, take the first site among the best sites.
+Note: I may update this to not require vcftools.}
 \usage{
 vcf_getSNP(
   vcftools.path,
@@ -27,16 +28,16 @@ vcf_getSNP(
 
 \item{indv.keep}{Character string with names of individuals to keep. Default is NULL (all individuals kept).}
 
-\item{min.n}{Minimum number of individuals required to keep a site. Default = 4.}
+\item{min.n}{Minimum number ofnon-missing alleles required to keep a site. Default = 4. If individuals are diploid, then setting this to twice the number of individuals will generate a dataset without missing data.}
 
-\item{min.n0}{Minimum number of individuals required to have the major allele to keep a site. Default = 2.}
+\item{min.n0}{Minimum number of individuals required to have at least one copy of the major allele to keep a site. Default = 2.}
 
-\item{min.n1}{Minimum number of individuals required to have the minor allele to keep a site. Default = 1.}
+\item{min.n1}{Minimum number of individuals required to have at least one copy of the minor allele to keep a site. Default = 1.}
 
 \item{which.site}{Character string indicating the method for choosing a site to keep for each locus (or chromosome). Default = "best", which is considered the one with the least missing data, or the first among sites tied for least missing data. Other options are "all.passing", which retains all sites (positions) that pass variation filters (min.n, min.0.n.0, min.1.n), "first" (first site kept at each locus), or "random".}
 }
 \value{
-Character vector with values of input arguments
+List with [\link{1}] path to vcftools, [\link{2}] dataframe with input and output values for VCF filepaths, number of loci (chromosomes), sites (positions), and individuals (samples).
 }
 \description{
 dev.new(height=10,width=6)

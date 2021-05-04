@@ -234,18 +234,7 @@ runtess <- function(vcf,coords=NULL,kmax=40,reps=100,save.as=NULL,ploidy=2,mask=
 }
 #' @examples
 ####
-#' library(maps)
-#' library(tess3r)
-#' libary(ade)
-#' library(adegenet)
-#' library(ggplot2)
-#' library(rworldmap)
-#' library(LEA)
-#' library(vcfR)
-#' library(geosphere)
-#' #source("~/DAPC_adegenet.R")
-#' #source("~/runtess.R")
-#' dev.new(width=10,height=6)
+#' library(misc.wrappers)
 #' Oxyrhabdium_AllSpecies <- runtess(vcf="Oxyrhabdium_AllSpecies_BestSNP.vcf",
 #'                      coords="Oxyrhabdium_AllSpecies_coords.txt",
 #'                      Krange=1:15,

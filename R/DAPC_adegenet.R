@@ -295,19 +295,21 @@ run_DAPC <- function(vcf, kmax=50, coords=NULL, reps=100,probs.out=NULL,save.as=
 #' 
 #' From a VCF with multiple sites/locus, create a VCF with only the best site/locus.
 #' The best site is the one with the least missing data. To break ties, take the first site among the best sites.
+#' Note: I may update this to not require vcftools.
 #' 
 #' @param vcf Character string with path to input vcf.
 #' @param vcftools.path Character string with path to the vcftools executable.
 #' @param out Character string where to write output vcf.
 #' @param indv.keep Character string with names of individuals to keep. Default is NULL (all individuals kept).
-#' @param min.n Minimum number of individuals required to keep a site. Default = 4.
-#' @param min.n0 Minimum number of individuals required to have the major allele to keep a site. Default = 2.
-#' @param min.n1 Minimum number of individuals required to have the minor allele to keep a site. Default = 1.
+#' @param min.n Minimum number ofnon-missing alleles required to keep a site. Default = 4. If individuals are diploid, then setting this to twice the number of individuals will generate a dataset without missing data.
+#' @param min.n0 Minimum number of individuals required to have at least one copy of the major allele to keep a site. Default = 2.
+#' @param min.n1 Minimum number of individuals required to have at least one copy of the minor allele to keep a site. Default = 1.
 #' @param which.site Character string indicating the method for choosing a site to keep for each locus (or chromosome). Default = "best", which is considered the one with the least missing data, or the first among sites tied for least missing data. Other options are "all.passing", which retains all sites (positions) that pass variation filters (min.n, min.0.n.0, min.1.n), "first" (first site kept at each locus), or "random".
-#' @return Character vector with values of input arguments
+#' @return List with [[1]] path to vcftools, [[2]] dataframe with input and output values for VCF filepaths, number of loci (chromosomes), sites (positions), and individuals (samples).
 #' @export vcf_getSNP
-vcf_getSNP     <- function(vcftools.path,vcf,out,indv.keep=NULL,min.n=4,min.n0=2,min.n1=1,which.site="best"){
-	vcf.obj    <- vcfR::read.vcfR(vcf)
+vcf_getSNP      <- function(vcftools.path,vcf,out,indv.keep=NULL,min.n=4,min.n0=2,min.n1=1,which.site="best"){
+	vcf.obj     <- vcfR::read.vcfR(vcf)
+	samplenames <- colnames(vcf.obj@gt)[-1]
 	# matrix with "fixed" columns, which are the columns with site-specific stats across all samples
 	# fix.mat    <- attributes(vcf.obj)[["fix"]]
 	fix.mat    <- vcf.obj@fix
@@ -326,7 +328,7 @@ vcf_getSNP     <- function(vcftools.path,vcf,out,indv.keep=NULL,min.n=4,min.n0=2
 				indv.keep <- suppressWarnings(readLines(indv.keep))
 			}
 		}
-		### Check that all names in indv.keep actually exist in the vcf
+		### Check that all names in indv.keep actually exist in the vcf, and then update gt.mat to only include individuals that pass
 		if(all(indv.keep %in% colnames(gt.mat))){
 			gt.mat <- gt.mat[,indv.keep,drop=F]
 		} else {
@@ -394,7 +396,11 @@ vcf_getSNP     <- function(vcftools.path,vcf,out,indv.keep=NULL,min.n=4,min.n0=2
 	system(paste("rm",temp.file2))
 	log.path <- file.path(getwd(),"out.log")
 	system(paste("rm",log.path))
-	return(c(vcftools.path=vcftools.path, vcf=vcf, out=out, nloci.out=length(unique(chrom.pos.filtered.df[,"CHROM"])), nsites.out=nrow(chrom.pos.filtered.df),numind.out=ncol(gt.mat)))
+	InOut.df <- data.frame(input=c(vcf,length(unique(fix.mat[,"CHROM"])),nrow(vcf.obj@gt),length(samplenames)),output=c(out,length(unique(chrom.pos.filtered.df[,"CHROM"])),nrow(chrom.pos.filtered.df),ncol(gt.mat)))
+	rownames(InOut.df) <- c("VCF_filepath","N_loci","N_sites","N_samples")
+	colnames(InOut.df) <- c("Input","Output")
+	return(list(vcftools.path=vcftools.path,InputOutput=InOut.df))
+	#return(c(vcftools.path=vcftools.path, vcf=vcf, out=out, nloci.out=length(unique(chrom.pos.filtered.df[,"CHROM"])), nsites.out=nrow(chrom.pos.filtered.df),numind.out=ncol(gt.mat)))
 }
 #' @examples
 #' vcf_getSNP(vcftools.path="/vcftools",vcf="Oxyrhabdium_AllSpecies_AllSNPs.vcf",out="Oxyrhabdium_AllSpecies_BestSNP.vcf")
@@ -414,6 +420,17 @@ vcf_getSNP     <- function(vcftools.path,vcf,out,indv.keep=NULL,min.n=4,min.n0=2
 #' vcf_getSNP(vcftools.path="/vcftools",vcf="Oxyrhabdium_both-modestum_AllSNPs.vcf",out="Oxyrhabdium_both-modestum_BestSNP.vcf",which.site="best")
 #' 
 #' vcf_getSNP(vcftools.path="/vcftools",vcf="Oxyrhabdium_AllSpecies_AllSNPs.vcf", indv.keep="indv_keep_Oxyrhabdium_both-modestum.txt", out="Oxyrhabdium_both-modestum_BestSNP.vcf", which.site="best")
+#'
+#' vcf_getSNP(vcftools.path="/panfs/pfs.local/home/j926w878/programs/vcftools_0.1.13/bin/vcftools",vcf="/panfs/pfs.local/home/j926w878/programs/easySFS/popfiles/Ahaetulla_snps.vcf",indv.keep="/panfs/pfs.local/home/j926w878/programs/easySFS/popfiles/indv_keep_Ahaetulla-prasina_AllLocalities_GoodData.txt",out="/panfs/pfs.local/home/j926w878/work/ddRAD/snps_goodData/Ahaetulla-prasina_AllPops_AllSNPs.vcf",which.site="all.passing")
+#'
+#' vcf_getSNP(vcftools.path="/panfs/pfs.local/home/j926w878/programs/vcftools_0.1.13/bin/vcftools",vcf="/panfs/pfs.local/home/j926w878/programs/easySFS/popfiles/Ahaetulla_snps.vcf",indv.keep="/panfs/pfs.local/home/j926w878/programs/easySFS/popfiles/indv_keep_Ahaetulla-prasina_AllLocalities_GoodData.txt",out="/panfs/pfs.local/home/j926w878/work/ddRAD/snps_goodData/Ahaetulla-prasina_AllPops_FirstSNP.vcf",which.site="first")
+#'
+#' vcf_getSNP(vcftools.path="/panfs/pfs.local/home/j926w878/programs/vcftools_0.1.13/bin/vcftools",vcf="/panfs/pfs.local/home/j926w878/work/ddRAD/snps_goodData/Ahaetulla-prasina_AllPops_AllSNPs.vcf",indv.keep="/panfs/pfs.local/home/j926w878/programs/easySFS/popfiles/indv_keep_Ahaetulla-prasina_Luzon.txt",out="/panfs/pfs.local/home/j926w878/work/ddRAD/snps_goodData/Ahaetulla-prasina_Luzon_BestSNP.vcf",which.site="best")
+#' 
+#' vcf_getSNP(vcftools.path="/panfs/pfs.local/home/j926w878/programs/vcftools_0.1.13/bin/vcftools",vcf="/panfs/pfs.local/home/j926w878/work/ddRAD/snps_goodData/Ahaetulla-prasina_AllPops_AllSNPs.vcf",indv.keep="/panfs/pfs.local/home/j926w878/programs/easySFS/popfiles/indv_keep_Ahaetulla-prasina_Luzon.txt",out="/panfs/pfs.local/home/j926w878/work/ddRAD/snps_goodData/Ahaetulla-prasina_Luzon_NoMissingData.vcf",which.site="all.passing",min.n = (19*2))
+#' 
+#' vcf_getSNP(vcftools.path="/panfs/pfs.local/home/j926w878/programs/vcftools_0.1.13/bin/vcftools",vcf="/panfs/pfs.local/home/j926w878/work/ddRAD/snps_goodData/Calamaria-gervaisii_AllPops_AllSNPs.vcf",indv.keep=NULL,out="/panfs/pfs.local/home/j926w878/work/ddRAD/snps_goodData/Calamaria-gervaisii_AllPops_BestSNP.vcf",which.site="best")
+
 #####
 
 #' @title Hex to xyz colors

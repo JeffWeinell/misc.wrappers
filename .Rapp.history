@@ -1,622 +1,1021 @@
-cfmodestum.qrates2.chain1 <- eemsgg2raster(gg.obj= cfmodestum.gg.chain1$qrates02,file.out="/Users/alyssaleinweber/Downloads/cfmodestum_mcmc/cfmodestum_chain1_qrates02.tif")
-eemsgg2raster(gg.obj= cfmodestum.gg.chain2$mrates01,file.out="/Users/alyssaleinweber/Downloads/cfmodestum_mcmc/cfmodestum_chain2_mrates01.tif"); eemsgg2raster(gg.obj= cfmodestum.gg.chain2$mrates02,file.out="/Users/alyssaleinweber/Downloads/cfmodestum_mcmc/cfmodestum_chain2_mrates02.tif"); eemsgg2raster(gg.obj= cfmodestum.gg.chain2$qrates01,file.out="/Users/alyssaleinweber/Downloads/cfmodestum_mcmc/cfmodestum_chain2_qrates01.tif"); eemsgg2raster(gg.obj= cfmodestum.gg.chain2$qrates02,file.out="/Users/alyssaleinweber/Downloads/cfmodestum_mcmc/cfmodestum_chain2_qrates02.tif")
-eemsgg2raster(gg.obj= cfmodestum.gg.chain3$mrates01,file.out="/Users/alyssaleinweber/Downloads/cfmodestum_mcmc/cfmodestum_chain3_mrates01.tif"); eemsgg2raster(gg.obj= cfmodestum.gg.chain3$mrates02,file.out="/Users/alyssaleinweber/Downloads/cfmodestum_mcmc/cfmodestum_chain3_mrates02.tif"); eemsgg2raster(gg.obj= cfmodestum.gg.chain3$qrates01,file.out="/Users/alyssaleinweber/Downloads/cfmodestum_mcmc/cfmodestum_chain3_qrates01.tif"); eemsgg2raster(gg.obj= cfmodestum.gg.chain3$qrates02,file.out="/Users/alyssaleinweber/Downloads/cfmodestum_mcmc/cfmodestum_chain3_qrates02.tif")
-packageVersion("raster")
-install.packages("raster")
-rgdal::getGDALVersionInfo()
-packageVersion("rgdal")
-leporinum.gg.chain1 <- reemsplots2::make_eems_plots("/Users/alyssaleinweber/Downloads/leporinum_mcmc/300Demes-chain1")
-leporinum.gg.chain2 <- reemsplots2::make_eems_plots("/Users/alyssaleinweber/Downloads/leporinum_mcmc/300Demes-chain2")
-leporinum.gg.chain3 <- reemsplots2::make_eems_plots("/Users/alyssaleinweber/Downloads/leporinum_mcmc/300Demes-chain3")
-eemsgg2raster(gg.obj= leporinum.gg.chain1$mrates01,file.out="/Users/alyssaleinweber/Downloads/leporinum_mcmc/leporinum_chain1_mrates01.tif")#
-eemsgg2raster(gg.obj= leporinum.gg.chain1$mrates02,file.out="/Users/alyssaleinweber/Downloads/leporinum_mcmc/leporinum_chain1_mrates02.tif")#
-eemsgg2raster(gg.obj= leporinum.gg.chain1$qrates01,file.out="/Users/alyssaleinweber/Downloads/leporinum_mcmc/leporinum_chain1_qrates01.tif")#
-eemsgg2raster(gg.obj= leporinum.gg.chain1$qrates02,file.out="/Users/alyssaleinweber/Downloads/leporinum_mcmc/leporinum_chain1_qrates02.tif")
-eemsgg2raster(gg.obj= leporinum.gg.chain2$mrates01,file.out="/Users/alyssaleinweber/Downloads/leporinum_mcmc/leporinum_chain2_mrates01.tif")#
-eemsgg2raster(gg.obj= leporinum.gg.chain2$mrates02,file.out="/Users/alyssaleinweber/Downloads/leporinum_mcmc/leporinum_chain2_mrates02.tif")#
-eemsgg2raster(gg.obj= leporinum.gg.chain2$qrates01,file.out="/Users/alyssaleinweber/Downloads/leporinum_mcmc/leporinum_chain2_qrates01.tif")#
-eemsgg2raster(gg.obj= leporinum.gg.chain2$qrates02,file.out="/Users/alyssaleinweber/Downloads/leporinum_mcmc/leporinum_chain2_qrates02.tif")
-eemsgg2raster(gg.obj= leporinum.gg.chain3$mrates01,file.out="/Users/alyssaleinweber/Downloads/leporinum_mcmc/leporinum_chain3_mrates01.tif")#
-eemsgg2raster(gg.obj= leporinum.gg.chain3$mrates02,file.out="/Users/alyssaleinweber/Downloads/leporinum_mcmc/leporinum_chain3_mrates02.tif")#
-eemsgg2raster(gg.obj= leporinum.gg.chain3$qrates01,file.out="/Users/alyssaleinweber/Downloads/leporinum_mcmc/leporinum_chain3_qrates01.tif")#
-eemsgg2raster(gg.obj= leporinum.gg.chain3$qrates02,file.out="/Users/alyssaleinweber/Downloads/leporinum_mcmc/leporinum_chain3_qrates02.tif")
-gg.obj <- gg$mrates01
-gg.obj <- leporinum.gg.chain1
-gg.obj.mrates1 <- leporinum.gg.chain1$mrates01
-gg.obj <- leporinum.gg.chain1
-gg.data.mrates1 <- ggplot2::ggplot_build(gg.obj$mrates01)[[1]][[1]]
-dim(gg.data.mrates1)
-rgb.mat.mrates1 <- t(col2rgb(gg.data.mrates1$fill))
-dim(rgb.mat.mrates1)
-colnames(rgb.mat.mrates1)
-paste0(c("red","green","blue"),".mrates1")
-paste0(c("red","green","blue"),".m1")
-gg.data.mrates2 <- ggplot2::ggplot_build(gg.obj$mrates02)[[1]][[1]]#
-	gg.data.qrates1 <- ggplot2::ggplot_build(gg.obj$qrates01)[[1]][[1]]#
-	gg.data.qrates2 <- ggplot2::ggplot_build(gg.obj$qrates02)[[1]][[1]]
-rgb.mat.mrates1 <- t(col2rgb(gg.data.mrates1$fill))#
-	rgb.mat.mrates2 <- t(col2rgb(gg.data.mrates2$fill))#
-	rgb.mat.qrates1 <- t(col2rgb(gg.data.qrates1$fill))#
-	rgb.mat.qrates2 <- t(col2rgb(gg.data.qrates2$fill))
-colnames(rgb.mat.mrates1) <- paste0(c("red","green","blue"),".m1")#
-	colnames(rgb.mat.mrates2) <- paste0(c("red","green","blue"),".m2")#
-	colnames(rgb.mat.qrates1) <- paste0(c("red","green","blue"),".q1")#
-	colnames(rgb.mat.qrates2) <- paste0(c("red","green","blue"),".q2")
-rgb.mat.mrates2[1:2,]
-df       <- cbind(gg.data.mrates1[,c("x","y")], rgb.mat.mrates1, rgb.mat.mrates2, rgb.mat.qrates1, rgb.mat.qrates2)
-df[1:10,]
-log10(1)
-log10(10)
-log10(50)
-log10(60)
-log10(100)
-log10(1000)
-log10(10000)
-log10(500)
-xcoords <- readLines("/Users/alyssaleinweber/Downloads/leporinum_mcmc/300Demes-chain3/mcmcxcoord.txt")
-ycoords <- readLines("/Users/alyssaleinweber/Downloads/leporinum_mcmc/300Demes-chain3/mcmcycoord.txt")
-wcoords <- readLines("/Users/alyssaleinweber/Downloads/leporinum_mcmc/300Demes-chain3/mcmcwcoord.txt")
-zcoords <- readLines("/Users/alyssaleinweber/Downloads/leporinum_mcmc/300Demes-chain3/mcmczcoord.txt")
-nrow(xcoords)
-length(xcoords)
-length(ycoords)
-length(wcoords)
-xcoords[1]
-strsplit(xcoords[1],split=" ")
-xcoord.path <- "/Users/alyssaleinweber/Downloads/leporinum_mcmc/300Demes-chain3/mcmcxcoord.txt"#
-ycoord.path <- "/Users/alyssaleinweber/Downloads/leporinum_mcmc/300Demes-chain3/mcmcycoord.txt"#
-wcoord.path <- "/Users/alyssaleinweber/Downloads/leporinum_mcmc/300Demes-chain3/mcmcwcoord.txt"#
-zcoord.path <- "/Users/alyssaleinweber/Downloads/leporinum_mcmc/300Demes-chain3/mcmczcoord.txt"
-xcoords <- lapply(readLines(xcoord.path),FUN=strsplit,split=" ")
-xcoords[1]
-xcoords <- unlist(lapply(readLines(xcoord.path),FUN=strsplit,split=" "))
-length(xcoords)
-xcoords[1]
-xcoords <- as.numeric(unlist(lapply(readLines(xcoord.path),FUN=strsplit,split=" ")))
-xccords[1]
-xcoords[1]
-xcoords[2]
-ycoords <- as.numeric(unlist(lapply(readLines(ycoord.path),FUN=strsplit,split=" ")))#
-wcoords <- as.numeric(unlist(lapply(readLines(wcoord.path),FUN=strsplit,split=" ")))#
-zcoords <- as.numeric(unlist(lapply(readLines(zcoord.path),FUN=strsplit,split=" ")))
-mcmcdir <- "/Users/alyssaleinweber/Downloads/leporinum_mcmc/300Demes-chain3/"
-xcoord.path <- paste0(mcmcdir,"/mcmcxcoord.txt")
-xcoord.path
-xcoords <- as.numeric(unlist(lapply(readLines(xcoord.path),FUN=strsplit,split=" ")))
-xcoords[1]
-length(xcoords)
-length(ycoords)
-length(wcoords)
-length(zcoords)
-nrow(df)
-53872-21592
-53872-21592-15921
-mcmcdir <- "/Users/alyssaleinweber/Downloads/leporinum_mcmc/300Demes-chain1/"#
-# paths to coordinates of tiles#
-xcoord.path <- paste0(mcmcdir,"/mcmcxcoord.txt")#
-ycoord.path <- paste0(mcmcdir,"/mcmcycoord.txt")#
-wcoord.path <- paste0(mcmcdir,"/mcmcwcoord.txt")#
-zcoord.path <- paste0(mcmcdir,"/mcmczcoord.txt")#
-# numerical vectors of tile coordinates #
-xcoords <- as.numeric(unlist(lapply(readLines(xcoord.path),FUN=strsplit,split=" ")))#
-ycoords <- as.numeric(unlist(lapply(readLines(ycoord.path),FUN=strsplit,split=" ")))#
-wcoords <- as.numeric(unlist(lapply(readLines(wcoord.path),FUN=strsplit,split=" ")))#
-zcoords <- as.numeric(unlist(lapply(readLines(zcoord.path),FUN=strsplit,split=" ")))
-# path to mrates#
-mrates.path <- paste0(mcmcdir,"/mcmcmrates.txt")#
-# path to qrates#
-qrates.path <- paste0(mcmcdir,"/mcmcqrates.txt")
-mrates <- as.numeric(unlist(lapply(readLines(mrates.path),FUN=strsplit,split=" ")))
-length(mrates)
-length(xcoords)
-qrates <- as.numeric(unlist(lapply(readLines(qrates.path),FUN=strsplit,split=" ")))
-length(qrates)
-length(wcoords)
-m.df   <- cbind(xcoords,ycoords,mrates)
-m.df[1:10,]
-m.df   <- cbind("lon"=xcoords,"lat"=ycoords,mrates)
-m.df[1:10,]
-m.df   <- as.data.frame(cbind("lon"=xcoords,"lat"=ycoords,mrates))#
-q.df   <- as.data.frame(cbind("lon"=wcoords,"lat"=zcoords,qrates))
-m.df[1:10,]
-sp::coordinates(m.df) <- ~ lon + lat
-sp::coordinates(q.df) <- ~ lon + lat
-sp::gridded(m.df)     <- TRUE
-sp::gridded(q.df)     <- TRUE
-class(m.df)
-m.raster <- rasterize(m.df)
-m.raster <- rasterize(m.df,fun=min)
-r <- raster(ncols=36, nrows=18)#
-n <- 1000#
-set.seed(123)#
-x <- runif(n) * 360 - 180#
-y <- runif(n) * 180 - 90#
-xy <- cbind(x, y)#
-# get the (last) indices#
-r0 <- rasterize(xy, r)#
-# presence/absensce (NA) (is there a point or not?)#
-r1 <- rasterize(xy, r, field=1)#
-# how many points?#
-r2 <- rasterize(xy, r, fun=function(x,...)length(x))#
-vals <- runif(n)#
-# sum of the values associated with the points#
-r3 <- rasterize(xy, r, vals, fun=sum)
-vals <- 1:n
-length(vals)
-vals[1:10]
-p <- data.frame(xy, name=vals)
-p[1:10,]
-m.df[1:10,]
-m.df   <- as.data.frame(cbind("lon"=xcoords,"lat"=ycoords,mrates))#
-q.df   <- as.data.frame(cbind("lon"=wcoords,"lat"=zcoords,qrates))
-m.df[1:10,]
-m.df   <- as.data.frame(cbind("lon"=xcoords,"lat"=ycoords,mrates,"name"=1:length(mrates)))
-m.df[1:10,]
-coordinates(p) <- ~x+y
-class(p)
-class(r)
-r <- rasterize(p, r, 'name', fun=min)
-r2 <- rasterize(m.df,'name', fun=min)
-sp::coordinates(m.df) <- ~ lon + lat
-r2 <- rasterize(m.df,'name', fun=min)
-r <- raster(ncols=36, nrows=18)
-r2 <- rasterize(m.df,r,'name', fun=min)
-128.236-120.288
-min(m.df$lon)
-max(m.df$lon)
-min(m.df$lat)
-max(m.df$lat)
-max(m.df$lon)-min(m.df$lon)
-(max(m.df$lon)-min(m.df$lon))*0.03204819
-(max(m.df$lon)-min(m.df$lon))/0.03204819
-m.df$lon
-max(m.df$lon)
-round(max(m.df$lon))
-(round(max(m.df$lon))-round(min(m.df$lon)))/0.03204819
-(max(m.df$lon)-min(m.df$lon))/0.03204819
-min(m.df$lon)
-round(min(m.df$lon))
-(round(max(m.df$lon),digits=2)-round(min(m.df$lon),digits=2))/0.03204819
-(round(max(m.df$lon),digits=1)-round(min(m.df$lon),digits=1))/0.03204819
-(ceiling(max(m.df$lon))-ceiling(min(m.df$lon)))/0.03204819
-test <- eemsgg2raster(gg.obj= modestum_chain1$mrates02)
-class(test)
-attributes(test)
-summary(test)
-test
-test$resolution
-names(test)
-names(attributes(test))
-(128.236-120.288)/0.03204819
-(max(m.df$lon)-min(m.df$lon))/0.03204819
-round((max(m.df$lon)-min(m.df$lon))/0.03204819)
-ceiling((max(m.df$lon)-min(m.df$lon))/0.03204819)
-m.rows <- ceiling((max(m.df$lon)-min(m.df$lon))/0.03204819)#
-m.cols <- ceiling((max(m.df$lat)-min(m.df$lat))/0.03157018)#
-q.rows <- ceiling((max(q.df$lon)-min(q.df$lon))/0.03204819)#
-q.cols <- ceiling((max(q.df$lat)-min(q.df$lat))/0.03157018)
-m.rows#
-m.cols#
-q.rows#
-q.cols
-min(c(m.df$lon,q.df$lon))
-max(c(m.df$lon,q.df$lon))
-m.raster <- raster(nrows=m.rows, ncols=m.cols)#
-q.raster <- raster(nrows=q.rows, ncols=q.cols)
-m.rasterized <- rasterize(m.df,m.raster)
-q.rasterized <- rasterize(q.df,q.raster)
-q.df   <- as.data.frame(cbind("lon"=wcoords,"lat"=zcoords,qrates))
-sp::coordinates(q.df) <- ~ lon + lat
-q.raster <- raster(nrows=q.rows, ncols=q.cols)
-q.rasterized <- rasterize(q.df,q.raster)
-raster::writeRaster(m.rasterized,filename="/Users/alyssaleinweber/Downloads/leporinum_mcmc/leporinum_chain1_m.tif")
-m.df   <- as.data.frame(cbind("lon"=xcoords,"lat"=ycoords,mrates))
-m.df[1:10,]
-max(m.df$mrates)
-min(m.df$mrates)
-m.df   <- as.data.frame(cbind("lon"=xcoords,"lat"=ycoords,mrates,logm=log10(mrates)))
-m.df[1:10,]
-max(m.df$logm)
-min(m.df$logm)
-q.df   <- as.data.frame(cbind("lon"=wcoords,"lat"=zcoords,qrates,logq=log10(qrates)))
-sp::coordinates(m.df) <- ~ lon + lat#
-sp::coordinates(q.df) <- ~ lon + lat#
-# define an empty rasters with number of columns and rows determined by max and min coordinates#
-m.rows <- ceiling((max(m.df$lon)-min(m.df$lon))/0.03204819)#
-m.cols <- ceiling((max(m.df$lat)-min(m.df$lat))/0.03157018)#
-q.rows <- ceiling((max(q.df$lon)-min(q.df$lon))/0.03204819)#
-q.cols <- ceiling((max(q.df$lat)-min(q.df$lat))/0.03157018)#
-m.raster <- raster(nrows=m.rows, ncols=m.cols)#
-q.raster <- raster(nrows=q.rows, ncols=q.cols)#
-# sp::gridded(m.df)     <- TRUE#
-# sp::gridded(q.df)     <- TRUE#
-m.rasterized <- rasterize(m.df,m.raster)#
-q.rasterized <- rasterize(q.df,q.raster)
-raster::writeRaster(m.rasterized,filename="/Users/alyssaleinweber/Downloads/leporinum_mcmc/leporinum_chain1_m.tif")#
-raster::writeRaster(q.rasterized,filename="/Users/alyssaleinweber/Downloads/leporinum_mcmc/leporinum_chain1_q.tif")
-raster::writeRaster(m.rasterized,filename="/Users/alyssaleinweber/Downloads/leporinum_mcmc/leporinum_chain1_m.tif",overwrite=T)
-?raster()
-?raster()
-?raster()
-m.raster <- raster(xmn=floor(min(m.df$lon)),xmx=ceiling(max(m.df$lon)),ymn=floor(min(m.df$lat)),ymx=ceiling(max(m.df$lat)),resolution=c(0.03204819,0.03157018))
-m.rasterized <- rasterize(m.df,m.raster)
-m.rasterized
-raster::writeRaster(m.rasterized,filename="/Users/alyssaleinweber/Downloads/leporinum_mcmc/leporinum_chain1_m.tif")
-m.rasterized <- rasterize(m.df,m.raster,fun=mean)
-raster::writeRaster(m.rasterized,filename="/Users/alyssaleinweber/Downloads/leporinum_mcmc/leporinum_chain1_m.tif",overwrite=T)
-library(deldir)
-?read_matrix()
-outer <- read.table("/Users/alyssaleinweber/Downloads/leporinum_mcmc/300Demes-chain1/outer.txt")
-ouet[1:2,]
-outer[1:2,]
-lines <- tolower(readLines(file.path(mcmcdir, "eemsrun.txt")))
-length(lines)
-lines[1]
-lines[2]
-lines
-dist_metric <- gsub("\\s*distance\\s*=\\s*(\\w+)", "\\1", lines[6])
-dist_metric
-outer[, c(2, 1)]
-demes <- read.table("/Users/alyssaleinweber/Downloads/leporinum_mcmc/300Demes-chain1/demes.txt")
-nrow(demes)
-demes[1:10,]
-edges <- read.table("/Users/alyssaleinweber/Downloads/leporinum_mcmc/300Demes-chain1/edges.txt")
-ipmap <- as.numeric(readLines("/Users/alyssaleinweber/Downloads/leporinum_mcmc/300Demes-chain1/ipmap.txt"))
-ipmap
-xlim <- range(outer[, 1])#
-  ylim <- range(outer[, 2])
-xlim
-ylim
-aspect <- (diff(ylim) / diff(xlim)) / cos(mean(ylim) * pi / 180)
-aspect
-aspect <- abs(aspect)
-nmrks=100
-if (aspect > 1) {#
-    nxmrks <- nmrks#
-    nymrks <- round(nxmrks * aspect)#
-  } else {#
-    nymrks <- nmrks#
-    nxmrks <- round(nymrks / aspect)#
-  }
-ncmrks
-nxmrks
-nymrks
-xmrks <- seq(from = xlim[1], to = xlim[2], length = nxmrks)#
-  ymrks <- seq(from = ylim[1], to = ylim[2], length = nymrks)
-marks <- cbind(rep(xmrks, times = nymrks), rep(ymrks, each = nxmrks))
-outer_poly <-sp::SpatialPolygons(list(Polygons(list(Polygon(outer, hole = FALSE)), "1")))
-marks <- sp::SpatialPoints(marks)[outer_poly, ]
-dim(marks)
-class(marks)
-marks <- marks@coords
-class(outer)
-outer <- as_data_frame(outer) %>% setNames(c("x", "y"))
-ipmap <- data.frame(id = ipmap) %>% count(id)
-data.frame(id = ipmap)
-read_matrix <- function(file, ncol = 2) {#
-	stopifnot(file.exists(file))#
-	matrix(scan(file, what = numeric(), quiet = TRUE),#
-				 ncol = ncol, byrow = TRUE)#
-}
-edges <- read_matrix("/Users/alyssaleinweber/Downloads/leporinum_mcmc/300Demes-chain1/edges.txt")
-edges[1:10,]
-read_voronoi <- function(mcmcpath, longlat, is_mrates) {#
-	if (is_mrates) {#
-		rates <- read_vector(file.path(mcmcpath, "mcmcmrates.txt"))#
-		tiles <- read_vector(file.path(mcmcpath, "mcmcmtiles.txt"))#
-		xseed <- read_vector(file.path(mcmcpath, "mcmcxcoord.txt"))#
-		yseed <- read_vector(file.path(mcmcpath, "mcmcycoord.txt"))#
-	} else {#
-		rates <- read_vector(file.path(mcmcpath, "mcmcqrates.txt"))#
-		tiles <- read_vector(file.path(mcmcpath, "mcmcqtiles.txt"))#
-		xseed <- read_vector(file.path(mcmcpath, "mcmcwcoord.txt"))#
-		yseed <- read_vector(file.path(mcmcpath, "mcmczcoord.txt"))#
-	}#
-	if (!longlat) {#
-		tempi <- xseed#
-		xseed <- yseed#
-		yseed <- tempi#
-	}#
-	list(rates = log10(rates), tiles = tiles, xseed = xseed, yseed = yseed)#
-}
-check_mcmcpath_contents <- function(mcmcpath) {#
-	for (path in mcmcpath) {#
-		for (file in c("rdistJtDobsJ.txt", "rdistJtDhatJ.txt", "rdistoDemes.txt","mcmcmtiles.txt", "mcmcmrates.txt", "mcmcxcoord.txt","mcmcycoord.txt", "mcmcqtiles.txt", "mcmcqrates.txt","mcmcwcoord.txt", "mcmczcoord.txt", "mcmcpilogl.txt","outer.txt", "demes.txt", "edges.txt", "ipmap.txt","eemsrun.txt")) {#
-			if (!file.exists(file.path(path, file)))#
-				stop("Each EEMS output folder should include ", file)#
+current.gg.sf <- geom_sf(data=current_sf,colour = "red", fill = NA)
+ggplot() + current.gg.sf
+current.gg.sf <- geom_sf(data=current_sf,colour = "black", fill = NA)
+st_crs(current_sf)
+mapplot.i + current.gg.sf
+mapplot.i
+mapplot.i + current.gg.sf
+world_sf      <- rnaturalearth::ne_countries(scale=10,returnclass="sf")[1]
+world.gg.sf   <- geom_sf(data=world_sf,colour = "black", fill = NA)
+mapplot[[i]]
+mapplot[[i]]    <- mapplot.i + ggplot2::theme_classic() + ggplot2::labs(title=paste0("Ancestry coefficients; K=",K), x="latitude", y="longitude") + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) + current.gg.sf + ggplot2::geom_point(data = coords, ggplot2::aes(x = Lon, y = Lat), size = 1, shape = 21, fill = "black")
+mapplot[[i]]
+current_sf2    <- sf::st_crop(world_sf,xmin=new.x[1],xmax=new.x[2],ymin=new.y[1],ymax=new.y[2])
+current.gg.sf2 < geom_sf(data=current_sf2,colour = "black", fill = NA)
+current.gg.sf2 <- geom_sf(data=current_sf2,colour = "black", fill = NA)
+mapplot.i + ggplot2::theme_classic() + ggplot2::labs(title=paste0("Ancestry coefficients; K=",K), x="latitude", y="longitude") + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) + current.gg.sf2 + ggplot2::geom_point(data = coords, ggplot2::aes(x = Lon, y = Lat), size = 1, shape = 21, fill = "black")
+mapplot.i       <- tess3r::ggtess3Q(tess3r.qmat,coords.mat, interpolation.model = tess3r::FieldsKrigModel(10),resolution = c(500,500), col.palette = my.palette, window=c(x.min,x.max,y.min,y.max),background=TRUE)
+mapplot.i + ggplot2::theme_classic() + ggplot2::labs(title=paste0("Ancestry coefficients; K=",K), x="latitude", y="longitude") + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) + current.gg.sf + ggplot2::geom_point(data = coords, ggplot2::aes(x = Lon, y = Lat), size = 1, shape = 21, fill = "black")
+mapplot.i + ggplot2::theme_classic() + ggplot2::labs(title=paste0("Ancestry coefficients; K=",K), x="latitude", y="longitude") + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) + current.gg.sf2 + ggplot2::geom_point(data = coords, ggplot2::aes(x = Lon, y = Lat), size = 1, shape = 21, fill = "black")
+mapplot.i + ggplot2::theme_classic() + ggplot2::labs(title=paste0("Ancestry coefficients; K=",K), x="latitude", y="longitude") + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) + current.gg.sf + ggplot2::geom_point(data = coords, ggplot2::aes(x = Lon, y = Lat), size = 1, shape = 21, fill = "black")
+?ggtess3Q
+world_sp      <- rnaturalearth::ne_countries(scale=10,returnclass="sp")[1]
+class(world_sp)
+world_sp      <- rnaturalearth::ne_countries(scale=10,returnclass="sp")
+class(world_sp)
+mapplot.i       <- tess3r::ggtess3Q(tess3r.qmat,coords.mat, interpolation.model = tess3r::FieldsKrigModel(10),resolution = c(500,500), col.palette = my.palette, window=c(new.x,new.y),background=TRUE,map.polygon=world_sp)
+mapplot.i + ggplot2::theme_classic() + ggplot2::labs(title=paste0("Ancestry coefficients; K=",K), x="latitude", y="longitude") + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) + current.gg.sf + ggplot2::geom_point(data = coords, ggplot2::aes(x = Lon, y = Lat), size = 1, shape = 21, fill = "black")
+mapplot.i       <- tess3r::ggtess3Q(tess3r.qmat,coords.mat, interpolation.model = tess3r::FieldsKrigModel(10),resolution = c(500,500), col.palette = my.palette, window=c(x.min,x.max,y.min,y.max),background=TRUE,map.polygon=world_sp)
+mapplot.i + ggplot2::theme_classic() + ggplot2::labs(title=paste0("Ancestry coefficients; K=",K), x="latitude", y="longitude") + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) + current.gg.sf + ggplot2::geom_point(data = coords, ggplot2::aes(x = Lon, y = Lat), size = 1, shape = 21, fill = "black")
+dev.off()
+getwd()
+devtools::document()
+vert.map <- mapplot.i + ggplot2::theme_classic() + ggplot2::labs(title=paste0("Ancestry coefficients; K=",K), x="latitude", y="longitude") + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) + current.gg.sf + ggplot2::geom_point(data = coords, ggplot2::aes(x = Lon, y = Lat), size = 1, shape = 21, fill = "black")
+hori.map <- vert.map + coord_flip()
+hori.map
+dev.new(height=6,width=10)
+vert.map
+hori.map <- vert.map + coord_flip()
+hori.map
+?viewport()
+?print
+rlang::last_error()
+?coord_flip()
+?factor
+devtools::document()
+n=5
+rep(1,(n-1))
+names(dummydata) <- 2:n
+dummydata <- rep(1,(n-1))#
+		names(dummydata) <- 2:n
+barplot(dummydata)
+?barplot()
+n=11
+result <- c("#33E8BB", "#C69A01", "#799525", "#030A34", "#091E57", "#4ED671", "#A4282F", "#2F08BA", "#5BD80A", "#CD0B50", "#B9C1F5")
+dummydata <- rep(1,(n-1))#
+		names(dummydata) <- 2:n
+dummydata
+barplot(dummydata,col=result)
+barplot(dummydata,col=result,axes=FALSE)
+mtext(side=1,text="Color Palette for Clusters",line=2.5)
+goodcolors <- function(n,thresh=65,iter=50,cbspace=c("prot","deut","trit")){#
+	# "#33E8BB" "#C69A01" "#799525" "#030A34" "#091E57" "#4ED671" "#A4282F" "#2F08BA" "#5BD80A" "#CD0B50" "#B9C1F5"#
+	# funky100          <- adegenet::funky(100)#
+	pset.index  <- pset(1:n)[which(lengths(pset(1:n))==2)]#
+#	cols.list   <- lapply(X=1:n,FUN=function(x){sample(0:255,3)})#
+#	colors.temp <- do.call(rbind,cols.list)#
+#	pairs.colorsdiffs <- unlist(lapply(X=1:length(pset.index),FUN=function(x){A=pset.index[[x]]; diffcol(cols.list[[A[1]]], cols.list[[A[2]]])}))#
+	norm.cols <- lapply(X=1:n,FUN=function(x){sample(0:255,3)})#
+	colors.temp <- do.call(rbind,norm.cols)#
+	all.cols  <- lapply(X=norm.cols,FUN=rgb.cb)#
+	prot.cols <- lapply(1:length(all.cols),FUN=function(x){all.cols[[x]]["prot",]})#
+	deut.cols <- lapply(1:length(all.cols),FUN=function(x){all.cols[[x]]["deut",]})#
+	trit.cols <- lapply(1:length(all.cols),FUN=function(x){all.cols[[x]]["trit",]})#
+	pairsdiffs.norm <- unlist(lapply(X=1:length(pset.index),FUN=function(x){A=pset.index[[x]]; diffcol(norm.cols[[A[1]]], norm.cols[[A[2]]])}))#
+	pairsdiffs.prot <- unlist(lapply(X=1:length(pset.index),FUN=function(x){A=pset.index[[x]]; diffcol(prot.cols[[A[1]]], prot.cols[[A[2]]])}))#
+	pairsdiffs.deut <- unlist(lapply(X=1:length(pset.index),FUN=function(x){A=pset.index[[x]]; diffcol(deut.cols[[A[1]]], deut.cols[[A[2]]])}))#
+	pairsdiffs.trit <- unlist(lapply(X=1:length(pset.index),FUN=function(x){A=pset.index[[x]]; diffcol(trit.cols[[A[1]]], trit.cols[[A[2]]])}))#
+	difftest <- c(pairsdiffs.norm)#
+	if(!is.null(cbspace)){#
+		if("prot" %in% cbspace){#
+			difftest <- c(difftest,pairsdiffs.prot)#
+		}#
+		if("deut" %in% cbspace){#
+			difftest <- c(difftest,pairsdiffs.deut)#
+		}#
+		if("trit" %in% cbspace){#
+			difftest <- c(difftest,pairsdiffs.trit)#
 		}#
 	}#
-}#
-read_vector <- function(file) {#
-	stopifnot(file.exists(file))#
-	scan(file, what = numeric(), quiet = TRUE)#
-}#
-read_matrix <- function(file, ncol = 2) {#
-	stopifnot(file.exists(file))#
-	matrix(scan(file, what = numeric(), quiet = TRUE),ncol = ncol, byrow = TRUE)#
-}
-veroni <- read_voronoi(mcmcpath=mcmcdir)
-veroni <- read_voronoi(mcmcpath=mcmcdir,is_mrates=T)
-veroni <- read_voronoi(mcmcpath=mcmcdir,is_mrates=T,longlat=F)
-class(veroni)
-veroni[[1]][1]
-veroni[[1]][2]
-class(veroni$tiles)
-veroni$tiles[1]
-# Get the distance metric from `eemsrun.txt`; use `euclidean` by default.#
-get_dist_metric <- function(mcmcpath) {#
-	dist_metric <- "euclidean"#
-	lines <- tolower(readLines(file.path(mcmcpath, "eemsrun.txt")))#
-	for (line in lines) {#
-		if (grepl("\\s*distance\\s*=\\s*", line))#
-			dist_metric <- gsub("\\s*distance\\s*=\\s*(\\w+)", "\\1", line)#
+	# difftest <- c(pairsdiffs.norm,pairsdiffs.prot,pairsdiffs.deut,pairsdiffs.trit)#
+	# difftest  <- c(pairsdiffs.norm,pairsdiffs.prot,pairsdiffs.deut)#
+	# difftest  <- c(pairsdiffs.norm,pairsdiffs.deut)#
+	# #
+	# colors.temp       <- sample(funky100,n)#
+	# colors.temp.pset  <- pset(colors.temp)#
+	# pairs.colors.temp <- colors.temp.pset[which(lengths(colors.temp.pset)==2)]#
+	# pairs.colorsdiffs <- unlist(lapply(X=pairs.colors.temp,FUN=function(x){diffcol(x[1],x[2])}))#
+	max.tries     <- iter#
+	min.tries     <- 10#
+	try.i         <- 1#
+	colors.i      <- list(); length(colors.i) <- max.tries#
+	colors.i[[1]] <- colors.temp#
+	mindiffs      <- min(difftest)#
+	while((mindiffs[try.i] < thresh & try.i <= max.tries) | try.i < min.tries){#
+		try.i <- try.i + 1#
+		if(try.i > max.tries + 1){#
+			stop("")#
+		}#
+	#	colors.temp       <- sample(funky100,n)#
+	#	colors.temp.pset  <- pset(colors.temp)#
+	#	colors.temp <- lapply(X=1:n,FUN=function(x){sample(0:255,3)})#
+	#	#pairs.colors.temp <- colors.temp.pset[which(lengths(colors.temp.pset)==2)]#
+	#	#pairs.colorsdiffs <- unlist(lapply(X=pairs.colors.temp,FUN=function(x){diffcol(x[1],x[2])}))#
+	#	pairs.colorsdiffs <- unlist(lapply(X=1:length(pset.index),FUN=function(x){A=pset.index[[x]]; diffcol(cols.list[[A[1]]], cols.list[[A[2]]])}))#
+	#	colors.i[[try.i]] <- do.call(rbind,colors.temp)#
+	#	min.i     <- min(pairs.colorsdiffs)#
+	#	mindiffs  <- c(mindiffs,min.i)#
+		norm.cols   <- lapply(X=1:n,FUN=function(x){sample(0:255,3)})#
+		colors.temp <- do.call(rbind,norm.cols)#
+		all.cols  <- lapply(X=norm.cols,FUN=rgb.cb)#
+		prot.cols <- lapply(1:length(all.cols),FUN=function(x){all.cols[[x]]["prot",]})#
+		deut.cols <- lapply(1:length(all.cols),FUN=function(x){all.cols[[x]]["deut",]})#
+		trit.cols <- lapply(1:length(all.cols),FUN=function(x){all.cols[[x]]["trit",]})#
+		pairsdiffs.norm <- unlist(lapply(X=1:length(pset.index),FUN=function(x){A=pset.index[[x]]; diffcol(norm.cols[[A[1]]], norm.cols[[A[2]]])}))#
+		pairsdiffs.prot <- unlist(lapply(X=1:length(pset.index),FUN=function(x){A=pset.index[[x]]; diffcol(prot.cols[[A[1]]], prot.cols[[A[2]]])}))#
+		pairsdiffs.deut <- unlist(lapply(X=1:length(pset.index),FUN=function(x){A=pset.index[[x]]; diffcol(deut.cols[[A[1]]], deut.cols[[A[2]]])}))#
+		pairsdiffs.trit <- unlist(lapply(X=1:length(pset.index),FUN=function(x){A=pset.index[[x]]; diffcol(trit.cols[[A[1]]], trit.cols[[A[2]]])}))#
+		# difftest  <- c(pairsdiffs.norm,pairsdiffs.prot,pairsdiffs.deut,pairsdiffs.trit)#
+		# difftest  <- c(pairsdiffs.norm,pairsdiffs.prot,pairsdiffs.deut)#
+		# difftest  <- c(pairsdiffs.norm,pairsdiffs.deut)#
+		difftest <- c(pairsdiffs.norm)#
+		if(!is.null(cbspace)){#
+			if("prot" %in% cbspace){#
+				difftest <- c(difftest,pairsdiffs.prot)#
+			}#
+			if("deut" %in% cbspace){#
+				difftest <- c(difftest,pairsdiffs.deut)#
+			}#
+			if("trit" %in% cbspace){#
+				difftest <- c(difftest,pairsdiffs.trit)#
+			}#
+		}#
+		min.i     <- min(difftest)#
+		mindiffs  <- c(mindiffs,min.i)#
+		colors.i[[try.i]] <- colors.temp#
 	}#
-	if (dist_metric != "euclidean" && dist_metric != "greatcirc")#
-		stop("eemsrun.txt should specify `euclidean` or `greatcirc` distance.")#
-	dist_metric#
-}
-get_dist_metric(mcmcdir)
-read_dimns <- function(mcmcpath, longlat, nmrks = 100) {#
-	outer <- read_matrix(file.path(mcmcpath, "outer.txt"))#
-	ipmap <- read_vector(file.path(mcmcpath, "ipmap.txt"))#
-	demes <- read_matrix(file.path(mcmcpath, "demes.txt"))#
-	edges <- read_matrix(file.path(mcmcpath, "edges.txt"))#
-	dist_metric <- get_dist_metric(mcmcpath)#
-	if (!longlat) {#
-		outer <- outer[, c(2,1)]#
-		demes <- demes[, c(2,1)]#
-	}#
-	xlim   <- range(outer[, 1])#
-	ylim   <- range(outer[, 2])#
-	aspect <- (diff(ylim) / diff(xlim)) / cos(mean(ylim) * pi / 180)#
-	aspect <- abs(aspect)#
-	if (aspect > 1) {#
-		nxmrks <- nmrks#
-		nymrks <- round(nxmrks * aspect)#
+	if(try.i>1){#
+		result.rgb <- colors.i[[which(mindiffs == max(mindiffs) )[1]]]#
+		colnames(result.rgb) <- c("r","g","b")#
+		rownames(result.rgb) <- paste0("col",1:n)#
 	} else {#
-		nymrks <- nmrks#
-		nxmrks <- round(nymrks / aspect)#
+		result.rgb <- colors.temp#
+		colnames(result.rgb) <- c("r","g","b")#
+		rownames(result.rgb) <- paste0("col",1:n)#
 	}#
-	# Construct a rectangular "raster" of equally spaced pixels/marks#
-	xmrks <- seq(from = xlim[1], to = xlim[2], length = nxmrks)#
-	ymrks <- seq(from = ylim[1], to = ylim[2], length = nymrks)#
-	marks <- cbind(rep(xmrks, times = nymrks), rep(ymrks, each = nxmrks))#
-	# Exclude pixels that fall outside the habitat outline#
-	outer_poly <-sp::SpatialPolygons(list(Polygons(list(Polygon(outer, hole = FALSE)), "1")))#
-	marks <- sp::SpatialPoints(marks)[outer_poly, ]#
-	marks <- marks@coords#
-	### set column names to x and y#
-	outer <- as_data_frame(outer) %>% setNames(c("x", "y"))#
-	### #
-	ipmap <- data_frame(id = ipmap) %>% count(id)#
-	### set column names to x and y#
-	demes <- as_data_frame(demes) %>% setNames(c("x", "y")) %>% mutate(id = row_number()) %>% left_join(ipmap) %>% arrange(id) %>% mutate(n = if_else(is.na(n), 0L, n))#
-	edges <- bind_cols(demes[edges[, 1], ] %>% select(x, y),demes[edges[, 2], ] %>% select(x, y)) %>% setNames(c("x", "y", "xend", "yend"))#
-	list(marks = marks, nmrks = nrow(marks), xlim = xlim, ylim = ylim,outer = outer, demes = demes, edges = edges, dist_metric = dist_metric)#
+	# print(try.i); print(max(mindiffs))#
+	result.hex <- vapply(X=1:nrow(result.rgb),FUN=function(x){rgb(result.rgb[x,1], result.rgb[x,2], result.rgb[x,3],maxColorValue=255)},FUN.VALUE="char")#
+	result.hex#
 }
-dimns = read_dimns(mcmcpath=mcmcdir,longlat=F)
-### Uses read_matrix, read_vector, get_dist_metric#
-read_dimns <- function(mcmcpath, longlat, nmrks = 100) {#
-	outer <- read_matrix(file.path(mcmcpath, "outer.txt"))#
-	ipmap <- read_vector(file.path(mcmcpath, "ipmap.txt"))#
-	demes <- read_matrix(file.path(mcmcpath, "demes.txt"))#
-	edges <- read_matrix(file.path(mcmcpath, "edges.txt"))#
-	dist_metric <- get_dist_metric(mcmcpath)#
-	if (!longlat) {#
-		outer <- outer[, c(2,1)]#
-		demes <- demes[, c(2,1)]#
+goodcolors(n=2)
+result <- c("#8BBC6F","#4B04E0")
+dummydata        <- rep(1,length(result))
+n=2
+names(dummydata) <- 2:n
+barplot(dummydata,col=result,axes=FALSE)#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)
+n=2; result <- goodcolors(n=n)
+dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 2:n#
+		barplot(dummydata,col=result,axes=FALSE)#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)
+n=2; result <- goodcolors(n=n); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		barplot(dummydata,col=result,axes=FALSE)#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)
+result
+barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))
+?text
+text(x=1:n, y=1.05, labels=result)
+bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))
+attributes(bp)
+names(bp)
+bp[1]
+bp[2]
+bp
+c(bp)
+bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.05, labels=result)
+n=3; result <- goodcolors(n=n);   ; dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.05, labels=result)
+n=3; result <- goodcolors(n=n); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.05, labels=result)
+n=3; result <- goodcolors(n=n); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.05, labels=result)
+n=3; result <- goodcolors(n=n); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.05, labels=result)
+n=3; result <- goodcolors(n=n); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.05, labels=result)
+n=3; result <- goodcolors(n=n); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.05, labels=result)
+n=3; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.05, labels=result)
+n=3; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.05, labels=result)
+result
+n=3; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.05, labels=result); result
+n=3; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.05, labels=result); result
+n=3; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.05, labels=result); result
+n=4; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.05, labels=result); result
+n=4; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.05, labels=result); result
+n=4; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.05, labels=result); result
+n=4; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.05, labels=result); result
+n=4; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.05, labels=result); result
+n=5; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.05, labels=result); result
+n=5; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.05, labels=result); result
+n=5; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.05, labels=result); result
+n=6; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.05, labels=result); result
+n=6; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.05, labels=result); result
+n=6; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.05, labels=result); result
+n=6; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.05, labels=result); result
+n=6; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.05, labels=result); result
+n=6; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.05, labels=result); result
+n=6; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.05, labels=result); result
+n=7; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.05, labels=result); result
+n=7; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.05, labels=result); result
+n=7; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.05, labels=result); result
+n=7; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.05, labels=result); result
+n=7; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.05, labels=result); result
+n=7; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.05, labels=result); result
+n=7; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.05, labels=result); result
+n=7; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.05, labels=result); result
+n=7; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.05, labels=result); result
+n=7; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.05, labels=result); result
+n=7; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.05, labels=result); result
+n=7; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.05, labels=result); result
+n=7; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.05, labels=result); result
+n=8; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.05, labels=result); result
+n=9; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.05, labels=result); result
+n=9; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.05, labels=result); result
+n=9; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.05, labels=result); result
+n=9; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.05, labels=result); result
+n=9; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.05, labels=result); result
+n=9; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.05, labels=result); result
+n=9; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.05, labels=result); result
+n=9; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.05, labels=result); result
+n=9; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.05, labels=result); result
+n=10; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.05, labels=result); result
+n=10; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.05, labels=result); result
+n=10; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.05, labels=result); result
+n=10; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.05, labels=result); result
+n=10; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.05, labels=result); result
+n=10; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.05, labels=result); result
+n=10; result <- goodcolors(n=n,thresh=110,iter=100); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.05, labels=result,srt=90); result
+n=10; result <- goodcolors(n=n,thresh=110,iter=100); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.2))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.1, labels=result,srt=90); result
+n=10; result <- goodcolors(n=n,thresh=110,iter=100); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.2))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.1, labels=result,srt=90); result
+n=10; result <- goodcolors(n=n,thresh=110,iter=100); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.15, labels=result,srt=90); result
+n=10; result <- goodcolors(n=n,thresh=110,iter=100); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.12, labels=result,srt=90); result
+n=10; result <- goodcolors(n=n,thresh=110,iter=100); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.12, labels=result,srt=90); result
+n=10; result <- goodcolors(n=n,thresh=110,iter=100); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.12, labels=result,srt=90); result
+n=11; result <- goodcolors(n=n,thresh=110,iter=100); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.12, labels=result,srt=90); result
+n=11; result <- goodcolors(n=n,thresh=110,iter=100); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.12, labels=result,srt=90); result
+n=12; result <- goodcolors(n=n,thresh=110,iter=100); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.12, labels=result,srt=90); result
+n=12; result <- goodcolors(n=n,thresh=110,iter=100); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.12, labels=result,srt=90); result
+n=12; result <- goodcolors(n=n,thresh=110,iter=100); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.12, labels=result,srt=90); result
+n=12; result <- goodcolors(n=n,thresh=110,iter=100); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.12, labels=result,srt=90); result
+n=12; result <- goodcolors(n=n,thresh=110,iter=100); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.12, labels=result,srt=90); result
+n=12; result <- goodcolors(n=n,thresh=110,iter=100); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.12, labels=result,srt=90); result
+n=12; result <- goodcolors(n=n,thresh=110,iter=100); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.12, labels=result,srt=90); result
+n=12; result <- goodcolors(n=n,thresh=110,iter=100); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.12, labels=result,srt=90); result
+n=12; result <- goodcolors(n=n,thresh=110,iter=100); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.12, labels=result,srt=90); result
+n=12; result <- goodcolors(n=n,thresh=110,iter=300); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.12, labels=result,srt=90); result
+n=12; result <- goodcolors(n=n,thresh=110,iter=300); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.12, labels=result,srt=90); result
+n=13; result <- goodcolors(n=n,thresh=110,iter=300); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.12, labels=result,srt=90); result
+n=14; result <- goodcolors(n=n,thresh=110,iter=300); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.12, labels=result,srt=90); result
+n=14; result <- goodcolors(n=n,thresh=110,iter=300); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.12, labels=result,srt=90); result
+n=14; result <- goodcolors(n=n,thresh=110,iter=300); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.12, labels=result,srt=90); result
+n=14; result <- goodcolors(n=n,thresh=110,iter=300); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.12, labels=result,srt=90); result
+n=14; result <- goodcolors(n=n,thresh=110,iter=300); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.12, labels=result,srt=90); result
+n=14; result <- goodcolors(n=n,thresh=110,iter=300); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.12, labels=result,srt=90); result
+n=14; result <- goodcolors(n=n,thresh=110,iter=300); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.12, labels=result,srt=90); result
+n=14; result <- goodcolors(n=n,thresh=110,iter=300); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.12, labels=result,srt=90); result
+n=14; result <- goodcolors(n=n,thresh=110,iter=300); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.12, labels=result,srt=90); result
+n=14; result <- goodcolors(n=n,thresh=110,iter=300); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.12, labels=result,srt=90); result
+n=14; result <- goodcolors(n=n,thresh=110,iter=300); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.12, labels=result,srt=90); result
+n=14; result <- goodcolors(n=n,thresh=110,iter=300); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.12, labels=result,srt=90); result
+n=14; result <- goodcolors(n=n,thresh=110,iter=300); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.12, labels=result,srt=90); result
+n=15; result <- goodcolors(n=n,thresh=110,iter=300); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.12, labels=result,srt=90); result
+n=15; result <- goodcolors(n=n,thresh=110,iter=300); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.12, labels=result,srt=90); result
+n=15; result <- goodcolors(n=n,thresh=110,iter=300); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.12, labels=result,srt=90); result
+n=15; result <- goodcolors(n=n,thresh=110,iter=300); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.12, labels=result,srt=90); result
+n=15; result <- goodcolors(n=n,thresh=110,iter=300); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.12, labels=result,srt=90); result
+n=15; result <- goodcolors(n=n,thresh=110,iter=300); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.12, labels=result,srt=90); result
+n=15; result <- goodcolors(n=n,thresh=110,iter=300); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.12, labels=result,srt=90); result
+n=15; result <- goodcolors(n=n,thresh=110,iter=300,cbspace=c("deut")); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.12, labels=result,srt=90); result
+n=15; result <- goodcolors(n=n,thresh=110,iter=300,cbspace=c("deut")); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.12, labels=result,srt=90); result
+n=15; result <- goodcolors(n=n,thresh=110,iter=300,cbspace=c("deut")); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.12, labels=result,srt=90); result
+n=15; result <- goodcolors(n=n,thresh=110,iter=300,cbspace=c("deut")); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.12, labels=result,srt=90); result
+n=15; result <- goodcolors(n=n,thresh=110,iter=300,cbspace=c("deut")); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.12, labels=result,srt=90); result
+n=15; result <- goodcolors(n=n,thresh=110,iter=300,cbspace=c("deut")); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.12, labels=result,srt=90); result
+n=15; result <- goodcolors(n=n,thresh=110,iter=300,cbspace=c("deut")); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.12, labels=result,srt=90); result
+n=15; result <- goodcolors(n=n,thresh=110,iter=300,cbspace=c("deut")); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.12, labels=result,srt=90); result
+n=15; result <- goodcolors(n=n,thresh=110,iter=300,cbspace=c("deut")); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.12, labels=result,srt=90); result
+n=15; result <- goodcolors(n=n,thresh=110,iter=300,cbspace=c("")); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.12, labels=result,srt=90); result
+goodcolors2 <- function(n,plot.palette=FALSE){#
+	if(n==1 | n > 15){#
+		stop("'n' must be an integer >=2 and <=15")#
 	}#
-	xlim   <- range(outer[, 1])#
-	ylim   <- range(outer[, 2])#
-	aspect <- (diff(ylim) / diff(xlim)) / cos(mean(ylim) * pi / 180)#
-	aspect <- abs(aspect)#
-	if (aspect > 1) {#
-		nxmrks <- nmrks#
-		nymrks <- round(nxmrks * aspect)#
-	} else {#
-		nymrks <- nmrks#
-		nxmrks <- round(nymrks / aspect)#
+	cols2  <- c("#659DDE","#9A0C2B") # "#8BBC6F","#4B04E0"#
+	cols3  <- c("#3DF1C9","#492E50","#FADD56")  # "#F1529B" "#FEF51B" "#2C27E8"#
+	cols4  <- c("#67F57A","#D7A003","#6E8C48","#C41D1B") # "#256D9E" "#EFFB0A" "#E41A3C" "#F98ACB"#
+	cols5  <- c("#789D95","#EDCBD2","#3F04C7","#1E9A00","#B95AEC") # "#6A96F1" "#CBE589" "#BA0803" "#7CDBE0" "#DEA14C"#
+	cols6  <- c("#BF3C2C","#6CD57D","#7D075C","#D7AB41","#E9D4F7","#481EE0") # c("#37175A","#DB8A83","#E91A00","#AA569D","#4385FD","#9AE8CF") # #
+	cols7  <- c("#424B13","#47E5F4","#511D49","#3F9876","#182D84","#AB5CC4","#90A930") # c("#382E69","#F7C665","#1DFC96","#200311","#9DCD2D","#3202E0","#851B20")#
+	cols8  <- c("#EA7250","#9DDF5B","#B74CE0","#687235","#021025","#1BB1A1","#3F8187","#C7B7CE")#
+	cols9  <- c("#8838BD","#997275","#E24911","#ACEB4F","#1DB756","#611D97","#6C7BCF","#125034","#F4ABD7")#
+	cols10 <- c("#98ACD2","#6197ED","#7A478F","#986D65","#D9C452","#22553B","#B4993A","#0DF1FA","#E8971B","#36D8B9") # "#51BE1A" "#34A6A2" "#86D0E8" "#BDFD81" "#21594F" "#F1F9D6" "#678534" "#6B49C8" "#57191C" "#EC906B"#
+	cols11 <- c("#33E8BB", "#C69A01", "#799525", "#030A34", "#091E57", "#4ED671", "#A4282F", "#2F08BA", "#5BD80A", "#CD0B50", "#B9C1F5") # "#5BBDFD" "#200042" "#616B8F" "#578B7C" "#4D59C3" "#B0FE9F" "#0B335C" "#7F780B" "#C55BD7" "#9F2502" "#D9EF1C"#
+	cols12 <- c("#FE42DD","#68B206","#FFD4E9","#4FBF72","#567D96","#94245B","#226826","#B8CC94","#1752F7","#8B8C5B","#29A6CF","#2ADEC9") #
+	cols13 <- c("#0ACCF8","#9F9D46","#2FCA60","#3D31C8","#50087B","#A17D78","#C0B27E","#EA6EA5","#B21D00","#31E701","#AC1479","#0B3D98","#5DBB15") # "#FCED80" "#336AB6" "#8F3A8C" "#FA9304" "#3545B1" "#83FDF4" "#B6575B" "#232E32" "#AF9746" "#4CA612" "#ED7B66" "#C3C600" "#47B9F5" # "#5B45C8" "#63F469" "#F3B4C8" "#D9EFE8" "#C74B77" "#F1A655" "#813402" "#3D27C4" "#CCD427" "#27AD47" "#13117F" "#97753D" "#09C1B2"#
+	cols14 <- c("#A9D12A","#1D5DB8","#F18249","#44EB9D","#3702AA","#0AF6FF","#48063C","#8DAFB0","#343E3D","#ED20FD","#910148","#375EFF","#F1A4CC","#CE1B4F") # "#FFA357" "#7AAD72" "#2D5AB4" "#E41B0B" "#51ECF5" "#007866" "#D43CB8" "#34E590" "#DC9F06" "#91827F" "#830638" "#B07527" "#F6BCC0" "#2B63EC" #### Change first color: "#62D236" "#FCED80" "#336AB6" "#8F3A8C" "#FA9304" "#3545B1" "#83FDF4" "#B6575B" "#232E32" "#AF9746" "#4CA612" "#ED7B66" "#C3C600" "#47B9F5"#
+	cols15 <- c("#810890","#EFD814","#2D793E","#796ED5","#699866","#343E3D","#F6233D","#877D0E","#C9BAD5","#8BB0B1","#00C3C0","#522AA9","#21FF61","#EA8316","#F5C387")#
+	cols16 <- NULL#
+	cols17 <- NULL#
+	cols18 <- NULL#
+	cols19 <- NULL#
+	cols20 <- NULL#
+	cols21 <- NULL#
+	cols22 <- NULL#
+	cols23 <- NULL#
+	cols24 <- NULL#
+	cols25 <- NULL#
+	colorList <- list(cols2 ,cols3 ,cols4 ,cols5 ,cols6 ,cols7 ,cols8 ,cols9 ,cols10,cols11,cols12,cols13,cols14,cols15,cols16,cols17,cols18,cols19,cols20,cols21,cols22,cols23,cols24,cols25)#
+	result    <- colorList[[n]]#
+	if(plot.palette){#
+		dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.05, labels=result,cex=0.5)#
 	}#
-	# Construct a rectangular "raster" of equally spaced pixels/marks#
-	xmrks <- seq(from = xlim[1], to = xlim[2], length = nxmrks)#
-	ymrks <- seq(from = ylim[1], to = ylim[2], length = nymrks)#
-	marks <- cbind(rep(xmrks, times = nymrks), rep(ymrks, each = nxmrks))#
-	# Exclude pixels that fall outside the habitat outline#
-	outer_poly <-sp::SpatialPolygons(list(Polygons(list(Polygon(outer, hole = FALSE)), "1")))#
-	marks <- sp::SpatialPoints(marks)[outer_poly, ]#
-	marks <- marks@coords#
-	### set column names to x and y#
-	# outer <- as_data_frame(outer) %>% setNames(c("x", "y"))#
-	outer <- as.data.frame(outer) %>% setNames(c("x", "y"))#
-	### #
-	### ipmap <- data_frame(id = ipmap) %>% count(id)#
-	ipmap <- data.frame(id = ipmap) %>% count(id)#
-	### set column names to x and y#
-	# demes <- as_data_frame(demes) %>% setNames(c("x", "y")) %>% mutate(id = row_number()) %>% left_join(ipmap) %>% arrange(id) %>% mutate(n = if_else(is.na(n), 0L, n))#
-	demes <- as.data.frame(demes) %>% setNames(c("x", "y")) %>% mutate(id = row_number()) %>% left_join(ipmap) %>% arrange(id) %>% mutate(n = if_else(is.na(n), 0L, n))#
-	edges <- bind_cols(demes[edges[, 1], ] %>% select(x, y),demes[edges[, 2], ] %>% select(x, y)) %>% setNames(c("x", "y", "xend", "yend"))#
-	list(marks = marks, nmrks = nrow(marks), xlim = xlim, ylim = ylim,outer = outer, demes = demes, edges = edges, dist_metric = dist_metric)#
+	result#
 }
-dimns = read_dimns(mcmcpath=mcmcdir,longlat=F)
-### Uses read_matrix, read_vector, get_dist_metric#
-read_dimns <- function(mcmcpath, longlat, nmrks = 100) {#
-	outer <- read_matrix(file.path(mcmcpath, "outer.txt"))#
-	ipmap <- read_vector(file.path(mcmcpath, "ipmap.txt"))#
-	demes <- read_matrix(file.path(mcmcpath, "demes.txt"))#
-	edges <- read_matrix(file.path(mcmcpath, "edges.txt"))#
-	dist_metric <- get_dist_metric(mcmcpath)#
-	if (!longlat) {#
-		outer <- outer[, c(2,1)]#
-		demes <- demes[, c(2,1)]#
+goodcolors2(1,TRUE)
+goodcolors2(2,TRUE)
+goodcolors2(3,TRUE)
+goodcolors2(4,TRUE)
+goodcolors2 <- function(n,plot.palette=FALSE){#
+	if(n==1 | n > 15){#
+		stop("'n' must be an integer >=2 and <=15")#
 	}#
-	xlim   <- range(outer[, 1])#
-	ylim   <- range(outer[, 2])#
-	aspect <- (diff(ylim) / diff(xlim)) / cos(mean(ylim) * pi / 180)#
-	aspect <- abs(aspect)#
-	if (aspect > 1) {#
-		nxmrks <- nmrks#
-		nymrks <- round(nxmrks * aspect)#
-	} else {#
-		nymrks <- nmrks#
-		nxmrks <- round(nymrks / aspect)#
+	cols2  <- c("#659DDE","#9A0C2B") # "#8BBC6F","#4B04E0"#
+	cols3  <- c("#3DF1C9","#492E50","#FADD56")  # "#F1529B" "#FEF51B" "#2C27E8"#
+	cols4  <- c("#67F57A","#D7A003","#6E8C48","#C41D1B") # "#256D9E" "#EFFB0A" "#E41A3C" "#F98ACB"#
+	cols5  <- c("#789D95","#EDCBD2","#3F04C7","#1E9A00","#B95AEC") # "#6A96F1" "#CBE589" "#BA0803" "#7CDBE0" "#DEA14C"#
+	cols6  <- c("#BF3C2C","#6CD57D","#7D075C","#D7AB41","#E9D4F7","#481EE0") # c("#37175A","#DB8A83","#E91A00","#AA569D","#4385FD","#9AE8CF") # #
+	cols7  <- c("#424B13","#47E5F4","#511D49","#3F9876","#182D84","#AB5CC4","#90A930") # c("#382E69","#F7C665","#1DFC96","#200311","#9DCD2D","#3202E0","#851B20")#
+	cols8  <- c("#EA7250","#9DDF5B","#B74CE0","#687235","#021025","#1BB1A1","#3F8187","#C7B7CE")#
+	cols9  <- c("#8838BD","#997275","#E24911","#ACEB4F","#1DB756","#611D97","#6C7BCF","#125034","#F4ABD7")#
+	cols10 <- c("#98ACD2","#6197ED","#7A478F","#986D65","#D9C452","#22553B","#B4993A","#0DF1FA","#E8971B","#36D8B9") # "#51BE1A" "#34A6A2" "#86D0E8" "#BDFD81" "#21594F" "#F1F9D6" "#678534" "#6B49C8" "#57191C" "#EC906B"#
+	cols11 <- c("#33E8BB", "#C69A01", "#799525", "#030A34", "#091E57", "#4ED671", "#A4282F", "#2F08BA", "#5BD80A", "#CD0B50", "#B9C1F5") # "#5BBDFD" "#200042" "#616B8F" "#578B7C" "#4D59C3" "#B0FE9F" "#0B335C" "#7F780B" "#C55BD7" "#9F2502" "#D9EF1C"#
+	cols12 <- c("#FE42DD","#68B206","#FFD4E9","#4FBF72","#567D96","#94245B","#226826","#B8CC94","#1752F7","#8B8C5B","#29A6CF","#2ADEC9") #
+	cols13 <- c("#0ACCF8","#9F9D46","#2FCA60","#3D31C8","#50087B","#A17D78","#C0B27E","#EA6EA5","#B21D00","#31E701","#AC1479","#0B3D98","#5DBB15") # "#FCED80" "#336AB6" "#8F3A8C" "#FA9304" "#3545B1" "#83FDF4" "#B6575B" "#232E32" "#AF9746" "#4CA612" "#ED7B66" "#C3C600" "#47B9F5" # "#5B45C8" "#63F469" "#F3B4C8" "#D9EFE8" "#C74B77" "#F1A655" "#813402" "#3D27C4" "#CCD427" "#27AD47" "#13117F" "#97753D" "#09C1B2"#
+	cols14 <- c("#A9D12A","#1D5DB8","#F18249","#44EB9D","#3702AA","#0AF6FF","#48063C","#8DAFB0","#343E3D","#ED20FD","#910148","#375EFF","#F1A4CC","#CE1B4F") # "#FFA357" "#7AAD72" "#2D5AB4" "#E41B0B" "#51ECF5" "#007866" "#D43CB8" "#34E590" "#DC9F06" "#91827F" "#830638" "#B07527" "#F6BCC0" "#2B63EC" #### Change first color: "#62D236" "#FCED80" "#336AB6" "#8F3A8C" "#FA9304" "#3545B1" "#83FDF4" "#B6575B" "#232E32" "#AF9746" "#4CA612" "#ED7B66" "#C3C600" "#47B9F5"#
+	cols15 <- c("#810890","#EFD814","#2D793E","#796ED5","#699866","#343E3D","#F6233D","#877D0E","#C9BAD5","#8BB0B1","#00C3C0","#522AA9","#21FF61","#EA8316","#F5C387")#
+	cols16 <- NULL#
+	cols17 <- NULL#
+	cols18 <- NULL#
+	cols19 <- NULL#
+	cols20 <- NULL#
+	cols21 <- NULL#
+	cols22 <- NULL#
+	cols23 <- NULL#
+	cols24 <- NULL#
+	cols25 <- NULL#
+	colorList <- list(cols2 ,cols3 ,cols4 ,cols5 ,cols6 ,cols7 ,cols8 ,cols9 ,cols10,cols11,cols12,cols13,cols14,cols15,cols16,cols17,cols18,cols19,cols20,cols21,cols22,cols23,cols24,cols25)#
+	result    <- colorList[[n]]#
+	if(plot.palette){#
+		dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.12, labels=result,srt=90)#
 	}#
-	# Construct a rectangular "raster" of equally spaced pixels/marks#
-	xmrks <- seq(from = xlim[1], to = xlim[2], length = nxmrks)#
-	ymrks <- seq(from = ylim[1], to = ylim[2], length = nymrks)#
-	marks <- cbind(rep(xmrks, times = nymrks), rep(ymrks, each = nxmrks))#
-	# Exclude pixels that fall outside the habitat outline#
-	outer_poly <-sp::SpatialPolygons(list(Polygons(list(Polygon(outer, hole = FALSE)), "1")))#
-	marks <- sp::SpatialPoints(marks)[outer_poly, ]#
-	marks <- marks@coords#
-	### set column names to x and y#
-	# outer <- as_data_frame(outer) %>% setNames(c("x", "y"))#
-	outer <- as.data.frame(outer) %>% setNames(c("x", "y"))#
-	### #
-	### ipmap <- data_frame(id = ipmap) %>% count(id)#
-	ipmap <- data.frame(id = ipmap) %>% plyr::count(id)#
-	### set column names to x and y#
-	# demes <- as_data_frame(demes) %>% setNames(c("x", "y")) %>% mutate(id = row_number()) %>% left_join(ipmap) %>% arrange(id) %>% mutate(n = if_else(is.na(n), 0L, n))#
-	demes <- as.data.frame(demes) %>% setNames(c("x", "y")) %>% mutate(id = row_number()) %>% left_join(ipmap) %>% arrange(id) %>% mutate(n = if_else(is.na(n), 0L, n))#
-	edges <- bind_cols(demes[edges[, 1], ] %>% select(x, y),demes[edges[, 2], ] %>% select(x, y)) %>% setNames(c("x", "y", "xend", "yend"))#
-	list(marks = marks, nmrks = nrow(marks), xlim = xlim, ylim = ylim,outer = outer, demes = demes, edges = edges, dist_metric = dist_metric)#
+	result#
 }
-dimns = read_dimns(mcmcpath=mcmcdir,longlat=F)
-library(plyr)
-read_dimns <- function(mcmcpath, longlat, nmrks = 100) {#
-	outer <- read_matrix(file.path(mcmcpath, "outer.txt"))#
-	ipmap <- read_vector(file.path(mcmcpath, "ipmap.txt"))#
-	demes <- read_matrix(file.path(mcmcpath, "demes.txt"))#
-	edges <- read_matrix(file.path(mcmcpath, "edges.txt"))#
-	dist_metric <- get_dist_metric(mcmcpath)#
-	if (!longlat) {#
-		outer <- outer[, c(2,1)]#
-		demes <- demes[, c(2,1)]#
+goodcolors2(4,TRUE)
+goodcolors2(5,TRUE)
+goodcolors2(6,TRUE)
+goodcolors2(7,TRUE)
+goodcolors2(8,TRUE)
+goodcolors2(9,TRUE)
+goodcolors2(10,TRUE)
+goodcolors2(11,TRUE)
+goodcolors2(13,TRUE)
+goodcolors2(15,TRUE)
+length(c("#810890","#EFD814","#2D793E","#796ED5","#699866","#343E3D","#F6233D","#877D0E","#C9BAD5","#8BB0B1","#00C3C0","#522AA9","#21FF61","#EA8316","#F5C387"))
+cols15 <- c("#810890","#EFD814","#2D793E","#796ED5","#699866","#343E3D","#F6233D","#877D0E","#C9BAD5","#8BB0B1","#00C3C0","#522AA9","#21FF61","#EA8316","#F5C387")
+goodcolors2 <- function(n,plot.palette=FALSE){#
+	if(n==1 | n > 15){#
+		stop("'n' must be an integer >=2 and <=15")#
 	}#
-	xlim   <- range(outer[, 1])#
-	ylim   <- range(outer[, 2])#
-	aspect <- (diff(ylim) / diff(xlim)) / cos(mean(ylim) * pi / 180)#
-	aspect <- abs(aspect)#
-	if (aspect > 1) {#
-		nxmrks <- nmrks#
-		nymrks <- round(nxmrks * aspect)#
-	} else {#
-		nymrks <- nmrks#
-		nxmrks <- round(nymrks / aspect)#
+	cols2  <- c("#659DDE","#9A0C2B") # "#8BBC6F","#4B04E0"#
+	cols3  <- c("#3DF1C9","#492E50","#FADD56")  # "#F1529B" "#FEF51B" "#2C27E8"#
+	cols4  <- c("#67F57A","#D7A003","#6E8C48","#C41D1B") # "#256D9E" "#EFFB0A" "#E41A3C" "#F98ACB"#
+	cols5  <- c("#789D95","#EDCBD2","#3F04C7","#1E9A00","#B95AEC") # "#6A96F1" "#CBE589" "#BA0803" "#7CDBE0" "#DEA14C"#
+	cols6  <- c("#BF3C2C","#6CD57D","#7D075C","#D7AB41","#E9D4F7","#481EE0") # c("#37175A","#DB8A83","#E91A00","#AA569D","#4385FD","#9AE8CF") # #
+	cols7  <- c("#424B13","#47E5F4","#511D49","#3F9876","#182D84","#AB5CC4","#90A930") # c("#382E69","#F7C665","#1DFC96","#200311","#9DCD2D","#3202E0","#851B20")#
+	cols8  <- c("#EA7250","#9DDF5B","#B74CE0","#687235","#021025","#1BB1A1","#3F8187","#C7B7CE")#
+	cols9  <- c("#8838BD","#997275","#E24911","#ACEB4F","#1DB756","#611D97","#6C7BCF","#125034","#F4ABD7")#
+	cols10 <- c("#98ACD2","#6197ED","#7A478F","#986D65","#D9C452","#22553B","#B4993A","#0DF1FA","#E8971B","#36D8B9") # "#51BE1A" "#34A6A2" "#86D0E8" "#BDFD81" "#21594F" "#F1F9D6" "#678534" "#6B49C8" "#57191C" "#EC906B"#
+	cols11 <- c("#33E8BB", "#C69A01", "#799525", "#030A34", "#091E57", "#4ED671", "#A4282F", "#2F08BA", "#5BD80A", "#CD0B50", "#B9C1F5") # "#5BBDFD" "#200042" "#616B8F" "#578B7C" "#4D59C3" "#B0FE9F" "#0B335C" "#7F780B" "#C55BD7" "#9F2502" "#D9EF1C"#
+	cols12 <- c("#FE42DD","#68B206","#FFD4E9","#4FBF72","#567D96","#94245B","#226826","#B8CC94","#1752F7","#8B8C5B","#29A6CF","#2ADEC9") #
+	cols13 <- c("#0ACCF8","#9F9D46","#2FCA60","#3D31C8","#50087B","#A17D78","#C0B27E","#EA6EA5","#B21D00","#31E701","#AC1479","#0B3D98","#5DBB15") # "#FCED80" "#336AB6" "#8F3A8C" "#FA9304" "#3545B1" "#83FDF4" "#B6575B" "#232E32" "#AF9746" "#4CA612" "#ED7B66" "#C3C600" "#47B9F5" # "#5B45C8" "#63F469" "#F3B4C8" "#D9EFE8" "#C74B77" "#F1A655" "#813402" "#3D27C4" "#CCD427" "#27AD47" "#13117F" "#97753D" "#09C1B2"#
+	cols14 <- c("#A9D12A","#1D5DB8","#F18249","#44EB9D","#3702AA","#0AF6FF","#48063C","#8DAFB0","#343E3D","#ED20FD","#910148","#375EFF","#F1A4CC","#CE1B4F") # "#FFA357" "#7AAD72" "#2D5AB4" "#E41B0B" "#51ECF5" "#007866" "#D43CB8" "#34E590" "#DC9F06" "#91827F" "#830638" "#B07527" "#F6BCC0" "#2B63EC" #### Change first color: "#62D236" "#FCED80" "#336AB6" "#8F3A8C" "#FA9304" "#3545B1" "#83FDF4" "#B6575B" "#232E32" "#AF9746" "#4CA612" "#ED7B66" "#C3C600" "#47B9F5"#
+	cols15 <- c("#810890","#EFD814","#2D793E","#796ED5","#699866","#343E3D","#F6233D","#877D0E","#C9BAD5","#8BB0B1","#00C3C0","#522AA9","#21FF61","#EA8316","#F5C387")#
+	cols16 <- NULL#
+	cols17 <- NULL#
+	cols18 <- NULL#
+	cols19 <- NULL#
+	cols20 <- NULL#
+	cols21 <- NULL#
+	cols22 <- NULL#
+	cols23 <- NULL#
+	cols24 <- NULL#
+	cols25 <- NULL#
+	colorList <- list(cols2 ,cols3 ,cols4 ,cols5 ,cols6 ,cols7 ,cols8 ,cols9 ,cols10,cols11,cols12,cols13,cols14,cols15,cols16,cols17,cols18,cols19,cols20,cols21,cols22,cols23,cols24,cols25)#
+	result    <- colorList[[n]]#
+	if(plot.palette){#
+		dummydata        <- rep(1,n)#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.12, labels=result,srt=90)#
 	}#
-	# Construct a rectangular "raster" of equally spaced pixels/marks#
-	xmrks <- seq(from = xlim[1], to = xlim[2], length = nxmrks)#
-	ymrks <- seq(from = ylim[1], to = ylim[2], length = nymrks)#
-	marks <- cbind(rep(xmrks, times = nymrks), rep(ymrks, each = nxmrks))#
-	# Exclude pixels that fall outside the habitat outline#
-	outer_poly <-sp::SpatialPolygons(list(Polygons(list(Polygon(outer, hole = FALSE)), "1")))#
-	marks <- sp::SpatialPoints(marks)[outer_poly, ]#
-	marks <- marks@coords#
-	### set column names to x and y#
-	# outer <- as_data_frame(outer) %>% setNames(c("x", "y"))#
-	outer <- as.data.frame(outer) %>% setNames(c("x", "y"))#
-	### #
-	### ipmap <- data_frame(id = ipmap) %>% count(id)#
-	ipmap <- plyr::count(data.frame(id = ipmap),vars="id")#
-	### set column names to x and y#
-	# demes <- as_data_frame(demes) %>% setNames(c("x", "y")) %>% mutate(id = row_number()) %>% left_join(ipmap) %>% arrange(id) %>% mutate(n = if_else(is.na(n), 0L, n))#
-	demes <- as.data.frame(demes) %>% setNames(c("x", "y")) %>% mutate(id = row_number()) %>% left_join(ipmap) %>% arrange(id) %>% mutate(n = if_else(is.na(n), 0L, n))#
-	edges <- bind_cols(demes[edges[, 1], ] %>% select(x, y),demes[edges[, 2], ] %>% select(x, y)) %>% setNames(c("x", "y", "xend", "yend"))#
-	list(marks = marks, nmrks = nrow(marks), xlim = xlim, ylim = ylim,outer = outer, demes = demes, edges = edges, dist_metric = dist_metric)#
+	result#
 }
-dimns = read_dimns(mcmcpath=mcmcdir,longlat=F)
-read_dimns <- function(mcmcpath, longlat, nmrks = 100) {#
-	outer <- read_matrix(file.path(mcmcpath, "outer.txt"))#
-	ipmap <- read_vector(file.path(mcmcpath, "ipmap.txt"))#
-	demes <- read_matrix(file.path(mcmcpath, "demes.txt"))#
-	edges <- read_matrix(file.path(mcmcpath, "edges.txt"))#
-	dist_metric <- get_dist_metric(mcmcpath)#
-	if (!longlat) {#
-		outer <- outer[, c(2,1)]#
-		demes <- demes[, c(2,1)]#
+goodcolors2(n=15,TRUE)
+goodcolors2(n=14,TRUE)
+n=15
+goodcolors2(n=2,TRUE)
+goodcolors2(n=3,TRUE)
+goodcolors2 <- function(n,plot.palette=FALSE){#
+	if(n==1 | n > 15){#
+		stop("'n' must be an integer >=2 and <=15")#
 	}#
-	xlim   <- range(outer[, 1])#
-	ylim   <- range(outer[, 2])#
-	aspect <- (diff(ylim) / diff(xlim)) / cos(mean(ylim) * pi / 180)#
-	aspect <- abs(aspect)#
-	if (aspect > 1) {#
-		nxmrks <- nmrks#
-		nymrks <- round(nxmrks * aspect)#
-	} else {#
-		nymrks <- nmrks#
-		nxmrks <- round(nymrks / aspect)#
+	cols2  <- c("#659DDE","#9A0C2B") # "#8BBC6F","#4B04E0"#
+	cols3  <- c("#3DF1C9","#492E50","#FADD56")  # "#F1529B" "#FEF51B" "#2C27E8"#
+	cols4  <- c("#67F57A","#D7A003","#6E8C48","#C41D1B") # "#256D9E" "#EFFB0A" "#E41A3C" "#F98ACB"#
+	cols5  <- c("#789D95","#EDCBD2","#3F04C7","#1E9A00","#B95AEC") # "#6A96F1" "#CBE589" "#BA0803" "#7CDBE0" "#DEA14C"#
+	cols6  <- c("#BF3C2C","#6CD57D","#7D075C","#D7AB41","#E9D4F7","#481EE0") # c("#37175A","#DB8A83","#E91A00","#AA569D","#4385FD","#9AE8CF") # #
+	cols7  <- c("#424B13","#47E5F4","#511D49","#3F9876","#182D84","#AB5CC4","#90A930") # c("#382E69","#F7C665","#1DFC96","#200311","#9DCD2D","#3202E0","#851B20")#
+	cols8  <- c("#EA7250","#9DDF5B","#B74CE0","#687235","#021025","#1BB1A1","#3F8187","#C7B7CE")#
+	cols9  <- c("#8838BD","#997275","#E24911","#ACEB4F","#1DB756","#611D97","#6C7BCF","#125034","#F4ABD7")#
+	cols10 <- c("#98ACD2","#6197ED","#7A478F","#986D65","#D9C452","#22553B","#B4993A","#0DF1FA","#E8971B","#36D8B9") # "#51BE1A" "#34A6A2" "#86D0E8" "#BDFD81" "#21594F" "#F1F9D6" "#678534" "#6B49C8" "#57191C" "#EC906B"#
+	cols11 <- c("#33E8BB", "#C69A01", "#799525", "#030A34", "#091E57", "#4ED671", "#A4282F", "#2F08BA", "#5BD80A", "#CD0B50", "#B9C1F5") # "#5BBDFD" "#200042" "#616B8F" "#578B7C" "#4D59C3" "#B0FE9F" "#0B335C" "#7F780B" "#C55BD7" "#9F2502" "#D9EF1C"#
+	cols12 <- c("#FE42DD","#68B206","#FFD4E9","#4FBF72","#567D96","#94245B","#226826","#B8CC94","#1752F7","#8B8C5B","#29A6CF","#2ADEC9") #
+	cols13 <- c("#0ACCF8","#9F9D46","#2FCA60","#3D31C8","#50087B","#A17D78","#C0B27E","#EA6EA5","#B21D00","#31E701","#AC1479","#0B3D98","#5DBB15") # "#FCED80" "#336AB6" "#8F3A8C" "#FA9304" "#3545B1" "#83FDF4" "#B6575B" "#232E32" "#AF9746" "#4CA612" "#ED7B66" "#C3C600" "#47B9F5" # "#5B45C8" "#63F469" "#F3B4C8" "#D9EFE8" "#C74B77" "#F1A655" "#813402" "#3D27C4" "#CCD427" "#27AD47" "#13117F" "#97753D" "#09C1B2"#
+	cols14 <- c("#A9D12A","#1D5DB8","#F18249","#44EB9D","#3702AA","#0AF6FF","#48063C","#8DAFB0","#343E3D","#ED20FD","#910148","#375EFF","#F1A4CC","#CE1B4F") # "#FFA357" "#7AAD72" "#2D5AB4" "#E41B0B" "#51ECF5" "#007866" "#D43CB8" "#34E590" "#DC9F06" "#91827F" "#830638" "#B07527" "#F6BCC0" "#2B63EC" #### Change first color: "#62D236" "#FCED80" "#336AB6" "#8F3A8C" "#FA9304" "#3545B1" "#83FDF4" "#B6575B" "#232E32" "#AF9746" "#4CA612" "#ED7B66" "#C3C600" "#47B9F5"#
+	cols15 <- c("#810890","#EFD814","#2D793E","#796ED5","#699866","#343E3D","#F6233D","#877D0E","#C9BAD5","#8BB0B1","#00C3C0","#522AA9","#21FF61","#EA8316","#F5C387")#
+	cols16 <- NULL#
+	cols17 <- NULL#
+	cols18 <- NULL#
+	cols19 <- NULL#
+	cols20 <- NULL#
+	cols21 <- NULL#
+	cols22 <- NULL#
+	cols23 <- NULL#
+	cols24 <- NULL#
+	cols25 <- NULL#
+	colorList <- list(cols2 ,cols3 ,cols4 ,cols5 ,cols6 ,cols7 ,cols8 ,cols9 ,cols10,cols11,cols12,cols13,cols14,cols15,cols16,cols17,cols18,cols19,cols20,cols21,cols22,cols23,cols24,cols25)#
+	result    <- colorList[[n-1]]#
+	if(plot.palette){#
+		dummydata        <- rep(1,n)#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.12, labels=result,srt=90)#
 	}#
-	# Construct a rectangular "raster" of equally spaced pixels/marks#
-	xmrks <- seq(from = xlim[1], to = xlim[2], length = nxmrks)#
-	ymrks <- seq(from = ylim[1], to = ylim[2], length = nymrks)#
-	marks <- cbind(rep(xmrks, times = nymrks), rep(ymrks, each = nxmrks))#
-	# Exclude pixels that fall outside the habitat outline#
-	outer_poly <-sp::SpatialPolygons(list(Polygons(list(Polygon(outer, hole = FALSE)), "1")))#
-	marks <- sp::SpatialPoints(marks)[outer_poly, ]#
-	marks <- marks@coords#
-	### set column names to x and y#
-	# outer <- as_data_frame(outer) %>% setNames(c("x", "y"))#
-	outer <- as.data.frame(outer) %>% setNames(c("x", "y"))#
-	### #
-	### ipmap <- data_frame(id = ipmap) %>% count(id)#
-	ipmap <- plyr::count(data.frame(id = ipmap),vars="id")#
-	### set column names to x and y#
-	# demes <- as_data_frame(demes) %>% setNames(c("x", "y")) %>% mutate(id = row_number()) %>% left_join(ipmap) %>% arrange(id) %>% mutate(n = if_else(is.na(n), 0L, n))#
-	demes <- as.data.frame(demes) %>% setNames(c("x", "y")) %>% mutate(id = row_number()) %>% dplyr::left_join(ipmap) %>% arrange(id) %>% mutate(n = if_else(is.na(n), 0L, n))#
-	edges <- bind_cols(demes[edges[, 1], ] %>% select(x, y),demes[edges[, 2], ] %>% select(x, y)) %>% setNames(c("x", "y", "xend", "yend"))#
-	list(marks = marks, nmrks = nrow(marks), xlim = xlim, ylim = ylim,outer = outer, demes = demes, edges = edges, dist_metric = dist_metric)#
+	result#
 }
-dimns = read_dimns(mcmcpath=mcmcdir,longlat=F)
-read_dimns <- function(mcmcpath, longlat, nmrks = 100) {#
-	outer <- read_matrix(file.path(mcmcpath, "outer.txt"))#
-	ipmap <- read_vector(file.path(mcmcpath, "ipmap.txt"))#
-	demes <- read_matrix(file.path(mcmcpath, "demes.txt"))#
-	edges <- read_matrix(file.path(mcmcpath, "edges.txt"))#
-	dist_metric <- get_dist_metric(mcmcpath)#
-	if (!longlat) {#
-		outer <- outer[, c(2,1)]#
-		demes <- demes[, c(2,1)]#
+goodcolors2(n=3,TRUE)
+goodcolors2(n=2,TRUE)
+goodcolors2(n=15,TRUE)
+goodcolors2(n=14,TRUE)
+goodcolors2(n=15,TRUE)
+goodcolors2(n=13,TRUE)
+goodcolors2(n=12,TRUE)
+goodcolors2(n=11,TRUE)
+goodcolors2(n=10,TRUE)
+goodcolors2(n=9,TRUE)
+goodcolors2(n=8,TRUE)
+goodcolors2(n=15,TRUE)
+goodcolors2(n=14,TRUE)
+goodcolors2(n=8,TRUE)
+goodcolors(n=5,TRUE,thresh=110,iter=100,cbspace="")
+goodcolors(n=5,thresh=110,iter=100,cbspace="")
+#n=15; result <- goodcolors(n=n,thresh=110,iter=300,cbspace=c("deut")); dummydata        <- rep(1,length(result))#
+		result <- c("#7C2CFE","#99D977","#FB9CC2","#470B23","#05E7D6"); names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.12, labels=result,srt=90); result
+n=5; result <- goodcolors(n=5,thresh=110,iter=100,cbspace=""); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.12, labels=result,srt=90); result
+n=5; result <- goodcolors(n=5,thresh=110,iter=100,cbspace=NULL); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.12, labels=result,srt=90); result
+goodcolors2(n=15,TRUE)
+goodcolors2(n=14,TRUE)
+n=5; result <- goodcolors(n=5,thresh=110,iter=100,cbspace=NULL); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.12, labels=result,srt=90); result
+n=5; result <- goodcolors(n=5,thresh=110,iter=100,cbspace=NULL); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.12, labels=result,srt=90); result
+n=5; result <- goodcolors(n=5,thresh=110,iter=100,cbspace=NULL); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.12, labels=result,srt=90); result
+n=5; result <- goodcolors(n=5,thresh=110,iter=100,cbspace=NULL); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.12, labels=result,srt=90); result
+n=5; result <- goodcolors(n=5,thresh=110,iter=100,cbspace=NULL); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.12, labels=result,srt=90); result
+n=5; result <- goodcolors(n=5,thresh=110,iter=100,cbspace=NULL); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.12, labels=result,srt=90); result
+n=5; result <- goodcolors(n=5,thresh=110,iter=100,cbspace=NULL); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.12, labels=result,srt=90); result
+n=5; result <- goodcolors(n=5,thresh=110,iter=100,cbspace=NULL); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.12, labels=result,srt=90); result
+n=5; result <- goodcolors(n=5,thresh=110,iter=100,cbspace=NULL); dummydata        <- rep(1,length(result))#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.12, labels=result,srt=90); result
+goodcolors2(n=14,TRUE)
+goodcolors2 <- function(n,plot.palette=FALSE){#
+	if(n==1 | n > 15){#
+		stop("'n' must be an integer >=2 and <=15")#
 	}#
-	xlim   <- range(outer[, 1])#
-	ylim   <- range(outer[, 2])#
-	aspect <- (diff(ylim) / diff(xlim)) / cos(mean(ylim) * pi / 180)#
-	aspect <- abs(aspect)#
-	if (aspect > 1) {#
-		nxmrks <- nmrks#
-		nymrks <- round(nxmrks * aspect)#
-	} else {#
-		nymrks <- nmrks#
-		nxmrks <- round(nymrks / aspect)#
+	cols2  <- c("#659DDE","#9A0C2B") # "#8BBC6F","#4B04E0"#
+	cols3  <- c("#3DF1C9","#492E50","#FADD56")  # "#F1529B" "#FEF51B" "#2C27E8"#
+	cols4  <- c("#67F57A","#D7A003","#6E8C48","#C41D1B") # "#256D9E" "#EFFB0A" "#E41A3C" "#F98ACB"#
+	cols5  <- c("#789D95","#EDCBD2","#3F04C7","#1E9A00","#B95AEC") # "#6A96F1" "#CBE589" "#BA0803" "#7CDBE0" "#DEA14C"#
+	cols6  <- c("#BF3C2C","#6CD57D","#7D075C","#D7AB41","#E9D4F7","#481EE0") # c("#37175A","#DB8A83","#E91A00","#AA569D","#4385FD","#9AE8CF") # #
+	cols7  <- c("#424B13","#47E5F4","#511D49","#3F9876","#182D84","#AB5CC4","#90A930") # c("#382E69","#F7C665","#1DFC96","#200311","#9DCD2D","#3202E0","#851B20")#
+	cols8  <- c("#EA7250","#9DDF5B","#B74CE0","#687235","#021025","#1BB1A1","#3F8187","#C7B7CE")#
+	cols9  <- c("#8838BD","#997275","#E24911","#ACEB4F","#1DB756","#611D97","#6C7BCF","#125034","#F4ABD7")#
+	cols10 <- c("#98ACD2","#6197ED","#7A478F","#986D65","#D9C452","#22553B","#B4993A","#0DF1FA","#E8971B","#36D8B9") # "#51BE1A" "#34A6A2" "#86D0E8" "#BDFD81" "#21594F" "#F1F9D6" "#678534" "#6B49C8" "#57191C" "#EC906B"#
+	cols11 <- c("#33E8BB", "#C69A01", "#799525", "#030A34", "#091E57", "#4ED671", "#A4282F", "#2F08BA", "#5BD80A", "#CD0B50", "#B9C1F5") # "#5BBDFD" "#200042" "#616B8F" "#578B7C" "#4D59C3" "#B0FE9F" "#0B335C" "#7F780B" "#C55BD7" "#9F2502" "#D9EF1C"#
+	cols12 <- c("#FE42DD","#68B206","#FFD4E9","#4FBF72","#567D96","#94245B","#226826","#B8CC94","#1752F7","#8B8C5B","#29A6CF","#2ADEC9") #
+	cols13 <- c("#0ACCF8","#9F9D46","#2FCA60","#3D31C8","#50087B","#A17D78","#C0B27E","#EA6EA5","#B21D00","#31E701","#AC1479","#0B3D98","#5DBB15") # "#FCED80" "#336AB6" "#8F3A8C" "#FA9304" "#3545B1" "#83FDF4" "#B6575B" "#232E32" "#AF9746" "#4CA612" "#ED7B66" "#C3C600" "#47B9F5" # "#5B45C8" "#63F469" "#F3B4C8" "#D9EFE8" "#C74B77" "#F1A655" "#813402" "#3D27C4" "#CCD427" "#27AD47" "#13117F" "#97753D" "#09C1B2"#
+	cols14 <- c("#A9D12A","#1D5DB8","#F18249","#44EB9D","#3702AA","#0AF6FF","#48063C","#8DAFB0","#343E3D","#ED20FD","#D1B67D","#472B20","#F1A4CC","#CE1B4F") # "#FFA357" "#7AAD72" "#2D5AB4" "#E41B0B" "#51ECF5" "#007866" "#D43CB8" "#34E590" "#DC9F06" "#91827F" "#830638" "#B07527" "#F6BCC0" "#2B63EC" #### Change first color: "#62D236" "#FCED80" "#336AB6" "#8F3A8C" "#FA9304" "#3545B1" "#83FDF4" "#B6575B" "#232E32" "#AF9746" "#4CA612" "#ED7B66" "#C3C600" "#47B9F5"#
+	cols15 <- c("#810890","#EFD814","#2D793E","#796ED5","#699866","#343E3D","#F6233D","#877D0E","#C9BAD5","#8BB0B1","#00C3C0","#522AA9","#21FF61","#EA8316","#F5C387")#
+	cols16 <- NULL#
+	cols17 <- NULL#
+	cols18 <- NULL#
+	cols19 <- NULL#
+	cols20 <- NULL#
+	cols21 <- NULL#
+	cols22 <- NULL#
+	cols23 <- NULL#
+	cols24 <- NULL#
+	cols25 <- NULL#
+	colorList <- list(cols2 ,cols3 ,cols4 ,cols5 ,cols6 ,cols7 ,cols8 ,cols9 ,cols10,cols11,cols12,cols13,cols14,cols15,cols16,cols17,cols18,cols19,cols20,cols21,cols22,cols23,cols24,cols25)#
+	result    <- colorList[[n-1]]#
+	if(plot.palette){#
+		dummydata        <- rep(1,n)#
+		names(dummydata) <- 1:n#
+		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
+		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
+		text(x=c(bp), y=1.12, labels=result,srt=90)#
 	}#
-	# Construct a rectangular "raster" of equally spaced pixels/marks#
-	xmrks <- seq(from = xlim[1], to = xlim[2], length = nxmrks)#
-	ymrks <- seq(from = ylim[1], to = ylim[2], length = nymrks)#
-	marks <- cbind(rep(xmrks, times = nymrks), rep(ymrks, each = nxmrks))#
-	# Exclude pixels that fall outside the habitat outline#
-	outer_poly <-sp::SpatialPolygons(list(Polygons(list(Polygon(outer, hole = FALSE)), "1")))#
-	marks <- sp::SpatialPoints(marks)[outer_poly, ]#
-	marks <- marks@coords#
-	### set column names to x and y#
-	# outer <- as_data_frame(outer) %>% setNames(c("x", "y"))#
-	outer <- as.data.frame(outer) %>% setNames(c("x", "y"))#
-	### #
-	### ipmap <- data_frame(id = ipmap) %>% count(id)#
-	ipmap <- plyr::count(data.frame(id = ipmap),vars="id")#
-	### set column names to x and y#
-	# demes <- as_data_frame(demes) %>% setNames(c("x", "y")) %>% mutate(id = row_number()) %>% left_join(ipmap) %>% arrange(id) %>% mutate(n = if_else(is.na(n), 0L, n))#
-	demes <- as.data.frame(demes) %>% setNames(c("x", "y")) %>% mutate(id = dplyr::row_number()) %>% dplyr::left_join(ipmap) %>% arrange(id) %>% mutate(n = if_else(is.na(n), 0L, n))#
-	edges <- bind_cols(demes[edges[, 1], ] %>% select(x, y),demes[edges[, 2], ] %>% select(x, y)) %>% setNames(c("x", "y", "xend", "yend"))#
-	list(marks = marks, nmrks = nrow(marks), xlim = xlim, ylim = ylim,outer = outer, demes = demes, edges = edges, dist_metric = dist_metric)#
+	result#
 }
-dimns = read_dimns(mcmcpath=mcmcdir,longlat=F)
-test <- c("#994000", "#CC5800", "#FF8F33", "#FFAD66", "#FFCA99", "#FFE6CC","#FBFBFB","#CCFDFF", "#99F8FF", "#66F0FF", "#33E4FF", "#00AACC", "#007A99")
-is_color <- function(x) {#
-	if(is.null(x)){#
-		return(FALSE)#
-	} else {#
-		sapply(x, function(x){tryCatch(is.matrix(col2rgb(x)), error = function(e) FALSE)})#
-	}#
-}
-is_color(test)
-?dplyr::count
-?setNames()
-?seq_len
+goodcolors2(n=14,TRUE)
+devtools::decoument()
+getwd()
+devtools::document()
+rm(list = c("goodcolors", "goodcolors2"))
+devtools::document()
