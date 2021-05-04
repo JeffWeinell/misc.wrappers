@@ -104,12 +104,16 @@ runtess <- function(vcf,coords=NULL,Krange=1:40,ploidy=2,mask=0.05,reps=100,max.
 	par(mfrow=c(1,1))
 	mean.entropy <- apply(crossentropy.mat,MARGIN=1,FUN=mean,na.rm=TRUE)
 	range.entropy.mat <- do.call(rbind,lapply(X=1:nrow(crossentropy.mat),FUN=function(x){range(crossentropy.mat[x,],na.rm=TRUE)}))
-	boxplot(t(crossentropy.mat))
 	if(any(diff(mean.entropy)>0)){
 		bestK <- unname(which(diff(mean.entropy)>0)[1])
 	} else {
 		bestK <- unname(Krange[1])
 	}
+#	boxplot(t(crossentropy.mat))
+	crossentropy.df <- data.frame(crossentropy=unname(unlist(c(crossentropy.mat))),Kval=rep(Krange,reps))
+	# mode(crossentropy.df$Kval) <- "character"
+	crossentropy.df$Kval <- factor(crossentropy.df$Kval, levels=c(1:nrow(crossentropy.df)))
+	entropyPlot <- ggplot2::ggplot(crossentropy.df, ggplot2::aes(x=Kval, y=crossentropy)) + ggplot2::geom_boxplot(fill='lightgray', outlier.colour="black", outlier.shape=16,outlier.size=2, notch=FALSE) + ggplot2::theme_classic() + ggplot2::labs(title= paste0("Cross-entropy (",reps," replicates) vs. number of ancestral populations (K)"), x="Number of ancestral populations", y = "Cross-entropy") + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) + ggplot2::geom_vline(xintercept=bestK, linetype=2, color="black", size=0.25)
 	### Criteria 3: Which K value (for K>=2) yields the least variable entropy scores.
 	Entropy.variation <- apply(X=crossentropy.mat,MARGIN=1,FUN=var,na.rm=TRUE)
 	Kbest.criteria3   <- which(Entropy.variation==min(Entropy.variation[-1]))
@@ -134,14 +138,14 @@ runtess <- function(vcf,coords=NULL,Krange=1:40,ploidy=2,mask=0.05,reps=100,max.
 		}
 	}
 	###
-	if(bestK>1){
-		segments(x0=bestK,y0=par("usr")[3],y1=par("usr")[4],lty=2)
-	}
-	mtext(side=1,"Number of ancestral populations",line=2.2)
-	mtext(side=2,"Cross-validation score",line=2.2)
-	mtext(side=3,paste0("Cross-validation score (",reps," replicates) vs. number of ancestral populations (K)"),line=1)
-	axis(1,at=Krange)
-	entropyPlot <- recordPlot()
+#	if(bestK>1){
+#		segments(x0=bestK,y0=par("usr")[3],y1=par("usr")[4],lty=2)
+#	}
+#	mtext(side=1,"Number of ancestral populations",line=2.2)
+#	mtext(side=2,"Cross-validation score",line=2.2)
+#	mtext(side=3,paste0("Cross-validation score (",reps," replicates) vs. number of ancestral populations (K)"),line=1)
+#	axis(1,at=Krange)
+#	entropyPlot <- recordPlot()
 	## List holding population assignment probabilities for each K
 	slist <- lapply(X=Krange,FUN=function(x){as.data.frame(tess3r::qmatrix(tess3=tess.obj, K = x))})
 	par(mar=c(5.1,4.1,4.1,2.1),mfrow=c(1,1))
@@ -152,6 +156,10 @@ runtess <- function(vcf,coords=NULL,Krange=1:40,ploidy=2,mask=0.05,reps=100,max.
 	x.max <- max((coords[,1]+0.5))
 	y.min <- min((coords[,2]-0.5))
 	y.max <- max((coords[,2]+0.5))
+	world_sf      <- rnaturalearth::ne_countries(scale=10,returnclass="sf")[1]
+	world_sp      <- rnaturalearth::ne_countries(scale=10,returnclass="sp")
+	current_sf    <- sf::st_crop(world_sf,xmin=x.min,xmax=x.max,ymin=y.min,ymax=y.max)
+	current.gg.sf <- ggplot2::geom_sf(data=current_sf,colour = "black", fill = NA)
 	for(K in Krange.plot){
 		i=(K-1)
 		q.matrix  <- slist[[K]]
@@ -171,22 +179,28 @@ runtess <- function(vcf,coords=NULL,Krange=1:40,ploidy=2,mask=0.05,reps=100,max.
 			myCols          <- c(goodcolors(14,thresh=100,cbspace=""), sample(adegenet::funky(100), size=K-14))
 		}
 		posterior.gg        <- ggplot2::ggplot(posterior.df, ggplot2::aes(fill= pop, x= assignment, y=indv)) + ggplot2::geom_bar(position="stack", stat="identity") + ggplot2::theme_classic() + ggplot2::theme(axis.text.y = ggplot2::element_text(size = label.size), panel.grid.major = ggplot2::element_blank(), panel.grid.minor = ggplot2::element_blank(), panel.background = ggplot2::element_blank()) + ggplot2::labs(x = "Membership Probability",y="",fill="Cluster",title=paste0("K = ",K)) + ggplot2::scale_fill_manual(values=myCols[1:K])
-		plot(posterior.gg)
-		admixturePlot[[i]]   <- recordPlot()
+		admixturePlot[[i]]  <- posterior.gg
+		#plot(posterior.gg)
+		#admixturePlot[[i]]   <- recordPlot()
 		my.palette      <- tess3r::CreatePalette(myCols, 9)
-		xdist           <- geosphere::distm(x=c(x.min,0),y=c(x.max,0))
-		ydist           <- geosphere::distm(x=c(0,y.min),y=c(0,y.max))
+	#	xdist           <- geosphere::distm(x=c(x.min,0),y=c(x.max,0))
+	#	ydist           <- geosphere::distm(x=c(0,y.min),y=c(0,y.max))
 	#	extent.test     <- raster::raster(raster::extent(c(x.min,x.max,y.min,y.max)), ncol = 500, nrow = 500, vals = 1)
 	#	interpol.stack  <- InterpolRaster(coord, Q, raster.grid, interpolation.model)
-		mapplot.initial <- plot(suppressWarnings(tess3r::as.qmatrix(q.matrix)), as.matrix(coords), main = "", xlab = "", ylab = "",resolution = c(2,2), col.palette = lapply(X=1:K,FUN=function(x){rep("#FFFFFF",9)}), cex=0,window=c(x.min,x.max,y.min,y.max),asp=xdist/ydist,add=FALSE)
-		mapplot.i       <- plot(suppressWarnings(tess3r::as.qmatrix(q.matrix)), as.matrix(coords), method = "map.max", interpol = tess3r::FieldsKrigModel(10), main = paste0("Ancestry coefficients; K=",K), xlab = "", ylab = "",resolution = c(500,500), cex = 0.4, col.palette = my.palette, window=par("usr"),asp=xdist/ydist,add=FALSE)
-		maps::map(add=TRUE)
+	#	mapplot.initial <- plot(suppressWarnings(tess3r::as.qmatrix(q.matrix)), as.matrix(coords), main = "", xlab = "", ylab = "",resolution = c(2,2), col.palette = lapply(X=1:K,FUN=function(x){rep("#FFFFFF",9)}), cex=0,window=c(x.min,x.max,y.min,y.max),asp=xdist/ydist,add=FALSE)
+#		mapplot.i       <- plot(suppressWarnings(tess3r::as.qmatrix(q.matrix)), as.matrix(coords), method = "map.max", interpol = tess3r::FieldsKrigModel(10), main = paste0("Ancestry coefficients; K=",K), xlab = "", ylab = "",resolution = c(500,500), cex = 0.4, col.palette = my.palette, window=par("usr"),asp=xdist/ydist,add=FALSE)
+#		maps::map(add=TRUE)
+#		
+		#mapplot.i       <- tess3r::ggtess3Q(suppressWarnings(tess3r::as.qmatrix(q.matrix)), as.matrix(coords), interpolation.model = tess3r::FieldsKrigModel(10),resolution = c(500,500), col.palette = my.palette, window=c(x.min,x.max,y.min,y.max),background=TRUE)
+		mapplot.i       <- tess3r::ggtess3Q(suppressWarnings(tess3r::as.qmatrix(q.matrix)), as.matrix(coords), interpolation.model = tess3r::FieldsKrigModel(10),resolution = c(500,500), col.palette = my.palette, window=c(x.min,x.max,y.min,y.max),background=TRUE,map.polygon=world_sp)
+		#mapplot[[i]]    <- mapplot.i + ggplot2::theme_classic() + ggplot2::labs(title=paste0("Ancestry coefficients; K=",K), x="latitude", y="longitude") + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) + ggplot2::borders(database="world", xlim=c(x.min,x.max), ylim=c(y.min,y.max), colour="black") + ggplot2::geom_point(data = coords, ggplot2::aes(x = Lon, y = Lat), size = 1, shape = 21, fill = "black")
+		mapplot[[i]]    <- mapplot.i + ggplot2::theme_classic() + ggplot2::labs(title=paste0("Ancestry coefficients; K=",K), x="latitude", y="longitude") + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) + current.gg.sf + ggplot2::geom_point(data = coords, ggplot2::aes(x = Lon, y = Lat), size = 1, shape = 21, fill = "black")
 #		mapplot.initial <- tess3r::ggtess3Q(suppressWarnings(tess3r::as.qmatrix(q.matrix)), as.matrix(coords), interpolation.model = tess3r::FieldsKrigModel(10),resolution = c(100,100), col.palette = my.palette, window=c(x.min,x.max,y.min,y.max),background=TRUE)
 #		plot(mapplot.initial + ggplot2::theme_classic())
 #		map(xlim=c(x.min,x.max),ylim=c(y.min,y.max),mar=c(5.1,4.1,4.1,2.1))
 #		mapplot.i       <- tess3r::ggtess3Q(suppressWarnings(tess3r::as.qmatrix(q.matrix)), as.matrix(coords), interpolation.model = tess3r::FieldsKrigModel(10),resolution = c(500,500), col.palette = my.palette, window=par("usr"),background=TRUE)
 #		plot(mapplot.i + ggplot2::theme_classic())
-		mapplot[[i]]    <- recordPlot()
+		#mapplot[[i]]    <- recordPlot()
 	}
 	result <- c(list(entropyPlot),admixturePlot,mapplot)
 	if(!is.null(save.as)){

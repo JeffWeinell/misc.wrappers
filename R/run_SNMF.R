@@ -18,7 +18,6 @@ run_SNMF <- function(vcf,coords=NULL,Krange=1:40,reps=100,entropy=TRUE,project="
 	samplenames <- colnames(vcf.obj@gt)[-1]
 	numind      <- length(samplenames)
 	label.size  <- min((288/numind),7)
-	
 	if(!is.null(coords)){
 		if(is(coords,"array") | is(coords,"data.frame")){
 			coords <-  coords
@@ -36,6 +35,11 @@ run_SNMF <- function(vcf,coords=NULL,Krange=1:40,reps=100,entropy=TRUE,project="
 		y.min <- min((coords[,2]-0.5))
 		y.max <- max((coords[,2]+0.5))
 		maxK <- min(nrow(unique(coords)),(numind-1))
+		world_sf      <- rnaturalearth::ne_countries(scale=10,returnclass="sf")[1]
+		world_sp      <- rnaturalearth::ne_countries(scale=10,returnclass="sp")
+		current_sf    <- sf::st_crop(world_sf,xmin=x.min,xmax=x.max,ymin=y.min,ymax=y.max)
+		current.gg.sf <- ggplot2::geom_sf(data=current_sf,colour = "black", fill = NA)
+		
 	} else {
 		maxK <- (numind-1)
 	}
@@ -52,22 +56,21 @@ run_SNMF <- function(vcf,coords=NULL,Krange=1:40,reps=100,entropy=TRUE,project="
 	crossentropy.mat <- t(do.call(cbind,lapply(X=Krange,FUN=function(x){LEA::cross.entropy(snmf.obj,K = x)})))
 	rownames(crossentropy.mat) <- Krange
 	colnames(crossentropy.mat) <- paste0("rep",1:reps)
-	
-	crossentropy.df <- data.frame(crossentropy=unname(unlist(c(crossentropy.mat))),Kval=rep(Krange,reps))
-	mode(crossentropy.df$Kval) <- "character"
-	entropyPlot <- ggplot2::ggplot(crossentropy.df, ggplot2::aes(x=Kval, y=crossentropy)) + ggplot2::geom_boxplot(fill='lightgray', outlier.colour="black", outlier.shape=16,outlier.size=2, notch=FALSE) + ggplot2::theme_classic() + ggplot2::labs(title= paste0("Cross-entropy (",reps," replicates) vs. number of ancestral populations (K)"), x="Number of ancestral populations", y = "Cross-entropy") + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5))
-
-#	boxplot(t(crossentropy.mat))
 	mean.entropy   <- apply(crossentropy.mat,MARGIN=1,FUN=mean,na.rm=TRUE)
-#	plot(Krange,mean.entropy,pch=21,col="blue",xlab="",ylab="",xlim=range(Krange), ylim=range(range.entropy.mat))
-#	arrows(x0=Krange,y0=range.entropy.mat[,1],y1=range.entropy.mat[,2],length=0.07,col="black",angle=90,code=3)
-#	lines(Krange,mean.entropy,col="blue")
 	if(any(diff(mean.entropy)>0)){
 		bestK <- unname(which(diff(mean.entropy)>0)[1])
 	} else {
 		bestK <- unname(Krange[1])
 	}
-	Kbest.criteria1   <- bestK
+	Kbest.criteria1 <- bestK
+	crossentropy.df <- data.frame(crossentropy=unname(unlist(c(crossentropy.mat))),Kval=rep(Krange,reps))
+#	mode(crossentropy.df$Kval) <- "character"
+	crossentropy.df$Kval <- factor(crossentropy.df$Kval, levels=c(1:nrow(crossentropy.df)))
+	entropyPlot <- ggplot2::ggplot(crossentropy.df, ggplot2::aes(x=Kval, y=crossentropy)) + ggplot2::geom_boxplot(fill='lightgray', outlier.colour="black", outlier.shape=16,outlier.size=2, notch=FALSE) + ggplot2::theme_classic() + ggplot2::labs(title= paste0("Cross-entropy (",reps," replicates) vs. number of ancestral populations (K)"), x="Number of ancestral populations", y = "Cross-entropy") + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) + ggplot2::geom_vline(xintercept=bestK, linetype=2, color="black", size=0.25)
+#	boxplot(t(crossentropy.mat))
+#	plot(Krange,mean.entropy,pch=21,col="blue",xlab="",ylab="",xlim=range(Krange), ylim=range(range.entropy.mat))
+#	arrows(x0=Krange,y0=range.entropy.mat[,1],y1=range.entropy.mat[,2],length=0.07,col="black",angle=90,code=3)
+#	lines(Krange,mean.entropy,col="blue")
 	### Criteria 2: Checking if the max BIC of the next K value is less than the min BIC of the previous K value.
 	range.entropy.mat <- do.call(rbind,lapply(X=1:nrow(crossentropy.mat),FUN=function(x){range(crossentropy.mat[x,],na.rm=TRUE)}))
 	entropy.is.nonoverlap <- NULL
@@ -105,9 +108,9 @@ run_SNMF <- function(vcf,coords=NULL,Krange=1:40,reps=100,entropy=TRUE,project="
 			}
 		}
 	}
-	if(bestK>1){
-		segments(x0=bestK,y0=par("usr")[3],y1=par("usr")[4],lty=2,col="black")
-	}
+#	if(bestK>1){
+#		segments(x0=bestK,y0=par("usr")[3],y1=par("usr")[4],lty=2,col="black")
+#	}
 	# segments(x0=bestK,y0=par("usr")[3],y1=par("usr")[4],lty=2,col="green")
 	# segments(x0=Kbest.criteria2,y0=par("usr")[3],y1=par("usr")[4],lty=2,col="blue")
 	# segments(x0=Kbest.criteria3,y0=par("usr")[3],y1=par("usr")[4],lty=2,col="red")
@@ -158,7 +161,8 @@ run_SNMF <- function(vcf,coords=NULL,Krange=1:40,reps=100,entropy=TRUE,project="
 #			mapplot.i       <- plot(suppressWarnings(tess3r::as.qmatrix(q.matrix)), as.matrix(coords), method = "map.max", interpol = tess3r::FieldsKrigModel(10), main = paste0("Ancestry coefficients; K=",K), xlab = "", ylab = "",resolution = c(500,500), cex = 0.4, col.palette = my.palette, window=par("usr"),asp=xdist/ydist,add=FALSE)
 #			maps::map(add=TRUE)
 			# mapplot.i       <- tess3r::ggtess3Q(suppressWarnings(tess3r::as.qmatrix(q.matrix)), as.matrix(coords), interpolation.model = tess3r::FieldsKrigModel(10),resolution = c(500,500), col.palette = my.palette, window=par("usr"),background=TRUE)
-			mapplot.i       <- tess3r::ggtess3Q(suppressWarnings(tess3r::as.qmatrix(q.matrix)), as.matrix(coords), interpolation.model = tess3r::FieldsKrigModel(10),resolution = c(500,500), col.palette = my.palette, window=c(x.min,x.max,y.min,y.max),background=TRUE)
+			#mapplot.i       <- tess3r::ggtess3Q(suppressWarnings(tess3r::as.qmatrix(q.matrix)), as.matrix(coords), interpolation.model = tess3r::FieldsKrigModel(10),resolution = c(500,500), col.palette = my.palette, window=c(x.min,x.max,y.min,y.max),background=TRUE)
+			mapplot.i       <- tess3r::ggtess3Q(suppressWarnings(tess3r::as.qmatrix(q.matrix)), as.matrix(coords), interpolation.model = tess3r::FieldsKrigModel(10),resolution = c(500,500), col.palette = my.palette, window=c(x.min,x.max,y.min,y.max),background=TRUE,map.polygon=world_sp)
 			# mapplot.i2      <- mapplot.i + ggplot2::theme_classic() + ggplot2::labs(title=paste0("Ancestry coefficients; K=",K), x="latitude", y="longitude") + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) + borders(database="Philippines",xlim=c(x.min,x.max),ylim=c(y.min,y.max),colour="black") + geom_point(data = coords, aes(x = Lon, y = Lat), size = 1, shape = 21, fill = "black")
 			# new.x <- ggplot_build(mapplot.i2)$layout$panel_scales_x[[1]]$range$range
 			# new.y <- ggplot_build(mapplot.i2)$layout$panel_scales_y[[1]]$range$range
@@ -167,8 +171,9 @@ run_SNMF <- function(vcf,coords=NULL,Krange=1:40,reps=100,entropy=TRUE,project="
 			# mapplot.i4 + geom_point(data = coords, aes(x = Lon, y = Lat), size = 4, shape = 23, fill = "darkred")
 			# mapplot.i2 + geom_point(data = coords, aes(x = Lon, y = Lat), size = 1, shape = 21, fill = "black")
 			# mapplot[[i]]    <- mapplot.i + borders(xlim=c(x.min,x.max),ylim=c(y.min,y.max),colour="black")
-			mapplot[[i]]    <-  mapplot.i + ggplot2::theme_classic() + ggplot2::labs(title=paste0("Ancestry coefficients; K=",K), x="latitude", y="longitude") + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) + ggplot2::borders(database="world", xlim=c(x.min,x.max), ylim=c(y.min,y.max), colour="black") + ggplot2::geom_point(data = coords, ggplot2::aes(x = Lon, y = Lat), size = 1, shape = 21, fill = "black")
-#			mapplot[[i]]    <- recordPlot()
+#			mapplot[[i]]    <- mapplot.i + ggplot2::theme_classic() + ggplot2::labs(title=paste0("Ancestry coefficients; K=",K), x="latitude", y="longitude") + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) + ggplot2::borders(database="world", xlim=c(x.min,x.max), ylim=c(y.min,y.max), colour="black") + ggplot2::geom_point(data = coords, ggplot2::aes(x = Lon, y = Lat), size = 1, shape = 21, fill = "black")
+			mapplot[[i]]    <- mapplot.i + ggplot2::theme_classic() + ggplot2::labs(title=paste0("Ancestry coefficients; K=",K), x="latitude", y="longitude") + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) + current.gg.sf + ggplot2::geom_point(data = coords, ggplot2::aes(x = Lon, y = Lat), size = 1, shape = 21, fill = "black")
+			#mapplot[[i]]    <- recordPlot()
 			# ggplot2::ggplot(data = world) + ggplot2::geom_sf() + ggplot2::coord_sf(xlim = c(x.min, x.max), ylim = c(y.min, y.max), expand = FALSE)
 		}
 	}
