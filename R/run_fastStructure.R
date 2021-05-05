@@ -137,7 +137,7 @@ vcf2structure <- function(vcf, IndvNames=TRUE, OneRowPerIndv=TRUE, MarkerNames=T
 				stop("If OtherData is non-NULL it must either be (1) a vector with its length equal to number of individuals, or (2) a matrix (or data frame coercible to a matrix) with as many rows as genotypes individuals.")
 			} else {
 				ExtraCols <- ncol(OtherData)
-				OtherData <- do.call(X=rbind,lapply(1:nrow(OtherData),FUN=function(x){paste(OtherData[x,],collapse=" ")}))
+				OtherData <- do.call(rbind,lapply(X=1:nrow(OtherData),FUN=function(x){paste(OtherData[x,],collapse=" ")}))
 			}
 		} else {
 			if(length(OtherData)!=numind){
@@ -275,7 +275,7 @@ vcf2fastStructure <- function(vcf, IndvNames=TRUE, out=NULL, OtherData=NULL){
 				if(ExtraCols>6){
 					stop("Only six columns of metadata allowed before genotype columns")
 				} else {
-					OtherData <- do.call(X=rbind,lapply(1:nrow(OtherData),FUN=function(x){paste(OtherData[x,],collapse=" ")}))
+					OtherData <- do.call(rbind,lapply(X=1:nrow(OtherData),FUN=function(x){paste(OtherData[x,],collapse=" ")}))
 				}
 			}
 		} else {
