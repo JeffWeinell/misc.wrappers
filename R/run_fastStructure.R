@@ -354,16 +354,19 @@ run_fastStructure <- function(vcf,coords=NULL,kmax=40,reps=100,save.as=NULL,cv.i
 	if(FALSE){
 		### Check if structure.py.path and chooseK.py.path are executable and stop if not
 	}
-
-	if(is(coords,"array") | is(coords,"data.frame")){
-		coords <-  coords
-	} else {
-		if(file.exists(coords)){
-			coords   <- read.table(coords)
+	if(!is.null(coords)){
+		if(is(coords,"array") | is(coords,"data.frame")){
+			coords <-  coords
+		} else {
+			if(file.exists(coords)){
+				coords   <- read.table(coords)
+			}
 		}
+		maxK <- min(nrow(unique(coords)),(numind-1))
+	} else {
+		maxK <- (numind-1)
 	}
-	maxK <- min(nrow(unique(coords)),(numind-1))
-	if(max(Krange) > maxK){
+	if(kmax > maxK){
 		Krange <- 1:maxK
 	}
 	outdir.temp <- file.path(dirname(save.as),paste(sample(c(letters,LETTERS,rep(0:9,3)),10,replace=T),collapse=""))
@@ -415,15 +418,19 @@ run_fastStructure <- function(vcf,coords=NULL,kmax=40,reps=100,save.as=NULL,cv.i
 	Krange.plot    <- setdiff(Krange,1)
 	admixturePlot  <- list(); length(admixturePlot)   <- length(Krange.plot)
 	assignmentPlot <- list(); length(assignmentPlot)  <- length(Krange.plot)
-	mapplot        <- list(); length(mapplot)         <- length(Krange.plot)
-	x.min <- min((coords[,1]-0.5))
-	x.max <- max((coords[,1]+0.5))
-	y.min <- min((coords[,2]-0.5))
-	y.max <- max((coords[,2]+0.5))
-	world_sf      <- rnaturalearth::ne_countries(scale=10,returnclass="sf")[1]
-	world_sp      <- rnaturalearth::ne_countries(scale=10,returnclass="sp")
-	current_sf    <- sf::st_crop(world_sf,xmin=x.min,xmax=x.max,ymin=y.min,ymax=y.max)
-	current.gg.sf <- ggplot2::geom_sf(data=current_sf,colour = "black", fill = NA)
+	if(!is.null(coords)){
+		mapplot        <- list(); length(mapplot)         <- length(Krange.plot)
+		x.min <- min((coords[,1]-0.5))
+		x.max <- max((coords[,1]+0.5))
+		y.min <- min((coords[,2]-0.5))
+		y.max <- max((coords[,2]+0.5))
+		world_sf      <- rnaturalearth::ne_countries(scale=10,returnclass="sf")[1]
+		world_sp      <- rnaturalearth::ne_countries(scale=10,returnclass="sp")
+		current_sf    <- sf::st_crop(world_sf,xmin=x.min,xmax=x.max,ymin=y.min,ymax=y.max)
+		current.gg.sf <- ggplot2::geom_sf(data=current_sf,colour = "black", fill = NA)
+	} else {
+		mapplot <- NULL
+	}
 	for(K in Krange.plot){
 		i=(K-1)
 		q.matrix  <- slist[[K]]
@@ -457,9 +464,13 @@ run_fastStructure <- function(vcf,coords=NULL,kmax=40,reps=100,save.as=NULL,cv.i
 		labels[posterior.df[,"assignment"] %in% indv.maxPosterior] <- "+"
 		assignment.K       <- ggplot2::ggplot(data=posterior.df, ggplot2::aes(x= pop, y=indv,fill=assignment)) + ggplot2::geom_tile(color="gray") + ggplot2::theme_classic() + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5), axis.text.y = ggplot2::element_text(size = label.size), panel.grid.major = ggplot2::element_blank(), panel.grid.minor = ggplot2::element_blank(), panel.background = ggplot2::element_blank(), legend.position = "none", ) + ggplot2::labs(title = paste0("K = ",K), x="Clusters", y="") + ggplot2::scale_fill_gradient2(low = "white", mid = "yellow", high = "red", midpoint = 0.5) + ggplot2::geom_text(label=labels)
 		assignmentPlot[[i]]  <- assignment.K
-		my.palette      <- tess3r::CreatePalette(myCols, 9)
-		mapplot.i       <- tess3r::ggtess3Q(suppressWarnings(tess3r::as.qmatrix(q.matrix)), as.matrix(coords), interpolation.model = tess3r::FieldsKrigModel(10),resolution = c(500,500), col.palette = my.palette, window=c(x.min,x.max,y.min,y.max),background=TRUE, map.polygon=world_sp)
-		mapplot[[i]]    <- mapplot.i + ggplot2::theme_classic() + ggplot2::labs(title=paste0("Ancestry coefficients; K=",K), x="latitude", y="longitude") + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) + current.gg.sf + ggplot2::geom_point(data = coords, ggplot2::aes(x = Lon, y = Lat), size = 1, shape = 21, fill = "black")
+		if(!is.null(coords)){
+			my.palette      <- tess3r::CreatePalette(myCols, 9)
+			mapplot.i       <- tess3r::ggtess3Q(suppressWarnings(tess3r::as.qmatrix(q.matrix)), as.matrix(coords), interpolation.model = tess3r::FieldsKrigModel(10),resolution = c(500,500), col.palette = my.palette, window=c(x.min,x.max,y.min,y.max),background=TRUE, map.polygon=world_sp)
+			mapplot[[i]]    <- mapplot.i + ggplot2::theme_classic() + ggplot2::labs(title=paste0("Ancestry coefficients; K=",K), x="latitude", y="longitude") + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) + current.gg.sf + ggplot2::geom_point(data = coords, ggplot2::aes(x = Lon, y = Lat), size = 1, shape = 21, fill = "black")
+		} else {
+			mapplot[[i]] <- NULL
+		}
 	}
 	result <- c(list(margLPlot),admixturePlot,assignmentPlot,mapplot)
 	if(!is.null(save.as)){
@@ -476,7 +487,7 @@ run_fastStructure <- function(vcf,coords=NULL,kmax=40,reps=100,save.as=NULL,cv.i
 #' run_fastStructure
 #' leporinum <- run_fastStructure(vcf="Oxyrhabdium-leporinum_BestSNP.vcf",
 #'           coords="Oxyrhabdium-leporinum_coords.txt",
-#'           Krange=1:15,
+#'           kmax=1:15,
 #'           save.as="Oxyrhabdium-leporinum_BestSNP_tess3r_run3.pdf",
 #'           python.path = "/panfs/pfs.local/software/7/install/anaconda/4.7/envs/py27/bin/python",
 #'           fastStructure.path = "/panfs/pfs.local/work/bi/bin/fastStructure-master/")
