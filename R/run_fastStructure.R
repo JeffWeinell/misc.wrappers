@@ -1,0 +1,515 @@
+#' @title Convert VCF file/object to STRUCTURE file (for SNP data)
+#' 
+#' Converts/writes a VCF file or vcfR object containing SNPs into STRUCTURE format, which is written to a file.
+#' Note: Does not yet handle 'recessive alleles' or phase information (see STRUCTURE manual). This information is optional for STRUCTURE but may be of interest to some users.
+#' 
+#' @param vcf Character string with path to input VCF, or an object of class vcfR.
+#' @param MarkerNames Either a logical (TRUE or FALSE), or a character string with marker names. If TRUE (the default), the marker names are constructed from the CHROM and POS columns of the VCF file: 'CHROM_POS' (e.g. "102_4").
+#' @param InterMarkerDists Either a logical indicating if intermarker distances should be included from CHROM and POS columns of the VCF, or a vector of integers with inter-marker distances to use. Default is FALSE. A warning is generated if multiple sites per locus are present in the input VCF and 'InterMarkerDists' is FALSE. See STRUCTURE manual for details on supplying inter-marker distances.
+#' @param IndvNames Logical indicating if the first column of the STRUCTURE file should contain the names of the individuals, or a character string with names to to use. Default is TRUE, in which case the names will be the names used in the VCF file.
+#' @param PopData Either NULL or an integer vector indicating user-defined population assignments of individuals. The default is NULL (population data not included in output file). If non-NULL, PopData is written in the second column of the output file.
+#' @param PopFlag Either NULL or a logical vector indicating whether or not STRUCTURE should use the PopData information for the particular individual. Default is NULL, in which case the PopFlag column is not written in the output file. If supplied, PopData must be non-NULL.
+#' @param OneRowPerIndv Logical specifying if each genotypes should be written to a single row or multiple rows. Default TRUE, but STRUCTURE works equivalently with either format.
+#' @param LocData NULL (the default) or a vector of integers specifying user-defined sampling locality for each individual.
+#' @param Phenotype NULL (the default) or a vector of integers specifying the value of a phenotype of interest for each individual.
+#' @param OtherData NULL (the default) or either a matrix or data frame with as many rows as individuals and columns specifying any other information of interest associated with individuals.
+#' @param MissingData Number to use for missing-data. Default is -9.
+#' @param out Path where output structure file should be written. The mainparams file is also written using the same name but with the extension '.params'.
+#' @return A list with [[1]] Value of 'out', which contains the path to the output file, and [[2]] values that should be used for some of the parameters in the mainparams file.
+#' @export vcf2structure
+vcf2structure <- function(vcf, IndvNames=TRUE, OneRowPerIndv=TRUE, MarkerNames=TRUE, MissingData=c(-9), out, InterMarkerDists=FALSE, PopData=NULL, PopFlag=NULL, LocData=NULL, Phenotype=NULL, OtherData=NULL){
+	# Check class of vcf argument value.
+	if(is(vcf,"vcfR")){
+		vcf.obj <- vcf
+	} else {
+		if(is(vcf,"character")){
+			# read VCF file into R as a vcfR object
+			vcf.obj     <- vcfR::read.vcfR(vcf)
+		} else {
+			stop("vcf argument must be eith a character string with path to VCF file, or a vcfR object")
+		}
+	}
+	## Data frame with site (SNP) specific information
+	fix.mat <- vcf.obj@fix
+	# Extract genotypes for each individual and hold genotypes in a character matrix; if polyploid, haplotypes are separated by "/" or "|"
+	gt.mat      <- gsub(":.+","",vcf.obj@gt[,-1])
+	# Detect ploidy from gt.mat
+	test.sample <- unlist(gt.mat)[!is.na(unlist(gt.mat))][1]
+	ploidy      <- length(unlist(strsplit(gt.mat[1],split="[/,|]",fixed=F)))
+	# Names of individuals
+	samplenames <- colnames(vcf.obj@gt)[-1]
+	# Number of individuals
+	numind      <- length(samplenames)
+	# Unique ID for each site. If MarkerNames is TRUE then these will be used for MarkerNames.
+	SiteNames <- paste(fix.mat[,"CHROM"],fix.mat[,"POS"],sep="_")
+	# Number of sites
+	nsites <- nrow(fix.mat)
+	# locus ID number from CHROM column
+	uniqueLoci <- unique(unique(fix.mat[,"CHROM"]))
+	# Number of loci (aka chromosomes or linkage groups)
+	nloci  <- length(uniqueLoci)
+	
+	if(nsites > nloci & !InterMarkerDists){
+		warning("Some loci have multiple sites, but InterMarkerDists is FALSE, and therefore STRUCTURE will incorrectly treat linked sites as unlinked")
+	}
+	
+	# Optional information rows and columns need to be considered for inclusion on output.
+	### MarkerNames row
+	if(is(MarkerNames,"logical")){
+		if(MarkerNames){
+			MarkerNames <- paste(fix.mat[,"CHROM"],fix.mat[,"POS"],sep="_")
+		} else {
+			MarkerNames <- NULL
+		}
+	} else {
+		if(length(MarkerNames)!=nsites){
+			stop("If MarkerNames is not a logical it should be a vector with length equal to the number of sites")
+		}
+	}
+	### InterMarkerDists row
+	if(is(InterMarkerDists,"logical")){
+		if(InterMarkerDists){
+			if(nsites==nloci){
+				InterMarkerDists <- rep(-1,nsites)
+			} else {
+				imd.list         <- lapply(X=1:nloci,FUN=function(x){grep(paste0("^",uniqueLoci[x],"_"),SiteNames,value=F)})
+				InterMarkerDists <- unlist(lapply(X=imd.list,FUN=function(x){x[1]=-1;x}))
+			}
+		} else {
+			InterMarkerDists <- NULL
+		}
+	} else {
+		if(length(InterMarkerDists)!=nsites){
+			stop("InterMarkerDists must be TRUE, FALSE, or an integer vector with length equal to the number of sites")
+		}
+	}
+	### RecessiveAlleles information not implemented
+	RecessiveAlleles <- NULL
+	if(FALSE){
+		stop("Not implemented. This information not required by STRUCTURE and usually not typically used for SNP data.")
+	}
+	### PhaseInfo information not yet implemented but might add later. This info might be extractable from some VCFs. See vcf.obj@meta
+	PhaseInfo <- NULL
+	if(FALSE){
+		stop("Not yet implemented")
+		vcf.meta <- vcf.obj@meta
+	}
+	### IndvNames; hopefully there isnt a limit on the lengths of names
+	if(is(IndvNames,"logical")){
+		if(IndvNames){
+			IndvNames <- samplenames
+		} else {
+			IndvNames <- NULL
+		}
+	} else {
+		if(length(IndvNames)!=numind){
+			stop("IndvNames must be TRUE, FALSE, or a character or numeric vector with a length equal to the number of individuals")
+		}
+	}
+	### PopData and PopFlag
+	if(!is.null(PopData)){
+		if(length(PopData)!=numind){
+			stop("If PopData is non-NULL it must be a character or numeric vector with a length equal to the number of individuals")
+		} else {
+			if(!is.null(PopFlag)){
+				if(length(PopFlag)!=numind | !all(test %in% c(0,1))){
+					stop("If PopFlag is non-NULL it must be a character or numeric vector with a length equal to the number of individuals, with each value either 0 (don't use PopData for individual) or 1 (use PopData for individual)")
+				}
+			}
+		}
+	} else {
+		# If PopData is NULL, ignore the user-defined value for PopFlag argument and set PopFlag to NULL.
+		PopFlag <- NULL
+	}
+	if(!is.null(LocData)){
+		if(length(LocData)!=numind | any(is.na(suppressWarnings(as.integer(LocData))))){
+			stop("If LocData is non-NULL it must be a vector of integers with a length equal to the number of individuals")
+		}
+	}
+	if(!is.null(Phenotype)){
+		if(length(Phenotype)!=numind | any(is.na(suppressWarnings(as.integer(Phenotype))))){
+			stop("If Phenotype is non-NULL it must be a vector of integers with a length equal to the number of individuals")
+		}
+	}
+	if(!is.null(OtherData)){
+		if(is(OtherData,c("matrix","array","data.frame"))){
+			if(nrow(OtherData)!=numind){
+				stop("If OtherData is non-NULL it must either be (1) a vector with its length equal to number of individuals, or (2) a matrix (or data frame coercible to a matrix) with as many rows as genotypes individuals.")
+			} else {
+				ExtraCols <- ncol(OtherData)
+				OtherData <- do.call(X=rbind,lapply(1:nrow(OtherData),FUN=function(x){paste(OtherData[x,],collapse=" ")}))
+			}
+		} else {
+			if(length(OtherData)!=numind){
+				stop("If OtherData is non-NULL it must either be (1) a vector with its length equal to number of individuals, or (2) a matrix (or data frame coercible to a matrix) with as many rows as genotypes individuals.")
+			} else {
+				ExtraCols <- 1
+			}
+		}
+	} else {
+		ExtraCols <- 0
+	}
+	if(OneRowPerIndv){
+		### Transpose the genotype matrix
+		t.gt.mat <- t(gt.mat)
+		### Split genotype strings by VCF haplotype separators ("/" or "|") and then reorganize into matrix with n columns per individual for n-ploidy individuals.
+		mat.temp0 <- unname(do.call(rbind,lapply(1:nrow(t.gt.mat), FUN=function(x){unlist(strsplit(t.gt.mat[x,],split="[/,|]"))})))
+		### Replace VCF missing data value "." with value supplied by MissingData argument.
+		mat.temp1 <- gsub(".",MissingData,mat.temp0,fixed=TRUE)
+	} else {
+		### split genotype strings by VCF haplotype separators ("/" or "|") and then reorganize into matrix with n columns per individual for n-ploidy individuals.
+		mat.temp0 <- t(unname(do.call(rbind,lapply(1:nrow(gt.mat), FUN=function(x){unlist(strsplit(gt.mat[x,],split="[/,|]"))}))))
+		### replace VCF missing data value "." with value supplied by MissingData argument
+		mat.temp1 <- gsub(".",MissingData,mat.temp0,fixed=TRUE)
+		#### at this point the structure genotype matrix (mat.temp1) is in the correct format but columns and rows are not named. Now the other optional information rows and columns need to be considered for inclusion on output.
+		# Repeat each value for the non-genotype columns twice 
+		IndvNames   <- rep(IndvNames,ploidy,each=T)
+		PopData     <- rep(PopData,ploidy,each=T)
+		PopFlag     <- rep(PopFlag,ploidy,each=T)
+		LocData     <- rep(LocData,ploidy,each=T)
+		Phenotype   <- rep(Phenotype,ploidy,each=T)
+		OtherData   <- rep(OtherData,ploidy,each=T)
+	}
+	### Individual/Genotype matrix
+	indv.gt.mat <- cbind(IndvNames,PopData,PopFlag,LocData,Phenotype,OtherData,mat.temp1)
+	### Converting each row of the Individual/Genotype matrix into a space-delineated character string
+	indv.gt.strings  <- unlist(lapply(1:nrow(indv.gt.mat),FUN=function(x){paste(indv.gt.mat[x,],collapse="\t")}))
+	### Collapsing each of MarkerNames, RecessiveAlleles, InterMarkerDists, and PhaseInfo into a space-delineated character string
+	MarkerNames         <- paste(MarkerNames,collapse="\t")
+	RecessiveAlleles    <- paste(RecessiveAlleles,collapse="\t")
+	InterMarkerDists    <- paste(InterMarkerDists,collapse="\t")
+	PhaseInfo           <- paste(PhaseInfo,collapse="\t")
+	### Combining the other rows (MarkerNames, RecessiveAlleles, InterMarkerDist, and PhaseInformation) with indv.gt.strings
+	result.strings   <- c(MarkerNames,RecessiveAlleles,InterMarkerDists,indv.gt.strings,PhaseInfo)
+	### Remove empty strings
+	result.strings   <- result.strings[nchar(result.strings) > 0]
+	### Write output STRUCTURE file
+	writeLines(text=result.strings,con=out)
+	### Generate the mainparams file
+	# For now just return a list holding the values of the parameters in mainparams
+	mainparams <- matrix(data=NA,nrow=23,ncol=1)
+	rownames(mainparams) <- c("MAXPOPS","BURNIN","NUMREPS","INFILE","OUTFILE","NUMINDS","NUMLOCI", "PLOIDY","MISSING","ONEROWPERIND","LABEL","POPDATA","POPFLAG","LOCDATA","PHENOTYPE","EXTRACOLS","MARKERNAMES","RECESSIVEALLELES","MAPDISTANCES","PHASED","PHASEINFO","MARKOVPHASE","NOTAMBIGUOUS")
+	mainparams["INFILE",]           <- basename(out)
+	mainparams["NUMINDS",]          <- numind
+	mainparams["NUMLOCI",]          <- nsites
+	mainparams["PLOIDY",]           <- ploidy
+	mainparams["MISSING",]          <- MissingData
+	mainparams["ONEROWPERIND",]     <- if(OneRowPerIndv) 1 else 0
+	mainparams["LABEL",]            <- if(is.null(IndvNames)) 0 else 1
+	mainparams["POPDATA",]          <- if(is.null(PopData)) 0 else 1
+	mainparams["POPFLAG",]          <- if(is.null(PopFlag)) 0 else 1
+	mainparams["LOCDATA",]          <- if(is.null(LocData)) 0 else 1
+	mainparams["PHENOTYPE",]        <- if(is.null(Phenotype)) 0 else 1
+	mainparams["EXTRACOLS",]        <- ExtraCols
+	mainparams["MARKERNAMES",]      <- if(MarkerNames=="") 0 else 1
+	mainparams["RECESSIVEALLELES",] <- if(RecessiveAlleles=="") 0 else 1
+	mainparams["MAPDISTANCES",]     <- if(InterMarkerDists=="") 0 else 1
+	mainparams["PHASEINFO",]        <- if(PhaseInfo=="") 0 else 1
+	mp.df <- data.frame(mainparams.known=c(mainparams),row.names=rownames(mainparams))
+	return(list(output.path=out,mp.df))
+}
+#' @examples
+#' library(misc.wrappers)
+#' vcf2structure(vcf="Ahaetulla-prasina_AllPops_BestSNP.vcf",out="example.str")
+
+
+#' @title Convert VCF file/object to fastStructure input file (for SNP data)
+#' 
+#' Converts a VCF file or vcfR object with SNP data into a fastStructure file.
+#' 
+#' @param vcf Character string with path to input VCF, or an object of class vcfR.
+#' @param IndvNames Logical indicating if the first column of the output file should include the names of individuals. Default TRUE.
+#' @param OtherData NULL (the default) or a matrix with up to five (if IndvNames TRUE) or six (if IndvNames FALSE) columns of metadata. If non-NULL, the number of rows must equal number of individuals in the VCF.
+#' @param out Path where output file should be written.
+#' @return Character string with value of 'out'.
+#' @export vcf2fastStructure
+vcf2fastStructure <- function(vcf, IndvNames=TRUE, out, OtherData=NULL){
+	# Value used for missing data
+	MissingData <- (-9)
+	# Check class of vcf argument value.
+	if(is(vcf,"vcfR")){
+		vcf.obj <- vcf
+	} else {
+		if(is(vcf,"character")){
+			# read VCF file into R as a vcfR object
+			vcf.obj     <- vcfR::read.vcfR(vcf)
+		} else {
+			stop("vcf argument must be eith a character string with path to VCF file, or a vcfR object")
+		}
+	}
+	## Data frame with site (SNP) specific information
+	fix.mat <- vcf.obj@fix
+	# Extract genotypes for each individual and hold genotypes in a character matrix; if polyploid, haplotypes are separated by "/" or "|"
+	gt.mat      <- gsub(":.+","",vcf.obj@gt[,-1])
+	# Detect ploidy from gt.mat
+	test.sample <- unlist(gt.mat)[!is.na(unlist(gt.mat))][1]
+	ploidy      <- length(unlist(strsplit(gt.mat[1],split="[/,|]",fixed=F)))
+	# Names of individuals
+	samplenames <- colnames(vcf.obj@gt)[-1]
+	# Number of individuals
+	numind      <- length(samplenames)
+	### IndvNames; hopefully there isnt a limit on the lengths of names
+	if(is(IndvNames,"logical")){
+		if(IndvNames){
+			IndvNames <- samplenames
+		} else {
+			IndvNames <- NULL
+		}
+	} else {
+		if(length(IndvNames)!=numind){
+			stop("IndvNames must be TRUE, FALSE, or a character or numeric vector with a length equal to the number of individuals")
+		}
+	}
+	#### Metadata columns
+	if(!is.null(OtherData)){
+		if(is(OtherData,c("matrix","array","data.frame"))){
+			if(nrow(OtherData)!=numind){
+				stop("When 'OtherData' is non-NULL, it must be a matrix nrow = number of individuals")
+			} else {
+				if(!is.null(IndvNames)){
+					ExtraCols <- ncol(OtherData) + 1
+				} else {
+					ExtraCols <- ncol(OtherData)
+				}
+				if(ExtraCols>6){
+					stop("Only six columns of metadata allowed before genotype columns")
+				} else {
+					OtherData <- do.call(X=rbind,lapply(1:nrow(OtherData),FUN=function(x){paste(OtherData[x,],collapse=" ")}))
+				}
+			}
+		} else {
+			stop("When 'OtherData' is non-NULL, it must be a matrix nrow = number of individuals")
+		}
+	} else {
+		if(!is.null(IndvNames)){
+			OtherData <- matrix(data=NA,nrow=(numind*ploidy),ncol=5)
+		} else {
+			OtherData <- matrix(data=NA,nrow=(numind*ploidy),ncol=6)
+		}
+	}
+	### Transpose the genotype matrix
+	t.gt.mat <- t(gt.mat)
+	### Split genotype strings by VCF haplotype separators ("/" or "|") and then reorganize into matrix with n columns per individual for n-ploidy individuals.
+	mat.temp0 <- unname(do.call(rbind,lapply(1:nrow(t.gt.mat), FUN=function(x){unlist(strsplit(t.gt.mat[x,],split="[/,|]"))})))
+	### Replace VCF missing data value "." with value supplied by MissingData argument.
+	mat.temp1 <- gsub(".",MissingData,mat.temp0,fixed=TRUE)
+	### split genotype strings by VCF haplotype separators ("/" or "|") and then reorganize into matrix with n columns per individual for n-ploidy individuals.
+	mat.temp0 <- t(unname(do.call(rbind,lapply(1:nrow(gt.mat), FUN=function(x){unlist(strsplit(gt.mat[x,],split="[/,|]"))}))))
+	### replace VCF missing data value "." with value supplied by MissingData argument
+	mat.temp1 <- gsub(".",MissingData,mat.temp0,fixed=TRUE)
+	### Merge metadata and genotype matrices
+	result.mat <- cbind(IndvNames,OtherData,mat.temp1)
+	write.table(x=result.mat,file=out,row.names=FALSE,col.names=FALSE,quote=FALSE,sep="\t")
+	out
+}
+#' @examples
+#' vcf2fastStructure(vcf="Ahaetulla-prasina_AllPops_BestSNP.vcf",out="example.str")
+
+### Modify the copy of runtess function below into a function "run_fastStructure"
+# Unlike tess3r/LEA/DAPC, the path to the fastStructure executable will need to be suipplied as an argument.
+# if(FALSE){
+# 	#' @title Run run_fastStructure from SNP data in a VCF file and and plot results.
+# 	#'
+# 	#' This fucntion is a wrapper that enables running fastStructure with SNP data in either a VCF file or vcfR object and coordinates in file or a matrix or data frame object.
+# 	#' 
+# 	#' @param vcf Path to input VCF file with SNP data.
+# 	#' @param coords Either a character string with path to file containing coordinates (longitude in first column, latitude in second column), or matrix object with longitude and latitude columns.
+# 	#' @param kmax Numerical vector with set of values to use for K. Default 40.
+# 	#' @param reps Number of repititions. Default 100.
+# 	#' @param save.as Where to save the output PDF. Default is NULL. **This argument is ignored in some environments. Instead, use dev.new(file="Where/To/Save/Output.pdf",height=6,width=10,noRStudioGD=TRUE) before calling 'runtess'. Then dev.off().
+# 	#' @param mask Proportion of input data to mask during each replicate when tess3 function is called. Default 0.05.
+# 	#' @param max.iteration Max iterations. Default 500.
+# 	#' @return List of plots
+# 	#' @export runtess
+# 	runtess <- function(vcf,coords=NULL,kmax=40,reps=100,save.as=NULL,mask=0.05, max.iteration=500){
+# 		if(!is.null(save.as)){
+# 			if(file.exists(save.as)){
+# 				stop("Output file already exists. Choose a different name.")
+# 			}
+# 		}
+# 		Krange=1:kmax
+# 		vcf.obj     <- vcfR::read.vcfR(vcf)
+# 		gt.mat      <- gsub(":.+","",vcf.obj@gt[,-1])
+# 		# Detect ploidy from genotype matrix of vcf
+# 		test.sample <- unlist(gt.mat)[!is.na(unlist(gt.mat))][1]
+# 		ploidy      <- length(unlist(strsplit(gt.mat[1],split="/",fixed=T)))
+# 		samplenames <- colnames(vcf.obj@gt)[-1]
+# 		numind      <- length(samplenames)
+# 		label.size  <- min((288/numind),7)
+# 		lfmm.obj    <- vcfR2lfmm(vcf=vcf)
+# 		if(is(coords,"array") | is(coords,"data.frame")){
+# 			coords <-  coords
+# 		} else {
+# 			if(file.exists(coords)){
+# 				coords   <- read.table(coords)
+# 			}
+# 		}
+# 		maxK <- min(nrow(unique(coords)),(numind-1))
+# 		if(max(Krange) > maxK){
+# 			Krange <- 1:maxK
+# 		}
+# 		tess.obj <- tess3r::tess3(X = lfmm.obj, coord = as.matrix(coords), K=Krange, ploidy = ploidy, verbose=FALSE ,mask=mask, rep=reps, max.iteration=max.iteration,keep="all")
+# 		crossentropy.mat <- do.call(rbind,lapply(X=1:length(tess.obj),FUN=function(x){matrix(unlist(tess.obj[[x]]["crossentropy"]),nrow=1)}))
+# 		rownames(crossentropy.mat) <- Krange
+# 		colnames(crossentropy.mat) <- paste0("rep",1:reps)
+# 		#par(mfrow=c(1,1))
+# 		mean.entropy <- apply(crossentropy.mat,MARGIN=1,FUN=mean,na.rm=TRUE)
+# 		range.entropy.mat <- do.call(rbind,lapply(X=1:nrow(crossentropy.mat),FUN=function(x){range(crossentropy.mat[x,],na.rm=TRUE)}))
+# 		if(any(diff(mean.entropy)>0)){
+# 			bestK <- unname(which(diff(mean.entropy)>0)[1])
+# 		} else {
+# 			bestK <- unname(Krange[1])
+# 		}
+# 	#	boxplot(t(crossentropy.mat))
+# 		crossentropy.df <- data.frame(crossentropy=unname(unlist(c(crossentropy.mat))),Kval=rep(Krange,reps))
+# 		# mode(crossentropy.df$Kval) <- "character"
+# 		crossentropy.df$Kval <- factor(crossentropy.df$Kval, levels=c(1:nrow(crossentropy.df)))
+# 		entropyPlot <- ggplot2::ggplot(crossentropy.df, ggplot2::aes(x=Kval, y=crossentropy)) + ggplot2::geom_boxplot(fill='lightgray', outlier.colour="black", outlier.shape=16,outlier.size=2, notch=FALSE) + ggplot2::theme_classic() + ggplot2::labs(title= paste0("Cross-entropy (",reps," replicates) vs. number of ancestral populations (K)"), x="Number of ancestral populations", y = "Cross-entropy") + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) + ggplot2::geom_vline(xintercept=bestK, linetype=2, color="black", size=0.25)
+# 		### Future feature
+# 		if(FALSE){
+# 			### Criteria 3: Which K value (for K>=2) yields the least variable entropy scores.
+# 			Entropy.variation <- apply(X=crossentropy.mat,MARGIN=1,FUN=var,na.rm=TRUE)
+# 			Kbest.criteria3   <- which(Entropy.variation==min(Entropy.variation[-1]))
+# 			### Criteria 4: t-tests for entropy of each pairwise adjacent K
+# 			for(i in 2:nrow(crossentropy.mat)){
+# 				if(Entropy.variation[Kbest.criteria3]==0){
+# 					Kbest.criteria4 <- NULL
+# 					break
+# 				}
+# 				t.test.i <- t.test(crossentropy.mat[i-1,],crossentropy.mat[i,])
+# 				pval.i   <- t.test.i$p.value
+# 				stat.i   <- t.test.i$statistic
+# 				if(pval.i < 0.05 & stat.i > 0){
+# 					next
+# 				} else {
+# 					if(i==nrow(crossentropy.mat)){
+# 						Kbest.criteria4 <- NULL
+# 					} else{
+# 						Kbest.criteria4 <- (i-1)
+# 						break
+# 					}
+# 				}
+# 			}
+# 		}
+# 		###
+# 	#	if(bestK>1){
+# 	#		segments(x0=bestK,y0=par("usr")[3],y1=par("usr")[4],lty=2)
+# 	#	}
+# 	#	mtext(side=1,"Number of ancestral populations",line=2.2)
+# 	#	mtext(side=2,"Cross-validation score",line=2.2)
+# 	#	mtext(side=3,paste0("Cross-validation score (",reps," replicates) vs. number of ancestral populations (K)"),line=1)
+# 	#	axis(1,at=Krange)
+# 	#	entropyPlot <- recordPlot()
+# 		## List holding population assignment probabilities for each K
+# 		slist <- lapply(X=Krange,FUN=function(x){as.data.frame(tess3r::qmatrix(tess3=tess.obj, K = x))})
+# 	#	par(mar=c(5.1,4.1,4.1,2.1),mfrow=c(1,1))
+# 		Krange.plot    <- setdiff(Krange,1)
+# 		admixturePlot  <- list(); length(admixturePlot)   <- length(Krange.plot)
+# 		assignmentPlot <- list(); length(assignmentPlot)  <- length(Krange.plot)
+# 		mapplot        <- list(); length(mapplot)         <- length(Krange.plot)
+# 		x.min <- min((coords[,1]-0.5))
+# 		x.max <- max((coords[,1]+0.5))
+# 		y.min <- min((coords[,2]-0.5))
+# 		y.max <- max((coords[,2]+0.5))
+# 		world_sf      <- rnaturalearth::ne_countries(scale=10,returnclass="sf")[1]
+# 		world_sp      <- rnaturalearth::ne_countries(scale=10,returnclass="sp")
+# 		current_sf    <- sf::st_crop(world_sf,xmin=x.min,xmax=x.max,ymin=y.min,ymax=y.max)
+# 		current.gg.sf <- ggplot2::geom_sf(data=current_sf,colour = "black", fill = NA)
+# 		for(K in Krange.plot){
+# 			i=(K-1)
+# 			q.matrix  <- slist[[K]]
+# 			rownames(q.matrix) <- samplenames
+# 			colnames(q.matrix) <- paste0("cluster",1:ncol(q.matrix))
+# 			posterior.df       <- data.frame(indv=rep(rownames(q.matrix),ncol(q.matrix)), pop=rep(colnames(q.matrix),each=nrow(q.matrix)), assignment=c(unlist(unname(q.matrix))))
+# 			if(FALSE){
+# 				if(K < 5){
+# 					myCols          <- goodcolors(K,thresh=100)
+# 				}
+# 				if(K >= 5 & K < 7){
+# 					myCols          <- goodcolors(K,thresh=100,cbspace="deut")
+# 				}
+# 				if(K >= 7 & K < 15){
+# 					myCols          <- goodcolors(K,thresh=100,cbspace="")
+# 				}
+# 				if(K>=15){
+# 					myCols          <- c(goodcolors(14,thresh=100,cbspace=""), sample(adegenet::funky(100), size=K-14))
+# 				}
+# 			}
+# 			if(K <= 15){
+# 				myCols          <- goodcolors2(n=K)
+# 			}
+# 			if(K>15){
+# 				myCols          <- c(goodcolors2(n=K), sample(adegenet::funky(100), size=K-15))
+# 			}
+# 			posterior.gg        <- ggplot2::ggplot(posterior.df, ggplot2::aes(fill= pop, x= assignment, y=indv)) + ggplot2::geom_bar(position="stack", stat="identity") + ggplot2::theme_classic() + ggplot2::theme(axis.text.y = ggplot2::element_text(size = label.size), panel.grid.major = ggplot2::element_blank(), panel.grid.minor = ggplot2::element_blank(), panel.background = ggplot2::element_blank()) + ggplot2::labs(x = "Membership Probability",y="",fill="Cluster",title=paste0("K = ",K)) + ggplot2::scale_fill_manual(values=myCols[1:K])
+# 			admixturePlot[[i]]  <- posterior.gg
+# 	
+# 			indv.maxPosterior  <- apply(X=q.matrix, MARGIN=1, FUN=function(x){max(x)})
+# 			labels             <- rep("",nrow(posterior.df))
+# 			labels[posterior.df[,"assignment"] %in% indv.maxPosterior] <- "+"
+# 			assignment.K       <- ggplot2::ggplot(data=posterior.df, ggplot2::aes(x= pop, y=indv,fill=assignment)) + ggplot2::geom_tile(color="gray") + ggplot2::theme_classic() + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5), axis.text.y = ggplot2::element_text(size = label.size), panel.grid.major = ggplot2::element_blank(), panel.grid.minor = ggplot2::element_blank(), panel.background = ggplot2::element_blank(), legend.position = "none", ) + ggplot2::labs(title = paste0("K = ",K), x="Clusters", y="") + ggplot2::scale_fill_gradient2(low = "white", mid = "yellow", high = "red", midpoint = 0.5) + ggplot2::geom_text(label=labels)
+# 	#		assignment.K        <- adegenet::assignplot(dapc.pcabest.K,cex.lab=(label.size/10))
+# 	#		mtext(text=paste0("K = ",K,"; PCs retained = ",best.npca[i]))
+# 			assignmentPlot[[i]]  <- assignment.K
+# 	
+# 			#plot(posterior.gg)
+# 			#admixturePlot[[i]]   <- recordPlot()
+# 			my.palette      <- tess3r::CreatePalette(myCols, 9)
+# 		#	xdist           <- geosphere::distm(x=c(x.min,0),y=c(x.max,0))
+# 		#	ydist           <- geosphere::distm(x=c(0,y.min),y=c(0,y.max))
+# 		#	extent.test     <- raster::raster(raster::extent(c(x.min,x.max,y.min,y.max)), ncol = 500, nrow = 500, vals = 1)
+# 		#	interpol.stack  <- InterpolRaster(coord, Q, raster.grid, interpolation.model)
+# 		#	mapplot.initial <- plot(suppressWarnings(tess3r::as.qmatrix(q.matrix)), as.matrix(coords), main = "", xlab = "", ylab = "",resolution = c(2,2), col.palette = lapply(X=1:K,FUN=function(x){rep("#FFFFFF",9)}), cex=0,window=c(x.min,x.max,y.min,y.max),asp=xdist/ydist,add=FALSE)
+# 	#		mapplot.i       <- plot(suppressWarnings(tess3r::as.qmatrix(q.matrix)), as.matrix(coords), method = "map.max", interpol = tess3r::FieldsKrigModel(10), main = paste0("Ancestry coefficients; K=",K), xlab = "", ylab = "",resolution = c(500,500), cex = 0.4, col.palette = my.palette, window=par("usr"),asp=xdist/ydist,add=FALSE)
+# 	#		maps::map(add=TRUE)
+# 	#		
+# 			#mapplot.i       <- tess3r::ggtess3Q(suppressWarnings(tess3r::as.qmatrix(q.matrix)), as.matrix(coords), interpolation.model = tess3r::FieldsKrigModel(10),resolution = c(500,500), col.palette = my.palette, window=c(x.min,x.max,y.min,y.max),background=TRUE)
+# 			mapplot.i       <- tess3r::ggtess3Q(suppressWarnings(tess3r::as.qmatrix(q.matrix)), as.matrix(coords), interpolation.model = tess3r::FieldsKrigModel(10),resolution = c(500,500), col.palette = my.palette, window=c(x.min,x.max,y.min,y.max),background=TRUE,map.polygon=world_sp)
+# 			#mapplot[[i]]    <- mapplot.i + ggplot2::theme_classic() + ggplot2::labs(title=paste0("Ancestry coefficients; K=",K), x="latitude", y="longitude") + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) + ggplot2::borders(database="world", xlim=c(x.min,x.max), ylim=c(y.min,y.max), colour="black") + ggplot2::geom_point(data = coords, ggplot2::aes(x = Lon, y = Lat), size = 1, shape = 21, fill = "black")
+# 			mapplot[[i]]    <- mapplot.i + ggplot2::theme_classic() + ggplot2::labs(title=paste0("Ancestry coefficients; K=",K), x="latitude", y="longitude") + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) + current.gg.sf + ggplot2::geom_point(data = coords, ggplot2::aes(x = Lon, y = Lat), size = 1, shape = 21, fill = "black")
+# 	#		mapplot.initial <- tess3r::ggtess3Q(suppressWarnings(tess3r::as.qmatrix(q.matrix)), as.matrix(coords), interpolation.model = tess3r::FieldsKrigModel(10),resolution = c(100,100), col.palette = my.palette, window=c(x.min,x.max,y.min,y.max),background=TRUE)
+# 	#		plot(mapplot.initial + ggplot2::theme_classic())
+# 	#		map(xlim=c(x.min,x.max),ylim=c(y.min,y.max),mar=c(5.1,4.1,4.1,2.1))
+# 	#		mapplot.i       <- tess3r::ggtess3Q(suppressWarnings(tess3r::as.qmatrix(q.matrix)), as.matrix(coords), interpolation.model = tess3r::FieldsKrigModel(10),resolution = c(500,500), col.palette = my.palette, window=par("usr"),background=TRUE)
+# 	#		plot(mapplot.i + ggplot2::theme_classic())
+# 			#mapplot[[i]]    <- recordPlot()
+# 		}
+# 		result <- c(list(entropyPlot),admixturePlot,assignmentPlot,mapplot)
+# 		if(!is.null(save.as)){
+# 			pdf(height=6,width=10,file=save.as,onefile=TRUE)
+# 			lapply(X=result,FUN=print)
+# 			dev.off()
+# 		}
+# 		result
+# 	}
+# }
+####################
+## module load R/3.6
+## Rscript /panfs/pfs.local/home/j926w878/work/ddRAD/files-to-run_fastStructure/stacks2fastStructure.R
+####################
+## Code below is what I used in the past to get data into fastStructure format
+# if(FALSE){
+# 	groupName     <- "Ahaetulla"
+# 	mM.folders    <- c("m3_M1","m3_M2","m3_M3","m3_M4","m3_M5","m3_M6","m3_M7","m3_M8")
+# 	#stacks.structure.filename <- "/Users/Jeff/Downloads/populations.str"
+# 	StacksFiles.dirs           <- paste0("/panfs/pfs.local/scratch/bi/j926w878/ddRAD/StacksFiles/",groupName,"/",mM.folders,"/AllPopsDifferent/")
+# 	stacks.structure.files     <- paste0(StacksFiles.dirs,"populations.structure")
+# 	output.paths               <- paste0(StacksFiles.dirs,"fastStructure.str")
+# 	for(i in 1:length(output.paths)){
+# 		### reads in the structure file generated by stacks (skipping first two rows)
+# 		input.table               <- read.table(file=stacks.structure.files[i],header=F,sep="\t",skip=2)
+# 		### these are metadata columns expected by fastStructure
+# 		meta.table                <- matrix(data="#",nrow=nrow(input.table),ncol=4)
+# 		snps.table                <- input.table[,-c(1,2)]
+# 		## Change value used for missing data from zero to -9
+# 		snps.table2               <- apply(X=snps.table,MARGIN=2,FUN= function(x){as.numeric(gsub("0", "-9", x))})
+# 		output.table.temp         <- cbind(meta.table,input.table[,c(1:2)],snps.table2)
+# 		write.table(x=output.table.temp,file=output.paths[i],quote=F,sep="\t",row.names=F,col.names=F)
+# 	}
+# }
+
+
+
+
+
+

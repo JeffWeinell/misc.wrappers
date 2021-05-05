@@ -50,7 +50,8 @@ filter.var <- function(alignment.site,min.freqs=c(2,1,0,0)){
 vcfR2lfmm <- function(vcf,out=NULL){
 	vcf.obj   <- vcfR::read.vcfR(vcf,verbose=FALSE)
 	gt.mat    <- gsub(":.+","",vcf.obj@gt[,-1])
-	mat.temp1 <- gsub("^0/0$","0",gt.mat)
+	mat.temp0 <- gsub("|","/",gt.mat,fixed=TRUE)
+	mat.temp1 <- gsub("^0/0$","0",mat.temp0)
 	mat.temp2 <- gsub("^1/1$","2",mat.temp1)
 	mat.temp3 <- gsub("^0/1$","1",mat.temp2)
 	mat.temp4 <- gsub("./.",NA,mat.temp3,fixed=T)
