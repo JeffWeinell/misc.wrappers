@@ -1,1021 +1,1221 @@
-current.gg.sf <- geom_sf(data=current_sf,colour = "red", fill = NA)
-ggplot() + current.gg.sf
-current.gg.sf <- geom_sf(data=current_sf,colour = "black", fill = NA)
-st_crs(current_sf)
-mapplot.i + current.gg.sf
-mapplot.i
-mapplot.i + current.gg.sf
-world_sf      <- rnaturalearth::ne_countries(scale=10,returnclass="sf")[1]
-world.gg.sf   <- geom_sf(data=world_sf,colour = "black", fill = NA)
-mapplot[[i]]
-mapplot[[i]]    <- mapplot.i + ggplot2::theme_classic() + ggplot2::labs(title=paste0("Ancestry coefficients; K=",K), x="latitude", y="longitude") + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) + current.gg.sf + ggplot2::geom_point(data = coords, ggplot2::aes(x = Lon, y = Lat), size = 1, shape = 21, fill = "black")
-mapplot[[i]]
-current_sf2    <- sf::st_crop(world_sf,xmin=new.x[1],xmax=new.x[2],ymin=new.y[1],ymax=new.y[2])
-current.gg.sf2 < geom_sf(data=current_sf2,colour = "black", fill = NA)
-current.gg.sf2 <- geom_sf(data=current_sf2,colour = "black", fill = NA)
-mapplot.i + ggplot2::theme_classic() + ggplot2::labs(title=paste0("Ancestry coefficients; K=",K), x="latitude", y="longitude") + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) + current.gg.sf2 + ggplot2::geom_point(data = coords, ggplot2::aes(x = Lon, y = Lat), size = 1, shape = 21, fill = "black")
-mapplot.i       <- tess3r::ggtess3Q(tess3r.qmat,coords.mat, interpolation.model = tess3r::FieldsKrigModel(10),resolution = c(500,500), col.palette = my.palette, window=c(x.min,x.max,y.min,y.max),background=TRUE)
-mapplot.i + ggplot2::theme_classic() + ggplot2::labs(title=paste0("Ancestry coefficients; K=",K), x="latitude", y="longitude") + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) + current.gg.sf + ggplot2::geom_point(data = coords, ggplot2::aes(x = Lon, y = Lat), size = 1, shape = 21, fill = "black")
-mapplot.i + ggplot2::theme_classic() + ggplot2::labs(title=paste0("Ancestry coefficients; K=",K), x="latitude", y="longitude") + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) + current.gg.sf2 + ggplot2::geom_point(data = coords, ggplot2::aes(x = Lon, y = Lat), size = 1, shape = 21, fill = "black")
-mapplot.i + ggplot2::theme_classic() + ggplot2::labs(title=paste0("Ancestry coefficients; K=",K), x="latitude", y="longitude") + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) + current.gg.sf + ggplot2::geom_point(data = coords, ggplot2::aes(x = Lon, y = Lat), size = 1, shape = 21, fill = "black")
-?ggtess3Q
-world_sp      <- rnaturalearth::ne_countries(scale=10,returnclass="sp")[1]
-class(world_sp)
-world_sp      <- rnaturalearth::ne_countries(scale=10,returnclass="sp")
-class(world_sp)
-mapplot.i       <- tess3r::ggtess3Q(tess3r.qmat,coords.mat, interpolation.model = tess3r::FieldsKrigModel(10),resolution = c(500,500), col.palette = my.palette, window=c(new.x,new.y),background=TRUE,map.polygon=world_sp)
-mapplot.i + ggplot2::theme_classic() + ggplot2::labs(title=paste0("Ancestry coefficients; K=",K), x="latitude", y="longitude") + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) + current.gg.sf + ggplot2::geom_point(data = coords, ggplot2::aes(x = Lon, y = Lat), size = 1, shape = 21, fill = "black")
-mapplot.i       <- tess3r::ggtess3Q(tess3r.qmat,coords.mat, interpolation.model = tess3r::FieldsKrigModel(10),resolution = c(500,500), col.palette = my.palette, window=c(x.min,x.max,y.min,y.max),background=TRUE,map.polygon=world_sp)
-mapplot.i + ggplot2::theme_classic() + ggplot2::labs(title=paste0("Ancestry coefficients; K=",K), x="latitude", y="longitude") + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) + current.gg.sf + ggplot2::geom_point(data = coords, ggplot2::aes(x = Lon, y = Lat), size = 1, shape = 21, fill = "black")
-dev.off()
-getwd()
-devtools::document()
-vert.map <- mapplot.i + ggplot2::theme_classic() + ggplot2::labs(title=paste0("Ancestry coefficients; K=",K), x="latitude", y="longitude") + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) + current.gg.sf + ggplot2::geom_point(data = coords, ggplot2::aes(x = Lon, y = Lat), size = 1, shape = 21, fill = "black")
-hori.map <- vert.map + coord_flip()
-hori.map
-dev.new(height=6,width=10)
-vert.map
-hori.map <- vert.map + coord_flip()
-hori.map
-?viewport()
-?print
-rlang::last_error()
-?coord_flip()
-?factor
-devtools::document()
-n=5
-rep(1,(n-1))
-names(dummydata) <- 2:n
-dummydata <- rep(1,(n-1))#
-		names(dummydata) <- 2:n
-barplot(dummydata)
-?barplot()
-n=11
-result <- c("#33E8BB", "#C69A01", "#799525", "#030A34", "#091E57", "#4ED671", "#A4282F", "#2F08BA", "#5BD80A", "#CD0B50", "#B9C1F5")
-dummydata <- rep(1,(n-1))#
-		names(dummydata) <- 2:n
-dummydata
-barplot(dummydata,col=result)
-barplot(dummydata,col=result,axes=FALSE)
-mtext(side=1,text="Color Palette for Clusters",line=2.5)
-goodcolors <- function(n,thresh=65,iter=50,cbspace=c("prot","deut","trit")){#
-	# "#33E8BB" "#C69A01" "#799525" "#030A34" "#091E57" "#4ED671" "#A4282F" "#2F08BA" "#5BD80A" "#CD0B50" "#B9C1F5"#
-	# funky100          <- adegenet::funky(100)#
-	pset.index  <- pset(1:n)[which(lengths(pset(1:n))==2)]#
-#	cols.list   <- lapply(X=1:n,FUN=function(x){sample(0:255,3)})#
-#	colors.temp <- do.call(rbind,cols.list)#
-#	pairs.colorsdiffs <- unlist(lapply(X=1:length(pset.index),FUN=function(x){A=pset.index[[x]]; diffcol(cols.list[[A[1]]], cols.list[[A[2]]])}))#
-	norm.cols <- lapply(X=1:n,FUN=function(x){sample(0:255,3)})#
-	colors.temp <- do.call(rbind,norm.cols)#
-	all.cols  <- lapply(X=norm.cols,FUN=rgb.cb)#
-	prot.cols <- lapply(1:length(all.cols),FUN=function(x){all.cols[[x]]["prot",]})#
-	deut.cols <- lapply(1:length(all.cols),FUN=function(x){all.cols[[x]]["deut",]})#
-	trit.cols <- lapply(1:length(all.cols),FUN=function(x){all.cols[[x]]["trit",]})#
-	pairsdiffs.norm <- unlist(lapply(X=1:length(pset.index),FUN=function(x){A=pset.index[[x]]; diffcol(norm.cols[[A[1]]], norm.cols[[A[2]]])}))#
-	pairsdiffs.prot <- unlist(lapply(X=1:length(pset.index),FUN=function(x){A=pset.index[[x]]; diffcol(prot.cols[[A[1]]], prot.cols[[A[2]]])}))#
-	pairsdiffs.deut <- unlist(lapply(X=1:length(pset.index),FUN=function(x){A=pset.index[[x]]; diffcol(deut.cols[[A[1]]], deut.cols[[A[2]]])}))#
-	pairsdiffs.trit <- unlist(lapply(X=1:length(pset.index),FUN=function(x){A=pset.index[[x]]; diffcol(trit.cols[[A[1]]], trit.cols[[A[2]]])}))#
-	difftest <- c(pairsdiffs.norm)#
-	if(!is.null(cbspace)){#
-		if("prot" %in% cbspace){#
-			difftest <- c(difftest,pairsdiffs.prot)#
-		}#
-		if("deut" %in% cbspace){#
-			difftest <- c(difftest,pairsdiffs.deut)#
-		}#
-		if("trit" %in% cbspace){#
-			difftest <- c(difftest,pairsdiffs.trit)#
-		}#
-	}#
-	# difftest <- c(pairsdiffs.norm,pairsdiffs.prot,pairsdiffs.deut,pairsdiffs.trit)#
-	# difftest  <- c(pairsdiffs.norm,pairsdiffs.prot,pairsdiffs.deut)#
-	# difftest  <- c(pairsdiffs.norm,pairsdiffs.deut)#
-	# #
-	# colors.temp       <- sample(funky100,n)#
-	# colors.temp.pset  <- pset(colors.temp)#
-	# pairs.colors.temp <- colors.temp.pset[which(lengths(colors.temp.pset)==2)]#
-	# pairs.colorsdiffs <- unlist(lapply(X=pairs.colors.temp,FUN=function(x){diffcol(x[1],x[2])}))#
-	max.tries     <- iter#
-	min.tries     <- 10#
-	try.i         <- 1#
-	colors.i      <- list(); length(colors.i) <- max.tries#
-	colors.i[[1]] <- colors.temp#
-	mindiffs      <- min(difftest)#
-	while((mindiffs[try.i] < thresh & try.i <= max.tries) | try.i < min.tries){#
-		try.i <- try.i + 1#
-		if(try.i > max.tries + 1){#
-			stop("")#
-		}#
-	#	colors.temp       <- sample(funky100,n)#
-	#	colors.temp.pset  <- pset(colors.temp)#
-	#	colors.temp <- lapply(X=1:n,FUN=function(x){sample(0:255,3)})#
-	#	#pairs.colors.temp <- colors.temp.pset[which(lengths(colors.temp.pset)==2)]#
-	#	#pairs.colorsdiffs <- unlist(lapply(X=pairs.colors.temp,FUN=function(x){diffcol(x[1],x[2])}))#
-	#	pairs.colorsdiffs <- unlist(lapply(X=1:length(pset.index),FUN=function(x){A=pset.index[[x]]; diffcol(cols.list[[A[1]]], cols.list[[A[2]]])}))#
-	#	colors.i[[try.i]] <- do.call(rbind,colors.temp)#
-	#	min.i     <- min(pairs.colorsdiffs)#
-	#	mindiffs  <- c(mindiffs,min.i)#
-		norm.cols   <- lapply(X=1:n,FUN=function(x){sample(0:255,3)})#
-		colors.temp <- do.call(rbind,norm.cols)#
-		all.cols  <- lapply(X=norm.cols,FUN=rgb.cb)#
-		prot.cols <- lapply(1:length(all.cols),FUN=function(x){all.cols[[x]]["prot",]})#
-		deut.cols <- lapply(1:length(all.cols),FUN=function(x){all.cols[[x]]["deut",]})#
-		trit.cols <- lapply(1:length(all.cols),FUN=function(x){all.cols[[x]]["trit",]})#
-		pairsdiffs.norm <- unlist(lapply(X=1:length(pset.index),FUN=function(x){A=pset.index[[x]]; diffcol(norm.cols[[A[1]]], norm.cols[[A[2]]])}))#
-		pairsdiffs.prot <- unlist(lapply(X=1:length(pset.index),FUN=function(x){A=pset.index[[x]]; diffcol(prot.cols[[A[1]]], prot.cols[[A[2]]])}))#
-		pairsdiffs.deut <- unlist(lapply(X=1:length(pset.index),FUN=function(x){A=pset.index[[x]]; diffcol(deut.cols[[A[1]]], deut.cols[[A[2]]])}))#
-		pairsdiffs.trit <- unlist(lapply(X=1:length(pset.index),FUN=function(x){A=pset.index[[x]]; diffcol(trit.cols[[A[1]]], trit.cols[[A[2]]])}))#
-		# difftest  <- c(pairsdiffs.norm,pairsdiffs.prot,pairsdiffs.deut,pairsdiffs.trit)#
-		# difftest  <- c(pairsdiffs.norm,pairsdiffs.prot,pairsdiffs.deut)#
-		# difftest  <- c(pairsdiffs.norm,pairsdiffs.deut)#
-		difftest <- c(pairsdiffs.norm)#
-		if(!is.null(cbspace)){#
-			if("prot" %in% cbspace){#
-				difftest <- c(difftest,pairsdiffs.prot)#
-			}#
-			if("deut" %in% cbspace){#
-				difftest <- c(difftest,pairsdiffs.deut)#
-			}#
-			if("trit" %in% cbspace){#
-				difftest <- c(difftest,pairsdiffs.trit)#
+ydist
+mapplot.initial <- plot(suppressWarnings(tess3r::as.qmatrix(q.matrix)), as.matrix(coords), method = "map.max", interpol = FieldsKrigModel(10), main = paste0("Ancestry coefficients; K=",K), xlab = "", ylab = "",resolution = c(100,100), cex = 0.4,col.palette = my.palette, window=c(x.min,x.max,y.min,y.max),asp=xdist/ydist)
+as.qmatrix(q.matrix)
+q.matrix           <- LEA::Q(snmf.obj,K=K,run=best)
+q.matrix
+snmf.obj
+class(snmf.obj)
+attributes(snmf.obj)
+vcf
+samplenames
+vcf.obj     <- vcfR::read.vcfR(vcf)
+samplenames <- colnames(vcf.obj@gt)[-1]#
+	numind      <- length(samplenames)
+numind
+vcftools.path="/panfs/pfs.local/home/j926w878/programs/vcftools_0.1.13/bin/vcftools";vcf="/panfs/pfs.local/home/j926w878/work/ddRAD/snps_goodData/Oxyrhabdium_AllSpecies_AllSNPs.vcf"; indv.keep=indvskeep; out="/panfs/pfs.local/home/j926w878/work/ddRAD/snps_goodData/Oxyrhabdium_both-modestum_BestSNP.vcf"; which.site="best"
+indvkeep
+indv.keep
+indv.keep="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/tess3r/indv_keep_Oxyrhabdium_both-modestum.txt"
+!is.null(indv.keep)
+is(indv.keep,"character"))
+is(indv.keep,"character")
+is(indv.keep,"character") & length(indv.keep)==1
+file.exists(indv.keep)
+indv.keep <- read.table(indv.keep)
+indv.keep
+indv.keep="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/tess3r/indv_keep_Oxyrhabdium_both-modestum.txt"
+unlist(read.table(indv.keep))
+unname(unlist(read.table(indv.keep)))
+indv.keep <- unname(unlist(read.table(indv.keep)))
+indv.keep
+readLines(indv.keep)
+indv.keep="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/tess3r/indv_keep_Oxyrhabdium_both-modestum.txt"
+readLines(indv.keep)
+indv.keep <- suppressWarnings(readLines(indv.keep))
+indv.keep
+vcf.obj    <- vcfR::read.vcfR(vcf)#
+	# matrix with "fixed" columns, which are the columns with site-specific stats across all samples#
+	# fix.mat    <- attributes(vcf.obj)[["fix"]]#
+	fix.mat    <- vcf.obj@fix
+vcf
+vcf="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/DAPC/Oxyrhabdium_both-modestum_BestSNP.vcf"
+vcftools.path
+vcftools.path=vcftools
+vcftools.path="vcftools"
+vcf.obj    <- vcfR::read.vcfR(vcf)#
+	# matrix with "fixed" columns, which are the columns with site-specific stats across all samples#
+	# fix.mat    <- attributes(vcf.obj)[["fix"]]#
+	fix.mat    <- vcf.obj@fix
+gt.mat     <- gsub(":.+","",vcf.obj@gt[,-1])
+dim(gt.mat)
+indv.keep
+!is.null(indv.keep)
+if(!is.null(indv.keep)){#
+		if(is(indv.keep,"character") & length(indv.keep)==1){#
+			if(file.exists(indv.keep)){#
+				#indv.keep <- unname(unlist(read.table(indv.keep)))#
+				indv.keep <- suppressWarnings(readLines(indv.keep))#
 			}#
 		}#
-		min.i     <- min(difftest)#
-		mindiffs  <- c(mindiffs,min.i)#
-		colors.i[[try.i]] <- colors.temp#
-	}#
-	if(try.i>1){#
-		result.rgb <- colors.i[[which(mindiffs == max(mindiffs) )[1]]]#
-		colnames(result.rgb) <- c("r","g","b")#
-		rownames(result.rgb) <- paste0("col",1:n)#
+		### Check that all names in indv.keep actually exist in the vcf#
+		if(all(indv.keep %in% colnames(gt.mat))){#
+			gt.mat <- gt.mat[,indv.keep,drop=F]#
+		} else {#
+			stop(paste(paste(setdiff(indv.keep,colnames(gt.mat)),collapse=","), "not in VCF"))#
+		}#
+	}
+dim(gt.mat)
+min.n=4;min.n0=2;min.n1=1;which.site="best"
+out
+out="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/DAPC/Oxyrhabdium_both-modestum_BestSNP_v2.vcf"
+vcf
+which.site="best"
+site.NS      <- vapply(X=1:nrow(gt.mat),FUN=function(x){length(grep(".", unlist(strsplit(gt.mat[x,],split="/",fixed=T)),fixed=T,invert=T))},FUN.VALUE=1)
+site.0.NS    <- vapply(X=1:nrow(gt.mat),FUN=function(x){length(grep("0", gt.mat[x,],fixed=T,invert=F))},FUN.VALUE=1)
+site.1.NS    <- vapply(X=1:nrow(gt.mat),FUN=function(x){length(grep("1", gt.mat[x,],fixed=T,invert=F))},FUN.VALUE=1)#
+	# Matrix with "CHROM" and "POS" from fix.mat, plus columns containing site.NS, site.0.NS, and site.1.NS#
+	chrom.pos.mat <- cbind(fix.mat[,c("CHROM","POS")],site.NS,site.0.NS,site.1.NS)
+chrom.pos.df <- data.frame(CHROM=fix.mat[,"CHROM"],POS=fix.mat[,"POS"],site.NS=site.NS,site.0.NS=site.0.NS,site.1.NS=site.1.NS)#
+	mode(chrom.pos.df[,"CHROM"])     <- "character"#
+	mode(chrom.pos.df[,"POS"])       <- "character"#
+	mode(chrom.pos.df[,"site.NS"])   <- "numeric"#
+	mode(chrom.pos.df[,"site.0.NS"]) <- "numeric"#
+	mode(chrom.pos.df[,"site.1.NS"]) <- "numeric"#
+	if(any(chrom.pos.df[,"site.NS"] >= min.n & chrom.pos.df[,"site.0.NS"] >= min.n0 & chrom.pos.df[,"site.1.NS"] >= min.n1)){#
+		# filter1 <- which(chrom.pos.df[,"site.1.NS"] >=2)#
+		filter1 <- which(chrom.pos.df[,"site.NS"] >= min.n & chrom.pos.df[,"site.0.NS"] >= min.n0 & chrom.pos.df[,"site.1.NS"] >= min.n1)#
 	} else {#
-		result.rgb <- colors.temp#
-		colnames(result.rgb) <- c("r","g","b")#
-		rownames(result.rgb) <- paste0("col",1:n)#
+		stop("no sites in which the minor allele occurs in more than 1 individual")#
+	}
+chrom.pos.df.filtered1 <- chrom.pos.df[filter1,]#
+	# vector with loci names for each site retained#
+	loci        <- chrom.pos.df.filtered1[,"CHROM"]#
+	# vector with unique loci names#
+	loci.unique <- unique(loci)#
+	# For each unique locus ("CHROM") in chrom.pos.df.filtered1, return the row number for the site with the greatest site.NS#
+	chrom.pos.list.filtered2 <- list(); length(chrom.pos.list.filtered2) <- length(loci.unique)
+length(loci.unique)
+for(i in 1:length(loci.unique)){#
+		locus.i <- loci.unique[i]#
+		chrom.pos.df.i <- chrom.pos.df.filtered1[which(chrom.pos.df.filtered1[,"CHROM"]==locus.i),,drop=F]#
+		site.NS.i <- chrom.pos.df.i[,"site.NS"]#
+		max.i     <- max(site.NS.i)#
+		if(which.site=="best"){#
+			chrom.pos.list.filtered2[[i]]    <- chrom.pos.df.i[(which(site.NS.i==max.i)[1]),]#
+		}#
+		if(which.site=="first"){#
+			chrom.pos.list.filtered2[[i]]    <- chrom.pos.df.i[1,]#
+		}#
+		if(which.site=="random"){#
+			chrom.pos.list.filtered2[[i]]    <- chrom.pos.df.i[sample(1:length(site.NS.i),1),]#
+		}#
+		if(which.site=="all.passing"){#
+			chrom.pos.list.filtered2[[i]]    <- chrom.pos.df.i#
+		}#
 	}#
-	# print(try.i); print(max(mindiffs))#
-	result.hex <- vapply(X=1:nrow(result.rgb),FUN=function(x){rgb(result.rgb[x,1], result.rgb[x,2], result.rgb[x,3],maxColorValue=255)},FUN.VALUE="char")#
-	result.hex#
-}
-goodcolors(n=2)
-result <- c("#8BBC6F","#4B04E0")
-dummydata        <- rep(1,length(result))
-n=2
-names(dummydata) <- 2:n
-barplot(dummydata,col=result,axes=FALSE)#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)
-n=2; result <- goodcolors(n=n)
-dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 2:n#
-		barplot(dummydata,col=result,axes=FALSE)#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)
-n=2; result <- goodcolors(n=n); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		barplot(dummydata,col=result,axes=FALSE)#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)
+	chrom.pos.df.filtered2 <- do.call(rbind, chrom.pos.list.filtered2)
+chrom.pos.filtered.df <- chrom.pos.df.filtered2[,c("CHROM","POS")]
+temp.file <- file.path(getwd(),"temp_filtertable.txt")#
+	write.table(chrom.pos.filtered.df, temp.file, quote=F, sep="\t", col.names=F, row.names=F)#
+	vcf.command <- paste(vcftools.path,"--vcf",vcf,"--positions",temp.file,"--recode -c > ",out)
+system(vcf.command)
+vcf.command
+dim(olnames(chrom.pos.df.filtered2))
+dim(colnames(chrom.pos.df.filtered2))
+colnames(chrom.pos.df.filtered2)
+colnames(gt.mat)
+temp.file2 <- file.path(getwd(),"temp_filtertable2.txt")
+temp.file2
+writeLines(text=colnames(gt.mat),con=temp.file2)
+vcf
+vcf.obj     <- vcfR::read.vcfR(vcf)#
+	samplenames <- colnames(vcf.obj@gt)[-1]#
+	numind      <- length(samplenames)#
+	label.size  <- min((288/numind),7)
+!is.null(coords)
+if(is(coords,"array") | is(coords,"data.frame")){#
+			coords <-  coords#
+		} else {#
+			if(file.exists(coords)){#
+				coords   <- read.table(coords)#
+			}#
+		}
+coords
+setdiff(rownames(coords),samplenames)
+setdiff(samplenames,rownames(coords))
+c(setdiff(rownames(coords),samplenames),setdiff(samplenames,rownames(coords)))
+length(c(setdiff(rownames(coords),samplenames),setdiff(samplenames,rownames(coords))))==0
+all(samplenames %in% rownames(coords))
+all(samplenames %in% rownames(coords) & rownames(coords) %in% samplenames)
+if(!all(samplenames %in% rownames(coords) & rownames(coords) %in% samplenames)){#
+			stop("All individuals in coords file must be in vcf")#
+		}#
+		x.min <- min((coords[,1]-0.5))#
+		x.max <- max((coords[,1]+0.5))#
+		y.min <- min((coords[,2]-0.5))#
+		y.max <- max((coords[,2]+0.5))#
+		maxK <- min(nrow(unique(coords)),(numind-1))
+maxK
+if(max(Krange) > maxK){#
+		Krange <- 1:maxK#
+	}
+Krange
+geno.temp.path <- paste0(tempfile(),".geno")#
+	geno.obj       <- vcfR2geno(vcf=vcf,out=geno.temp.path)#
+	snmf.obj       <- LEA::snmf(geno.temp.path,K=Krange, repetitions=reps,entropy=entropy,project="new",iterations=iter,CPU=CPU)#
+	crossentropy.mat  <- t(do.call(cbind,lapply(X=Krange,FUN=function(x){LEA::cross.entropy(snmf.obj,K = x)})))#
+	rownames(crossentropy.mat) <- Krange#
+	colnames(crossentropy.mat) <- paste0("rep",1:reps)#
+	boxplot(t(crossentropy.mat))#
+	mean.entropy   <- apply(crossentropy.mat,MARGIN=1,FUN=mean,na.rm=TRUE)
+if(any(diff(mean.entropy)>0)){#
+		bestK <- unname(which(diff(mean.entropy)>0)[1])#
+	} else {#
+		bestK <- unname(Krange[1])#
+	}#
+	Kbest.criteria1   <- bestK#
+	### Checking if the max BIC of the next K value is less than the min BIC of the previous K value.#
+	range.entropy.mat <- do.call(rbind,lapply(X=1:nrow(crossentropy.mat),FUN=function(x){range(crossentropy.mat[x,],na.rm=TRUE)}))#
+	entropy.is.nonoverlap <- NULL#
+	entropy.is.reduced    <- NULL#
+	for(i in 2:nrow(range.entropy.mat)){#
+		entropy.is.nonoverlap  <- c(entropy.is.nonoverlap, range.entropy.mat[i,1] > range.entropy.mat[(i-1),2] | range.entropy.mat[i,2] < range.entropy.mat[(i-1),1])#
+		entropy.is.reduced     <- c(entropy.is.reduced, range.entropy.mat[i,2] < range.entropy.mat[(i-1),1])#
+	}#
+	# If max BIC for K=2 is better than BIC K=1 and if some K values are not better (all BIC lower) than K-1, then find the first K value in which K+1 is not better.#
+	if(any(!entropy.is.reduced) & entropy.is.reduced[1]){#
+		Kbest.criteria2 <- which(!entropy.is.reduced)[1]#
+	} else {#
+		Kbest.criteria2 <- 1#
+	}#
+	### Which K value (for K>=2) yields the least variable BIC scores.#
+	Entropy.variation <- apply(X=crossentropy.mat,MARGIN=1,FUN=var,na.rm=TRUE)#
+	Kbest.criteria3   <- which(Entropy.variation==min(Entropy.variation[-1]))
+Kbest.criteria1
+Kbest.criteria2
+Kbest.criteria3
+segments(x0=bestK,y0=par("usr")[3],y1=par("usr")[4],lty=2,col="black")
+mtext(side=1,"Number of ancestral populations",line=2.2)#
+	mtext(side=2,"Cross-entropy",line=2.2)#
+	mtext(side=3,paste0("Cross-entropy (",reps," replicates) vs. number of ancestral populations (K)"),line=1)#
+	axis(1,at=Krange)
+entropyPlot    <- recordPlot()#
+	Krange.plot    <- setdiff(Krange,1)#
+	admixturePlot  <- list(); length(admixturePlot)   <- length(Krange.plot)#
+	mapplot        <- list(); length(mapplot)         <- length(Krange.plot)
+for(K in Krange.plot){#
+		i=(K-1)#
+		ce           <- LEA::cross.entropy(snmf.obj, K = K)#
+		best         <- which.min(ce)#
+	#	q.matrix.best <- suppressWarnings(tess3r::as.qmatrix(LEA::Q(snmf.obj,K=bestK,run=best)))#
+		if(K < 5){#
+			myCols          <- goodcolors(K,thresh=100)#
+		}#
+		if(K >= 5 & K < 7){#
+			myCols          <- goodcolors(K,thresh=100,cbspace="deut")#
+		}#
+		if(K >= 7 & K < 15){#
+			myCols          <- goodcolors(K,thresh=100,cbspace="")#
+		}#
+		if(K>=15){#
+			myCols          <- c(goodcolors(14,thresh=100,cbspace=""), sample(adegenet::funky(100), size=K-14))#
+		}#
+		q.matrix           <- LEA::Q(snmf.obj,K=K,run=best)#
+		rownames(q.matrix) <- samplenames#
+		colnames(q.matrix) <- paste0("cluster",1:ncol(q.matrix))#
+		posterior.df       <- data.frame(indv=rep(rownames(q.matrix),ncol(q.matrix)), pop=rep(colnames(q.matrix),each=nrow(q.matrix)), assignment=c(unlist(unname(q.matrix))))#
+		posterior.gg       <- ggplot2::ggplot(posterior.df, aes(fill= pop, x= assignment, y=indv)) + geom_bar(position="stack", stat="identity") + theme_classic() + theme(axis.text.y = element_text(size = label.size), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank()) + ggplot2::labs(x = "Membership Probability",y="",fill="Cluster",title=paste0("K = ",K)) + scale_fill_manual(values=myCols[1:K])#
+		plot(posterior.gg)#
+		admixturePlot[[i]]   <- recordPlot()#
+		if(!is.null(coords)){#
+			my.palette      <- tess3r::CreatePalette(myCols, 9)#
+			xdist           <- geosphere::distm(x=c(x.min,0),y=c(x.max,0))#
+			ydist           <- geosphere::distm(x=c(0,y.min),y=c(0,y.max))#
+			mapplot.initial <- plot(suppressWarnings(tess3r::as.qmatrix(q.matrix)), as.matrix(coords), method = "map.max", interpol = FieldsKrigModel(10), main = paste0("Ancestry coefficients; K=",K), xlab = "", ylab = "",resolution = c(100,100), cex = 0.4,col.palette = my.palette, window=c(x.min,x.max,y.min,y.max),asp=xdist/ydist)#
+			mapplot.i       <- plot(suppressWarnings(tess3r::as.qmatrix(q.matrix)), as.matrix(coords), method = "map.max", interpol = FieldsKrigModel(10), main = paste0("Ancestry coefficients; K=",K), xlab = "", ylab = "",resolution = c(500,500), cex = 0.4,col.palette = my.palette, window=c(par("usr")[1],par("usr")[2],par("usr")[3],par("usr")[4]),asp=xdist/ydist)#
+			mapplot[[i]]    <- recordPlot()#
+		}#
+	}
+if(!is.null(coords)){#
+		result <- c(list(entropyPlot),admixturePlot,mapplot)#
+	} else {#
+		result <- c(list(entropyPlot),admixturePlot)#
+	}
+!is.null(save.as)
+save.as
+pdf(height=6,width=10,file=save.as,onefile=TRUE)
 result
-barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))
-?text
-text(x=1:n, y=1.05, labels=result)
-bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))
-attributes(bp)
-names(bp)
-bp[1]
-bp[2]
-bp
-c(bp)
-bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.05, labels=result)
-n=3; result <- goodcolors(n=n);   ; dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.05, labels=result)
-n=3; result <- goodcolors(n=n); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.05, labels=result)
-n=3; result <- goodcolors(n=n); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.05, labels=result)
-n=3; result <- goodcolors(n=n); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.05, labels=result)
-n=3; result <- goodcolors(n=n); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.05, labels=result)
-n=3; result <- goodcolors(n=n); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.05, labels=result)
-n=3; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.05, labels=result)
-n=3; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.05, labels=result)
+dev.off()
+save.as
+crossentropy.mat
+i=2
+t.test(crossentropy.mat[i-1,],crossentropy.mat[i,])
+t.test.i <- t.test(crossentropy.mat[i-1,],crossentropy.mat[i,])
+attributes(t.test.i)
+pval.i   <- t.test.i$p.value
+pval.i
+t.test.i$statistic
+t.test.i$parameter
+t.test.i$conf.int
+t.test.i$null.value
+t.test.i$alternative
+boxplot(t(crossentropy.mat))
+stat.i   <- t.test.i$statistic
+stat.i
+i
+t.test.i <- t.test(crossentropy.mat[i-1,],crossentropy.mat[i,])#
+		pval.i   <- t.test.i$p.value#
+		stat.i   <- t.test.i$statistic
+pval.i < 0.05 & stat.i > 0
+i=3
+t.test.i <- t.test(crossentropy.mat[i-1,],crossentropy.mat[i,])#
+		pval.i   <- t.test.i$p.value#
+		stat.i   <- t.test.i$statistic
+pval.i
+stat.i
+pval.i < 0.05 & stat.i > 0
+i
+i=4
+t.test.i <- t.test(crossentropy.mat[i-1,],crossentropy.mat[i,])#
+		pval.i   <- t.test.i$p.value#
+		stat.i   <- t.test.i$statistic
+pval.i
+stat.i
+i=i+1
+i
+t.test.i <- t.test(crossentropy.mat[i-1,],crossentropy.mat[i,])#
+		pval.i   <- t.test.i$p.value#
+		stat.i   <- t.test.i$statistic
+pval.i
+stat.i
+pval.i < 0.05 & stat.i > 0
+i==nrow(crossentropy.mat)
+Kbest.criteria4 <- (i-1)
+Kbest.criteria4
+for(i in 2:nrow(crossentropy.mat)){#
+		t.test.i <- t.test(crossentropy.mat[i-1,],crossentropy.mat[i,])#
+		pval.i   <- t.test.i$p.value#
+		stat.i   <- t.test.i$statistic#
+		if(pval.i < 0.05 & stat.i > 0){#
+			next#
+		} else {#
+			if(i==nrow(crossentropy.mat)){#
+				Kbest.criteria4 <- NULL#
+			} else{#
+				Kbest.criteria4 <- (i-1)#
+			}#
+		}#
+	}
+Kbest.criteria4
+for(i in 2:nrow(crossentropy.mat)){#
+		t.test.i <- t.test(crossentropy.mat[i-1,],crossentropy.mat[i,])#
+		pval.i   <- t.test.i$p.value#
+		stat.i   <- t.test.i$statistic#
+		if(pval.i < 0.05 & stat.i > 0){#
+			next#
+		} else {#
+			if(i==nrow(crossentropy.mat)){#
+				Kbest.criteria4 <- NULL#
+			} else{#
+				Kbest.criteria4 <- (i-1)#
+				i <- nrow(crossentropy.mat)#
+			}#
+		}#
+	}
+Kbest.criteria4
+i
+for(i in 2:nrow(crossentropy.mat)){#
+		t.test.i <- t.test(crossentropy.mat[i-1,],crossentropy.mat[i,])#
+		pval.i   <- t.test.i$p.value#
+		stat.i   <- t.test.i$statistic#
+		if(pval.i < 0.05 & stat.i > 0){#
+			next#
+		} else {#
+			if(i==nrow(crossentropy.mat)){#
+				Kbest.criteria4 <- NULL#
+			} else{#
+				Kbest.criteria4 <- (i-1)#
+				break#
+			}#
+		}#
+	}
+i
+Kbest.criteria4
+segments(x0=bestK,y0=par("usr")[3],y1=par("usr")[4],lty=2,col="black")
+run_SNMF <- function(vcf,coords=NULL,Krange=1:40,reps=100,entropy=TRUE,project="new",iter=500,CPU=2,save.as=NULL){#
+	vcf.obj     <- vcfR::read.vcfR(vcf)#
+	samplenames <- colnames(vcf.obj@gt)[-1]#
+	numind      <- length(samplenames)#
+	label.size  <- min((288/numind),7)#
+	if(!is.null(coords)){#
+		if(is(coords,"array") | is(coords,"data.frame")){#
+			coords <-  coords#
+		} else {#
+			if(file.exists(coords)){#
+				coords   <- read.table(coords)#
+			}#
+		}#
+		### Check that all individuals with coords are in the vcf file, and vice versa.#
+		if(!all(samplenames %in% rownames(coords) & rownames(coords) %in% samplenames)){#
+			stop("All individuals in coords file must be in vcf")#
+		}#
+		x.min <- min((coords[,1]-0.5))#
+		x.max <- max((coords[,1]+0.5))#
+		y.min <- min((coords[,2]-0.5))#
+		y.max <- max((coords[,2]+0.5))#
+		maxK <- min(nrow(unique(coords)),(numind-1))#
+	} else {#
+		maxK <- (numind-1)#
+	}#
+	if(max(Krange) > maxK){#
+		Krange <- 1:maxK#
+	}#
+	geno.temp.path <- paste0(tempfile(),".geno")#
+	geno.obj       <- vcfR2geno(vcf=vcf,out=geno.temp.path)#
+	snmf.obj       <- LEA::snmf(geno.temp.path,K=Krange, repetitions=reps,entropy=entropy,project="new",iterations=iter,CPU=CPU)#
+	crossentropy.mat  <- t(do.call(cbind,lapply(X=Krange,FUN=function(x){LEA::cross.entropy(snmf.obj,K = x)})))#
+	rownames(crossentropy.mat) <- Krange#
+	colnames(crossentropy.mat) <- paste0("rep",1:reps)#
+	boxplot(t(crossentropy.mat))#
+	mean.entropy   <- apply(crossentropy.mat,MARGIN=1,FUN=mean,na.rm=TRUE)#
+#	plot(Krange,mean.entropy,pch=21,col="blue",xlab="",ylab="",xlim=range(Krange), ylim=range(range.entropy.mat))#
+#	arrows(x0=Krange,y0=range.entropy.mat[,1],y1=range.entropy.mat[,2],length=0.07,col="black",angle=90,code=3)#
+#	lines(Krange,mean.entropy,col="blue")#
+	if(any(diff(mean.entropy)>0)){#
+		bestK <- unname(which(diff(mean.entropy)>0)[1])#
+	} else {#
+		bestK <- unname(Krange[1])#
+	}#
+	Kbest.criteria1   <- bestK#
+	### Checking if the max BIC of the next K value is less than the min BIC of the previous K value.#
+	range.entropy.mat <- do.call(rbind,lapply(X=1:nrow(crossentropy.mat),FUN=function(x){range(crossentropy.mat[x,],na.rm=TRUE)}))#
+	entropy.is.nonoverlap <- NULL#
+	entropy.is.reduced    <- NULL#
+	for(i in 2:nrow(range.entropy.mat)){#
+		entropy.is.nonoverlap  <- c(entropy.is.nonoverlap, range.entropy.mat[i,1] > range.entropy.mat[(i-1),2] | range.entropy.mat[i,2] < range.entropy.mat[(i-1),1])#
+		entropy.is.reduced     <- c(entropy.is.reduced, range.entropy.mat[i,2] < range.entropy.mat[(i-1),1])#
+	}#
+	# If max BIC for K=2 is better than BIC K=1 and if some K values are not better (all BIC lower) than K-1, then find the first K value in which K+1 is not better.#
+	if(any(!entropy.is.reduced) & entropy.is.reduced[1]){#
+		Kbest.criteria2 <- which(!entropy.is.reduced)[1]#
+	} else {#
+		Kbest.criteria2 <- 1#
+	}#
+	### Which K value (for K>=2) yields the least variable BIC scores.#
+	Entropy.variation <- apply(X=crossentropy.mat,MARGIN=1,FUN=var,na.rm=TRUE)#
+	Kbest.criteria3   <- which(Entropy.variation==min(Entropy.variation[-1]))#
+	### Criteria 4: t-tests for entropy of each pairwise adjacent K#
+	for(i in 2:nrow(crossentropy.mat)){#
+		t.test.i <- t.test(crossentropy.mat[i-1,],crossentropy.mat[i,])#
+		pval.i   <- t.test.i$p.value#
+		stat.i   <- t.test.i$statistic#
+		if(pval.i < 0.05 & stat.i > 0){#
+			next#
+		} else {#
+			if(i==nrow(crossentropy.mat)){#
+				Kbest.criteria4 <- NULL#
+			} else{#
+				Kbest.criteria4 <- (i-1)#
+				break#
+			}#
+		}#
+	}#
+	segments(x0=bestK,y0=par("usr")[3],y1=par("usr")[4],lty=2,col="black")#
+	# segments(x0=bestK,y0=par("usr")[3],y1=par("usr")[4],lty=2,col="green")#
+	# segments(x0=Kbest.criteria2,y0=par("usr")[3],y1=par("usr")[4],lty=2,col="blue")#
+	# segments(x0=Kbest.criteria3,y0=par("usr")[3],y1=par("usr")[4],lty=2,col="red")#
+	mtext(side=1,"Number of ancestral populations",line=2.2)#
+	mtext(side=2,"Cross-entropy",line=2.2)#
+	mtext(side=3,paste0("Cross-entropy (",reps," replicates) vs. number of ancestral populations (K)"),line=1)#
+	axis(1,at=Krange)#
+	entropyPlot    <- recordPlot()#
+	Krange.plot    <- setdiff(Krange,1)#
+	admixturePlot  <- list(); length(admixturePlot)   <- length(Krange.plot)#
+	mapplot        <- list(); length(mapplot)         <- length(Krange.plot)#
+	for(K in Krange.plot){#
+		i=(K-1)#
+		ce           <- LEA::cross.entropy(snmf.obj, K = K)#
+		best         <- which.min(ce)#
+	#	q.matrix.best <- suppressWarnings(tess3r::as.qmatrix(LEA::Q(snmf.obj,K=bestK,run=best)))#
+		if(K < 5){#
+			myCols          <- goodcolors(K,thresh=100)#
+		}#
+		if(K >= 5 & K < 7){#
+			myCols          <- goodcolors(K,thresh=100,cbspace="deut")#
+		}#
+		if(K >= 7 & K < 15){#
+			myCols          <- goodcolors(K,thresh=100,cbspace="")#
+		}#
+		if(K>=15){#
+			myCols          <- c(goodcolors(14,thresh=100,cbspace=""), sample(adegenet::funky(100), size=K-14))#
+		}#
+		q.matrix           <- LEA::Q(snmf.obj,K=K,run=best)#
+		rownames(q.matrix) <- samplenames#
+		colnames(q.matrix) <- paste0("cluster",1:ncol(q.matrix))#
+		posterior.df       <- data.frame(indv=rep(rownames(q.matrix),ncol(q.matrix)), pop=rep(colnames(q.matrix),each=nrow(q.matrix)), assignment=c(unlist(unname(q.matrix))))#
+		posterior.gg       <- ggplot2::ggplot(posterior.df, aes(fill= pop, x= assignment, y=indv)) + geom_bar(position="stack", stat="identity") + theme_classic() + theme(axis.text.y = element_text(size = label.size), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank()) + ggplot2::labs(x = "Membership Probability",y="",fill="Cluster",title=paste0("K = ",K)) + scale_fill_manual(values=myCols[1:K])#
+		plot(posterior.gg)#
+		admixturePlot[[i]]   <- recordPlot()#
+		if(!is.null(coords)){#
+			my.palette      <- tess3r::CreatePalette(myCols, 9)#
+			xdist           <- geosphere::distm(x=c(x.min,0),y=c(x.max,0))#
+			ydist           <- geosphere::distm(x=c(0,y.min),y=c(0,y.max))#
+			mapplot.initial <- plot(suppressWarnings(tess3r::as.qmatrix(q.matrix)), as.matrix(coords), method = "map.max", interpol = FieldsKrigModel(10), main = paste0("Ancestry coefficients; K=",K), xlab = "", ylab = "",resolution = c(100,100), cex = 0.4,col.palette = my.palette, window=c(x.min,x.max,y.min,y.max),asp=xdist/ydist)#
+			mapplot.i       <- plot(suppressWarnings(tess3r::as.qmatrix(q.matrix)), as.matrix(coords), method = "map.max", interpol = FieldsKrigModel(10), main = paste0("Ancestry coefficients; K=",K), xlab = "", ylab = "",resolution = c(500,500), cex = 0.4,col.palette = my.palette, window=c(par("usr")[1],par("usr")[2],par("usr")[3],par("usr")[4]),asp=xdist/ydist)#
+			mapplot[[i]]    <- recordPlot()#
+		}#
+	}#
+	if(!is.null(coords)){#
+		result <- c(list(entropyPlot),admixturePlot,mapplot)#
+	} else {#
+		result <- c(list(entropyPlot),admixturePlot)#
+	}#
+	if(!is.null(save.as)){#
+		pdf(height=6,width=10,file=save.as,onefile=TRUE)#
+		lapply(X=result,FUN=print)#
+		dev.off()#
+	}#
+	result#
+}
+bothmodestum <- run_SNMF(vcf="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/DAPC/Oxyrhabdium_both-modestum_BestSNP.vcf",#
+	                           coords="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/tess3r/Oxyrhabdium_bothmodestum_coords.txt",reps=30,Krange=1:4,#
+	                           save.as="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/LEA/Oxyrhabdium_both-modestum_BestSNP_sNMF_run1.pdf")
+bothmodestum <- run_SNMF(vcf="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/DAPC/Oxyrhabdium_both-modestum_BestSNP.vcf",#
+	                           coords="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/tess3r/Oxyrhabdium_bothmodestum_coords.txt",reps=30,Krange=1:4,#
+	                           save.as="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/LEA/Oxyrhabdium_both-modestum_BestSNP_sNMF_test.pdf")
+runtess <- function(vcf,coords=NULL,Krange=1:40,ploidy=2,mask=0.05,reps=100,max.iteration=500,save.as=NULL){#
+	vcf.obj     <- vcfR::read.vcfR(vcf)#
+	samplenames <- colnames(vcf.obj@gt)[-1]#
+	numind      <- length(samplenames)#
+	label.size  <- min((288/numind),7)#
+	lfmm.obj    <- vcfR2lfmm(vcf=vcf)#
+	if(is(coords,"array") | is(coords,"data.frame")){#
+		coords <-  coords#
+	} else {#
+		if(file.exists(coords)){#
+			coords   <- read.table(coords)#
+		}#
+	}#
+	maxK <- min(nrow(unique(coords)),(numind-1))#
+	if(max(Krange) > maxK){#
+		Krange <- 1:maxK#
+	}#
+	tess.obj <- tess3r::tess3(X = lfmm.obj, coord = as.matrix(coords), K=Krange, ploidy = ploidy, verbose=FALSE ,mask=0.05, rep=reps, max.iteration=max.iteration,keep="all")#
+	crossentropy.mat <- do.call(rbind,lapply(X=1:length(tess.obj),FUN=function(x){matrix(unlist(tess.obj[[x]]["crossentropy"]),nrow=1)}))#
+	rownames(crossentropy.mat) <- Krange#
+	colnames(crossentropy.mat) <- paste0("rep",1:reps)#
+	par(mfrow=c(1,1))#
+	mean.entropy <- apply(crossentropy.mat,MARGIN=1,FUN=mean,na.rm=TRUE)#
+	range.entropy.mat <- do.call(rbind,lapply(X=1:nrow(crossentropy.mat),FUN=function(x){range(crossentropy.mat[x,],na.rm=TRUE)}))#
+	boxplot(t(crossentropy.mat))#
+	if(any(diff(mean.entropy)>0)){#
+		bestK <- unname(which(diff(mean.entropy)>0)[1])#
+	} else {#
+		bestK <- unname(Krange[1])#
+	}#
+	### Criteria 3: Which K value (for K>=2) yields the least variable entropy scores.#
+	Entropy.variation <- apply(X=crossentropy.mat,MARGIN=1,FUN=var,na.rm=TRUE)#
+	Kbest.criteria3   <- which(Entropy.variation==min(Entropy.variation[-1]))#
+	### Criteria 4: t-tests for entropy of each pairwise adjacent K#
+	for(i in 2:nrow(crossentropy.mat)){#
+		t.test.i <- t.test(crossentropy.mat[i-1,],crossentropy.mat[i,])#
+		pval.i   <- t.test.i$p.value#
+		stat.i   <- t.test.i$statistic#
+		if(pval.i < 0.05 & stat.i > 0){#
+			next#
+		} else {#
+			if(i==nrow(crossentropy.mat)){#
+				Kbest.criteria4 <- NULL#
+			} else{#
+				Kbest.criteria4 <- (i-1)#
+				break#
+			}#
+		}#
+	}#
+	####
+	if(bestK>1){#
+		segments(x0=bestK,y0=par("usr")[3],y1=par("usr")[4],lty=2)#
+	}#
+	mtext(side=1,"Number of ancestral populations",line=2.2)#
+	mtext(side=2,"Cross-validation score",line=2.2)#
+	mtext(side=3,paste0("Cross-validation score (",reps," replicates) vs. number of ancestral populations (K)"),line=1)#
+	axis(1,at=Krange)#
+	entropyPlot <- recordPlot()#
+	## List holding population assignment probabilities for each K#
+	slist <- lapply(X=Krange,FUN=function(x){as.data.frame(tess3r::qmatrix(tess3=tess.obj, K = x))})#
+	par(mar=c(5.1,4.1,4.1,2.1),mfrow=c(1,1))#
+	Krange.plot    <- setdiff(Krange,1)#
+	admixturePlot  <- list(); length(admixturePlot)   <- length(Krange.plot)#
+	mapplot        <- list(); length(mapplot)         <- length(Krange.plot)#
+	x.min <- min((coords[,1]-0.5))#
+	x.max <- max((coords[,1]+0.5))#
+	y.min <- min((coords[,2]-0.5))#
+	y.max <- max((coords[,2]+0.5))#
+	for(K in Krange.plot){#
+		i=(K-1)#
+		q.matrix  <- slist[[K]]#
+		rownames(q.matrix) <- samplenames#
+		colnames(q.matrix) <- paste0("cluster",1:ncol(q.matrix))#
+		posterior.df       <- data.frame(indv=rep(rownames(q.matrix),ncol(q.matrix)), pop=rep(colnames(q.matrix),each=nrow(q.matrix)), assignment=c(unlist(unname(q.matrix))))#
+		if(K < 5){#
+			myCols          <- goodcolors(K,thresh=100)#
+		}#
+		if(K >= 5 & K < 7){#
+			myCols          <- goodcolors(K,thresh=100,cbspace="deut")#
+		}#
+		if(K >= 7 & K < 15){#
+			myCols          <- goodcolors(K,thresh=100,cbspace="")#
+		}#
+		if(K>=15){#
+			myCols          <- c(goodcolors(14,thresh=100,cbspace=""), sample(adegenet::funky(100), size=K-14))#
+		}#
+		posterior.gg        <- ggplot2::ggplot(posterior.df, aes(fill= pop, x= assignment, y=indv)) + geom_bar(position="stack", stat="identity") + theme_classic() + theme(axis.text.y = element_text(size = label.size), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank()) + ggplot2::labs(x = "Membership Probability",y="",fill="Cluster",title=paste0("K = ",K)) + scale_fill_manual(values=myCols[1:K])#
+		plot(posterior.gg)#
+		admixturePlot[[i]]   <- recordPlot()#
+		my.palette   <- tess3r::CreatePalette(myCols, 9)#
+		xdist        <- geosphere::distm(x=c(x.min,0),y=c(x.max,0))#
+		ydist        <- geosphere::distm(x=c(0,y.min),y=c(0,y.max))#
+		mapplot.initial <- plot(suppressWarnings(tess3r::as.qmatrix(q.matrix)), as.matrix(coords), method = "map.max", interpol = FieldsKrigModel(10), main = paste0("Ancestry coefficients; K=",K), xlab = "", ylab = "",resolution = c(100,100), cex = 0.4,col.palette = my.palette, window=c(x.min,x.max,y.min,y.max),asp=xdist/ydist)#
+		mapplot.i       <- plot(suppressWarnings(tess3r::as.qmatrix(q.matrix)), as.matrix(coords), method = "map.max", interpol = FieldsKrigModel(10), main = paste0("Ancestry coefficients; K=",K), xlab = "", ylab = "",resolution = c(500,500), cex = 0.4,col.palette = my.palette, window=c(par("usr")[1],par("usr")[2],par("usr")[3],par("usr")[4]),asp=xdist/ydist)#
+		mapplot[[i]]    <- recordPlot()#
+	}#
+	result <- c(list(entropyPlot),admixturePlot,mapplot)#
+	if(!is.null(save.as)){#
+		pdf(height=6,width=10,file=save.as,onefile=TRUE)#
+		lapply(X=result,FUN=print)#
+		dev.off()#
+	}#
+	result#
+}
+run_DAPC <- function(vcf, kmax=50, coords=NULL, reps=100,probs.out=NULL,save.as=NULL){#
+	dev.new(width=10,height=6)#
+	vcf.obj     <- vcfR::read.vcfR(vcf,verbose=F)#
+	samplenames <- colnames(vcf.obj@gt)[-1]#
+	genind      <- suppressWarnings(vcfR::vcfR2genind(vcf.obj))#
+	numind      <- (dim(attributes(vcf.obj)[["gt"]])[2])-1#
+	label.size  <- min((288/numind),7)#
+	if(!is.null(coords)){#
+		if(is(coords,"array") | is(coords,"data.frame")){#
+			coords <-  coords#
+		} else {#
+			if(file.exists(coords)){#
+				coords   <- read.table(coords)#
+			}#
+		}#
+		x.min <- min((coords[,1]-0.5))#
+		x.max <- max((coords[,1]+0.5))#
+		y.min <- min((coords[,2]-0.5))#
+		y.max <- max((coords[,2]+0.5))#
+		maxK <- min(nrow(unique(coords)),(numind-1))#
+	} else {#
+		maxK <- (numind-1)#
+	}#
+	if(is.null(kmax)){#
+		kmax <- maxK#
+	} else {#
+		if(kmax > maxK){#
+			kmax <- maxK#
+		}#
+	}#
+	max.clusters <- kmax#
+	grp          <- adegenet::find.clusters(genind, max.n.clust=max.clusters,n.pca=max.clusters,choose.n.clust=F)#
+	grp.list <- list(); length(grp.list) <- reps#
+	par(mar=c(3.5,4,3,2.1))#
+	for(i in 1:reps){#
+		grp.list[[i]] <- adegenet::find.clusters(genind, max.n.clust=max.clusters,n.pca=max.clusters,choose.n.clust=F)#
+	}#
+	BIC.mat           <- do.call(cbind,lapply(X=1:reps,FUN=function(x){grp.list[[x]]$Kstat}))#
+	rownames(BIC.mat) <- 1:max.clusters#
+	colnames(BIC.mat) <- paste0("rep",1:reps)#
+	boxplot(t(BIC.mat))#
+	mean.BIC        <- apply(BIC.mat,MARGIN=1,FUN=mean,na.rm=TRUE)#
+	### Lowest K with a lower mean BIC than K+1 mean BIC.#
+	if(any(diff(mean.BIC)>0)){#
+		bestK <- unname(which(diff(mean.BIC)>0)[1])#
+	} else {#
+		bestK <- 1#
+	}#
+	Kbest.criteria1   <- bestK#
+	### Checking if the max BIC of the next K value is less than the min BIC of the previous K value.#
+	range.BIC.mat     <- do.call(rbind,lapply(X=1:nrow(BIC.mat),FUN=function(x){range(BIC.mat[x,],na.rm=TRUE)}))#
+	BIC.is.nonoverlap <- NULL#
+	BIC.is.reduced    <- NULL#
+	for(i in 2:nrow(range.BIC.mat)){#
+		BIC.is.nonoverlap     <- c(BIC.is.nonoverlap,range.BIC.mat[i,1] > range.BIC.mat[(i-1),2] | range.BIC.mat[i,2] < range.BIC.mat[(i-1),1])#
+		BIC.is.reduced     <- c(BIC.is.reduced,range.BIC.mat[i,2] < range.BIC.mat[(i-1),1])#
+	}#
+	# If max BIC for K=2 is better than BIC K=1 and if some K values are not better (all BIC lower) than K-1, then find the first K value in which K+1 is not better.#
+	if(any(!BIC.is.reduced) & BIC.is.reduced[1]){#
+		Kbest.criteria2 <- which(!BIC.is.reduced)[1]#
+	} else {#
+		Kbest.criteria2 <- 1#
+	}#
+	### Which K value (for K>=2) yields the least variable BIC scores.#
+	BICvK.variation <- apply(X=BIC.mat,MARGIN=1,FUN=var)#
+	KminVarBIC      <- which(BICvK.variation==min(BICvK.variation[-1]))#
+	Kbest.criteria3 <- KminVarBIC#
+	### Criteria 4: t-tests for BIC of each pairwise adjacent K#
+	for(i in 2:nrow(BIC.mat)){#
+		t.test.i <- t.test(BIC.mat[i-1,],BIC.mat[i,])#
+		pval.i   <- t.test.i$p.value#
+		stat.i   <- t.test.i$statistic#
+		if(pval.i < 0.05 & stat.i > 0){#
+			next#
+		} else {#
+			if(i==nrow(BIC.mat)){#
+				Kbest.criteria4 <- NULL#
+			} else{#
+				Kbest.criteria4 <- (i-1)#
+				break#
+			}#
+		}#
+	}#
+	if(bestK>1){#
+		segments(x0=Kbest.criteria1, y0=par("usr")[3], y1=par("usr")[4],lty=2,col="black")#
+	}#
+	# segments(x0=Kbest.criteria1, y0=par("usr")[3], y1=par("usr")[4],lty=2,col="green")#
+	# segments(x0=Kbest.criteria2, y0=par("usr")[3], y1=par("usr")[4],lty=2,col="blue")#
+	# segments(x0=Kbest.criteria3, y0=par("usr")[3], y1=par("usr")[4],lty=2,col="orange")#
+	mtext(side=1,"Number of ancestral populations",line=2.2)#
+	mtext(side=2,"BIC",line=2.2)#
+	mtext(side=3,paste0("BIC (",reps," replicates of find.clusters) vs. number of clusters (K)"),line=1)#
+	axis(1,at=1:max.clusters)#
+	BICPlot    <- recordPlot()#
+	best.npca    <- NULL#
+	grp.mat      <- matrix(data=0,nrow=length(grp$grp),ncol=(max.clusters-1))#
+	for(K in 2:max.clusters){#
+		i=(K-1)#
+		grp.K         <- adegenet::find.clusters(genind, max.n.clust=max.clusters,n.pca=max.clusters,n.clust=K)#
+		grp.mat[,i]   <- grp.K$grp#
+		dapc.pcamax.K <- suppressWarnings(adegenet::dapc(genind, grp.K$grp,n.pca=max.clusters,n.da=5))#
+		alpha_optim.K <- suppressWarnings(adegenet::optim.a.score(dapc.pcamax.K,plot=FALSE))#
+		best.npca     <- c(best.npca,alpha_optim.K$best)#
+	}#
+	##### Plot 2: BIC vs. K when number of PCs retained = alpha optimized #
+	par(mar=c(4,4,3,2.1))#
+	names(best.npca) <- 2:max.clusters#
+	barplot(best.npca)#
+	mtext(text="Alpha optimized number of principle components to retain",side=2,line=2)#
+	mtext(text="Number of clusters",side=1,line=2)#
+	mtext(text="alpha optimized # of PCs vs. number of clusters",side=3,line=1)#
+	grp.plot2      <- recordPlot()#
+	par(mfrow=c(1,1))#
+	admixturePlot  <- list(); length(admixturePlot)   <- max.clusters-1#
+	assignmentPlot <- list(); length(assignmentPlot)  <- max.clusters-1#
+	posterior.list <- list(); length(posterior.list)  <- max.clusters-1#
+	mapplot <- list(); length(mapplot)  <- max.clusters-1#
+	for(K in 2:max.clusters){#
+		i=(K-1)#
+		par(mar=c(5.1,4.1,4.1,2.1),mfrow=c(1,1))#
+		dapc.pcabest.K  <- adegenet::dapc(genind, grp.mat[,i],n.pca=best.npca[i],n.da=5)#
+		posterior       <- dapc.pcabest.K$posterior#
+		q.matrix        <- posterior#
+		posterior.list[[i]] <- posterior#
+		posterior.df    <- data.frame(indv=rep(rownames(posterior),ncol(posterior)), pop=rep(colnames(posterior),each=nrow(posterior)), assignment=c(posterior))#
+		if(K < 5){#
+			myCols          <- goodcolors(K,thresh=100)#
+		}#
+		if(K >= 5 & K < 7){#
+			myCols          <- goodcolors(K,thresh=100,cbspace="deut")#
+		}#
+		if(K >= 7 & K < 15){#
+			myCols          <- goodcolors(K,thresh=100,cbspace="")#
+		}#
+		if(K>=15){#
+			myCols          <- c(goodcolors(14,thresh=100,cbspace=""), sample(adegenet::funky(100), size=K-14))#
+		}#
+		posterior.gg        <- ggplot2::ggplot(posterior.df, aes(fill= pop, x= assignment, y=indv)) + geom_bar(position="stack", stat="identity") + theme_classic() + theme(axis.text.y = element_text(size = label.size), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank()) + ggplot2::labs(x = "Membership Probability",y="",fill="Cluster",title=paste0("K = ",K,"; PCs retained = ",best.npca[i])) + scale_fill_manual(values=myCols[1:K])#
+		plot(posterior.gg)#
+		admixturePlot[[i]]   <- recordPlot()#
+		par(mar=c(5,20,2,2.1),mfrow=c(1,1))#
+		assignment.K         <- adegenet::assignplot(dapc.pcabest.K,cex.lab=(label.size/10))#
+		mtext(text=paste0("K = ",K,"; PCs retained = ",best.npca[i]))#
+		assignmentPlot[[i]]  <- recordPlot()#
+		par(mar=c(5.1,4.1,4.1,2.1),mfrow=c(1,1))#
+		if(!is.null(coords)){#
+			my.palette      <- tess3r::CreatePalette(myCols, 9)#
+			xdist           <- geosphere::distm(x=c(x.min,0),y=c(x.max,0))#
+			ydist           <- geosphere::distm(x=c(0,y.min),y=c(0,y.max))#
+			tess3r.qmat     <- suppressWarnings(tess3r::as.qmatrix(q.matrix))#
+			coords.mat      <- as.matrix(coords)#
+			mapplot.initial <- plot(tess3r.qmat, coords.mat, method = "map.max", interpol = FieldsKrigModel(10), main = paste0("Ancestry coefficients; K=",K), xlab = "", ylab = "",resolution = c(100,100), cex = 0.4,col.palette = my.palette, window=c(x.min,x.max,y.min,y.max),asp=xdist/ydist)#
+			mapplot.i       <- plot(tess3r.qmat, coords.mat, method = "map.max", interpol = FieldsKrigModel(10), main = paste0("Ancestry coefficients; K=",K), xlab = "", ylab = "",resolution = c(500,500), cex = 0.4,col.palette = my.palette, window=c(par("usr")[1],par("usr")[2],par("usr")[3],par("usr")[4]),asp=xdist/ydist)#
+			mapplot[[i]]    <- recordPlot()#
+		}#
+	}#
+	if(bestK>1){#
+		posterior.bestK <- posterior.list[[bestK-1]]#
+		colnames(posterior.bestK) <- paste0("K",colnames(posterior.bestK))#
+		if(!is.null(probs.out)){#
+			write.table(posterior.bestK,file=probs.out,quote=F,col.names=T,row.names=T)#
+		}#
+	} else {#
+		posterior.bestK <- matrix(data=rep(1,numind),ncol=1)#
+		rownames(posterior.bestK) <- samplenames#
+	}#
+	dev.off()#
+	if(!is.null(coords)){#
+		result <- c(list(BICPlot,grp.plot2),admixturePlot,assignmentPlot,mapplot)#
+	} else {#
+		result <- c(list(BICPlot,grp.plot2),admixturePlot,assignmentPlot)#
+	}#
+	if(!is.null(save.as)){#
+		pdf(height=6,width=10,file=save.as,onefile=TRUE)#
+		lapply(X=result,FUN=print)#
+		dev.off()#
+	}#
+	result#
+}
+bothmodestum <- run_SNMF(vcf="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/DAPC/Oxyrhabdium_both-modestum_BestSNP.vcf",#
+	                           coords="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/tess3r/Oxyrhabdium_bothmodestum_coords.txt",#
+	                           save.as="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/LEA/Oxyrhabdium_both-modestum_BestSNP_sNMF_run2.pdf")
+source("/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/DAPC/DAPC_adegenet.R")
+q()
+library(ade4)#
+	library(adegenet)#
+	library(vcfR)#
+	library(ggplot2)#
+	library(tess3r)#
+	library(rworldmap)#
+	library(LEA)#
+	library(geosphere)#
+	library(maps)#
+	library(dartR)#
+	source("/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/DAPC/DAPC_adegenet.R")#
+	source("/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/runtess.R")#
+	source("/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/LEA/run_SNMF.R")
+dev.new(width=10,height=6)
+cfmodestum_Luzon <- run_DAPC(vcf="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/DAPC/Oxyrhabdium-cf.modestum_Luzon_BestSNP.vcf",#
+                            probs.out="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/DAPC/Oxyrhabdium-cf.modestum_Luzon_BestSNP_DAPC_BestK_Membership_run2.txt",#
+                            coords="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/tess3r/Oxyrhabdium-cfmodestum_Luzon_coords.txt",#
+                            save.as="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/DAPC/Oxyrhabdium-cfmodestum_Luzon_BestSNP_DAPC_run1.pdf")
+vcf="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/DAPC/Oxyrhabdium-cf.modestum_Luzon_BestSNP.vcf";#
+                             probs.out="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/DAPC/Oxyrhabdium-cf.modestum_Luzon_BestSNP_DAPC_BestK_Membership_run2.txt";#
+                             coords="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/tess3r/Oxyrhabdium-cfmodestum_Luzon_coords.txt";#
+                             save.as="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/DAPC/Oxyrhabdium-cfmodestum_Luzon_BestSNP_DAPC_run1.pdf"
+kmax=50
+reps=100
+vcf.obj     <- vcfR::read.vcfR(vcf,verbose=F)#
+	samplenames <- colnames(vcf.obj@gt)[-1]#
+	genind      <- suppressWarnings(vcfR::vcfR2genind(vcf.obj))#
+	numind      <- (dim(attributes(vcf.obj)[["gt"]])[2])-1#
+	label.size  <- min((288/numind),7)
+samplenames
+!is.null(coords)
+if(is(coords,"array") | is(coords,"data.frame")){#
+			coords <-  coords#
+		} else {#
+			if(file.exists(coords)){#
+				coords   <- read.table(coords)#
+			}#
+		}
+coords
+x.min <- min((coords[,1]-0.5))#
+		x.max <- max((coords[,1]+0.5))#
+		y.min <- min((coords[,2]-0.5))#
+		y.max <- max((coords[,2]+0.5))#
+		maxK <- min(nrow(unique(coords)),(numind-1))
+if(is.null(kmax)){#
+		kmax <- maxK#
+	} else {#
+		if(kmax > maxK){#
+			kmax <- maxK#
+		}#
+	}
+max.clusters <- kmax
+grp          <- adegenet::find.clusters(genind, max.n.clust=max.clusters,n.pca=max.clusters,choose.n.clust=F)
+for(i in 1:reps){#
+		grp.list[[i]] <- adegenet::find.clusters(genind, max.n.clust=max.clusters,n.pca=max.clusters,choose.n.clust=F)#
+	}#
+	BIC.mat           <- do.call(cbind,lapply(X=1:reps,FUN=function(x){grp.list[[x]]$Kstat}))
+grp.list <- list(); length(grp.list) <- reps#
+	par(mar=c(3.5,4,3,2.1))#
+	for(i in 1:reps){#
+		grp.list[[i]] <- adegenet::find.clusters(genind, max.n.clust=max.clusters,n.pca=max.clusters,choose.n.clust=F)#
+	}#
+	BIC.mat           <- do.call(cbind,lapply(X=1:reps,FUN=function(x){grp.list[[x]]$Kstat}))
+rownames(BIC.mat) <- 1:max.clusters#
+	colnames(BIC.mat) <- paste0("rep",1:reps)#
+	boxplot(t(BIC.mat))#
+	mean.BIC        <- apply(BIC.mat,MARGIN=1,FUN=mean,na.rm=TRUE)
+if(any(diff(mean.BIC)>0)){#
+		bestK <- unname(which(diff(mean.BIC)>0)[1])#
+	} else {#
+		bestK <- 1#
+	}#
+	Kbest.criteria1   <- bestK
+Kbest.criteria1
+range.BIC.mat     <- do.call(rbind,lapply(X=1:nrow(BIC.mat),FUN=function(x){range(BIC.mat[x,],na.rm=TRUE)}))#
+	BIC.is.nonoverlap <- NULL#
+	BIC.is.reduced    <- NULL
+range.BIC.mat
+for(i in 2:nrow(range.BIC.mat)){#
+		BIC.is.nonoverlap     <- c(BIC.is.nonoverlap,range.BIC.mat[i,1] > range.BIC.mat[(i-1),2] | range.BIC.mat[i,2] < range.BIC.mat[(i-1),1])#
+		BIC.is.reduced     <- c(BIC.is.reduced,range.BIC.mat[i,2] < range.BIC.mat[(i-1),1])#
+	}
+if(any(!BIC.is.reduced) & BIC.is.reduced[1]){#
+		Kbest.criteria2 <- which(!BIC.is.reduced)[1]#
+	} else {#
+		Kbest.criteria2 <- 1#
+	}
+BICvK.variation <- apply(X=BIC.mat,MARGIN=1,FUN=var)
+BICvK.variation
+KminVarBIC      <- which(BICvK.variation==min(BICvK.variation[-1]))
+KminVarBIC
+Kbest.criteria3 <- KminVarBIC[1]
+Kbest.criteria3
+for(i in 2:nrow(BIC.mat)){#
+		t.test.i <- t.test(BIC.mat[i-1,],BIC.mat[i,])#
+		pval.i   <- t.test.i$p.value#
+		stat.i   <- t.test.i$statistic#
+		if(pval.i < 0.05 & stat.i > 0){#
+			next#
+		} else {#
+			if(i==nrow(BIC.mat)){#
+				Kbest.criteria4 <- NULL#
+			} else{#
+				Kbest.criteria4 <- (i-1)#
+				break#
+			}#
+		}#
+	}
+t.test.i <- t.test(BIC.mat[i-1,],BIC.mat[i,])
+for(i in 2:nrow(BIC.mat)){#
+		if(KminVarBIC==0){#
+			Kbest.criteria4 <- NULL#
+			break#
+		}#
+		t.test.i <- t.test(BIC.mat[i-1,],BIC.mat[i,])#
+		pval.i   <- t.test.i$p.value#
+		stat.i   <- t.test.i$statistic#
+		if(pval.i < 0.05 & stat.i > 0){#
+			next#
+		} else {#
+			if(i==nrow(BIC.mat)){#
+				Kbest.criteria4 <- NULL#
+			} else{#
+				Kbest.criteria4 <- (i-1)#
+				break#
+			}#
+		}#
+	}
+KminVarBIC==0
+BICvK.variation[Kbest.criteria3]
+for(i in 2:nrow(BIC.mat)){#
+		if(BICvK.variation[Kbest.criteria3]==0){#
+			Kbest.criteria4 <- NULL#
+			break#
+		}#
+		t.test.i <- t.test(BIC.mat[i-1,],BIC.mat[i,])#
+		pval.i   <- t.test.i$p.value#
+		stat.i   <- t.test.i$statistic#
+		if(pval.i < 0.05 & stat.i > 0){#
+			next#
+		} else {#
+			if(i==nrow(BIC.mat)){#
+				Kbest.criteria4 <- NULL#
+			} else{#
+				Kbest.criteria4 <- (i-1)#
+				break#
+			}#
+		}#
+	}
+if(bestK>1){#
+		segments(x0=Kbest.criteria1, y0=par("usr")[3], y1=par("usr")[4],lty=2,col="black")#
+	}
+bestK
+if(bestK>1){#
+		segments(x0=Kbest.criteria1, y0=par("usr")[3], y1=par("usr")[4],lty=2,col="black")#
+	}
+mtext(side=1,"Number of ancestral populations",line=2.2)#
+	mtext(side=2,"BIC",line=2.2)#
+	mtext(side=3,paste0("BIC (",reps," replicates of find.clusters) vs. number of clusters (K)"),line=1)
+axis(1,at=1:max.clusters)#
+	BICPlot    <- recordPlot()#
+	best.npca    <- NULL#
+	grp.mat      <- matrix(data=0,nrow=length(grp$grp),ncol=(max.clusters-1))#
+	for(K in 2:max.clusters){#
+		i=(K-1)#
+		grp.K         <- adegenet::find.clusters(genind, max.n.clust=max.clusters,n.pca=max.clusters,n.clust=K)#
+		grp.mat[,i]   <- grp.K$grp#
+		dapc.pcamax.K <- suppressWarnings(adegenet::dapc(genind, grp.K$grp,n.pca=max.clusters,n.da=5))#
+		alpha_optim.K <- suppressWarnings(adegenet::optim.a.score(dapc.pcamax.K,plot=FALSE))#
+		best.npca     <- c(best.npca,alpha_optim.K$best)#
+	}
+##### Plot 2: BIC vs. K when number of PCs retained = alpha optimized #
+	par(mar=c(4,4,3,2.1))#
+	names(best.npca) <- 2:max.clusters#
+	barplot(best.npca)#
+	mtext(text="Alpha optimized number of principle components to retain",side=2,line=2)#
+	mtext(text="Number of clusters",side=1,line=2)#
+	mtext(text="alpha optimized # of PCs vs. number of clusters",side=3,line=1)#
+	grp.plot2      <- recordPlot()#
+	par(mfrow=c(1,1))#
+	admixturePlot  <- list(); length(admixturePlot)   <- max.clusters-1#
+	assignmentPlot <- list(); length(assignmentPlot)  <- max.clusters-1#
+	posterior.list <- list(); length(posterior.list)  <- max.clusters-1#
+	mapplot <- list(); length(mapplot)  <- max.clusters-1
+for(K in 2:max.clusters){#
+		i=(K-1)#
+		par(mar=c(5.1,4.1,4.1,2.1),mfrow=c(1,1))#
+		dapc.pcabest.K  <- adegenet::dapc(genind, grp.mat[,i],n.pca=best.npca[i],n.da=5)#
+		posterior       <- dapc.pcabest.K$posterior#
+		q.matrix        <- posterior#
+		posterior.list[[i]] <- posterior#
+		posterior.df    <- data.frame(indv=rep(rownames(posterior),ncol(posterior)), pop=rep(colnames(posterior),each=nrow(posterior)), assignment=c(posterior))#
+		if(K < 5){#
+			myCols          <- goodcolors(K,thresh=100)#
+		}#
+		if(K >= 5 & K < 7){#
+			myCols          <- goodcolors(K,thresh=100,cbspace="deut")#
+		}#
+		if(K >= 7 & K < 15){#
+			myCols          <- goodcolors(K,thresh=100,cbspace="")#
+		}#
+		if(K>=15){#
+			myCols          <- c(goodcolors(14,thresh=100,cbspace=""), sample(adegenet::funky(100), size=K-14))#
+		}#
+		posterior.gg        <- ggplot2::ggplot(posterior.df, aes(fill= pop, x= assignment, y=indv)) + geom_bar(position="stack", stat="identity") + theme_classic() + theme(axis.text.y = element_text(size = label.size), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank()) + ggplot2::labs(x = "Membership Probability",y="",fill="Cluster",title=paste0("K = ",K,"; PCs retained = ",best.npca[i])) + scale_fill_manual(values=myCols[1:K])#
+		plot(posterior.gg)#
+		admixturePlot[[i]]   <- recordPlot()#
+		par(mar=c(5,20,2,2.1),mfrow=c(1,1))#
+		assignment.K         <- adegenet::assignplot(dapc.pcabest.K,cex.lab=(label.size/10))#
+		mtext(text=paste0("K = ",K,"; PCs retained = ",best.npca[i]))#
+		assignmentPlot[[i]]  <- recordPlot()#
+		par(mar=c(5.1,4.1,4.1,2.1),mfrow=c(1,1))#
+		if(!is.null(coords)){#
+			my.palette      <- tess3r::CreatePalette(myCols, 9)#
+			xdist           <- geosphere::distm(x=c(x.min,0),y=c(x.max,0))#
+			ydist           <- geosphere::distm(x=c(0,y.min),y=c(0,y.max))#
+			tess3r.qmat     <- suppressWarnings(tess3r::as.qmatrix(q.matrix))#
+			coords.mat      <- as.matrix(coords)#
+			mapplot.initial <- plot(tess3r.qmat, coords.mat, method = "map.max", interpol = FieldsKrigModel(10), main = paste0("Ancestry coefficients; K=",K), xlab = "", ylab = "",resolution = c(100,100), cex = 0.4,col.palette = my.palette, window=c(x.min,x.max,y.min,y.max),asp=xdist/ydist)#
+			mapplot.i       <- plot(tess3r.qmat, coords.mat, method = "map.max", interpol = FieldsKrigModel(10), main = paste0("Ancestry coefficients; K=",K), xlab = "", ylab = "",resolution = c(500,500), cex = 0.4,col.palette = my.palette, window=c(par("usr")[1],par("usr")[2],par("usr")[3],par("usr")[4]),asp=xdist/ydist)#
+			mapplot[[i]]    <- recordPlot()#
+		}#
+	}
+if(bestK>1){#
+		posterior.bestK <- posterior.list[[bestK-1]]#
+		colnames(posterior.bestK) <- paste0("K",colnames(posterior.bestK))#
+		if(!is.null(probs.out)){#
+			write.table(posterior.bestK,file=probs.out,quote=F,col.names=T,row.names=T)#
+		}#
+	} else {#
+		posterior.bestK <- matrix(data=rep(1,numind),ncol=1)#
+		rownames(posterior.bestK) <- samplenames#
+	}
+if(!is.null(coords)){#
+		result <- c(list(BICPlot,grp.plot2),admixturePlot,assignmentPlot,mapplot)#
+	} else {#
+		result <- c(list(BICPlot,grp.plot2),admixturePlot,assignmentPlot)#
+	}
+pdf(height=6,width=10,file=save.as,onefile=TRUE)
 result
-n=3; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.05, labels=result); result
-n=3; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.05, labels=result); result
-n=3; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.05, labels=result); result
-n=4; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.05, labels=result); result
-n=4; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.05, labels=result); result
-n=4; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.05, labels=result); result
-n=4; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.05, labels=result); result
-n=4; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.05, labels=result); result
-n=5; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.05, labels=result); result
-n=5; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.05, labels=result); result
-n=5; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.05, labels=result); result
-n=6; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.05, labels=result); result
-n=6; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.05, labels=result); result
-n=6; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.05, labels=result); result
-n=6; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.05, labels=result); result
-n=6; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.05, labels=result); result
-n=6; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.05, labels=result); result
-n=6; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.05, labels=result); result
-n=7; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.05, labels=result); result
-n=7; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.05, labels=result); result
-n=7; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.05, labels=result); result
-n=7; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.05, labels=result); result
-n=7; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.05, labels=result); result
-n=7; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.05, labels=result); result
-n=7; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.05, labels=result); result
-n=7; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.05, labels=result); result
-n=7; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.05, labels=result); result
-n=7; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.05, labels=result); result
-n=7; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.05, labels=result); result
-n=7; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.05, labels=result); result
-n=7; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.05, labels=result); result
-n=8; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.05, labels=result); result
-n=9; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.05, labels=result); result
-n=9; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.05, labels=result); result
-n=9; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.05, labels=result); result
-n=9; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.05, labels=result); result
-n=9; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.05, labels=result); result
-n=9; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.05, labels=result); result
-n=9; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.05, labels=result); result
-n=9; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.05, labels=result); result
-n=9; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.05, labels=result); result
-n=10; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.05, labels=result); result
-n=10; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.05, labels=result); result
-n=10; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.05, labels=result); result
-n=10; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.05, labels=result); result
-n=10; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.05, labels=result); result
-n=10; result <- goodcolors(n=n,thresh=100); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.05, labels=result); result
-n=10; result <- goodcolors(n=n,thresh=110,iter=100); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.05, labels=result,srt=90); result
-n=10; result <- goodcolors(n=n,thresh=110,iter=100); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.2))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.1, labels=result,srt=90); result
-n=10; result <- goodcolors(n=n,thresh=110,iter=100); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.2))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.1, labels=result,srt=90); result
-n=10; result <- goodcolors(n=n,thresh=110,iter=100); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.15, labels=result,srt=90); result
-n=10; result <- goodcolors(n=n,thresh=110,iter=100); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.12, labels=result,srt=90); result
-n=10; result <- goodcolors(n=n,thresh=110,iter=100); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.12, labels=result,srt=90); result
-n=10; result <- goodcolors(n=n,thresh=110,iter=100); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.12, labels=result,srt=90); result
-n=11; result <- goodcolors(n=n,thresh=110,iter=100); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.12, labels=result,srt=90); result
-n=11; result <- goodcolors(n=n,thresh=110,iter=100); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.12, labels=result,srt=90); result
-n=12; result <- goodcolors(n=n,thresh=110,iter=100); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.12, labels=result,srt=90); result
-n=12; result <- goodcolors(n=n,thresh=110,iter=100); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.12, labels=result,srt=90); result
-n=12; result <- goodcolors(n=n,thresh=110,iter=100); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.12, labels=result,srt=90); result
-n=12; result <- goodcolors(n=n,thresh=110,iter=100); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.12, labels=result,srt=90); result
-n=12; result <- goodcolors(n=n,thresh=110,iter=100); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.12, labels=result,srt=90); result
-n=12; result <- goodcolors(n=n,thresh=110,iter=100); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.12, labels=result,srt=90); result
-n=12; result <- goodcolors(n=n,thresh=110,iter=100); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.12, labels=result,srt=90); result
-n=12; result <- goodcolors(n=n,thresh=110,iter=100); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.12, labels=result,srt=90); result
-n=12; result <- goodcolors(n=n,thresh=110,iter=100); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.12, labels=result,srt=90); result
-n=12; result <- goodcolors(n=n,thresh=110,iter=300); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.12, labels=result,srt=90); result
-n=12; result <- goodcolors(n=n,thresh=110,iter=300); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.12, labels=result,srt=90); result
-n=13; result <- goodcolors(n=n,thresh=110,iter=300); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.12, labels=result,srt=90); result
-n=14; result <- goodcolors(n=n,thresh=110,iter=300); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.12, labels=result,srt=90); result
-n=14; result <- goodcolors(n=n,thresh=110,iter=300); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.12, labels=result,srt=90); result
-n=14; result <- goodcolors(n=n,thresh=110,iter=300); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.12, labels=result,srt=90); result
-n=14; result <- goodcolors(n=n,thresh=110,iter=300); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.12, labels=result,srt=90); result
-n=14; result <- goodcolors(n=n,thresh=110,iter=300); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.12, labels=result,srt=90); result
-n=14; result <- goodcolors(n=n,thresh=110,iter=300); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.12, labels=result,srt=90); result
-n=14; result <- goodcolors(n=n,thresh=110,iter=300); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.12, labels=result,srt=90); result
-n=14; result <- goodcolors(n=n,thresh=110,iter=300); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.12, labels=result,srt=90); result
-n=14; result <- goodcolors(n=n,thresh=110,iter=300); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.12, labels=result,srt=90); result
-n=14; result <- goodcolors(n=n,thresh=110,iter=300); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.12, labels=result,srt=90); result
-n=14; result <- goodcolors(n=n,thresh=110,iter=300); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.12, labels=result,srt=90); result
-n=14; result <- goodcolors(n=n,thresh=110,iter=300); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.12, labels=result,srt=90); result
-n=14; result <- goodcolors(n=n,thresh=110,iter=300); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.12, labels=result,srt=90); result
-n=15; result <- goodcolors(n=n,thresh=110,iter=300); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.12, labels=result,srt=90); result
-n=15; result <- goodcolors(n=n,thresh=110,iter=300); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.12, labels=result,srt=90); result
-n=15; result <- goodcolors(n=n,thresh=110,iter=300); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.12, labels=result,srt=90); result
-n=15; result <- goodcolors(n=n,thresh=110,iter=300); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.12, labels=result,srt=90); result
-n=15; result <- goodcolors(n=n,thresh=110,iter=300); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.12, labels=result,srt=90); result
-n=15; result <- goodcolors(n=n,thresh=110,iter=300); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.12, labels=result,srt=90); result
-n=15; result <- goodcolors(n=n,thresh=110,iter=300); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.12, labels=result,srt=90); result
-n=15; result <- goodcolors(n=n,thresh=110,iter=300,cbspace=c("deut")); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.12, labels=result,srt=90); result
-n=15; result <- goodcolors(n=n,thresh=110,iter=300,cbspace=c("deut")); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.12, labels=result,srt=90); result
-n=15; result <- goodcolors(n=n,thresh=110,iter=300,cbspace=c("deut")); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.12, labels=result,srt=90); result
-n=15; result <- goodcolors(n=n,thresh=110,iter=300,cbspace=c("deut")); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.12, labels=result,srt=90); result
-n=15; result <- goodcolors(n=n,thresh=110,iter=300,cbspace=c("deut")); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.12, labels=result,srt=90); result
-n=15; result <- goodcolors(n=n,thresh=110,iter=300,cbspace=c("deut")); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.12, labels=result,srt=90); result
-n=15; result <- goodcolors(n=n,thresh=110,iter=300,cbspace=c("deut")); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.12, labels=result,srt=90); result
-n=15; result <- goodcolors(n=n,thresh=110,iter=300,cbspace=c("deut")); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.12, labels=result,srt=90); result
-n=15; result <- goodcolors(n=n,thresh=110,iter=300,cbspace=c("deut")); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.12, labels=result,srt=90); result
-n=15; result <- goodcolors(n=n,thresh=110,iter=300,cbspace=c("")); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.12, labels=result,srt=90); result
-goodcolors2 <- function(n,plot.palette=FALSE){#
-	if(n==1 | n > 15){#
-		stop("'n' must be an integer >=2 and <=15")#
-	}#
-	cols2  <- c("#659DDE","#9A0C2B") # "#8BBC6F","#4B04E0"#
-	cols3  <- c("#3DF1C9","#492E50","#FADD56")  # "#F1529B" "#FEF51B" "#2C27E8"#
-	cols4  <- c("#67F57A","#D7A003","#6E8C48","#C41D1B") # "#256D9E" "#EFFB0A" "#E41A3C" "#F98ACB"#
-	cols5  <- c("#789D95","#EDCBD2","#3F04C7","#1E9A00","#B95AEC") # "#6A96F1" "#CBE589" "#BA0803" "#7CDBE0" "#DEA14C"#
-	cols6  <- c("#BF3C2C","#6CD57D","#7D075C","#D7AB41","#E9D4F7","#481EE0") # c("#37175A","#DB8A83","#E91A00","#AA569D","#4385FD","#9AE8CF") # #
-	cols7  <- c("#424B13","#47E5F4","#511D49","#3F9876","#182D84","#AB5CC4","#90A930") # c("#382E69","#F7C665","#1DFC96","#200311","#9DCD2D","#3202E0","#851B20")#
-	cols8  <- c("#EA7250","#9DDF5B","#B74CE0","#687235","#021025","#1BB1A1","#3F8187","#C7B7CE")#
-	cols9  <- c("#8838BD","#997275","#E24911","#ACEB4F","#1DB756","#611D97","#6C7BCF","#125034","#F4ABD7")#
-	cols10 <- c("#98ACD2","#6197ED","#7A478F","#986D65","#D9C452","#22553B","#B4993A","#0DF1FA","#E8971B","#36D8B9") # "#51BE1A" "#34A6A2" "#86D0E8" "#BDFD81" "#21594F" "#F1F9D6" "#678534" "#6B49C8" "#57191C" "#EC906B"#
-	cols11 <- c("#33E8BB", "#C69A01", "#799525", "#030A34", "#091E57", "#4ED671", "#A4282F", "#2F08BA", "#5BD80A", "#CD0B50", "#B9C1F5") # "#5BBDFD" "#200042" "#616B8F" "#578B7C" "#4D59C3" "#B0FE9F" "#0B335C" "#7F780B" "#C55BD7" "#9F2502" "#D9EF1C"#
-	cols12 <- c("#FE42DD","#68B206","#FFD4E9","#4FBF72","#567D96","#94245B","#226826","#B8CC94","#1752F7","#8B8C5B","#29A6CF","#2ADEC9") #
-	cols13 <- c("#0ACCF8","#9F9D46","#2FCA60","#3D31C8","#50087B","#A17D78","#C0B27E","#EA6EA5","#B21D00","#31E701","#AC1479","#0B3D98","#5DBB15") # "#FCED80" "#336AB6" "#8F3A8C" "#FA9304" "#3545B1" "#83FDF4" "#B6575B" "#232E32" "#AF9746" "#4CA612" "#ED7B66" "#C3C600" "#47B9F5" # "#5B45C8" "#63F469" "#F3B4C8" "#D9EFE8" "#C74B77" "#F1A655" "#813402" "#3D27C4" "#CCD427" "#27AD47" "#13117F" "#97753D" "#09C1B2"#
-	cols14 <- c("#A9D12A","#1D5DB8","#F18249","#44EB9D","#3702AA","#0AF6FF","#48063C","#8DAFB0","#343E3D","#ED20FD","#910148","#375EFF","#F1A4CC","#CE1B4F") # "#FFA357" "#7AAD72" "#2D5AB4" "#E41B0B" "#51ECF5" "#007866" "#D43CB8" "#34E590" "#DC9F06" "#91827F" "#830638" "#B07527" "#F6BCC0" "#2B63EC" #### Change first color: "#62D236" "#FCED80" "#336AB6" "#8F3A8C" "#FA9304" "#3545B1" "#83FDF4" "#B6575B" "#232E32" "#AF9746" "#4CA612" "#ED7B66" "#C3C600" "#47B9F5"#
-	cols15 <- c("#810890","#EFD814","#2D793E","#796ED5","#699866","#343E3D","#F6233D","#877D0E","#C9BAD5","#8BB0B1","#00C3C0","#522AA9","#21FF61","#EA8316","#F5C387")#
-	cols16 <- NULL#
-	cols17 <- NULL#
-	cols18 <- NULL#
-	cols19 <- NULL#
-	cols20 <- NULL#
-	cols21 <- NULL#
-	cols22 <- NULL#
-	cols23 <- NULL#
-	cols24 <- NULL#
-	cols25 <- NULL#
-	colorList <- list(cols2 ,cols3 ,cols4 ,cols5 ,cols6 ,cols7 ,cols8 ,cols9 ,cols10,cols11,cols12,cols13,cols14,cols15,cols16,cols17,cols18,cols19,cols20,cols21,cols22,cols23,cols24,cols25)#
-	result    <- colorList[[n]]#
-	if(plot.palette){#
-		dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.1))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.05, labels=result,cex=0.5)#
-	}#
-	result#
-}
-goodcolors2(1,TRUE)
-goodcolors2(2,TRUE)
-goodcolors2(3,TRUE)
-goodcolors2(4,TRUE)
-goodcolors2 <- function(n,plot.palette=FALSE){#
-	if(n==1 | n > 15){#
-		stop("'n' must be an integer >=2 and <=15")#
-	}#
-	cols2  <- c("#659DDE","#9A0C2B") # "#8BBC6F","#4B04E0"#
-	cols3  <- c("#3DF1C9","#492E50","#FADD56")  # "#F1529B" "#FEF51B" "#2C27E8"#
-	cols4  <- c("#67F57A","#D7A003","#6E8C48","#C41D1B") # "#256D9E" "#EFFB0A" "#E41A3C" "#F98ACB"#
-	cols5  <- c("#789D95","#EDCBD2","#3F04C7","#1E9A00","#B95AEC") # "#6A96F1" "#CBE589" "#BA0803" "#7CDBE0" "#DEA14C"#
-	cols6  <- c("#BF3C2C","#6CD57D","#7D075C","#D7AB41","#E9D4F7","#481EE0") # c("#37175A","#DB8A83","#E91A00","#AA569D","#4385FD","#9AE8CF") # #
-	cols7  <- c("#424B13","#47E5F4","#511D49","#3F9876","#182D84","#AB5CC4","#90A930") # c("#382E69","#F7C665","#1DFC96","#200311","#9DCD2D","#3202E0","#851B20")#
-	cols8  <- c("#EA7250","#9DDF5B","#B74CE0","#687235","#021025","#1BB1A1","#3F8187","#C7B7CE")#
-	cols9  <- c("#8838BD","#997275","#E24911","#ACEB4F","#1DB756","#611D97","#6C7BCF","#125034","#F4ABD7")#
-	cols10 <- c("#98ACD2","#6197ED","#7A478F","#986D65","#D9C452","#22553B","#B4993A","#0DF1FA","#E8971B","#36D8B9") # "#51BE1A" "#34A6A2" "#86D0E8" "#BDFD81" "#21594F" "#F1F9D6" "#678534" "#6B49C8" "#57191C" "#EC906B"#
-	cols11 <- c("#33E8BB", "#C69A01", "#799525", "#030A34", "#091E57", "#4ED671", "#A4282F", "#2F08BA", "#5BD80A", "#CD0B50", "#B9C1F5") # "#5BBDFD" "#200042" "#616B8F" "#578B7C" "#4D59C3" "#B0FE9F" "#0B335C" "#7F780B" "#C55BD7" "#9F2502" "#D9EF1C"#
-	cols12 <- c("#FE42DD","#68B206","#FFD4E9","#4FBF72","#567D96","#94245B","#226826","#B8CC94","#1752F7","#8B8C5B","#29A6CF","#2ADEC9") #
-	cols13 <- c("#0ACCF8","#9F9D46","#2FCA60","#3D31C8","#50087B","#A17D78","#C0B27E","#EA6EA5","#B21D00","#31E701","#AC1479","#0B3D98","#5DBB15") # "#FCED80" "#336AB6" "#8F3A8C" "#FA9304" "#3545B1" "#83FDF4" "#B6575B" "#232E32" "#AF9746" "#4CA612" "#ED7B66" "#C3C600" "#47B9F5" # "#5B45C8" "#63F469" "#F3B4C8" "#D9EFE8" "#C74B77" "#F1A655" "#813402" "#3D27C4" "#CCD427" "#27AD47" "#13117F" "#97753D" "#09C1B2"#
-	cols14 <- c("#A9D12A","#1D5DB8","#F18249","#44EB9D","#3702AA","#0AF6FF","#48063C","#8DAFB0","#343E3D","#ED20FD","#910148","#375EFF","#F1A4CC","#CE1B4F") # "#FFA357" "#7AAD72" "#2D5AB4" "#E41B0B" "#51ECF5" "#007866" "#D43CB8" "#34E590" "#DC9F06" "#91827F" "#830638" "#B07527" "#F6BCC0" "#2B63EC" #### Change first color: "#62D236" "#FCED80" "#336AB6" "#8F3A8C" "#FA9304" "#3545B1" "#83FDF4" "#B6575B" "#232E32" "#AF9746" "#4CA612" "#ED7B66" "#C3C600" "#47B9F5"#
-	cols15 <- c("#810890","#EFD814","#2D793E","#796ED5","#699866","#343E3D","#F6233D","#877D0E","#C9BAD5","#8BB0B1","#00C3C0","#522AA9","#21FF61","#EA8316","#F5C387")#
-	cols16 <- NULL#
-	cols17 <- NULL#
-	cols18 <- NULL#
-	cols19 <- NULL#
-	cols20 <- NULL#
-	cols21 <- NULL#
-	cols22 <- NULL#
-	cols23 <- NULL#
-	cols24 <- NULL#
-	cols25 <- NULL#
-	colorList <- list(cols2 ,cols3 ,cols4 ,cols5 ,cols6 ,cols7 ,cols8 ,cols9 ,cols10,cols11,cols12,cols13,cols14,cols15,cols16,cols17,cols18,cols19,cols20,cols21,cols22,cols23,cols24,cols25)#
-	result    <- colorList[[n]]#
-	if(plot.palette){#
-		dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.12, labels=result,srt=90)#
-	}#
-	result#
-}
-goodcolors2(4,TRUE)
-goodcolors2(5,TRUE)
-goodcolors2(6,TRUE)
-goodcolors2(7,TRUE)
-goodcolors2(8,TRUE)
-goodcolors2(9,TRUE)
-goodcolors2(10,TRUE)
-goodcolors2(11,TRUE)
-goodcolors2(13,TRUE)
-goodcolors2(15,TRUE)
-length(c("#810890","#EFD814","#2D793E","#796ED5","#699866","#343E3D","#F6233D","#877D0E","#C9BAD5","#8BB0B1","#00C3C0","#522AA9","#21FF61","#EA8316","#F5C387"))
-cols15 <- c("#810890","#EFD814","#2D793E","#796ED5","#699866","#343E3D","#F6233D","#877D0E","#C9BAD5","#8BB0B1","#00C3C0","#522AA9","#21FF61","#EA8316","#F5C387")
-goodcolors2 <- function(n,plot.palette=FALSE){#
-	if(n==1 | n > 15){#
-		stop("'n' must be an integer >=2 and <=15")#
-	}#
-	cols2  <- c("#659DDE","#9A0C2B") # "#8BBC6F","#4B04E0"#
-	cols3  <- c("#3DF1C9","#492E50","#FADD56")  # "#F1529B" "#FEF51B" "#2C27E8"#
-	cols4  <- c("#67F57A","#D7A003","#6E8C48","#C41D1B") # "#256D9E" "#EFFB0A" "#E41A3C" "#F98ACB"#
-	cols5  <- c("#789D95","#EDCBD2","#3F04C7","#1E9A00","#B95AEC") # "#6A96F1" "#CBE589" "#BA0803" "#7CDBE0" "#DEA14C"#
-	cols6  <- c("#BF3C2C","#6CD57D","#7D075C","#D7AB41","#E9D4F7","#481EE0") # c("#37175A","#DB8A83","#E91A00","#AA569D","#4385FD","#9AE8CF") # #
-	cols7  <- c("#424B13","#47E5F4","#511D49","#3F9876","#182D84","#AB5CC4","#90A930") # c("#382E69","#F7C665","#1DFC96","#200311","#9DCD2D","#3202E0","#851B20")#
-	cols8  <- c("#EA7250","#9DDF5B","#B74CE0","#687235","#021025","#1BB1A1","#3F8187","#C7B7CE")#
-	cols9  <- c("#8838BD","#997275","#E24911","#ACEB4F","#1DB756","#611D97","#6C7BCF","#125034","#F4ABD7")#
-	cols10 <- c("#98ACD2","#6197ED","#7A478F","#986D65","#D9C452","#22553B","#B4993A","#0DF1FA","#E8971B","#36D8B9") # "#51BE1A" "#34A6A2" "#86D0E8" "#BDFD81" "#21594F" "#F1F9D6" "#678534" "#6B49C8" "#57191C" "#EC906B"#
-	cols11 <- c("#33E8BB", "#C69A01", "#799525", "#030A34", "#091E57", "#4ED671", "#A4282F", "#2F08BA", "#5BD80A", "#CD0B50", "#B9C1F5") # "#5BBDFD" "#200042" "#616B8F" "#578B7C" "#4D59C3" "#B0FE9F" "#0B335C" "#7F780B" "#C55BD7" "#9F2502" "#D9EF1C"#
-	cols12 <- c("#FE42DD","#68B206","#FFD4E9","#4FBF72","#567D96","#94245B","#226826","#B8CC94","#1752F7","#8B8C5B","#29A6CF","#2ADEC9") #
-	cols13 <- c("#0ACCF8","#9F9D46","#2FCA60","#3D31C8","#50087B","#A17D78","#C0B27E","#EA6EA5","#B21D00","#31E701","#AC1479","#0B3D98","#5DBB15") # "#FCED80" "#336AB6" "#8F3A8C" "#FA9304" "#3545B1" "#83FDF4" "#B6575B" "#232E32" "#AF9746" "#4CA612" "#ED7B66" "#C3C600" "#47B9F5" # "#5B45C8" "#63F469" "#F3B4C8" "#D9EFE8" "#C74B77" "#F1A655" "#813402" "#3D27C4" "#CCD427" "#27AD47" "#13117F" "#97753D" "#09C1B2"#
-	cols14 <- c("#A9D12A","#1D5DB8","#F18249","#44EB9D","#3702AA","#0AF6FF","#48063C","#8DAFB0","#343E3D","#ED20FD","#910148","#375EFF","#F1A4CC","#CE1B4F") # "#FFA357" "#7AAD72" "#2D5AB4" "#E41B0B" "#51ECF5" "#007866" "#D43CB8" "#34E590" "#DC9F06" "#91827F" "#830638" "#B07527" "#F6BCC0" "#2B63EC" #### Change first color: "#62D236" "#FCED80" "#336AB6" "#8F3A8C" "#FA9304" "#3545B1" "#83FDF4" "#B6575B" "#232E32" "#AF9746" "#4CA612" "#ED7B66" "#C3C600" "#47B9F5"#
-	cols15 <- c("#810890","#EFD814","#2D793E","#796ED5","#699866","#343E3D","#F6233D","#877D0E","#C9BAD5","#8BB0B1","#00C3C0","#522AA9","#21FF61","#EA8316","#F5C387")#
-	cols16 <- NULL#
-	cols17 <- NULL#
-	cols18 <- NULL#
-	cols19 <- NULL#
-	cols20 <- NULL#
-	cols21 <- NULL#
-	cols22 <- NULL#
-	cols23 <- NULL#
-	cols24 <- NULL#
-	cols25 <- NULL#
-	colorList <- list(cols2 ,cols3 ,cols4 ,cols5 ,cols6 ,cols7 ,cols8 ,cols9 ,cols10,cols11,cols12,cols13,cols14,cols15,cols16,cols17,cols18,cols19,cols20,cols21,cols22,cols23,cols24,cols25)#
-	result    <- colorList[[n]]#
-	if(plot.palette){#
-		dummydata        <- rep(1,n)#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.12, labels=result,srt=90)#
-	}#
-	result#
-}
-goodcolors2(n=15,TRUE)
-goodcolors2(n=14,TRUE)
-n=15
-goodcolors2(n=2,TRUE)
-goodcolors2(n=3,TRUE)
-goodcolors2 <- function(n,plot.palette=FALSE){#
-	if(n==1 | n > 15){#
-		stop("'n' must be an integer >=2 and <=15")#
-	}#
-	cols2  <- c("#659DDE","#9A0C2B") # "#8BBC6F","#4B04E0"#
-	cols3  <- c("#3DF1C9","#492E50","#FADD56")  # "#F1529B" "#FEF51B" "#2C27E8"#
-	cols4  <- c("#67F57A","#D7A003","#6E8C48","#C41D1B") # "#256D9E" "#EFFB0A" "#E41A3C" "#F98ACB"#
-	cols5  <- c("#789D95","#EDCBD2","#3F04C7","#1E9A00","#B95AEC") # "#6A96F1" "#CBE589" "#BA0803" "#7CDBE0" "#DEA14C"#
-	cols6  <- c("#BF3C2C","#6CD57D","#7D075C","#D7AB41","#E9D4F7","#481EE0") # c("#37175A","#DB8A83","#E91A00","#AA569D","#4385FD","#9AE8CF") # #
-	cols7  <- c("#424B13","#47E5F4","#511D49","#3F9876","#182D84","#AB5CC4","#90A930") # c("#382E69","#F7C665","#1DFC96","#200311","#9DCD2D","#3202E0","#851B20")#
-	cols8  <- c("#EA7250","#9DDF5B","#B74CE0","#687235","#021025","#1BB1A1","#3F8187","#C7B7CE")#
-	cols9  <- c("#8838BD","#997275","#E24911","#ACEB4F","#1DB756","#611D97","#6C7BCF","#125034","#F4ABD7")#
-	cols10 <- c("#98ACD2","#6197ED","#7A478F","#986D65","#D9C452","#22553B","#B4993A","#0DF1FA","#E8971B","#36D8B9") # "#51BE1A" "#34A6A2" "#86D0E8" "#BDFD81" "#21594F" "#F1F9D6" "#678534" "#6B49C8" "#57191C" "#EC906B"#
-	cols11 <- c("#33E8BB", "#C69A01", "#799525", "#030A34", "#091E57", "#4ED671", "#A4282F", "#2F08BA", "#5BD80A", "#CD0B50", "#B9C1F5") # "#5BBDFD" "#200042" "#616B8F" "#578B7C" "#4D59C3" "#B0FE9F" "#0B335C" "#7F780B" "#C55BD7" "#9F2502" "#D9EF1C"#
-	cols12 <- c("#FE42DD","#68B206","#FFD4E9","#4FBF72","#567D96","#94245B","#226826","#B8CC94","#1752F7","#8B8C5B","#29A6CF","#2ADEC9") #
-	cols13 <- c("#0ACCF8","#9F9D46","#2FCA60","#3D31C8","#50087B","#A17D78","#C0B27E","#EA6EA5","#B21D00","#31E701","#AC1479","#0B3D98","#5DBB15") # "#FCED80" "#336AB6" "#8F3A8C" "#FA9304" "#3545B1" "#83FDF4" "#B6575B" "#232E32" "#AF9746" "#4CA612" "#ED7B66" "#C3C600" "#47B9F5" # "#5B45C8" "#63F469" "#F3B4C8" "#D9EFE8" "#C74B77" "#F1A655" "#813402" "#3D27C4" "#CCD427" "#27AD47" "#13117F" "#97753D" "#09C1B2"#
-	cols14 <- c("#A9D12A","#1D5DB8","#F18249","#44EB9D","#3702AA","#0AF6FF","#48063C","#8DAFB0","#343E3D","#ED20FD","#910148","#375EFF","#F1A4CC","#CE1B4F") # "#FFA357" "#7AAD72" "#2D5AB4" "#E41B0B" "#51ECF5" "#007866" "#D43CB8" "#34E590" "#DC9F06" "#91827F" "#830638" "#B07527" "#F6BCC0" "#2B63EC" #### Change first color: "#62D236" "#FCED80" "#336AB6" "#8F3A8C" "#FA9304" "#3545B1" "#83FDF4" "#B6575B" "#232E32" "#AF9746" "#4CA612" "#ED7B66" "#C3C600" "#47B9F5"#
-	cols15 <- c("#810890","#EFD814","#2D793E","#796ED5","#699866","#343E3D","#F6233D","#877D0E","#C9BAD5","#8BB0B1","#00C3C0","#522AA9","#21FF61","#EA8316","#F5C387")#
-	cols16 <- NULL#
-	cols17 <- NULL#
-	cols18 <- NULL#
-	cols19 <- NULL#
-	cols20 <- NULL#
-	cols21 <- NULL#
-	cols22 <- NULL#
-	cols23 <- NULL#
-	cols24 <- NULL#
-	cols25 <- NULL#
-	colorList <- list(cols2 ,cols3 ,cols4 ,cols5 ,cols6 ,cols7 ,cols8 ,cols9 ,cols10,cols11,cols12,cols13,cols14,cols15,cols16,cols17,cols18,cols19,cols20,cols21,cols22,cols23,cols24,cols25)#
-	result    <- colorList[[n-1]]#
-	if(plot.palette){#
-		dummydata        <- rep(1,n)#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.12, labels=result,srt=90)#
-	}#
-	result#
-}
-goodcolors2(n=3,TRUE)
-goodcolors2(n=2,TRUE)
-goodcolors2(n=15,TRUE)
-goodcolors2(n=14,TRUE)
-goodcolors2(n=15,TRUE)
-goodcolors2(n=13,TRUE)
-goodcolors2(n=12,TRUE)
-goodcolors2(n=11,TRUE)
-goodcolors2(n=10,TRUE)
-goodcolors2(n=9,TRUE)
-goodcolors2(n=8,TRUE)
-goodcolors2(n=15,TRUE)
-goodcolors2(n=14,TRUE)
-goodcolors2(n=8,TRUE)
-goodcolors(n=5,TRUE,thresh=110,iter=100,cbspace="")
-goodcolors(n=5,thresh=110,iter=100,cbspace="")
-#n=15; result <- goodcolors(n=n,thresh=110,iter=300,cbspace=c("deut")); dummydata        <- rep(1,length(result))#
-		result <- c("#7C2CFE","#99D977","#FB9CC2","#470B23","#05E7D6"); names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.12, labels=result,srt=90); result
-n=5; result <- goodcolors(n=5,thresh=110,iter=100,cbspace=""); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.12, labels=result,srt=90); result
-n=5; result <- goodcolors(n=5,thresh=110,iter=100,cbspace=NULL); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.12, labels=result,srt=90); result
-goodcolors2(n=15,TRUE)
-goodcolors2(n=14,TRUE)
-n=5; result <- goodcolors(n=5,thresh=110,iter=100,cbspace=NULL); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.12, labels=result,srt=90); result
-n=5; result <- goodcolors(n=5,thresh=110,iter=100,cbspace=NULL); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.12, labels=result,srt=90); result
-n=5; result <- goodcolors(n=5,thresh=110,iter=100,cbspace=NULL); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.12, labels=result,srt=90); result
-n=5; result <- goodcolors(n=5,thresh=110,iter=100,cbspace=NULL); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.12, labels=result,srt=90); result
-n=5; result <- goodcolors(n=5,thresh=110,iter=100,cbspace=NULL); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.12, labels=result,srt=90); result
-n=5; result <- goodcolors(n=5,thresh=110,iter=100,cbspace=NULL); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.12, labels=result,srt=90); result
-n=5; result <- goodcolors(n=5,thresh=110,iter=100,cbspace=NULL); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.12, labels=result,srt=90); result
-n=5; result <- goodcolors(n=5,thresh=110,iter=100,cbspace=NULL); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.12, labels=result,srt=90); result
-n=5; result <- goodcolors(n=5,thresh=110,iter=100,cbspace=NULL); dummydata        <- rep(1,length(result))#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.12, labels=result,srt=90); result
-goodcolors2(n=14,TRUE)
-goodcolors2 <- function(n,plot.palette=FALSE){#
-	if(n==1 | n > 15){#
-		stop("'n' must be an integer >=2 and <=15")#
-	}#
-	cols2  <- c("#659DDE","#9A0C2B") # "#8BBC6F","#4B04E0"#
-	cols3  <- c("#3DF1C9","#492E50","#FADD56")  # "#F1529B" "#FEF51B" "#2C27E8"#
-	cols4  <- c("#67F57A","#D7A003","#6E8C48","#C41D1B") # "#256D9E" "#EFFB0A" "#E41A3C" "#F98ACB"#
-	cols5  <- c("#789D95","#EDCBD2","#3F04C7","#1E9A00","#B95AEC") # "#6A96F1" "#CBE589" "#BA0803" "#7CDBE0" "#DEA14C"#
-	cols6  <- c("#BF3C2C","#6CD57D","#7D075C","#D7AB41","#E9D4F7","#481EE0") # c("#37175A","#DB8A83","#E91A00","#AA569D","#4385FD","#9AE8CF") # #
-	cols7  <- c("#424B13","#47E5F4","#511D49","#3F9876","#182D84","#AB5CC4","#90A930") # c("#382E69","#F7C665","#1DFC96","#200311","#9DCD2D","#3202E0","#851B20")#
-	cols8  <- c("#EA7250","#9DDF5B","#B74CE0","#687235","#021025","#1BB1A1","#3F8187","#C7B7CE")#
-	cols9  <- c("#8838BD","#997275","#E24911","#ACEB4F","#1DB756","#611D97","#6C7BCF","#125034","#F4ABD7")#
-	cols10 <- c("#98ACD2","#6197ED","#7A478F","#986D65","#D9C452","#22553B","#B4993A","#0DF1FA","#E8971B","#36D8B9") # "#51BE1A" "#34A6A2" "#86D0E8" "#BDFD81" "#21594F" "#F1F9D6" "#678534" "#6B49C8" "#57191C" "#EC906B"#
-	cols11 <- c("#33E8BB", "#C69A01", "#799525", "#030A34", "#091E57", "#4ED671", "#A4282F", "#2F08BA", "#5BD80A", "#CD0B50", "#B9C1F5") # "#5BBDFD" "#200042" "#616B8F" "#578B7C" "#4D59C3" "#B0FE9F" "#0B335C" "#7F780B" "#C55BD7" "#9F2502" "#D9EF1C"#
-	cols12 <- c("#FE42DD","#68B206","#FFD4E9","#4FBF72","#567D96","#94245B","#226826","#B8CC94","#1752F7","#8B8C5B","#29A6CF","#2ADEC9") #
-	cols13 <- c("#0ACCF8","#9F9D46","#2FCA60","#3D31C8","#50087B","#A17D78","#C0B27E","#EA6EA5","#B21D00","#31E701","#AC1479","#0B3D98","#5DBB15") # "#FCED80" "#336AB6" "#8F3A8C" "#FA9304" "#3545B1" "#83FDF4" "#B6575B" "#232E32" "#AF9746" "#4CA612" "#ED7B66" "#C3C600" "#47B9F5" # "#5B45C8" "#63F469" "#F3B4C8" "#D9EFE8" "#C74B77" "#F1A655" "#813402" "#3D27C4" "#CCD427" "#27AD47" "#13117F" "#97753D" "#09C1B2"#
-	cols14 <- c("#A9D12A","#1D5DB8","#F18249","#44EB9D","#3702AA","#0AF6FF","#48063C","#8DAFB0","#343E3D","#ED20FD","#D1B67D","#472B20","#F1A4CC","#CE1B4F") # "#FFA357" "#7AAD72" "#2D5AB4" "#E41B0B" "#51ECF5" "#007866" "#D43CB8" "#34E590" "#DC9F06" "#91827F" "#830638" "#B07527" "#F6BCC0" "#2B63EC" #### Change first color: "#62D236" "#FCED80" "#336AB6" "#8F3A8C" "#FA9304" "#3545B1" "#83FDF4" "#B6575B" "#232E32" "#AF9746" "#4CA612" "#ED7B66" "#C3C600" "#47B9F5"#
-	cols15 <- c("#810890","#EFD814","#2D793E","#796ED5","#699866","#343E3D","#F6233D","#877D0E","#C9BAD5","#8BB0B1","#00C3C0","#522AA9","#21FF61","#EA8316","#F5C387")#
-	cols16 <- NULL#
-	cols17 <- NULL#
-	cols18 <- NULL#
-	cols19 <- NULL#
-	cols20 <- NULL#
-	cols21 <- NULL#
-	cols22 <- NULL#
-	cols23 <- NULL#
-	cols24 <- NULL#
-	cols25 <- NULL#
-	colorList <- list(cols2 ,cols3 ,cols4 ,cols5 ,cols6 ,cols7 ,cols8 ,cols9 ,cols10,cols11,cols12,cols13,cols14,cols15,cols16,cols17,cols18,cols19,cols20,cols21,cols22,cols23,cols24,cols25)#
-	result    <- colorList[[n-1]]#
-	if(plot.palette){#
-		dummydata        <- rep(1,n)#
-		names(dummydata) <- 1:n#
-		bp <- barplot(dummydata,col=result,axes=FALSE,ylim=c(0,1.25))#
-		mtext(side=1,text="Color Palette for Clusters",line=2.5)#
-		text(x=c(bp), y=1.12, labels=result,srt=90)#
-	}#
-	result#
-}
-goodcolors2(n=14,TRUE)
-devtools::decoument()
-getwd()
+dev.off()
+dev.new(height=6,width=10)
+source("/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/DAPC/DAPC_adegenet.R")
+q()
+library(remotes)
+remotes::install_github("JeffWeinell/misc.wrappers",upgrade=FALSE,auth_token="323d9e4cd00247a39a805dbb66f37db6403cfb8b")
+library(misc.wrappers)
+q()
+setwd("Documents/misc.wrappers")
 devtools::document()
-rm(list = c("goodcolors", "goodcolors2"))
+library(remotes)
+remotes::install_github("JeffWeinell/misc.wrappers",upgrade=FALSE,auth_token="323d9e4cd00247a39a805dbb66f37db6403cfb8b")
+library(misc.wrappers)
 devtools::document()
+warning("Some loci have multiple sites, but InterMarkerDists is FALSE, and therefore STRUCTURE will incorrectly consider linked sites as unlinked")
+grep("A",c("AB","AC","CD"),value=T)
+x=1;grep(paste0("^",uniqueLoci[x],"_"),SiteNames,value=T)
+is(as.integer("A"),"integer",na.omit=F)
+vcf2structure <- function(vcf, IndvNames=TRUE, OneIndvPerRow=TRUE, MarkerNames=TRUE, MissingData=c(-9), out, InterMarkerDists=FALSE, PopData=NULL, PopFlag=NULL, LocData=NULL, Phenotype=NULL, OtherData=NULL){#
+	# Check class of vcf argument value.#
+	if(is(vcf,"vcfR")){#
+		vcf.obj <- vcf#
+	} else {#
+		if(is(vcf,"character")){#
+			# read VCF file into R as a vcfR object#
+			vcf.obj     <- vcfR::read.vcfR(vcf)#
+		} else {#
+			stop("vcf argument must be eith a character string with path to VCF file, or a vcfR object")#
+		}#
+	}#
+	## Data frame with site (SNP) specific information#
+	fix.mat <- vcf.obj@fix#
+	# Extract genotypes for each individual and hold genotypes in a character matrix; if polyploid, haplotypes are separated by "/" or "|"#
+	gt.mat      <- gsub(":.+","",vcf.obj@gt[,-1])#
+	# Detect ploidy from gt.mat#
+	test.sample <- unlist(gt.mat)[!is.na(unlist(gt.mat))][1]#
+	ploidy      <- length(unlist(strsplit(gt.mat[1],split="/",fixed=T)))#
+	# Names of individuals#
+	samplenames <- colnames(vcf.obj@gt)[-1]#
+	# Number of individuals#
+	numind      <- length(samplenames)#
+	# Unique ID for each site. If MarkerNames is TRUE then these will be used for MarkerNames.#
+	SiteNames <- paste(fix.mat[,"CHROM"],fix.mat[,"POS"],sep="_")#
+	# Number of sites#
+	nsites <- nrow(fix.mat)#
+	# locus ID number from CHROM column#
+	uniqueLoci <- unique(unique(fix.mat[,"CHROM"]))#
+	# Number of loci (aka chromosomes or linkage groups)#
+	nloci  <- length(uniqueLoci)#
+	if(nsites > nloci & !InterMarkerDists){#
+		warning("Some loci have multiple sites, but InterMarkerDists is FALSE, and therefore STRUCTURE will incorrectly treat linked sites as unlinked")#
+	}#
+	# Optional information rows and columns need to be considered for inclusion on output.#
+	### MarkerNames row#
+	if(is(MarkerNames,"logical")){#
+		if(MarkerNames){#
+			MarkerNames <- paste(fix.mat[,"CHROM"],fix.mat[,"POS"],sep="_")#
+		} else {#
+			MarkerNames <- NULL#
+		}#
+	} else {#
+		if(length(MarkerNames)!=nsites){#
+			stop("If MarkerNames is not a logical it should be a vector with length equal to the number of sites")#
+		}#
+	}#
+	### InterMarkerDists row#
+	if(is(InterMarkerDists,"logical")){#
+		if(InterMarkerDists){#
+			if(nsites==nloci){#
+				InterMarkerDists <- rep(-1,nsites)#
+			} else {#
+				imd.list         <- lapply(X=1:nloci,FUN=function(x){grep(paste0("^",uniqueLoci[x],"_"),SiteNames,value=F)})#
+				InterMarkerDists <- unlist(lapply(X=imd.list,FUN=function(x){x[1]=-1;x}))#
+			}#
+		} else {#
+			InterMarkerDists <- NULL#
+		}#
+	} else {#
+		if(length(InterMarkerDists)!=nsites){#
+			stop("InterMarkerDists must be TRUE, FALSE, or an integer vector with length equal to the number of sites")#
+		}#
+	}#
+	### RecessiveAlleles information not implemented#
+	RecessiveAlleles <- NULL#
+	if(FALSE){#
+		stop("Not implemented. This information not required by STRUCTURE and usually not typically used for SNP data.")#
+	}#
+	### Phase information not yet implemented but might add later. This info might be extractable from some VCFs. See vcf.obj@meta#
+	Phase <- NULL#
+	if(FALSE){#
+		stop("Not yet implemented")#
+		vcf.meta <- vcf.obj@meta#
+	}#
+	### IndvNames; hopefully there isnt a limit on the lengths of names#
+	if(is(IndvNames,"logical")){#
+		if(IndvNames){#
+			IndvNames <- samplenames#
+		} else {#
+			IndvNames <- NULL#
+		}#
+	} else {#
+		if(length(IndvNames)!=numind){#
+			stop("IndvNames must be TRUE, FALSE, or a character or numeric vector with a length equal to the number of individuals")#
+		}#
+	}#
+	### PopData and PopFlag#
+	if(!is.null(PopData)){#
+		if(length(PopData)!=numind){#
+			stop("If PopData is non-NULL it must be a character or numeric vector with a length equal to the number of individuals")#
+		} else {#
+			if(!is.null(PopFlag)){#
+				if(length(PopFlag)!=numind | !all(test %in% c(0,1))){#
+					stop("If PopFlag is non-NULL it must be a character or numeric vector with a length equal to the number of individuals, with each value either 0 (don't use PopData for individual) or 1 (use PopData for individual)")#
+				}#
+			}#
+		}#
+	} else {#
+		# If PopData is NULL, ignore the user-defined value for PopFlag argument and set PopFlag to NULL.#
+		PopFlag <- NULL#
+	}#
+	if(!is.null(LocData)){#
+		if(length(LocData)!=numind | any(is.na(suppressWarnings(as.integer(LocData))))){#
+			stop("If LocData is non-NULL it must be a vector of integers with a length equal to the number of individuals")#
+		}#
+	}#
+	if(!is.null(Phenotype)){#
+		if(length(Phenotype)!=numind | any(is.na(suppressWarnings(as.integer(Phenotype))))){#
+			stop("If Phenotype is non-NULL it must be a vector of integers with a length equal to the number of individuals")#
+		}#
+	}#
+	if(!is.null(OtherData)){#
+		if(is(OtherData,c("matrix","array","data.frame"))){#
+			if(nrow(OtherData)!=numind){#
+				stop("If OtherData is non-NULL it must either be (1) a vector with its length equal to number of individuals, or (2) a matrix (or data frame coercible to a matrix) with as many rows as genotypes individuals.")#
+			} else {#
+				OtherData <- do.call(X=rbind,lapply(1:nrow(OtherData),FUN=function(x){paste(OtherData[x,],collapse=" ")}))#
+			}#
+		} else {#
+			if(length(OtherData)!=numind){#
+				stop("If OtherData is non-NULL it must either be (1) a vector with its length equal to number of individuals, or (2) a matrix (or data frame coercible to a matrix) with as many rows as genotypes individuals.")#
+			}#
+		}#
+	}#
+	if(OneIndvPerRow){#
+		### Transpose the genotype matrix#
+		t.gt.mat <- t(gt.mat)#
+		### Split genotype strings by VCF haplotype separators ("/" or "|") and then reorganize into matrix with n columns per individual for n-ploidy individuals.#
+		mat.temp0 <- unname(do.call(rbind,lapply(1:nrow(t.gt.mat), FUN=function(x){unlist(strsplit(t.gt.mat[x,],split="[/,|]"))})))#
+		### Replace VCF missing data value "." with value supplied by MissingData argument.#
+		mat.temp1 <- gsub(".",MissingData,mat.temp0,fixed=TRUE)#
+	} else {#
+		### split genotype strings by VCF haplotype separators ("/" or "|") and then reorganize into matrix with n columns per individual for n-ploidy individuals.#
+		mat.temp0 <- t(unname(do.call(rbind,lapply(1:nrow(gt.mat), FUN=function(x){unlist(strsplit(gt.mat[x,],split="[/,|]"))}))))#
+		### replace VCF missing data value "." with value supplied by MissingData argument#
+		mat.temp1 <- gsub(".",MissingData,mat.temp0,fixed=TRUE)#
+		#### at this point the structure genotype matrix (mat.temp1) is in the correct format but columns and rows are not named. Now the other optional information rows and columns need to be considered for inclusion on output.#
+		# Repeat each value for the non-genotype columns twice #
+		IndvNames   <- rep(IndvNames,ploidy,each=T)#
+		PopData     <- rep(PopData,ploidy,each=T)#
+		PopFlag     <- rep(PopFlag,ploidy,each=T)#
+		LocData     <- rep(LocData,ploidy,each=T)#
+		Phenotype   <- rep(Phenotype,ploidy,each=T)#
+		OtherData   <- rep(OtherData,ploidy,each=T)#
+	}#
+	### Individual/Genotype matrix#
+	indv.gt.mat <- cbind(IndvNames,PopData,PopFlag,LocData,Phenotype,OtherData,mat.temp1)#
+	### Converting each row of the Individual/Genotype matrix into a space-delineated character string#
+	indv.gt.strings  <- unlist(lapply(1:nrow(indv.gt.mat),FUN=function(x){paste(indv.gt.mat[x,],collapse=" ")}))#
+	### Collapsing each of MarkerNames, RecessiveAlleles, InterMarkerDists, and Phase into a space-delineated character string#
+	MarkerNames      <- paste(MarkerNames,collapse=" ")#
+	RecessiveAlleles <- paste(RecessiveAlleles,collapse=" ")#
+	InterMarkerDists <- paste(InterMarkerDists,collapse=" ")#
+	Phase            <- paste(Phase,collapse=" ")#
+	### Combining the other rows (MarkerNames, RecessiveAlleles, InterMarkerDist, and PhaseInformation) with indv.gt.strings#
+	result.strings   <- c(MarkerNames,RecessiveAlleles,InterMarkerDists,Phase,indv.gt.strings)#
+	### Write output STRUCTURE file#
+	writeLines(text=result.strings,con=out)#
+	return(0)#
+}
+list(length=2)
+list(length(2))
+?is.null
+c(NA,length.out=2)
+c(NA,length=2)
+vector(NA,length=2)
+vector(mode="character",length=2)
+devtools::document()
+rm(list = c("vcf2structure"))
+devtools::document()
+sample(c(letters,LETTERS),20,replace=T)
+sample(c(letters,LETTERS,0:9),20,replace=T)
+c(letters,LETTERS,0:9)
+filepath(getwd(),paste0(sample(c(letters,LETTERS,rep(0:9,3)),30,replace=T),".str"))
+file.path(getwd(),paste0(sample(c(letters,LETTERS,rep(0:9,3)),30,replace=T),".str"))
+file.path(getwd(),paste0(paste(sample(c(letters,LETTERS,rep(0:9,3)),30,replace=T),collapse=""),".str"))
+dir.path(paste(sample(c(letters,LETTERS,rep(0:9,3)),30,replace=T),collapse=""))
+dirpath(paste(sample(c(letters,LETTERS,rep(0:9,3)),30,replace=T),collapse=""))
+file.path(paste(sample(c(letters,LETTERS,rep(0:9,3)),30,replace=T),collapse=""))
+file.path(getwd(),paste(sample(c(letters,LETTERS,rep(0:9,3)),30,replace=T),collapse=""))
+file.path(getwd(),paste(sample(c(letters,LETTERS,rep(0:9,3)),10,replace=T),collapse=""))
+outdir.temp <- file.path(getwd(),paste(sample(c(letters,LETTERS,rep(0:9,3)),10,replace=T),collapse=""))
+outdir.temp
+file.path(outdir.temp,"rep1")
+i=1
+file.path(outdir.temp,paste0("rep",i))
+dir.create
+plot(1:3,c(-0.9593229,-0.5727647,-0.5079722))
+margL.df <- data.frame(crossentropy=unname(unlist(c(margL.mat))),Kval=rep(Krange,reps))

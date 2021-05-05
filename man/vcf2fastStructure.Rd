@@ -6,7 +6,7 @@
 
 Converts a VCF file or vcfR object with SNP data into a fastStructure file.}
 \usage{
-vcf2fastStructure(vcf, IndvNames = TRUE, out, OtherData = NULL)
+vcf2fastStructure(vcf, IndvNames = TRUE, out = NULL, OtherData = NULL)
 }
 \arguments{
 \item{vcf}{Character string with path to input VCF, or an object of class vcfR.}
