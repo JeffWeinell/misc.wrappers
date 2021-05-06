@@ -410,8 +410,8 @@ run_fastStructure <- function(vcf,coords=NULL,kmax=40,reps=100,save.as=NULL,cv.i
 	qpaths          <- list.files(outdir.temp,pattern="^.+\\.meanQ$",full.names=TRUE)
 	qmats.list      <- lapply(qpaths,read.table)
 	Kvals.qmats     <- sapply(qmats.list,ncol)
-	bestReps        <- unname(sapply(1:kmax,FUN=function(x){which(margL.mat[x,]==max(margL.mat[x,]))[1]}))
-	qmats.list.best <- lapply(1:kmax,FUN=function(x){ qmats.list[[which(Kvals.qmats==x)[bestReps[(x)]]]]})
+	bestReps        <- unname(sapply(1:max(Krange),FUN=function(x){which(margL.mat[x,]==max(margL.mat[x,]))[1]}))
+	qmats.list.best <- lapply(1:max(Krange),FUN=function(x){qmats.list[[which(Kvals.qmats==x)[bestReps[(x)]]]]})
 	#### List holding population assignment probabilities for each K
 	# Could also try using the mean among qmatrices, but that could be problematic if cluster1 is treated as cluster2 in another iteration.
 	slist          <- qmats.list.best
@@ -437,25 +437,25 @@ run_fastStructure <- function(vcf,coords=NULL,kmax=40,reps=100,save.as=NULL,cv.i
 		rownames(q.matrix) <- samplenames
 		colnames(q.matrix) <- paste0("cluster",1:ncol(q.matrix))
 		posterior.df       <- data.frame(indv=rep(rownames(q.matrix),ncol(q.matrix)), pop=rep(colnames(q.matrix),each=nrow(q.matrix)), assignment=c(unlist(unname(q.matrix))))
-		if(FALSE){
-			if(K < 5){
-				myCols          <- goodcolors(K,thresh=100)
-			}
-			if(K >= 5 & K < 7){
-				myCols          <- goodcolors(K,thresh=100,cbspace="deut")
-			}
-			if(K >= 7 & K < 15){
-				myCols          <- goodcolors(K,thresh=100,cbspace="")
-			}
-			if(K>=15){
-				myCols          <- c(goodcolors(14,thresh=100,cbspace=""), sample(adegenet::funky(100), size=K-14))
-			}
-		}
+		#if(FALSE){
+		#	if(K < 5){
+		#		myCols          <- goodcolors(K,thresh=100)
+		#	}
+		#	if(K >= 5 & K < 7){
+		#		myCols          <- goodcolors(K,thresh=100,cbspace="deut")
+		#	}
+		#	if(K >= 7 & K < 15){
+		#		myCols          <- goodcolors(K,thresh=100,cbspace="")
+		#	}
+		#	if(K>=15){
+		#		myCols          <- c(goodcolors(14,thresh=100,cbspace=""), sample(adegenet::funky(100), size=K-14))
+		#	}
+		#}
 		if(K <= 15){
 			myCols          <- goodcolors2(n=K)
 		}
 		if(K>15){
-			myCols          <- c(goodcolors2(n=K), sample(adegenet::funky(100), size=K-15))
+			myCols          <- c(goodcolors2(n=15), sample(adegenet::funky(100), size=K-15))
 		}
 		posterior.gg        <- ggplot2::ggplot(posterior.df, ggplot2::aes(fill= pop, x= assignment, y=indv)) + ggplot2::geom_bar(position="stack", stat="identity") + ggplot2::theme_classic() + ggplot2::theme(axis.text.y = ggplot2::element_text(size = label.size), panel.grid.major = ggplot2::element_blank(), panel.grid.minor = ggplot2::element_blank(), panel.background = ggplot2::element_blank()) + ggplot2::labs(x = "Admixture Proportion",y="",fill="Cluster",title=paste0("K = ",K)) + ggplot2::scale_fill_manual(values=myCols[1:K])
 		admixturePlot[[i]]  <- posterior.gg
