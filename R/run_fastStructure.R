@@ -412,7 +412,7 @@ run_fastStructure <- function(vcf,coords=NULL,kmax=40,reps=100,save.as=NULL,cv.i
 		log.i.df <- data.frame(K_Replicate_Iteration=paste(logmat2.i[,"K"],logmat2.i[,"replicate"],logmat2.i[,"Iteration"],sep=":"), MarginalLikelihood=logmat2.i[,"Marginal_Likelihood"],deltaMarginalLikelihood=logmat2.i[,"delta_Marginal_Likelihood"], IterationTime.seconds = logmat2.i[,"Iteration_Time_secs"])
 		log.df <- rbind(log.df,log.i.df)
 	}
-	write.table(x=q.df,file=paste0(tools::file_path_sans_ext(save.as),".margLlog"),row.names=F,col.names=T,quote=F,sep="\t")
+	write.table(x=log.df,file=paste0(tools::file_path_sans_ext(save.as),".margLlog"),row.names=F,col.names=T,quote=F,sep="\t")
 	### Matrix with marginal likelihood from each rep and each K
 	margL.mat <- do.call(rbind,lapply(Krange,FUN=function(x){A=unlist(loglines[which(KLogs==x)]);B=A[grep("^Marginal Likelihood = .+",A)]; as.numeric(gsub("Marginal Likelihood = ","",B,fixed=T))}))
 	rownames(margL.mat) <- paste0("K",Krange)
