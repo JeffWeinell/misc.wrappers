@@ -11,7 +11,7 @@
 #' @param save.as Character string with where to save the output PDF with plots of results. Default is NULL. **Important! This argument is ignored in some environments. Instead, use dev.new(file="Where/To/Save/Output.pdf",height=6,width=10,noRStudioGD=TRUE) before using run_DAPC. Then dev.off().
 #' @return A list of plots.
 #' @export run_DAPC
-run_DAPC <- function(vcf, kmax=50, coords=NULL, reps=100,probs.out=NULL,save.as=NULL){
+run_DAPC <- function(vcf, kmax=40, coords=NULL, reps=100,probs.out=NULL,save.as=NULL){
 	if(!is.null(save.as)){
 		if(file.exists(save.as)){
 			stop("Output file already exists. Choose a different name.")

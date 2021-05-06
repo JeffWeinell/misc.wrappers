@@ -480,6 +480,10 @@ run_fastStructure <- function(vcf,coords=NULL,kmax=40,reps=100,save.as=NULL,cv.i
 	}
 	# Delete the fastStructure file
 	remove.str <- file.remove(str.path0)
+	# Delete the folder with .log, .meanQ, and .meanP files; the info from these are compiled in a single file.
+	if(FALSE){
+		outdir.temp
+	}
 	result
 }
 #' @examples
