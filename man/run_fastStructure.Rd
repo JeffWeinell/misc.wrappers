@@ -18,7 +18,8 @@ run_fastStructure(
   save.as = NULL,
   cv.iter = 0,
   python.path = NULL,
-  fastStructure.path = NULL
+  fastStructure.path = NULL,
+  cleanup = TRUE
 )
 }
 \arguments{
@@ -37,6 +38,8 @@ run_fastStructure(
 \item{python.path}{Character string with path to python 2 with fastStructure dependencies Numpy, Scipy, Cython, GNU Scientific Library}
 
 \item{fastStructure.path}{Character string with path to folder containing the fastStructure python executable called 'structure.py'}
+
+\item{cleanup}{Whether or not the original fastStructure output files (*.log, *.meanQ, *meanP file for each replicate of each K) should be deleted after the data from those files are compiled and saved in three tables. Default TRUE.}
 }
 \value{
 List of plots

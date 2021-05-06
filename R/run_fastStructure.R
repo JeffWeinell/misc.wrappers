@@ -317,9 +317,10 @@ vcf2fastStructure <- function(vcf, IndvNames=TRUE, out=NULL, OtherData=NULL){
 #' @param cv.iter Number of iterations to perform for cross-validation. Default is zero. Currently ignored.
 #' @param python.path Character string with path to python 2 with fastStructure dependencies Numpy, Scipy, Cython, GNU Scientific Library
 #' @param fastStructure.path Character string with path to folder containing the fastStructure python executable called 'structure.py'
+#' @param cleanup Whether or not the original fastStructure output files (*.log, *.meanQ, *meanP file for each replicate of each K) should be deleted after the data from those files are compiled and saved in three tables. Default TRUE.
 #' @return List of plots
 #' @export run_fastStructure
-run_fastStructure <- function(vcf,coords=NULL,kmax=40,reps=100,save.as=NULL,cv.iter=0,python.path=NULL,fastStructure.path=NULL){
+run_fastStructure <- function(vcf,coords=NULL,kmax=40,reps=100,save.as=NULL,cv.iter=0,python.path=NULL,fastStructure.path=NULL,cleanup=TRUE){
 	if(!is.null(save.as)){
 		if(file.exists(save.as)){
 			stop("Output file already exists. Choose a different name.")
@@ -497,20 +498,6 @@ run_fastStructure <- function(vcf,coords=NULL,kmax=40,reps=100,save.as=NULL,cv.i
 		rownames(q.matrix) <- samplenames
 		colnames(q.matrix) <- paste0("cluster",1:ncol(q.matrix))
 		posterior.df       <- data.frame(indv=rep(rownames(q.matrix),ncol(q.matrix)), pop=rep(colnames(q.matrix),each=nrow(q.matrix)), assignment=c(unlist(unname(q.matrix))))
-		#if(FALSE){
-		#	if(K < 5){
-		#		myCols          <- goodcolors(K,thresh=100)
-		#	}
-		#	if(K >= 5 & K < 7){
-		#		myCols          <- goodcolors(K,thresh=100,cbspace="deut")
-		#	}
-		#	if(K >= 7 & K < 15){
-		#		myCols          <- goodcolors(K,thresh=100,cbspace="")
-		#	}
-		#	if(K>=15){
-		#		myCols          <- c(goodcolors(14,thresh=100,cbspace=""), sample(adegenet::funky(100), size=K-14))
-		#	}
-		#}
 		if(K <= 15){
 			myCols          <- goodcolors2(n=K)
 		}
@@ -541,7 +528,7 @@ run_fastStructure <- function(vcf,coords=NULL,kmax=40,reps=100,save.as=NULL,cv.i
 	# Delete the fastStructure file
 	remove.str <- file.remove(str.path0)
 	# Delete the folder with .log, .meanQ, and .meanP files; the info from these are compiled in a single file.
-	if(FALSE){
+	if(cleanup){
 		system(paste0("rm -R ",outdir.temp))
 	}
 	result
