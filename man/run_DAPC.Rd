@@ -9,7 +9,7 @@ If sample coordinates are supplied, this function interpolates cluster membershi
 \usage{
 run_DAPC(
   vcf,
-  kmax = 50,
+  kmax = 40,
   coords = NULL,
   reps = 100,
   probs.out = NULL,
