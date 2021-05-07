@@ -19,7 +19,8 @@ run_fastStructure(
   cv.iter = 0,
   python.path = NULL,
   fastStructure.path = NULL,
-  cleanup = TRUE
+  cleanup = TRUE,
+  include.out = c(".pdf", ".Qlog", ".margLlog")
 )
 }
 \arguments{
@@ -31,7 +32,7 @@ run_fastStructure(
 
 \item{reps}{Number of repititions. Default 100.}
 
-\item{save.as}{Where to save the output PDF. Default is NULL. **This argument is ignored in some environments. Instead, use dev.new(file="Where/To/Save/Output.pdf",height=6,width=10,noRStudioGD=TRUE) before calling 'runtess'. Then dev.off().}
+\item{save.as}{Where to save the output PDF. Default is NULL.}
 
 \item{cv.iter}{Number of iterations to perform for cross-validation. Default is zero. Currently ignored.}
 
@@ -40,6 +41,8 @@ run_fastStructure(
 \item{fastStructure.path}{Character string with path to folder containing the fastStructure python executable called 'structure.py'}
 
 \item{cleanup}{Whether or not the original fastStructure output files (*.log, *.meanQ, *meanP file for each replicate of each K) should be deleted after the data from those files are compiled and saved in three tables. Default TRUE.}
+
+\item{include.out}{Character vector indicating which type of files should be included as output. Default is c(".pdf",".Qlog",".margLlog"). An additional file ".Plog" can be included but can be very large.}
 }
 \value{
 List of plots

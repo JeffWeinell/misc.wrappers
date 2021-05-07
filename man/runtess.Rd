@@ -25,7 +25,7 @@ runtess(
 
 \item{reps}{Number of repititions. Default 100.}
 
-\item{save.as}{Where to save the output PDF. Default is NULL. **This argument is ignored in some environments. Instead, use dev.new(file="Where/To/Save/Output.pdf",height=6,width=10,noRStudioGD=TRUE) before calling 'runtess'. Then dev.off().}
+\item{save.as}{Where to save the output PDF. Default is NULL.}
 
 \item{mask}{Proportion of input data to mask during each replicate when tess3 function is called. Default 0.05.}
 

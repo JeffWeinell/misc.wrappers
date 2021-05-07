@@ -27,7 +27,7 @@ run_DAPC(
 
 \item{probs.out}{NULL or a character string with location where to write a table containing the membership probabilities for the best K and alpha-optimized number of PCAs.}
 
-\item{save.as}{Character string with where to save the output PDF with plots of results. Default is NULL. **Important! This argument is ignored in some environments. Instead, use dev.new(file="Where/To/Save/Output.pdf",height=6,width=10,noRStudioGD=TRUE) before using run_DAPC. Then dev.off().}
+\item{save.as}{Character string with where to save the output PDF with plots of results. Default is NULL.}
 }
 \value{
 A list of plots.
