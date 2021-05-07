@@ -344,14 +344,48 @@ run_fastStructure <- function(vcf,coords=NULL,kmax=40,reps=100,save.as=NULL,tole
 	str.path0   <- vcf2fastStructure(vcf=vcf.obj)
 	str.path    <- tools::file_path_sans_ext(str.path0)
 
+	#### This might work?
+	#if(is.null(python.path)){
+	#	check.paths <- system("which python2",ignore.stdout=TRUE,ignore.stderr=TRUE)
+	#	if(check.paths==0){
+	#		check.paths <- system("which python2",intern=TRUE)[1]
+	#		if(check.if.executable(check.paths)==0){
+	#			python.path <- check.paths
+	#		}
+	#	}
+	#	if(is.null(python.path)){
+	#		linked.paths <- config_miscwrappers()
+	#		if(any(linked.paths$program == 'python')){
+	#			python.trypath <- linked.paths$exe_path[which(linked.paths$program=="python")[1]]
+	#			if(check.if.executable(python.trypath)==0){
+	#				python.path <- python.trypath
+	#			} else {
+	#				stop("No valid python identified. Set 'python.path' to location of python2.")
+	#			}
+	#		}
+	#	}
+	#}
+	### Checking that python2 exists and is executable
 	if(is.null(python.path)){
-		stop("NULL input for python.path not yet implemented")
-		## Need to check that python 2* is available/usable
+		python.testpath <- find.exe.path("python")
+		if(python.testpath!=1){
+			python.path <- python.testpath
+		} else {
+			stop("No valid python identified. Set 'python.path' to location of python2.")
+		}
 	}
-
+	### Checking that python has the required modules installed
+#	modules.check <- c("numpy","fastStructure","parse_bed","parse_str","random","getopt","sys","pdb","warnings")
+#	lapply(modules.check,function(x){system(paste0(python.path," -c 'import ",x,"' ; echo $?"))}) #  system(paste0(python.path," -c 'import ",modules[i],"' ; echo $?"))
+	
 	### Checking that the fastStructure program 'structure.py' exists and is executable
 	if(is.null(fastStructure.path)){
-		stop("NULL input for fastStructure.path not yet implemented")
+		fastStructure.testpath <- find.exe.path("structure.py")
+		if(fastStructure.testpath!=1){
+			fastStructure.path <- fastStructure.testpath
+		} else {
+			stop("No valid path to fastStructure identified. Set 'fastStructure.path' to location of 'structure.py' executable file")
+		}
 	}
 	if(!file.exists(fastStructure.path)){
 		stop(paste0(fastStructure.path," does not exist"))
@@ -572,6 +606,37 @@ run_fastStructure <- function(vcf,coords=NULL,kmax=40,reps=100,save.as=NULL,tole
 #'           python.path = "/panfs/pfs.local/software/7/install/anaconda/4.7/envs/py27/bin/python",
 #'           fastStructure.path = "/panfs/pfs.local/work/bi/bin/fastStructure-master/")
 #'
+
+
+#' Find path to program
+#' 
+#' This function searches the system path and the settings file of the misc.wrappers program for a usable path to a program with a specified name.
+#' 
+#' @param program Character string with name of program to find
+#' @return Character string with path to the program's executable file, or 1 if path not found. 
+#' @export find.exe.path
+find.exe.path <- function(program){
+	linked.paths <- misc.wrappers::config_miscwrappers()
+	if(any(linked.paths$program == program)){
+		trypath <- linked.paths$exe_path[which(linked.paths$program==program)[1]]
+		if(misc.wrappers::check.if.executable(trypath)==0){
+			return(trypath)
+		}
+	}
+	check.paths <- system(paste("which",program),ignore.stdout=TRUE,ignore.stderr=TRUE)
+	if(check.paths==0){
+		check.paths <- system(paste("which",program),intern=TRUE)[1]
+		if(misc.wrappers::check.if.executable(check.paths)==0){
+			return(check.paths)
+		} else {
+			return(1)
+		}
+	} else {
+		return(1)
+	}
+}
+
+
 
 
 

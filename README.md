@@ -48,18 +48,48 @@ config_miscwrappers(exe.paths="*/eems-master/runeems_snps/src/runeems_snps")
 config_miscwrappers(exe.paths=c("*/PATH/TO/python","*/fastStructure-master/structure.py"))
 
 ```
+### ```run_DAPC``` Run DAPC from SNP data in a VCF file and plot results
+```
+library(misc.wrappers)
+run_DAPC(vcf="/PATH/TO/SNPs/VCF.vcf",coords="/PATH/TO/LonLat.txt",out="/PATH/FOR/RESULTS.pdf")
+```
 
-### Generate input files runeems_snps 
-The main wrapper function for EEMS is ```runeems_snps_setup```, which takes as input two files: (1) a SNPs dataset in (Variant-Call Format) VCF and (2) a two-column text file with longitude and latitude coordinates for each individual in the VCF file. Output of this function include all of the files and directories necessary for running EEMS. Bash files for running EEMS are also generated.
+### ```run_sNMF``` Run sNMF/LEA from SNP data in a VCF file and plot results
+```
+library(misc.wrappers)
+run_sNMF(vcf="/PATH/TO/SNPs/VCF.vcf",coords="/PATH/TO/LonLat.txt",out="/PATH/FOR/RESULTS.pdf")
+```
+
+### ```runtess``` Run tess3r from SNP data in a VCF file and plot results
+```
+library(misc.wrappers)
+runtess(vcf="/PATH/TO/SNPs/VCF.vcf",coords="/PATH/TO/LonLat.txt",out="/PATH/FOR/RESULTS.pdf")
+```
+
+### ```run_fastStructure``` Run fastStructure from SNP data in a VCF file and and plot results.
+```
+library(misc.wrappers)
+run_fastStructure(vcf="/PATH/TO/SNPs/VCF.vcf",coords="/PATH/TO/LonLat.txt",out="/PATH/FOR/RESULTS.pdf")
+```
+
+### ```plot_model``` Create a graphical representation of a demographic model that is defined by a template (.tpl) and estimation (.est) file.
+```
+library(misc.wrappers)
+model.obj  <- plot_model(tpl.path="/PATH/TO/model.tpl",  est.path="/PATH/TO/model.est")
+pdf("cartoon_model.pdf",width=10,height=6)
+model.obj
+dev.off()
+```
+
+### ```runeems_snps_setup``` Generate input files for runeems_snps
+This function takes as input two files: (1) SNPs in a VCF file and (2) a two-column text file with longitude and latitude coordinates for each individual in the VCF file. Output of this function includes all of the files and directories necessary for running EEMS. Bash files for running EEMS are also generated.
 
 ```
 library(misc.wrappers)
-# Load example dataset
-# exampleData <- data('<add/example/data.vcf>',package="misc.wrappers")
-## runeems_snps_setup function
-runeems_snps_setup(output.dirpath="Path/To/Directory/That/Doesnt/Exist",data="Path/To/SNP/file.vcf",coord="Path/To/LonLat/of/Individuals/file.txt")
+## Set up input files for runeems_snps
+runeems_snps_setup(data="Path/To/SNP/file.vcf",coord="Path/To/LonLat/of/Individuals/file.txt",output.dirpath="Path/To/Directory/That/Doesnt/Exist")
 ```
-Running runeems_snps_setup will create output.dirpath containing:
+Running runeems_snps_setup will create a directory with path output.dirpath and all of the following files:
   - `habitat_outer.pdf`
   - `data/data.diffs`
   - `data/data.outer`
