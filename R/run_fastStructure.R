@@ -313,7 +313,7 @@ vcf2fastStructure <- function(vcf, IndvNames=TRUE, out=NULL, OtherData=NULL){
 #' @param coords Either a character string with path to file containing coordinates (longitude in first column, latitude in second column), or matrix object with longitude and latitude columns.
 #' @param kmax Numerical vector with set of values to use for K. Default 40.
 #' @param reps Number of repititions. Default 100.
-#' @param save.as Where to save the output PDF. Default is NULL. **This argument is ignored in some environments. Instead, use dev.new(file="Where/To/Save/Output.pdf",height=6,width=10,noRStudioGD=TRUE) before calling 'runtess'. Then dev.off().
+#' @param save.as Where to save the output PDF. Default is NULL.
 #' @param cv.iter Number of iterations to perform for cross-validation. Default is zero. Currently ignored.
 #' @param python.path Character string with path to python 2 with fastStructure dependencies Numpy, Scipy, Cython, GNU Scientific Library
 #' @param fastStructure.path Character string with path to folder containing the fastStructure python executable called 'structure.py'
@@ -321,10 +321,11 @@ vcf2fastStructure <- function(vcf, IndvNames=TRUE, out=NULL, OtherData=NULL){
 #' @return List of plots
 #' @export run_fastStructure
 run_fastStructure <- function(vcf,coords=NULL,kmax=40,reps=100,save.as=NULL,cv.iter=0,python.path=NULL,fastStructure.path=NULL,cleanup=TRUE){
-	if(!is.null(save.as)){
-		if(file.exists(save.as)){
-			stop("Output file already exists. Choose a different name.")
-		}
+	if(is.null(save.as)){
+		save.as <- file.path(getwd(),"result_fastStructure.pdf")
+	}
+	if(file.exists(save.as)){
+		stop("Output file already exists. Use a different name for 'save.as' argument.")
 	}
 	Krange=1:kmax
 	vcf.obj     <- vcfR::read.vcfR(vcf)

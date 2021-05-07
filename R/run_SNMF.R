@@ -10,14 +10,15 @@
 #' @param project Defualt 'new'
 #' @param iter Default 500
 #' @param CPU Defualt 2
-#' @param save.as Character string with where to save the output PDF with plots of results. Default is NULL. **Important! This argument is ignored in some environments. Instead, use dev.new(file="Where/To/Save/Output.pdf",height=6,width=10,noRStudioGD=TRUE) before using run_SNMF. Then dev.off().
+#' @param save.as Character string with where to save the output PDF with plots of results. Default is NULL.
 #' @return List of plots
 #' @export run_SNMF
 run_SNMF <- function(vcf,coords=NULL,kmax=40,reps=100,entropy=TRUE,project="new",iter=500,save.as=NULL){
-	if(!is.null(save.as)){
-		if(file.exists(save.as)){
-			stop("Output file already exists. Choose a different name.")
-		}
+	if(is.null(save.as)){
+		save.as <- file.path(getwd(),"result_LEA-sNMF.pdf")
+	}
+	if(file.exists(save.as)){
+		stop("Output file already exists. Use a different name for 'save.as' argument.")
 	}
 	Krange=1:kmax
 	vcf.obj     <- vcfR::read.vcfR(vcf)

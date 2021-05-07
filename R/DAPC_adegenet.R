@@ -8,14 +8,15 @@
 #' @param coords Optional character string with path to a table with longitude and latitude of individuals in the vcf file, or a matrix or data frame with longitude and latitude columns. Default is NULL, in which case membership probabilities are not interpolated onto a map.
 #' @param reps Number indicating the number of replicates of 'find.clusters'. Default 100.
 #' @param probs.out NULL or a character string with location where to write a table containing the membership probabilities for the best K and alpha-optimized number of PCAs.
-#' @param save.as Character string with where to save the output PDF with plots of results. Default is NULL. **Important! This argument is ignored in some environments. Instead, use dev.new(file="Where/To/Save/Output.pdf",height=6,width=10,noRStudioGD=TRUE) before using run_DAPC. Then dev.off().
+#' @param save.as Character string with where to save the output PDF with plots of results. Default is NULL.
 #' @return A list of plots.
 #' @export run_DAPC
 run_DAPC <- function(vcf, kmax=40, coords=NULL, reps=100,probs.out=NULL,save.as=NULL){
-	if(!is.null(save.as)){
-		if(file.exists(save.as)){
-			stop("Output file already exists. Choose a different name.")
-		}
+	if(is.null(save.as)){
+		save.as <- file.path(getwd(),"result_DAPC.pdf")
+	}
+	if(file.exists(save.as)){
+		stop("Output file already exists. Use a different name for 'save.as' argument.")
 	}
 	#dev.new(width=10,height=6)
 	vcf.obj     <- vcfR::read.vcfR(vcf,verbose=F)

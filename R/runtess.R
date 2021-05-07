@@ -75,16 +75,17 @@ vcfR2lfmm <- function(vcf,out=NULL){
 #' @param coords Either a character string with path to file containing coordinates (longitude in first column, latitude in second column), or matrix object with longitude and latitude columns.
 #' @param kmax Numerical vector with set of values to use for K. Default 40.
 #' @param reps Number of repititions. Default 100.
-#' @param save.as Where to save the output PDF. Default is NULL. **This argument is ignored in some environments. Instead, use dev.new(file="Where/To/Save/Output.pdf",height=6,width=10,noRStudioGD=TRUE) before calling 'runtess'. Then dev.off().
+#' @param save.as Where to save the output PDF. Default is NULL.
 #' @param mask Proportion of input data to mask during each replicate when tess3 function is called. Default 0.05.
 #' @param max.iteration Max iterations. Default 500.
 #' @return List of plots
 #' @export runtess
 runtess <- function(vcf,coords=NULL,kmax=40,reps=100,save.as=NULL,mask=0.05,max.iteration=500){
-	if(!is.null(save.as)){
-		if(file.exists(save.as)){
-			stop("Output file already exists. Choose a different name.")
-		}
+	if(is.null(save.as)){
+		save.as <- file.path(getwd(),"result_tess.pdf")
+	}
+	if(file.exists(save.as)){
+		stop("Output file already exists. Use a different name for 'save.as' argument.")
 	}
 	Krange=1:kmax
 	vcf.obj     <- vcfR::read.vcfR(vcf)
