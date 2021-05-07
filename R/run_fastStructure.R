@@ -608,7 +608,7 @@ run_fastStructure <- function(vcf,coords=NULL,kmax=40,reps=100,save.as=NULL,tole
 #'
 
 
-#' Find path to program
+#' @title Find path to program
 #' 
 #' This function searches the system path and the settings file of the misc.wrappers program for a usable path to a program with a specified name.
 #' 

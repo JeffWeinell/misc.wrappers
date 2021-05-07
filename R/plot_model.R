@@ -1485,7 +1485,7 @@ rlogunif <- function (n, min, max, base = exp(1)){
 #' @param z quantile
 #' @param b Numerical vector with b1 and b2 for X1~Unif(0,b1) and X2~Unif(0,b2).
 #' @return Probability density of z in Z
-#' @export dunif.ratio.a0
+#' @export dunif.quotient.a0
 dunif.quotient.a0 <- function(z,b){
 	d.standard <- (0.5*((((sign(z-1)+1)/2)/(z^2))+((sign(1-z)+1)/2)))
 	result     <- d.standard*(b[1]/b[2])
@@ -1501,7 +1501,7 @@ dunif.quotient.a0 <- function(z,b){
 #' @param a Number indicating the lower limit of X1 and X2
 #' @param b Number indicating the lower upper of X1 and X2
 #' @return Probability density of z in Z
-#' @export dunif.ratio.iid
+#' @export dunif.quotient.iid
 dunif.quotient.iid <- function(z,a,b){
 	if(a > b){
 		stop("'a' must be < 'b'")
