@@ -1,10 +1,10 @@
 #' @title config_miscwrappers function
 #' 
-#' This function is used to tell misc.wrappers where an EEMS executable is located. You only need to run this function once for a particular EEMS program.
 #' 
-#' @param exe.paths Character string or vector with the full path(s) to one or more EEMS executables.
-##' @param program A character string or character vector containing the names of the program(s) with their paths defined by ```eems_exe``` argument. Default "runeems_snps"; other options could include "str2diffs", "runeems_sats", "runeems_Fsts", "bed2diffs", "rEEMSplots" or a character vector including all or a subset of these. The programs must be executable first.
-#' @return Updates settings and returns NULL if exe.paths is a valid character strings or vector of path(s); returns a dataframe with the all path settings if exe.paths is NULL.
+#' This function is used to tell misc.wrappers where a program (executable file) is located. You only need to run this function once for a particular program.
+#' 
+#' @param exe.paths Character string or vector with the full path(s) to one or more executable files for programs that misc.wrappers uses.
+#' @return If exe.paths is non-NULL, the function will update settings and return 0 if successful. If exe.paths is NULL, the function returns a dataframe with all of the path settings.
 #' @export config_miscwrappers
 config_miscwrappers <- function(exe.paths=NULL){
 	settings.dir  <- path.expand(rappdirs::user_config_dir("R_misc_wrappers", version=packageVersion("misc.wrappers")))
@@ -32,7 +32,7 @@ config_miscwrappers <- function(exe.paths=NULL){
 			use.settings.mat <- combined.settings.mat.order[match(unique(combined.settings.mat.order[,"program"]),combined.settings.mat.order[,"program"]),c(1:2)]
 			write.table(use.settings.mat,settings.file,col.names=T,row.names=F,quote=T)
 		}
-		result <- NULL
+		result <- 0
 	} else {
 		if(is.null(exe.paths)){
 			if(!dir.exists(settings.dir)){
@@ -48,4 +48,21 @@ config_miscwrappers <- function(exe.paths=NULL){
 	}
 	result
 }
+#' @examples
+#' library(misc.wrappers)
+#' 
+#' # Example 1: view current path settings
+#' config_miscwrappers()
+#' # Example 2: set path to program 'runeems_snps' (replace example path with the real path on you machine)
+#' config_miscwrappers(exe.path="/FULL/PATH/TO/runeems_snps")
+#' # Example 3: set path to the fastStructure file 'structure.py'
+#' config_miscwrappers(exe.path="/FULL/PATH/TO/structure.py")
+
+
+
+
+
+
+
+
 

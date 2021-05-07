@@ -12,8 +12,8 @@
 #' @param CPU Defualt 2
 #' @param save.as Character string with where to save the output PDF with plots of results. Default is NULL.
 #' @return List of plots
-#' @export run_SNMF
-run_SNMF <- function(vcf,coords=NULL,kmax=40,reps=100,entropy=TRUE,project="new",iter=500,save.as=NULL){
+#' @export run_sNMF
+run_sNMF <- function(vcf,coords=NULL,kmax=40,reps=100,entropy=TRUE,project="new",iter=500,save.as=NULL){
 	if(is.null(save.as)){
 		save.as <- file.path(getwd(),"result_LEA-sNMF.pdf")
 	}
@@ -235,38 +235,38 @@ run_SNMF <- function(vcf,coords=NULL,kmax=40,reps=100,entropy=TRUE,project="new"
 #'	library(JeffWeinell/misc.wrappers)
 #'	#source("DAPC_adegenet.R")
 #'	#source("runtess.R")
-#'	#source("run_SNMF.R")
+#'	#source("run_sNMF.R")
 #'
 #'	dev.new(width=10,height=6)
-#'	leporinum <- run_SNMF(vcf="Oxyrhabdium-leporinum_BestSNP.vcf",
+#'	leporinum <- run_sNMF(vcf="Oxyrhabdium-leporinum_BestSNP.vcf",
 #'	                      coords="Oxyrhabdium-leporinum_coords.txt",
 #'	                      save.as="Oxyrhabdium-leporinum_BestSNP_sNMF_run3.pdf")
 #'
-#'	modestum  <- run_SNMF(vcf="Oxyrhabdium-modestum_BestSNP.vcf",
+#'	modestum  <- run_sNMF(vcf="Oxyrhabdium-modestum_BestSNP.vcf",
 #'	                     coords="Oxyrhabdium-modestum_coords.txt",
 #'	                     save.as="Oxyrhabdium-modestum_BestSNP_sNMF_run1.pdf")
 #'
-#'	cfmodestum  <- run_SNMF(vcf="Oxyrhabdium-cf.modestum_BestSNP.vcf",
+#'	cfmodestum  <- run_sNMF(vcf="Oxyrhabdium-cf.modestum_BestSNP.vcf",
 #'	                     coords="Oxyrhabdium-cfmodestum_coords.txt",
 #'	                     save.as="Oxyrhabdium-cfmodestum_BestSNP_sNMF_run1.pdf")
 #'
-#'	cfmodestum_Luzon     <- run_SNMF(vcf="Oxyrhabdium-cf.modestum_Luzon_BestSNP.vcf",
+#'	cfmodestum_Luzon     <- run_sNMF(vcf="Oxyrhabdium-cf.modestum_Luzon_BestSNP.vcf",
 #'	                        coords="Oxyrhabdium-cfmodestum_Luzon_coords.txt",
 #'	                        save.as="Oxyrhabdium-cf.modestum_Luzon_BestSNP_sNMF_run1.pdf")
 #'
-#'	leporinum_Luzon <- run_SNMF(vcf="Oxyrhabdium-leporinum_Luzon_BestSNP.vcf",
+#'	leporinum_Luzon <- run_sNMF(vcf="Oxyrhabdium-leporinum_Luzon_BestSNP.vcf",
 #'	                           coords="Oxyrhabdium-leporinum_Luzon_coords.txt",
 #'	                           save.as="Oxyrhabdium-leporinum_Luzon_BestSNP_sNMF_run1.pdf")
 #'
-#'	bothmodestum <- run_SNMF(vcf="Oxyrhabdium_both-modestum_BestSNP.vcf",
+#'	bothmodestum <- run_sNMF(vcf="Oxyrhabdium_both-modestum_BestSNP.vcf",
 #'	                           coords="Oxyrhabdium_bothmodestum_coords.txt",
 #'	                           save.as="Oxyrhabdium_both-modestum_BestSNP_sNMF_run1.pdf")
 #'
-#'	Oxyrhabdium <- run_SNMF(vcf="Oxyrhabdium_AllSpecies_BestSNP.vcf",
+#'	Oxyrhabdium <- run_sNMF(vcf="Oxyrhabdium_AllSpecies_BestSNP.vcf",
 #'	                            coords="Oxyrhabdium_AllSpecies_coords.txt",
 #'	                            save.as="Oxyrhabdium_AllSpecies_BestSNP_sNMF_v1.pdf")
 #'
-#'	Oxyrhabdium_AllSpecies <- run_SNMF(vcf="Oxyrhabdium_AllSpecies_BestSNP.vcf",
+#'	Oxyrhabdium_AllSpecies <- run_sNMF(vcf="Oxyrhabdium_AllSpecies_BestSNP.vcf",
 #'	                         coords="Oxyrhabdium_AllSpecies_coords.txt",
 #'	                         save.as="Oxyrhabdium_AllSpecies_BestSNP_sNMF_run1.pdf")
 
@@ -275,7 +275,7 @@ run_SNMF <- function(vcf,coords=NULL,kmax=40,reps=100,entropy=TRUE,project="new"
 #' 
 #' The object returned by vcfR2geno can be used as input in the LEA function snmf
 #' Optionally supply a character string with path where geno object will be saved
-#' This function is used in the function run_SNMFR
+#' This function is used in the function run_sNMFR
 #' 
 #' @param vcf Character string with path to input VCF file.
 #' @param out Character string with path where output geno file should be saved. Default is NULL.
