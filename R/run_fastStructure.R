@@ -314,14 +314,17 @@ vcf2fastStructure <- function(vcf, IndvNames=TRUE, out=NULL, OtherData=NULL){
 #' @param kmax Numerical vector with set of values to use for K. Default 40.
 #' @param reps Number of repititions. Default 100.
 #' @param save.as Where to save the output PDF. Default is NULL.
-#' @param cv.iter Number of iterations to perform for cross-validation. Default is zero. Currently ignored.
+#' @param tolerance Tolerance for convergence, i.e., the change in marginal likelihood required to continue.
+#' @param prior Type of prior to use. Default "simple"
+#' @param full Whether or not to generate output files holding variation of Q, P, and marginal likelihood, in addition to the files holding means. Default FALSE.
+#' @param seed Value to use as a seed for reproducing results. Default NULL.
 #' @param python.path Character string with path to python 2 with fastStructure dependencies Numpy, Scipy, Cython, GNU Scientific Library
 #' @param fastStructure.path Character string with path to folder containing the fastStructure python executable called 'structure.py'
 #' @param cleanup Whether or not the original fastStructure output files (*.log, *.meanQ, *meanP file for each replicate of each K) should be deleted after the data from those files are compiled and saved in three tables. Default TRUE.
 #' @param include.out Character vector indicating which type of files should be included as output. Default is c(".pdf",".Qlog",".margLlog"). An additional file ".Plog" can be included but can be very large.
 #' @return List of plots
 #' @export run_fastStructure
-run_fastStructure <- function(vcf,coords=NULL,kmax=40,reps=100,save.as=NULL,cv.iter=0,python.path=NULL,fastStructure.path=NULL,cleanup=TRUE,include.out=c(".pdf",".Qlog",".margLlog")){
+run_fastStructure <- function(vcf,coords=NULL,kmax=40,reps=100,save.as=NULL,tolerance=10e-6,prior="simple",full=FALSE,seed=NULL,python.path=NULL,fastStructure.path=NULL,cleanup=TRUE,include.out=c(".pdf",".Qlog",".margLlog")){
 	if(is.null(save.as)){
 		save.as <- file.path(getwd(),"result_fastStructure.pdf")
 	}
@@ -346,17 +349,27 @@ run_fastStructure <- function(vcf,coords=NULL,kmax=40,reps=100,save.as=NULL,cv.i
 		## Need to check that python 2* is available/usable
 	}
 
+	### Checking that the fastStructure program 'structure.py' exists and is executable
 	if(is.null(fastStructure.path)){
 		stop("NULL input for fastStructure.path not yet implemented")
-		### Need to test if there are executables of structure.py (and maybe also chooseK.py) somewhere on your path.
 	}
-
-	structure.py.path <- file.path(fastStructure.path,"structure.py")
-	# chooseK.py.path   <- file.path(fastStructure.path,"chooseK.py")
-	
-	if(FALSE){
-		### Check if structure.py.path and chooseK.py.path are executable and stop if not
+	if(!file.exists(fastStructure.path)){
+		stop(paste0(fastStructure.path," does not exist"))
+	} else {
+		if(file.info(fastStructure.path)$isdir){
+			structure.py.path <- file.path(fastStructure.path,"structure.py")
+		} else {
+			structure.py.path <- fastStructure.path
+		}
 	}
+	if(!file.exists(structure.py.path)){
+		stop(paste0(structure.py.path," does not exist"))
+	} else {
+		if(check.if.executable(structure.py.path)!=0){
+			stop("fastStructure 'structure.py' not executable")
+		}
+	}
+	### Loading coordinates of individuals if coordinates were supplied.
 	if(!is.null(coords)){
 		if(is(coords,"array") | is(coords,"data.frame")){
 			coords <-  coords
@@ -372,18 +385,28 @@ run_fastStructure <- function(vcf,coords=NULL,kmax=40,reps=100,save.as=NULL,cv.i
 	if(kmax > maxK){
 		Krange <- 1:maxK
 	}
+	if(full){
+		full <- " --full"
+	} else {
+		full <- NULL
+	}
+	if(!is.null(seed)){
+		seed <- paste0(" --seed=",seed)
+	} else {
+		seed <- NULL
+	}
 	outdir.temp <- file.path(dirname(save.as),paste(sample(c(letters,LETTERS,rep(0:9,3)),10,replace=T),collapse=""))
 	dir.create(outdir.temp)
 	for(i in 1:reps){
 		outfile.temp.i <- file.path(outdir.temp,paste0("rep",i))
 		for(K in Krange){
-			command1     <- paste0(python.path," ",structure.py.path," -K",K," --input=",str.path," --format=str --output=", outfile.temp.i)
+			command1     <- paste0(python.path," ",structure.py.path," -K ",K," --input=",str.path," --tol=",tolerance," --prior=",prior,full,seed," --format=str --output=", outfile.temp.i)
 			run.command1 <- system(command1)
 		}
-		if(FALSE){
-			command2     <- paste0(python.path," ",chooseK.py.path," --input=",outfile.temp.i)
-			run.command2 <- system(command2,intern=TRUE)
-		}
+		#if(FALSE){
+		#	command2     <- paste0(python.path," ",chooseK.py.path," --input=",outfile.temp.i)
+		#	run.command2 <- system(command2,intern=TRUE)
+		#}
 	}
 	
 	#### Load the marginal likelihood scores (the metric of fit for each K)

@@ -16,7 +16,10 @@ run_fastStructure(
   kmax = 40,
   reps = 100,
   save.as = NULL,
-  cv.iter = 0,
+  tolerance = 1e-05,
+  prior = "simple",
+  full = FALSE,
+  seed = NULL,
   python.path = NULL,
   fastStructure.path = NULL,
   cleanup = TRUE,
@@ -34,7 +37,13 @@ run_fastStructure(
 
 \item{save.as}{Where to save the output PDF. Default is NULL.}
 
-\item{cv.iter}{Number of iterations to perform for cross-validation. Default is zero. Currently ignored.}
+\item{tolerance}{Tolerance for convergence, i.e., the change in marginal likelihood required to continue.}
+
+\item{prior}{Type of prior to use. Default "simple"}
+
+\item{full}{Whether or not to generate output files holding variation of Q, P, and marginal likelihood, in addition to the files holding means. Default FALSE.}
+
+\item{seed}{Value to use as a seed for reproducing results. Default NULL.}
 
 \item{python.path}{Character string with path to python 2 with fastStructure dependencies Numpy, Scipy, Cython, GNU Scientific Library}
 
