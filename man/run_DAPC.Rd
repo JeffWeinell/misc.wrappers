@@ -13,7 +13,8 @@ run_DAPC(
   coords = NULL,
   reps = 100,
   probs.out = NULL,
-  save.as = NULL
+  save.as = NULL,
+  include.out = c(".pdf", ".Qlog", ".BIClog")
 )
 }
 \arguments{
@@ -28,6 +29,8 @@ run_DAPC(
 \item{probs.out}{NULL or a character string with location where to write a table containing the membership probabilities for the best K and alpha-optimized number of PCAs.}
 
 \item{save.as}{Character string with where to save the output PDF with plots of results. Default is NULL.}
+
+\item{include.out}{Character vector indicating which type of files should be included as output. Default is c(".pdf",".Qlog",".BIClog").}
 }
 \value{
 A list of plots.

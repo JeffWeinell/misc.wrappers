@@ -7,11 +7,12 @@
 #' @param kmax Number indicating the maximum number of clusters to evaluate. Default is 40, which is converted using kmax = min(kmax, number of individuals-1)
 #' @param coords Optional character string with path to a table with longitude and latitude of individuals in the vcf file, or a matrix or data frame with longitude and latitude columns. Default is NULL, in which case membership probabilities are not interpolated onto a map.
 #' @param reps Number indicating the number of replicates of 'find.clusters'. Default 100.
+#' @param include.out Character vector indicating which type of files should be included as output. Default is c(".pdf",".Qlog",".BIClog").
 #' @param probs.out NULL or a character string with location where to write a table containing the membership probabilities for the best K and alpha-optimized number of PCAs.
 #' @param save.as Character string with where to save the output PDF with plots of results. Default is NULL.
 #' @return A list of plots.
 #' @export run_DAPC
-run_DAPC <- function(vcf, kmax=40, coords=NULL, reps=100,probs.out=NULL,save.as=NULL){
+run_DAPC <- function(vcf, kmax=40, coords=NULL, reps=100,probs.out=NULL,save.as=NULL,include.out=c(".pdf",".Qlog",".BIClog")){
 	if(is.null(save.as)){
 		save.as <- file.path(getwd(),"result_DAPC.pdf")
 	}
@@ -56,7 +57,7 @@ run_DAPC <- function(vcf, kmax=40, coords=NULL, reps=100,probs.out=NULL,save.as=
 	max.clusters <- kmax
 	Krange       <- 1:max.clusters
 	grp          <- adegenet::find.clusters(genind, max.n.clust=max.clusters,n.pca=max.clusters,choose.n.clust=F)
-	grp.list <- list(); length(grp.list) <- reps
+	grp.list     <- list(); length(grp.list) <- reps
 	# par(mar=c(3.5,4,3,2.1))
 	for(i in 1:reps){
 		grp.list[[i]] <- adegenet::find.clusters(genind, max.n.clust=max.clusters,n.pca=max.clusters,choose.n.clust=F)
@@ -72,50 +73,54 @@ run_DAPC <- function(vcf, kmax=40, coords=NULL, reps=100,probs.out=NULL,save.as=
 		bestK <- 1
 	}
 	Kbest.criteria1   <- bestK
-#	boxplot(t(BIC.mat))
-	BIC.df      <- data.frame(BIC=unname(unlist(c(BIC.mat))),Kval=rep(Krange,reps))
+	### Construct data frame holding BIC scores for each replicate of each K
+	BIC.df      <- data.frame(BIC=unname(unlist(c(BIC.mat))),K=rep(Krange,reps),replicate=rep(1:reps,each=length(Krange)))
+	### save a copy of BIC scores
+	if(".BIClog" %in% include.out){
+		write.table(x=BIC.df,file=paste0(tools::file_path_sans_ext(save.as),".BIClog"),row.names=FALSE,col.names=TRUE,quote=FALSE,sep="\t")
+	}
 	#BIC.df <- BIC.df[order(BIC.df.temp[,"Kval"]),]
 	#mode(BIC.df$Kval) <- "character"
-	BIC.df$Kval <- factor(BIC.df$Kval, levels=c(1:nrow(BIC.df)))
-	BICPlot     <- ggplot2::ggplot(data=BIC.df,ggplot2::aes(x=Kval, y=BIC)) + ggplot2::geom_boxplot(fill='lightgray', outlier.colour="black", outlier.shape=16,outlier.size=2, notch=FALSE) + ggplot2::theme_classic() + ggplot2::labs(title= paste0("BIC (",reps," replicates of find.clusters) vs. number of clusters (K)"), x="Number of ancestral populations", y = "BIC") + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) + ggplot2::geom_vline(xintercept=bestK, linetype=2, color="black", size=0.25)
+	BIC.df$K <- factor(BIC.df$K, levels=c(1:nrow(BIC.df)))
+	BICPlot  <- ggplot2::ggplot(data=BIC.df,ggplot2::aes(x=K, y=BIC)) + ggplot2::geom_boxplot(fill='lightgray', outlier.colour="black", outlier.shape=16,outlier.size=2, notch=FALSE) + ggplot2::theme_classic() + ggplot2::labs(title= paste0("BIC (",reps," replicates of find.clusters) vs. number of clusters (K)"), x="Number of ancestral populations", y = "BIC") + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) + ggplot2::geom_vline(xintercept=bestK, linetype=2, color="black", size=0.25)
 	### Checking if the max BIC of the next K value is less than the min BIC of the previous K value.
-	range.BIC.mat     <- do.call(rbind,lapply(X=1:nrow(BIC.mat),FUN=function(x){range(BIC.mat[x,],na.rm=TRUE)}))
-	BIC.is.nonoverlap <- NULL
-	BIC.is.reduced    <- NULL
-	for(i in 2:nrow(range.BIC.mat)){
-		BIC.is.nonoverlap     <- c(BIC.is.nonoverlap,range.BIC.mat[i,1] > range.BIC.mat[(i-1),2] | range.BIC.mat[i,2] < range.BIC.mat[(i-1),1])
-		BIC.is.reduced     <- c(BIC.is.reduced,range.BIC.mat[i,2] < range.BIC.mat[(i-1),1])
-	}
+	#range.BIC.mat     <- do.call(rbind,lapply(X=1:nrow(BIC.mat),FUN=function(x){range(BIC.mat[x,],na.rm=TRUE)}))
+	#BIC.is.nonoverlap <- NULL
+	#BIC.is.reduced    <- NULL
+	#for(i in 2:nrow(range.BIC.mat)){
+	#	BIC.is.nonoverlap     <- c(BIC.is.nonoverlap,range.BIC.mat[i,1] > range.BIC.mat[(i-1),2] | range.BIC.mat[i,2] < range.BIC.mat[(i-1),1])
+	#	BIC.is.reduced     <- c(BIC.is.reduced,range.BIC.mat[i,2] < range.BIC.mat[(i-1),1])
+	#}
 	# If max BIC for K=2 is better than BIC K=1 and if some K values are not better (all BIC lower) than K-1, then find the first K value in which K+1 is not better.
-	if(any(!BIC.is.reduced) & BIC.is.reduced[1]){
-		Kbest.criteria2 <- which(!BIC.is.reduced)[1]
-	} else {
-		Kbest.criteria2 <- 1
-	}
+	#if(any(!BIC.is.reduced) & BIC.is.reduced[1]){
+	#	Kbest.criteria2 <- which(!BIC.is.reduced)[1]
+	#} else {
+	#	Kbest.criteria2 <- 1
+	#}
 	### Which K value (for K>=2) yields the least variable BIC scores.
-	BICvK.variation <- apply(X=BIC.mat,MARGIN=1,FUN=var)
-	KminVarBIC      <- which(BICvK.variation==min(BICvK.variation[-1]))
-	Kbest.criteria3 <- KminVarBIC[1]
+	#BICvK.variation <- apply(X=BIC.mat,MARGIN=1,FUN=var)
+	#KminVarBIC      <- which(BICvK.variation==min(BICvK.variation[-1]))
+	#Kbest.criteria3 <- KminVarBIC[1]
 	### Criteria 4: t-tests for BIC of each pairwise adjacent K
-	for(i in 2:nrow(BIC.mat)){
-		if(BICvK.variation[Kbest.criteria3]==0){
-			Kbest.criteria4 <- NULL
-			break
-		}
-		t.test.i <- t.test(BIC.mat[i-1,],BIC.mat[i,])
-		pval.i   <- t.test.i$p.value
-		stat.i   <- t.test.i$statistic
-		if(pval.i < 0.05 & stat.i > 0){
-			next
-		} else {
-			if(i==nrow(BIC.mat)){
-				Kbest.criteria4 <- NULL
-			} else{
-				Kbest.criteria4 <- (i-1)
-				break
-			}
-		}
-	}
+	# for(i in 2:nrow(BIC.mat)){
+	# 	if(BICvK.variation[Kbest.criteria3]==0){
+	# 		Kbest.criteria4 <- NULL
+	# 		break
+	# 	}
+	# 	t.test.i <- t.test(BIC.mat[i-1,],BIC.mat[i,])
+	# 	pval.i   <- t.test.i$p.value
+	# 	stat.i   <- t.test.i$statistic
+	# 	if(pval.i < 0.05 & stat.i > 0){
+	# 		next
+	# 	} else {
+	# 		if(i==nrow(BIC.mat)){
+	# 			Kbest.criteria4 <- NULL
+	# 		} else{
+	# 			Kbest.criteria4 <- (i-1)
+	# 			break
+	# 		}
+	# 	}
+	# }
 #	if(bestK>1){
 #		segments(x0=Kbest.criteria1, y0=par("usr")[3], y1=par("usr")[4],lty=2,col="black")
 #	}

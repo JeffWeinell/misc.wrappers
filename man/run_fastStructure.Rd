@@ -65,6 +65,3 @@ Notes for running fastStructure:
 Requires python 2
 Cross validation with the "cv.iter" argument not implemented because it crashes my copy of fastStructure, probably due to a python build problem on my end
 }
-\examples{
-vcf2fastStructure(vcf="Ahaetulla-prasina_AllPops_BestSNP.vcf",out="example.str")
-}
