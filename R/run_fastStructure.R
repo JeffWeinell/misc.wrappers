@@ -394,6 +394,7 @@ run_fastStructure <- function(vcf,coords=NULL,kmax=40,reps=100,save.as=NULL,tole
 	if(kmax > maxK){
 		Krange <- 1:maxK
 	}
+	###### Defining other settings for fastStructure
 	if(full){
 		full <- " --full"
 	} else {
@@ -464,19 +465,21 @@ run_fastStructure <- function(vcf,coords=NULL,kmax=40,reps=100,save.as=NULL,tole
 	margL.df      <- data.frame(marginalLikelihood=unname(unlist(c(margL.mat))),Kval=rep(Krange,reps))
 	margL.df$Kval <- factor(margL.df$Kval, levels=c(1:nrow(margL.df)))
 	margLPlot     <- ggplot2::ggplot(margL.df, ggplot2::aes(x=Kval, y=marginalLikelihood)) + ggplot2::geom_boxplot(fill='lightgray', outlier.colour="black", outlier.shape=16,outlier.size=2, notch=FALSE) + ggplot2::theme_classic() + ggplot2::labs(title= paste0("marginal likelihood (",reps," replicates) vs. number of ancestral populations (K)"), x="Number of ancestral populations", y = "marginalLikelihood") + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) + ggplot2::geom_vline(xintercept=bestK, linetype=2, color="black", size=0.25)
+	
+	#### Load the Q matrices
+	qpaths          <- list.files(outdir.temp,pattern="^.+\\.meanQ$",full.names=TRUE)
+	qmats.list      <- lapply(qpaths,read.table)
+	qfiles          <- basename(qpaths)
+	### K value associated with each q matrix
+	KQmats          <- sapply(qmats.list,ncol)
+	### replicate of K associated with each q matrix
+	repsQmats       <- as.numeric(gsub("^rep","",gsub("\\..+$","",qfiles)))
+	### for a particular K, the replicate with the highest marginal likelihood
+	bestReps        <- unname(sapply(1:max(Krange),FUN=function(x){which(margL.mat[x,]==max(margL.mat[x,]))[1]}))
+	### for a particular K, the qmatrix of the replicate with the highest marginal likelihood
+	qmats.list.best <- lapply(1:max(Krange),FUN=function(x){qmats.list[[which(KQmats==x)[bestReps[(x)]]]]})
+	
 	if(".Qlog" %in% include.out){
-		#### Load the Q matrices
-		qpaths          <- list.files(outdir.temp,pattern="^.+\\.meanQ$",full.names=TRUE)
-		qmats.list      <- lapply(qpaths,read.table)
-		qfiles          <- basename(qpaths)
-		### K value associated with each q matrix
-		KQmats          <- sapply(qmats.list,ncol)
-		### replicate of K associated with each q matrix
-		repsQmats       <- as.numeric(gsub("^rep","",gsub("\\..+$","",qfiles)))
-		### for a particular K, the replicate with the highest marginal likelihood
-		bestReps        <- unname(sapply(1:max(Krange),FUN=function(x){which(margL.mat[x,]==max(margL.mat[x,]))[1]}))
-		### for a particular K, the qmatrix of the replicate with the highest marginal likelihood
-		qmats.list.best <- lapply(1:max(Krange),FUN=function(x){qmats.list[[which(KQmats==x)[bestReps[(x)]]]]})
 		### Organizing a single data frame to hold all q matrices for all replicates of every K. This data frame will be written to a single file so that the many '*.meanQ' files produced by fastStrucure can be deleted.
 		q.df <- NULL
 		for(i in 1:length(KQmats)){
