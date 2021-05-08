@@ -99,7 +99,6 @@ Running runeems_snps_setup will create a directory with path output.dirpath and 
   - `params/params-chain*.ini`; one for each chain
   - `runeems_snps_chain*.sh`; bash script for running EEMS to generate MCMC chain*
 
-
 <!---
 # I don't remember if this works yet.
 ### Visualizing results
