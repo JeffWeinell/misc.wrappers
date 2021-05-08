@@ -3,12 +3,13 @@
 **Under Developement**
 
 ### Package Description
-This package includes functions to fascilitate running various population genetic/genomic and phylogenetic/genomic programs, and to summarize results in useful ways. The main functions:
+This package includes functions to fascilitate running some popular programs used for assessing population structure, demographic modelling, and genetic/genomic and phylogenetic/genomic programs, and to summarize results in useful ways. The main functions are:
   - ```run_DAPC```
   - ```run_sNMF```
   - ```runtess```
   - ```run_fastStructure```
   - ```runeems_snps_setup```
+  - ```plot_model```
  <!-- - ```eemsgg2raster```-->
 
 ### Install ```misc.wrappers``` from GitHub using ```devtools```, ```remotes```, or ```BiocManager```.
@@ -27,7 +28,7 @@ BiocManager::install("JeffWeinell/misc.wrappers")
 ```
 
 ### Software Requirements
-Some functions depend on other programs to be installed. In particular, ```run_fastStructure``` requires the fastStructure program to be installed, and ```runeems_snps_setup``` requires EEMS to be installed.
+Some functions depend on other programs to be installed. In particular, ```run_fastStructure``` requires [fastStructure](https://rajanil.github.io/fastStructure/) to be installed, and ```runeems_snps_setup``` requires [EEMS](https://github.com/dipetkov/eems) to be installed.
 
 #### Download, unpack, and install EEMS
 Follow the instructions [here](https://github.com/dipetkov/eems) on how to download the EEMS repository, which includes several programs, including ```runeems_snps``` which you must install from source.

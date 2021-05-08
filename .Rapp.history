@@ -1,33 +1,3 @@
-ydist
-mapplot.initial <- plot(suppressWarnings(tess3r::as.qmatrix(q.matrix)), as.matrix(coords), method = "map.max", interpol = FieldsKrigModel(10), main = paste0("Ancestry coefficients; K=",K), xlab = "", ylab = "",resolution = c(100,100), cex = 0.4,col.palette = my.palette, window=c(x.min,x.max,y.min,y.max),asp=xdist/ydist)
-as.qmatrix(q.matrix)
-q.matrix           <- LEA::Q(snmf.obj,K=K,run=best)
-q.matrix
-snmf.obj
-class(snmf.obj)
-attributes(snmf.obj)
-vcf
-samplenames
-vcf.obj     <- vcfR::read.vcfR(vcf)
-samplenames <- colnames(vcf.obj@gt)[-1]#
-	numind      <- length(samplenames)
-numind
-vcftools.path="/panfs/pfs.local/home/j926w878/programs/vcftools_0.1.13/bin/vcftools";vcf="/panfs/pfs.local/home/j926w878/work/ddRAD/snps_goodData/Oxyrhabdium_AllSpecies_AllSNPs.vcf"; indv.keep=indvskeep; out="/panfs/pfs.local/home/j926w878/work/ddRAD/snps_goodData/Oxyrhabdium_both-modestum_BestSNP.vcf"; which.site="best"
-indvkeep
-indv.keep
-indv.keep="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/tess3r/indv_keep_Oxyrhabdium_both-modestum.txt"
-!is.null(indv.keep)
-is(indv.keep,"character"))
-is(indv.keep,"character")
-is(indv.keep,"character") & length(indv.keep)==1
-file.exists(indv.keep)
-indv.keep <- read.table(indv.keep)
-indv.keep
-indv.keep="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/tess3r/indv_keep_Oxyrhabdium_both-modestum.txt"
-unlist(read.table(indv.keep))
-unname(unlist(read.table(indv.keep)))
-indv.keep <- unname(unlist(read.table(indv.keep)))
-indv.keep
 readLines(indv.keep)
 indv.keep="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/tess3r/indv_keep_Oxyrhabdium_both-modestum.txt"
 readLines(indv.keep)
@@ -1019,203 +989,148 @@ library(remotes)
 remotes::install_github("JeffWeinell/misc.wrappers",upgrade=FALSE,auth_token="323d9e4cd00247a39a805dbb66f37db6403cfb8b")
 library(misc.wrappers)
 q()
+library(devtools)
 setwd("Documents/misc.wrappers")
 devtools::document()
-library(remotes)
-remotes::install_github("JeffWeinell/misc.wrappers",upgrade=FALSE,auth_token="323d9e4cd00247a39a805dbb66f37db6403cfb8b")
 library(misc.wrappers)
 devtools::document()
-warning("Some loci have multiple sites, but InterMarkerDists is FALSE, and therefore STRUCTURE will incorrectly consider linked sites as unlinked")
-grep("A",c("AB","AC","CD"),value=T)
-x=1;grep(paste0("^",uniqueLoci[x],"_"),SiteNames,value=T)
-is(as.integer("A"),"integer",na.omit=F)
-vcf2structure <- function(vcf, IndvNames=TRUE, OneIndvPerRow=TRUE, MarkerNames=TRUE, MissingData=c(-9), out, InterMarkerDists=FALSE, PopData=NULL, PopFlag=NULL, LocData=NULL, Phenotype=NULL, OtherData=NULL){#
-	# Check class of vcf argument value.#
-	if(is(vcf,"vcfR")){#
-		vcf.obj <- vcf#
-	} else {#
-		if(is(vcf,"character")){#
-			# read VCF file into R as a vcfR object#
-			vcf.obj     <- vcfR::read.vcfR(vcf)#
-		} else {#
-			stop("vcf argument must be eith a character string with path to VCF file, or a vcfR object")#
+devtools::document()
+devtools::document()
+devtools::document()
+0.161+0.312+(0.303*3)
+devtools::document()
+devtools::document()
+devtools::document()
+devtools::document()
+include.out=c(".pdf",".Qlog",".margLlog")
+include.out
+".Plog" %in% include.out
+devtools::document()
+?file.exists
+devtools::document()
+library(misc.wrappers)
+config_miscwrappers()
+config_miscwrappers
+remotes::install_github("JeffWeinell/misc.wrappers",upgrade=FALSE,auth_token="323d9e4cd00247a39a805dbb66f37db6403cfb8b")
+library(misc.wrappers)
+settings.dir  <- path.expand(rappdirs::user_config_dir("R_misc_wrappers", version=packageVersion("misc.wrappers")))
+settings.dir
+settings.file <- paste0(settings.dir,"/exepaths.txt")
+settings.file
+file.exists(settings.file)
+test <- readLines(settings.file)
+length(test)
+test
+user_config_dir
+rappdirs
+rappdirs::user_config_dir
+settings.dir  <- path.expand(rappdirs::user_config_dir("R_misc_wrappers", version=packageVersion("misc.wrappers")))
+settings.dir
+settings.file <- paste0(settings.dir,"/exepaths.txt")
+settings.file
+exe.paths=NULL
+is(exe.paths,"character")
+is.null(exe.paths)
+!dir.exists(settings.dir)
+settings.dir
+!dir.exists(settings.dir)
+!file.exists(settings.file)
+readLines(settings.file)
+linked.paths <- config_miscwrappers()
+linked.paths
+find.exe.path <- function(program){#
+		check.paths <- system(paste("which",program),ignore.stdout=TRUE,ignore.stderr=TRUE)#
+		if(check.paths==0){#
+			check.paths <- system(paste("which",program),intern=TRUE)[1]#
+			if(check.if.executable(check.paths)==0){#
+				return(check.paths)#
+			}#
 		}#
-	}#
-	## Data frame with site (SNP) specific information#
-	fix.mat <- vcf.obj@fix#
-	# Extract genotypes for each individual and hold genotypes in a character matrix; if polyploid, haplotypes are separated by "/" or "|"#
-	gt.mat      <- gsub(":.+","",vcf.obj@gt[,-1])#
-	# Detect ploidy from gt.mat#
-	test.sample <- unlist(gt.mat)[!is.na(unlist(gt.mat))][1]#
-	ploidy      <- length(unlist(strsplit(gt.mat[1],split="/",fixed=T)))#
-	# Names of individuals#
-	samplenames <- colnames(vcf.obj@gt)[-1]#
-	# Number of individuals#
-	numind      <- length(samplenames)#
-	# Unique ID for each site. If MarkerNames is TRUE then these will be used for MarkerNames.#
-	SiteNames <- paste(fix.mat[,"CHROM"],fix.mat[,"POS"],sep="_")#
-	# Number of sites#
-	nsites <- nrow(fix.mat)#
-	# locus ID number from CHROM column#
-	uniqueLoci <- unique(unique(fix.mat[,"CHROM"]))#
-	# Number of loci (aka chromosomes or linkage groups)#
-	nloci  <- length(uniqueLoci)#
-	if(nsites > nloci & !InterMarkerDists){#
-		warning("Some loci have multiple sites, but InterMarkerDists is FALSE, and therefore STRUCTURE will incorrectly treat linked sites as unlinked")#
-	}#
-	# Optional information rows and columns need to be considered for inclusion on output.#
-	### MarkerNames row#
-	if(is(MarkerNames,"logical")){#
-		if(MarkerNames){#
-			MarkerNames <- paste(fix.mat[,"CHROM"],fix.mat[,"POS"],sep="_")#
-		} else {#
-			MarkerNames <- NULL#
-		}#
-	} else {#
-		if(length(MarkerNames)!=nsites){#
-			stop("If MarkerNames is not a logical it should be a vector with length equal to the number of sites")#
-		}#
-	}#
-	### InterMarkerDists row#
-	if(is(InterMarkerDists,"logical")){#
-		if(InterMarkerDists){#
-			if(nsites==nloci){#
-				InterMarkerDists <- rep(-1,nsites)#
+		linked.paths <- config_miscwrappers()#
+		if(any(linked.paths$program == program)){#
+			trypath <- linked.paths$exe_path[which(linked.paths$program==program)[1]]#
+			if(check.if.executable(trypath)==0){#
+				return(trypath)#
 			} else {#
-				imd.list         <- lapply(X=1:nloci,FUN=function(x){grep(paste0("^",uniqueLoci[x],"_"),SiteNames,value=F)})#
-				InterMarkerDists <- unlist(lapply(X=imd.list,FUN=function(x){x[1]=-1;x}))#
-			}#
-		} else {#
-			InterMarkerDists <- NULL#
-		}#
-	} else {#
-		if(length(InterMarkerDists)!=nsites){#
-			stop("InterMarkerDists must be TRUE, FALSE, or an integer vector with length equal to the number of sites")#
-		}#
-	}#
-	### RecessiveAlleles information not implemented#
-	RecessiveAlleles <- NULL#
-	if(FALSE){#
-		stop("Not implemented. This information not required by STRUCTURE and usually not typically used for SNP data.")#
-	}#
-	### Phase information not yet implemented but might add later. This info might be extractable from some VCFs. See vcf.obj@meta#
-	Phase <- NULL#
-	if(FALSE){#
-		stop("Not yet implemented")#
-		vcf.meta <- vcf.obj@meta#
-	}#
-	### IndvNames; hopefully there isnt a limit on the lengths of names#
-	if(is(IndvNames,"logical")){#
-		if(IndvNames){#
-			IndvNames <- samplenames#
-		} else {#
-			IndvNames <- NULL#
-		}#
-	} else {#
-		if(length(IndvNames)!=numind){#
-			stop("IndvNames must be TRUE, FALSE, or a character or numeric vector with a length equal to the number of individuals")#
-		}#
-	}#
-	### PopData and PopFlag#
-	if(!is.null(PopData)){#
-		if(length(PopData)!=numind){#
-			stop("If PopData is non-NULL it must be a character or numeric vector with a length equal to the number of individuals")#
-		} else {#
-			if(!is.null(PopFlag)){#
-				if(length(PopFlag)!=numind | !all(test %in% c(0,1))){#
-					stop("If PopFlag is non-NULL it must be a character or numeric vector with a length equal to the number of individuals, with each value either 0 (don't use PopData for individual) or 1 (use PopData for individual)")#
-				}#
-			}#
-		}#
-	} else {#
-		# If PopData is NULL, ignore the user-defined value for PopFlag argument and set PopFlag to NULL.#
-		PopFlag <- NULL#
-	}#
-	if(!is.null(LocData)){#
-		if(length(LocData)!=numind | any(is.na(suppressWarnings(as.integer(LocData))))){#
-			stop("If LocData is non-NULL it must be a vector of integers with a length equal to the number of individuals")#
-		}#
-	}#
-	if(!is.null(Phenotype)){#
-		if(length(Phenotype)!=numind | any(is.na(suppressWarnings(as.integer(Phenotype))))){#
-			stop("If Phenotype is non-NULL it must be a vector of integers with a length equal to the number of individuals")#
-		}#
-	}#
-	if(!is.null(OtherData)){#
-		if(is(OtherData,c("matrix","array","data.frame"))){#
-			if(nrow(OtherData)!=numind){#
-				stop("If OtherData is non-NULL it must either be (1) a vector with its length equal to number of individuals, or (2) a matrix (or data frame coercible to a matrix) with as many rows as genotypes individuals.")#
-			} else {#
-				OtherData <- do.call(X=rbind,lapply(1:nrow(OtherData),FUN=function(x){paste(OtherData[x,],collapse=" ")}))#
-			}#
-		} else {#
-			if(length(OtherData)!=numind){#
-				stop("If OtherData is non-NULL it must either be (1) a vector with its length equal to number of individuals, or (2) a matrix (or data frame coercible to a matrix) with as many rows as genotypes individuals.")#
+				return(1)#
+				#stop("No valid path python identified. Set 'python.path' to location of python2.")#
 			}#
 		}#
 	}#
-	if(OneIndvPerRow){#
-		### Transpose the genotype matrix#
-		t.gt.mat <- t(gt.mat)#
-		### Split genotype strings by VCF haplotype separators ("/" or "|") and then reorganize into matrix with n columns per individual for n-ploidy individuals.#
-		mat.temp0 <- unname(do.call(rbind,lapply(1:nrow(t.gt.mat), FUN=function(x){unlist(strsplit(t.gt.mat[x,],split="[/,|]"))})))#
-		### Replace VCF missing data value "." with value supplied by MissingData argument.#
-		mat.temp1 <- gsub(".",MissingData,mat.temp0,fixed=TRUE)#
-	} else {#
-		### split genotype strings by VCF haplotype separators ("/" or "|") and then reorganize into matrix with n columns per individual for n-ploidy individuals.#
-		mat.temp0 <- t(unname(do.call(rbind,lapply(1:nrow(gt.mat), FUN=function(x){unlist(strsplit(gt.mat[x,],split="[/,|]"))}))))#
-		### replace VCF missing data value "." with value supplied by MissingData argument#
-		mat.temp1 <- gsub(".",MissingData,mat.temp0,fixed=TRUE)#
-		#### at this point the structure genotype matrix (mat.temp1) is in the correct format but columns and rows are not named. Now the other optional information rows and columns need to be considered for inclusion on output.#
-		# Repeat each value for the non-genotype columns twice #
-		IndvNames   <- rep(IndvNames,ploidy,each=T)#
-		PopData     <- rep(PopData,ploidy,each=T)#
-		PopFlag     <- rep(PopFlag,ploidy,each=T)#
-		LocData     <- rep(LocData,ploidy,each=T)#
-		Phenotype   <- rep(Phenotype,ploidy,each=T)#
-		OtherData   <- rep(OtherData,ploidy,each=T)#
-	}#
-	### Individual/Genotype matrix#
-	indv.gt.mat <- cbind(IndvNames,PopData,PopFlag,LocData,Phenotype,OtherData,mat.temp1)#
-	### Converting each row of the Individual/Genotype matrix into a space-delineated character string#
-	indv.gt.strings  <- unlist(lapply(1:nrow(indv.gt.mat),FUN=function(x){paste(indv.gt.mat[x,],collapse=" ")}))#
-	### Collapsing each of MarkerNames, RecessiveAlleles, InterMarkerDists, and Phase into a space-delineated character string#
-	MarkerNames      <- paste(MarkerNames,collapse=" ")#
-	RecessiveAlleles <- paste(RecessiveAlleles,collapse=" ")#
-	InterMarkerDists <- paste(InterMarkerDists,collapse=" ")#
-	Phase            <- paste(Phase,collapse=" ")#
-	### Combining the other rows (MarkerNames, RecessiveAlleles, InterMarkerDist, and PhaseInformation) with indv.gt.strings#
-	result.strings   <- c(MarkerNames,RecessiveAlleles,InterMarkerDists,Phase,indv.gt.strings)#
-	### Write output STRUCTURE file#
-	writeLines(text=result.strings,con=out)#
-	return(0)#
+	#exe.path#
 }
-list(length=2)
-list(length(2))
-?is.null
-c(NA,length.out=2)
-c(NA,length=2)
-vector(NA,length=2)
-vector(mode="character",length=2)
+find.exe.path <- function(program){#
+	check.paths <- system(paste("which",program),ignore.stdout=TRUE,ignore.stderr=TRUE)#
+	if(check.paths==0){#
+		check.paths <- system(paste("which",program),intern=TRUE)[1]#
+		if(check.if.executable(check.paths)==0){#
+			return(check.paths)#
+		}#
+	}#
+	linked.paths <- config_miscwrappers()#
+	if(any(linked.paths$program == program)){#
+		trypath <- linked.paths$exe_path[which(linked.paths$program==program)[1]]#
+		if(check.if.executable(trypath)==0){#
+			return(trypath)#
+		} else {#
+			return(1)#
+			#stop("No valid path python identified. Set 'python.path' to location of python2.")#
+		}#
+	}#
+}
+find.exe.path <- function(program){#
+	check.paths <- system(paste("which",program),ignore.stdout=TRUE,ignore.stderr=TRUE)#
+	if(check.paths==0){#
+		check.paths <- system(paste("which",program),intern=TRUE)[1]#
+		if(misc.wrappers::check.if.executable(check.paths)==0){#
+			return(check.paths)#
+		}#
+	}#
+	linked.paths <- misc.wrappers::config_miscwrappers()#
+	if(any(linked.paths$program == program)){#
+		trypath <- linked.paths$exe_path[which(linked.paths$program==program)[1]]#
+		if(misc.wrappers::check.if.executable(trypath)==0){#
+			return(trypath)#
+		} else {#
+			return(1)#
+			#stop("No valid path python identified. Set 'python.path' to location of python2.")#
+		}#
+	}#
+}
+find.exe.path("python")
+find.exe.path("python2")
+test <- find.exe.path("python2")
+test
+find.exe.path <- function(program){#
+	check.paths <- system(paste("which",program),ignore.stdout=TRUE,ignore.stderr=TRUE)#
+	if(check.paths==0){#
+		check.paths <- system(paste("which",program),intern=TRUE)[1]#
+		if(misc.wrappers::check.if.executable(check.paths)==0){#
+			return(check.paths)#
+		}#
+	}#
+	linked.paths <- misc.wrappers::config_miscwrappers()#
+	if(any(linked.paths$program == program)){#
+		trypath <- linked.paths$exe_path[which(linked.paths$program==program)[1]]#
+		if(misc.wrappers::check.if.executable(trypath)==0){#
+			return(trypath)#
+		} else {#
+			return(1)#
+			#stop("No valid path python identified. Set 'python.path' to location of python2.")#
+		}#
+	} else {#
+		return(1)#
+	}#
+}
+test <- find.exe.path("python2")
+test
+exp(1)
+misc.wrappers::pset
 devtools::document()
-rm(list = c("vcf2structure"))
+rm(list = c("find.exe.path"))
 devtools::document()
-sample(c(letters,LETTERS),20,replace=T)
-sample(c(letters,LETTERS,0:9),20,replace=T)
-c(letters,LETTERS,0:9)
-filepath(getwd(),paste0(sample(c(letters,LETTERS,rep(0:9,3)),30,replace=T),".str"))
-file.path(getwd(),paste0(sample(c(letters,LETTERS,rep(0:9,3)),30,replace=T),".str"))
-file.path(getwd(),paste0(paste(sample(c(letters,LETTERS,rep(0:9,3)),30,replace=T),collapse=""),".str"))
-dir.path(paste(sample(c(letters,LETTERS,rep(0:9,3)),30,replace=T),collapse=""))
-dirpath(paste(sample(c(letters,LETTERS,rep(0:9,3)),30,replace=T),collapse=""))
-file.path(paste(sample(c(letters,LETTERS,rep(0:9,3)),30,replace=T),collapse=""))
-file.path(getwd(),paste(sample(c(letters,LETTERS,rep(0:9,3)),30,replace=T),collapse=""))
-file.path(getwd(),paste(sample(c(letters,LETTERS,rep(0:9,3)),10,replace=T),collapse=""))
-outdir.temp <- file.path(getwd(),paste(sample(c(letters,LETTERS,rep(0:9,3)),10,replace=T),collapse=""))
-outdir.temp
-file.path(outdir.temp,"rep1")
-i=1
-file.path(outdir.temp,paste0("rep",i))
-dir.create
-plot(1:3,c(-0.9593229,-0.5727647,-0.5079722))
-margL.df <- data.frame(crossentropy=unname(unlist(c(margL.mat))),Kval=rep(Krange,reps))
+devtools::document()
+devtools::document()
+remotes::install_github("JeffWeinell/misc.wrappers",upgrade=FALSE,auth_token="323d9e4cd00247a39a805dbb66f37db6403cfb8b")
+library(misc.wrappers)
+plot_model(tpl.path="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/delimitR/custom_models/TwoPops/leporinum_13.tpl", est.path="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/delimitR/custom_models/TwoPops/leporinum_13.est")
