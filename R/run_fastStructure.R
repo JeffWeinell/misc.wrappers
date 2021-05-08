@@ -344,27 +344,6 @@ run_fastStructure <- function(vcf,coords=NULL,kmax=40,reps=100,save.as=NULL,tole
 	str.path0   <- vcf2fastStructure(vcf=vcf.obj)
 	str.path    <- tools::file_path_sans_ext(str.path0)
 
-	#### This might work?
-	#if(is.null(python.path)){
-	#	check.paths <- system("which python2",ignore.stdout=TRUE,ignore.stderr=TRUE)
-	#	if(check.paths==0){
-	#		check.paths <- system("which python2",intern=TRUE)[1]
-	#		if(check.if.executable(check.paths)==0){
-	#			python.path <- check.paths
-	#		}
-	#	}
-	#	if(is.null(python.path)){
-	#		linked.paths <- config_miscwrappers()
-	#		if(any(linked.paths$program == 'python')){
-	#			python.trypath <- linked.paths$exe_path[which(linked.paths$program=="python")[1]]
-	#			if(check.if.executable(python.trypath)==0){
-	#				python.path <- python.trypath
-	#			} else {
-	#				stop("No valid python identified. Set 'python.path' to location of python2.")
-	#			}
-	#		}
-	#	}
-	#}
 	### Checking that python2 exists and is executable
 	if(is.null(python.path)){
 		python.testpath <- find.exe.path("python")
@@ -374,10 +353,6 @@ run_fastStructure <- function(vcf,coords=NULL,kmax=40,reps=100,save.as=NULL,tole
 			stop("No valid python identified. Set 'python.path' to location of python2.")
 		}
 	}
-	### Checking that python has the required modules installed
-#	modules.check <- c("numpy","fastStructure","parse_bed","parse_str","random","getopt","sys","pdb","warnings")
-#	lapply(modules.check,function(x){system(paste0(python.path," -c 'import ",x,"' ; echo $?"))}) #  system(paste0(python.path," -c 'import ",modules[i],"' ; echo $?"))
-	
 	### Checking that the fastStructure program 'structure.py' exists and is executable
 	if(is.null(fastStructure.path)){
 		fastStructure.testpath <- find.exe.path("structure.py")
