@@ -145,15 +145,16 @@ run_DAPC <- function(vcf, kmax=40, coords=NULL, reps=100,probs.out=NULL,save.as=
 	##### Plot 2: BIC vs. K when number of PCs retained = alpha optimized 
 #	par(mar=c(4,4,3,2.1))
 	# names(best.npca) <- 2:max.clusters
-	best.npca.df      <- data.frame(best.npca=best.npca,Kval=2:max.clusters)
-	best.npca.df$Kval <- factor(best.npca.df$Kval)
-	grp.plot2         <- ggplot2::ggplot(data=best.npca.df, ggplot2::aes(x=Kval,y=best.npca)) + ggplot2::geom_bar(stat="identity",fill="lightgray") + ggplot2::labs(title= "alpha optimized # of PCs vs. number of clusters", x="Number of clusters", y = "Alpha optimized number of principle components to retain") + ggplot2::theme_classic() + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5))
+	best.npca.df      <- data.frame(K=2:max.clusters,best.npca=best.npca)
+	best.npca.df$K    <- factor(best.npca.df$K)
+	grp.plot2         <- ggplot2::ggplot(data=best.npca.df, ggplot2::aes(x=K,y=best.npca)) + ggplot2::geom_bar(stat="identity",fill="lightgray") + ggplot2::labs(title= "alpha optimized # of PCs vs. number of clusters", x="Number of clusters", y = "Alpha optimized number of principle components to retain") + ggplot2::theme_classic() + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5))
 #	barplot(best.npca)
 #	mtext(text="Alpha optimized number of principle components to retain",side=2,line=2)
 #	mtext(text="Number of clusters",side=1,line=2)
 #	mtext(text="alpha optimized # of PCs vs. number of clusters",side=3,line=1)
 #	grp.plot2      <- recordPlot()
 	admixturePlot  <- list(); length(admixturePlot)   <- max.clusters-1
+	scatterPlot    <- list(); length(scatterPlot)     <- max.clusters-1
 	assignmentPlot <- list(); length(assignmentPlot)  <- max.clusters-1
 	posterior.list <- list(); length(posterior.list)  <- max.clusters-1
 	mapplot        <- list(); length(mapplot)         <- max.clusters-1
@@ -182,6 +183,10 @@ run_DAPC <- function(vcf, kmax=40, coords=NULL, reps=100,probs.out=NULL,save.as=
 		if(K>15){
 			myCols          <- c(goodcolors2(n=K), sample(adegenet::funky(100), size=K-15))
 		}
+		##### Need to find a way to add a scatterplot as a ggplot
+		# scatterPlot.i    <- ade4::scatter(dapc.pcabest.K)
+		# scatterPlot[[i]] <- 
+
 		posterior.gg        <- ggplot2::ggplot(posterior.df, ggplot2::aes(fill= pop, x= assignment, y=indv)) + ggplot2::geom_bar(position="stack", stat="identity") + ggplot2::theme_classic() + ggplot2::theme(axis.text.y = ggplot2::element_text(size = label.size), panel.grid.major = ggplot2::element_blank(), panel.grid.minor = ggplot2::element_blank(), panel.background = ggplot2::element_blank()) + ggplot2::labs(x = "Membership Probability",y="",fill="Cluster",title=paste0("K = ",K,"; PCs retained = ",best.npca[i])) + ggplot2::scale_fill_manual(values=myCols[1:K])
 		admixturePlot[[i]]  <- posterior.gg
 	#	par(mar=c(5,20,2,2.1))
