@@ -186,7 +186,6 @@ run_DAPC <- function(vcf, kmax=40, coords=NULL, reps=100,probs.out=NULL,save.as=
 		# grp.coords        <- dapc.pcabest.K$grp.coord
 		scatterPlot.i       <- ggscatter.dapc(dapc.pcabest.K,col=myCols)
 		scatterPlot[[i]]    <- scatterPlot.i
-
 		posterior.gg        <- ggplot2::ggplot(posterior.df, ggplot2::aes(fill= pop, x= assignment, y=indv)) + ggplot2::geom_bar(position="stack", stat="identity") + ggplot2::theme_classic() + ggplot2::theme(axis.text.y = ggplot2::element_text(size = label.size), panel.grid.major = ggplot2::element_blank(), panel.grid.minor = ggplot2::element_blank(), panel.background = ggplot2::element_blank()) + ggplot2::labs(x = "Membership Probability",y="",fill="Cluster",title=paste0("K = ",K,"; PCs retained = ",best.npca[i])) + ggplot2::scale_fill_manual(values=myCols[1:K])
 		admixturePlot[[i]]  <- posterior.gg
 	#	par(mar=c(5,20,2,2.1))
@@ -246,9 +245,9 @@ run_DAPC <- function(vcf, kmax=40, coords=NULL, reps=100,probs.out=NULL,save.as=
 	}
 	#dev.off()
 	if(!is.null(coords)){
-		result <- c(list(BICPlot,grp.plot2),admixturePlot,assignmentPlot,mapplot)
+		result <- c(list(BICPlot,grp.plot2),scatterPlot,admixturePlot,assignmentPlot,mapplot)
 	} else {
-		result <- c(list(BICPlot,grp.plot2),admixturePlot,assignmentPlot)
+		result <- c(list(BICPlot,grp.plot2),scatterPlot,admixturePlot,assignmentPlot)
 	}
 	if(!is.null(save.as)){
 		pdf(height=6,width=10,file=save.as,onefile=TRUE)
