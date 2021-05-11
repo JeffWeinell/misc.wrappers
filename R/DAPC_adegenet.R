@@ -812,7 +812,6 @@ ggscatter.dapc <- function (x, xax = 1, yax = 2, grp = x$grp , cpoint=2, col = a
 		ONEDIM <- TRUE
 	}
 	### Things to do when more than one PC exists.
-	### THIS PART NOT YET UPDATED
 	if(!ONEDIM){
 		coords.df  <- data.frame(x.coords=x$ind.coord[, xax],y.coords=x$ind.coord[, yax],Cluster=grp)
 		xlim       <- c(-max(abs(coords.df[,"x.coords"])),max(abs(coords.df[,"x.coords"])))
@@ -824,66 +823,8 @@ ggscatter.dapc <- function (x, xax = 1, yax = 2, grp = x$grp , cpoint=2, col = a
 			coords.df[rows.temp,"grp.center.x"] <- mean(coords.df[rows.temp,"x.coords"])
 			coords.df[rows.temp,"grp.center.y"] <- mean(coords.df[rows.temp,"y.coords"])
 		}
-		#coords.df[,"d"]     <- sqrt(((coords.df[,"x.coords"]-coords.df[,"grp.center.x"])^2)+((coords.df[,"y.coords"]-coords.df[,"grp.center.y"])^2))
-		#coords.df[,"d2"]    <- cstar*coords.df[,"d"]
-		#coords.df[,"m"]     <- (coords.df[,"y.coords"]-coords.df[,"grp.center.y"])/(coords.df[,"x.coords"]-coords.df[,"grp.center.x"])
-		#coords.df[,"x3"]    <- coords.df[,"d2"]*cos(coords.df[,"theta"])
-		
-		#xy2rad <- function(x,y,x0,y0){
-		#	x <- x+x0
-		#	y <- y+y0
-		#	if(x > 0 & y > 0){
-		#		solrange <- c(0,(pi/2))
-		#	}
-		#	if(x < 0 & y > 0){
-		#		solrange <- c((pi/2),pi)
-		#	}
-		#	if(x < 0 & y < 0){
-		#		solrange <- c(pi,(3*pi/2))
-		#	}
-		#	if(x > 0 & y < 0){
-		#		solrange <- c((3*pi/2),(2*pi))
-		#	}
-		#	sol1 <- atan(y/x)
-		#	if(sol1 < 0){
-		#		while(sol1 < 0){
-		#			sol1 <- sol1 + (2*pi)
-		#		}
-		#	}
-		#	sol2 <- atan(y/x) + pi
-		#	if(sol2 < 0){
-		#		while(sol2 <0){
-		#			sol2 <- sol2 + (2*pi)
-		#		}
-		#	}
-		#	solution <- c(sol1,sol2)[which(c((solrange[1] <= sol1 & sol1 <= solrange[2]),(solrange[1] <= sol2 & sol2 <= solrange[2])))]
-		#	solution
-		#}
-
-	#	coords.df[,"theta"]   <- sapply(1:nrow(coords.df),FUN=function(z){xy2rad(x=coords.df[z,"x.coords"],y=coords.df[z,"y.coords"],x0=coords.df[z,"grp.center.x"],y0=coords.df[z,"grp.center.y"])})
-	#	coords.df[,"delta.x"] <- (coords.df[,"d2"]*cos(coords.df[,"theta"]))
-	#	coords.df[,"delta.y"] <- (coords.df[,"d2"]*sin(coords.df[,"theta"]))
-	#	coords.df[,"x3"]    <- (coords.df[,"d2"]*cos(coords.df[,"theta"])) + coords.df[,"grp.center.x"]
-	#	coords.df[,"y3"]    <- (coords.df[,"d2"]*sin(coords.df[,"theta"])) + coords.df[,"grp.center.y"]
-
-		## Function to find the position of a third point on a line with distance c*d from the first point, where d is the distance between the first and second points.
-		#newpoint  <- function(x0,x1,y0,y1,c=1){
-		#	d     <- sqrt(((x1-x0)^2)+((y1-y0)^2))
-		#	m     <- (y1-y0)/(x1-x0)
-		#	xdir  <- (x1-x0)/abs((x1-x0))
-		#	ydir  <- (y1-y0)/abs((y1-y0))
-		#	theta <- atan(m)
-		#	d2    <- d*c
-		#	x     <- (d2*cos(theta)) + x0
-		#	y     <- (d2*sin(theta))  + y0
-		#	#y  <- (d2*(m/sqrt((m^2)+1)))+y0
-		#	#x  <- (d2*(1/sqrt((m^2)+1)))+x0
-		#	return(c(x,y))
-		#}
-
 		newpoint <-function(x0,y0,x1,y1,c){
 			norm_vec <- function(v){sqrt(sum(v^2))}
-			#d  <- sqrt(((x1-x0)^2)+((y1-y0)^2))
 			p0 <- c(x0, y0)
 			p1 <- c(x1, y1)
 			v  <- p1-p0
@@ -893,12 +834,10 @@ ggscatter.dapc <- function (x, xax = 1, yax = 2, grp = x$grp , cpoint=2, col = a
 			p3 <- p0 + (d2*u)
 			p3
 		}
-
 		xy3.df           <- do.call(rbind,lapply(1:nrow(coords.df),FUN=function(z){newpoint(x0=coords.df[z,"grp.center.x"],x1=coords.df[z,"x.coords"], y0=coords.df[z,"grp.center.y"],y1=coords.df[z,"y.coords"],c=cstar)}))
 		coords.df[,"x3"] <- xy3.df[,1]
 		coords.df[,"y3"] <- xy3.df[,2]
 		### blank plotting area
-		# ggscatter.tempA <- ggplot2::ggplot(coords.df, ggplot2::aes(x=x.coords, y=y.coords,color=Cluster,shape=Cluster,fill=Cluster)) + ggplot2::theme_classic() + ggplot2::geom_blank()  + ggplot2::scale_x_continuous(name=paste("Discriminant function",xax),limits=xlim) + ggplot2::scale_y_continuous(name=paste("Discriminant function",yax), limits=ylim) + ggplot2::theme(panel.background = ggplot2::element_rect(fill = bg)) + ggplot2::stat_ellipse()
 		ggscatter.tempA      <- ggplot2::ggplot(coords.df, ggplot2::aes(x=x.coords, y=y.coords,color=Cluster,shape=Cluster,fill=Cluster)) + ggplot2::theme_classic() + ggplot2::geom_blank()  + ggplot2::scale_x_continuous(name=paste("Discriminant function",xax)) + ggplot2::scale_y_continuous(name=paste("Discriminant function",yax)) + ggplot2::theme(panel.background = ggplot2::element_rect(fill = bg)) + ggplot2::stat_ellipse(color="white")
 		# Includes box around plotting area, a vertical line at x=0, and a horizontal line at y=0
 		ggscatter.tempB      <- ggscatter.tempA + ggplot2::theme(panel.border = ggplot2::element_rect(color = "black", fill=NA, size=1)) 
@@ -923,12 +862,8 @@ ggscatter.dapc <- function (x, xax = 1, yax = 2, grp = x$grp , cpoint=2, col = a
 		}
 		# Add 'star' lines from each cluster mean to the coordinates of individuals in the cluster.
 		if(cstar > 0){
-			# star.df <- coords.df
-			# ggscatter.temp3 <- ggscatter.temp2 + ggplot2::geom_segment()
-			# lines00.df      <- data.frame(x1 = c(xlim[1],0), x2 = c(xlim[2],0), y1 = c(0,ylim[1]), y2 = c(0,ylim[2])) *1.5
 			ggscatter.temp3 <- ggscatter.temp2 + ggplot2::geom_segment(data = coords.df, aes(x = x3, y = y3, xend = grp.center.x, yend = grp.center.y, color = Cluster))
 		}
-		
 		if (mstree) {
 			meanposi <- apply(x$tab, 2, tapply, grp, mean)
 			D        <- dist(meanposi)^2
@@ -969,11 +904,9 @@ ggscatter.dapc <- function (x, xax = 1, yax = 2, grp = x$grp , cpoint=2, col = a
 		xat  <- xat0[xat0/2 == round(xat0/2)]
 		xpoints <- x$ind.coord[grp == levels(grp)[i], pcLab]
 		ypoints <- rep(0, sum(grp == levels(grp)[i]))
-		
 		### ggplot of PC coordinates of groups.
 		if(onedim.filled){
 			gg.density.temp  <- ggplot2::ggplot(coords.df, ggplot2::aes(x=coords,color=Cluster,fill=Cluster)) + ggplot2::geom_density() + ggplot2::theme_classic() + ggplot2::scale_color_manual(values=col) + ggplot2::scale_fill_manual(values=col) + ggplot2::scale_x_continuous(breaks=xat,name="Discriminant function 1",limits=range(allx))
-			#gg.density       <- gg.density.temp + ggplot2::ylab("Density") + ggplot2::geom_text(aes(x=coords,y=rep(0,length(coords)),label=rep("|",length(coords))),show.legend=FALSE) + ggplot2::theme(panel.border = ggplot2::element_rect(color = "black", fill=NA, size=1), axis.line=ggplot2::element_blank(), axis.text.x = element_text(size=12), axis.text.y = ggplot2::element_text(size=12)) + ggplot2::labs(title=paste0("K=",K))
 		} else {
 			gg.density.temp  <- ggplot2::ggplot(coords.df, ggplot2::aes(x=coords,color=Cluster,fill=NA)) + ggplot2::geom_density() + ggplot2::theme_classic() + ggplot2::scale_color_manual(values=col) + ggplot2::scale_fill_manual(values=NA) + ggplot2::scale_x_continuous(breaks=xat,name="Discriminant function 1",limits=range(allx))
 		}
@@ -983,58 +916,10 @@ ggscatter.dapc <- function (x, xax = 1, yax = 2, grp = x$grp , cpoint=2, col = a
 			gg.density <- gg.density + theme(legend.position = "none")
 		}
 	}
-	
 	if(ONEDIM){
 		return(gg.density)
 	} else {
 		return(ggscatter.temp5)
 	}
 }
-
-
-
-#########
-### This function is also from adegenet
-# s.class <- function (dfxy, fac, wt = rep(1, length(fac)), xax = 1, yax = 2, cstar = 1, cellipse = 1.5, axesell = TRUE, label = levels(fac), clabel = 1, cpoint = 1, pch = 20, col = rep(1, length(levels(fac))), xlim = NULL, ylim = NULL, grid = TRUE, addaxes = TRUE, origin = c(0, 0), include.origin = TRUE, sub = "", csub = 1, possub = "bottomleft", cgrid = 1, pixmap = NULL, contour = NULL, area = NULL, add.plot = FALSE) {
-#     opar <- par(mar = par("mar"))
-#     par(mar = c(0.1, 0.1, 0.1, 0.1))
-#     on.exit(par(opar))
-#     dfxy <- data.frame(dfxy)
-#     if (!is.data.frame(dfxy)) 
-#         stop("Non convenient selection for dfxy")
-#     if (any(is.na(dfxy))) 
-#         stop("NA non implemented")
-#     if (!is.factor(fac)) 
-#         stop("factor expected for fac")
-#     dfdistri <- fac2disj(fac) * wt
-#     coul     <- col
-#     w1       <- unlist(lapply(dfdistri, sum))
-#     dfdistri <- t(t(dfdistri)/w1)
-#     coox     <- as.matrix(t(dfdistri)) %*% dfxy[, xax]
-#     cooy     <- as.matrix(t(dfdistri)) %*% dfxy[, yax]
-#     if (nrow(dfxy) != nrow(dfdistri)) 
-#         stop(paste("Non equal row numbers", nrow(dfxy), nrow(dfdistri)))
-#     coo <- scatterutil.base(dfxy = dfxy, xax = xax, yax = yax, xlim = xlim, ylim = ylim, grid = grid, addaxes = addaxes, cgrid = cgrid, include.origin = include.origin, origin = origin, sub = sub, csub = csub, possub = possub, pixmap = pixmap, contour = contour, area = area, add.plot = add.plot)
-#     if (cpoint > 0) 
-#         for (i in 1:ncol(dfdistri)) {
-#             pch <- rep(pch, length = nrow(dfxy))
-#             points(coo$x[dfdistri[, i] > 0], coo$y[dfdistri[, i] > 0], pch = pch[dfdistri[, i] > 0], cex = par("cex") * cpoint, col = coul[i])
-#         }
-#     if (cstar > 0) 
-#         for (i in 1:ncol(dfdistri)) {
-#             scatterutil.star(coo$x, coo$y, dfdistri[, i], cstar = cstar, coul[i])
-#         }
-#     if (cellipse > 0) 
-#         for (i in 1:ncol(dfdistri)) {
-#             scatterutil.ellipse(coo$x, coo$y, dfdistri[, i], 
-#                 cellipse = cellipse, axesell = axesell, coul[i])
-#         }
-#     if (clabel > 0) 
-#         scatterutil.eti(coox, cooy, label, clabel, coul = col)
-#     box()
-#     invisible(match.call())
-# }
-
-
-
 
