@@ -56,6 +56,16 @@ run_DAPC <- function(vcf, kmax=40, coords=NULL, reps=100,probs.out=NULL,save.as=
 	}
 	max.clusters <- kmax
 	Krange       <- 1:max.clusters
+	
+	### Defining colors to use
+	if(max.clusters <= 15){
+			myCols          <- goodcolors2(n=max.clusters)
+		}
+		if(max.clusters>15){
+			myCols          <- c(goodcolors2(n=15), sample(adegenet::funky(100), size=max.clusters-15))
+	}
+	
+	#### find.clusters
 	grp          <- adegenet::find.clusters(genind, max.n.clust=max.clusters,n.pca=max.clusters,choose.n.clust=F)
 	grp.list     <- list(); length(grp.list) <- reps
 	# par(mar=c(3.5,4,3,2.1))
@@ -158,34 +168,24 @@ run_DAPC <- function(vcf, kmax=40, coords=NULL, reps=100,probs.out=NULL,save.as=
 	assignmentPlot <- list(); length(assignmentPlot)  <- max.clusters-1
 	posterior.list <- list(); length(posterior.list)  <- max.clusters-1
 	mapplot        <- list(); length(mapplot)         <- max.clusters-1
+	q.df           <- NULL
+	dapc.df        <- NULL
 	for(K in 2:max.clusters){
 		i=(K-1)
 	#	par(mar=c(5.1,4.1,4.1,2.1),mfrow=c(1,1))
-		dapc.pcabest.K  <- adegenet::dapc(genind, grp.mat[,i],n.pca=best.npca[i],n.da=5)
-		posterior       <- dapc.pcabest.K$posterior
-		q.matrix        <- posterior
+		dapc.pcabest.K      <- adegenet::dapc(genind, grp.mat[,i],n.pca=best.npca[i],n.da=5)
+		posterior           <- dapc.pcabest.K$posterior
+		q.matrix            <- posterior
 		posterior.list[[i]] <- posterior
-		posterior.df    <- data.frame(indv=rep(rownames(posterior),ncol(posterior)), pop=rep(colnames(posterior),each=nrow(posterior)), assignment=c(posterior))
-		if(FALSE){
-			if(K < 5){
-				myCols          <- goodcolors(K,thresh=100)
-			}
-			if(K >= 5 & K < 7){
-				myCols          <- goodcolors(K,thresh=100,cbspace="deut")
-			}
-			if(K >= 7 & K < 15){
-				myCols          <- goodcolors(K,thresh=100,cbspace="")
-			}
-		}
-		if(K <= 15){
-			myCols          <- goodcolors2(n=K)
-		}
-		if(K>15){
-			myCols          <- c(goodcolors2(n=K), sample(adegenet::funky(100), size=K-15))
-		}
+		posterior.df        <- data.frame(indv=rep(rownames(posterior),ncol(posterior)), pop=rep(colnames(posterior),each=nrow(posterior)), assignment=c(posterior))
+		q.df                <- rbind(q.df,posterior.df)
+#		test <- cbind(dapc.pcabest.K$assign,dapc.pcabest.K$ind.coord)
+		# rep(repsQmats[i],(KQmats[i]*numind))
 		##### Need to find a way to add a scatterplot as a ggplot
-		# scatterPlot.i    <- ade4::scatter(dapc.pcabest.K)
-		# scatterPlot[[i]] <- 
+		# ind.coords        <- dapc.pcabest.K$ind.coord
+		# grp.coords        <- dapc.pcabest.K$grp.coord
+		scatterPlot.i       <- ggscatter.dapc(dapc.pcabest.K,col=myCols)
+		# scatterPlot[[i]]  <- scatterPlot.i
 
 		posterior.gg        <- ggplot2::ggplot(posterior.df, ggplot2::aes(fill= pop, x= assignment, y=indv)) + ggplot2::geom_bar(position="stack", stat="identity") + ggplot2::theme_classic() + ggplot2::theme(axis.text.y = ggplot2::element_text(size = label.size), panel.grid.major = ggplot2::element_blank(), panel.grid.minor = ggplot2::element_blank(), panel.background = ggplot2::element_blank()) + ggplot2::labs(x = "Membership Probability",y="",fill="Cluster",title=paste0("K = ",K,"; PCs retained = ",best.npca[i])) + ggplot2::scale_fill_manual(values=myCols[1:K])
 		admixturePlot[[i]]  <- posterior.gg
@@ -203,7 +203,7 @@ run_DAPC <- function(vcf, kmax=40, coords=NULL, reps=100,probs.out=NULL,save.as=
 		assignmentPlot[[i]]  <- assignment.K
 	#	par(mar=c(5.1,4.1,4.1,2.1),mfrow=c(1,1))
 		if(!is.null(coords)){
-			my.palette      <- tess3r::CreatePalette(myCols, 9)
+			my.palette      <- tess3r::CreatePalette(myCols[1:K], 9)
 		#	xdist           <- geosphere::distm(x=c(x.min,0),y=c(x.max,0))
 		#	ydist           <- geosphere::distm(x=c(0,y.min),y=c(0,y.max))
 		#	xdist2          <- (ydist*(10/6))
@@ -732,6 +732,309 @@ goodcolors2 <- function(n,plot.palette=FALSE){
 	result
 }
 
+
+#####################################################################################
+#### THIS FUNCTION IS LARGELY BASED ON THE FUNCTION 'scatter.dapc' FROM ADEGENET ####
+#####################################################################################
+
+#' @title Make ggplot with DAPC scatterplot
+#' 
+#' This function produces plots very similar to those produced by the adegenet function 'scatter.dapc', except that the object returned is a ggplot. This is useful when making lists of plots.
+#' SOME FEATURES STILL IN PROGRESS:
+#' - ability to add screeplot of discriminant functions or PCAs.
+#' 
+#' @param x Object of class DAPC (adegenet package).
+#' @param xax Which descriminant function to plot on the x axis.
+#' @param yax Which descriminant function to plot on the y axis. Default 2. Ignored if only one discriminant function exists.
+#' @param bg Color to use for the background of the plot. Default "white".
+#' @param grp Object of class 'factor' with length equal to the number of individuals, which indicates individual assignments to clusters. By default posterior assignments are extracted from 'x'.
+#' @param col Vector with color to use for each cluster.
+#' @param pch Either one number indicating pch code of symbol to use for all points (see 'pch' in graphical parameters), or, a numeric vector with pch codes to each for clusters . Default 20.
+#' @param cpoint Number with cex size to use for points.
+#' @param solid Number between 0 and 1 indicating the level of transparency to use for colors; 0 = fully transparent; 1 = fully opaque; default = 0.7.
+#' @param legend A logical indicating whether a legend for group colours should added to the plot. Default FALSE.
+#' @param onedim.filled Logical indicating, when only one discriminant function is to be plotted, whether or not density plots should be filled or unfilled with the colors indicated by 'col'. Default TRUE.
+#' @param addaxes Logical indicating if reference axes should be drawn at x=a and y=b, with a and b supplied by the 'origin' argument. Default TRUE.
+#' @param cellipse A positive coefficient for the inertia ellipse size. Default 1.5. Setting to zero removes ellipses.
+#' @param cstar A number greater than 0 defining the length of the star size (i.e., the lines radiating from the center of clusters towards individuals). Default 1. Setting to zero removes the star lines; setting =1 connects points to cluster mean; setting > 1 extends lines through their points.
+#' @param mstree A logical indicating whether a minimum spanning tree linking the groups and based on the squared distances between the groups inside the entire space should added to the plot (TRUE), or not (FALSE). Default FALSE.
+#' @param lwd Line weight to use for edges of the minimum spanning tree linking the groups. Default 0.5.
+#' @param lty Line type to use for edges of the minimum spanning tree linking the groups. Default 1 (solid).
+#' @param segcol Color to use for edges of the minimum spanning tree linking the groups Default "black".
+#' @param label Name to use for clusters. Default NULL, in which case group will be used.
+#' @param clabel A number indicating the size of labels. Default 1.
+#' @param axesell NOT YET IMPLEMENTED. A logical value indicating whether the ellipse axes should be drawn. Default FALSE.
+#' @param txt.leg NOT YET IMPLEMENTED. Labels to use for clusters in the legend. 
+#' @param scree.da NOT YET IMPLEMENTED. Logical indicated whether or not a screeplot of the discriminant functions should be included. Default TRUE.
+#' @param scree.pca  NOT YET IMPLEMENTED. Logical indicated whether or not a screeplot of the PCs should be included. Default FALSE.
+#' @param posi.da NOT YET IMPLEMENTED. The position of the screeplot of discriminant functions. Can match any combination of "top/bottom" and "left/right", or a set of x/y coordinates stored as a list (locator can be used). Default = "bottomright".
+#' @param posi.pca NOT YET IMPLEMENTED. The position of the screeplot of discriminant functions. Can match any combination of "top/bottom" and "left/right", or a set of x/y coordinates stored as a list (locator can be used). Default = "bottomleft".
+#' @param posi.leg NOT YET IMPLEMENTED. The position of the legend holding group colors. Can match any combination of "top/bottom" and "left/right", or a set of x/y coordinates stored as a list (locator can be used). Default = "topright".
+#' @param bg.inset NOT YET IMPLEMENTED. Default "white".
+#' @param ratio.da NOT YET IMPLEMENTED. Default 0.25
+#' @param ratio.pca NOT YET IMPLEMENTED. Default 0.25
+#' @param inset.da NOT YET IMPLEMENTED. Default 0.02
+#' @param inset.pca NOT YET IMPLEMENTED. Default 0.02
+#' @param inset.solid NOT YET IMPLEMENTED. Default 0.5
+#' @param cleg NOT YET IMPLEMENTED. Size factor for the legend. Default 1.
+#' @param xlim NOT YET IMPLEMENTED. Default NULL.
+#' @param ylim NOT YET IMPLEMENTED. Default NULL.
+#' @param grid NOT YET IMPLEMENTED. Whether or not to include a grid in the background. Default FALSE.
+#' @param cgrid NOT YET IMPLEMENTED. A number used with par("cex")* cgrid to specify the mesh of the grid.
+#' @param origin NOT YET IMPLEMENTED. Location of the origin.
+#' @param include.origin NOT YET IMPLEMENTED. A logical value indicating whether the point "origin" should be belonged to the graph space. Default TRUE.
+#' @param sub NOT YET IMPLEMENTED. A string of characters to be inserted as legend. Default "".
+#' @param csub NOT YET IMPLEMENTED. Number specifying text size for 'sub'.
+#' @param possub NOT YET IMPLEMENTED. The position of the subtitle ("topleft", "topright", "bottomleft", "bottomright"). Default "bottomleft".
+#' @param pixmap NOT YET IMPLEMENTED. An object 'pixmap' displayed in the map background. Default NULL.
+#' @param contour NOT YET IMPLEMENTED. A data frame with 4 columns to plot the contour of the map : each row gives a segment (x1,y1,x2,y2). Default NULL. 
+#' @param area NOT YET IMPLEMENTED. A data frame of class 'area' to plot a set of surface units in contour. Default NULL.
+#' @param label.inds NOT YET IMPLEMENTED. Default NULL. Named list of arguments passed to the orditorp function. This will label individual points witout overlapping. Arguments x and display are hardcoded and should not be specified by user.
+#' @param new.pred NOT YET IMPLEMENTED. An optional list, as returned by the predict method for dapc objects; if provided, the individuals with unknown groups are added at the bottom of the plot. To visualize these individuals only, specify only.grp="unknown".
+#' @param only.grp NOT YET IMPLEMENTED. Character vector indicating which groups should be displayed. Values should match values of x$grp. If NULL, all results are displayed.
+#' @return A ggplot object
+#' @export ggscatter.dapc
+ggscatter.dapc <- function (x, xax = 1, yax = 2, grp = x$grp , cpoint=2, col = adegenet::seasun(length(levels(grp))), txt.leg = levels(grp), label = levels(grp), pch = 20, solid = 0.7, scree.da = TRUE, scree.pca = FALSE, posi.da = "bottomright", posi.pca = "bottomleft", bg.inset = "white", ratio.da = 0.25, ratio.pca = 0.25, inset.da = 0.02, inset.pca = 0.02, inset.solid = 0.5, onedim.filled = TRUE, mstree = FALSE, lwd = 1, lty = 1, segcol = "black", legend = FALSE, posi.leg = "topright", cleg = 1, cstar = 1, cellipse = 1.5, axesell = FALSE, clabel = 1, xlim = NULL, ylim = NULL, grid = FALSE, addaxes = TRUE, origin = c(0,0), include.origin = TRUE, sub = "", csub = 1, possub = "bottomleft", cgrid = 1, pixmap = NULL, contour = NULL, area = NULL, label.inds = NULL, new.pred=NULL){
+	### Logical indicating if only one principle component retained
+	ONEDIM   <- xax == yax | ncol(x$ind.coord) == 1
+	col      <- rep(col, length(levels(grp)))
+	pch      <- rep(pch, length(levels(grp)))
+	col      <- transp(col, solid)
+	bg.inset <- transp(bg.inset, inset.solid)
+	### Posterior assignments of individuals to groups
+	if (is.null(grp)) {
+		grp <- x$grp
+	}
+	### Further checking/updating if there is only one discriminant function
+	if (is.null(xax) || is.null(yax)) {
+		## a number followed by L indiciates that the class should be an integer
+		xax    <- 1L
+		yax    <- ifelse(ncol(x$ind.coord) == 1L, 1L, 2L)
+		ONEDIM <- TRUE
+	}
+	### Things to do when more than one PC exists.
+	### THIS PART NOT YET UPDATED
+	if(!ONEDIM){
+		coords.df  <- data.frame(x.coords=x$ind.coord[, xax],y.coords=x$ind.coord[, yax],Cluster=grp)
+		xlim       <- c(-max(abs(coords.df[,"x.coords"])),max(abs(coords.df[,"x.coords"])))
+		ylim       <- c(-max(abs(coords.df[,"y.coords"])),max(abs(coords.df[,"y.coords"])))
+		### Creating columns to hold x and y mean of group that each individual belongs too
+		unique.clusters <- levels(grp)
+		for(z in unique.clusters){
+			rows.temp <- which(coords.df$Cluster==z)
+			coords.df[rows.temp,"grp.center.x"] <- mean(coords.df[rows.temp,"x.coords"])
+			coords.df[rows.temp,"grp.center.y"] <- mean(coords.df[rows.temp,"y.coords"])
+		}
+		#coords.df[,"d"]     <- sqrt(((coords.df[,"x.coords"]-coords.df[,"grp.center.x"])^2)+((coords.df[,"y.coords"]-coords.df[,"grp.center.y"])^2))
+		#coords.df[,"d2"]    <- cstar*coords.df[,"d"]
+		#coords.df[,"m"]     <- (coords.df[,"y.coords"]-coords.df[,"grp.center.y"])/(coords.df[,"x.coords"]-coords.df[,"grp.center.x"])
+		#coords.df[,"x3"]    <- coords.df[,"d2"]*cos(coords.df[,"theta"])
+		
+		#xy2rad <- function(x,y,x0,y0){
+		#	x <- x+x0
+		#	y <- y+y0
+		#	if(x > 0 & y > 0){
+		#		solrange <- c(0,(pi/2))
+		#	}
+		#	if(x < 0 & y > 0){
+		#		solrange <- c((pi/2),pi)
+		#	}
+		#	if(x < 0 & y < 0){
+		#		solrange <- c(pi,(3*pi/2))
+		#	}
+		#	if(x > 0 & y < 0){
+		#		solrange <- c((3*pi/2),(2*pi))
+		#	}
+		#	sol1 <- atan(y/x)
+		#	if(sol1 < 0){
+		#		while(sol1 < 0){
+		#			sol1 <- sol1 + (2*pi)
+		#		}
+		#	}
+		#	sol2 <- atan(y/x) + pi
+		#	if(sol2 < 0){
+		#		while(sol2 <0){
+		#			sol2 <- sol2 + (2*pi)
+		#		}
+		#	}
+		#	solution <- c(sol1,sol2)[which(c((solrange[1] <= sol1 & sol1 <= solrange[2]),(solrange[1] <= sol2 & sol2 <= solrange[2])))]
+		#	solution
+		#}
+
+	#	coords.df[,"theta"]   <- sapply(1:nrow(coords.df),FUN=function(z){xy2rad(x=coords.df[z,"x.coords"],y=coords.df[z,"y.coords"],x0=coords.df[z,"grp.center.x"],y0=coords.df[z,"grp.center.y"])})
+	#	coords.df[,"delta.x"] <- (coords.df[,"d2"]*cos(coords.df[,"theta"]))
+	#	coords.df[,"delta.y"] <- (coords.df[,"d2"]*sin(coords.df[,"theta"]))
+	#	coords.df[,"x3"]    <- (coords.df[,"d2"]*cos(coords.df[,"theta"])) + coords.df[,"grp.center.x"]
+	#	coords.df[,"y3"]    <- (coords.df[,"d2"]*sin(coords.df[,"theta"])) + coords.df[,"grp.center.y"]
+
+		## Function to find the position of a third point on a line with distance c*d from the first point, where d is the distance between the first and second points.
+		#newpoint  <- function(x0,x1,y0,y1,c=1){
+		#	d     <- sqrt(((x1-x0)^2)+((y1-y0)^2))
+		#	m     <- (y1-y0)/(x1-x0)
+		#	xdir  <- (x1-x0)/abs((x1-x0))
+		#	ydir  <- (y1-y0)/abs((y1-y0))
+		#	theta <- atan(m)
+		#	d2    <- d*c
+		#	x     <- (d2*cos(theta)) + x0
+		#	y     <- (d2*sin(theta))  + y0
+		#	#y  <- (d2*(m/sqrt((m^2)+1)))+y0
+		#	#x  <- (d2*(1/sqrt((m^2)+1)))+x0
+		#	return(c(x,y))
+		#}
+
+		newpoint <-function(x0,y0,x1,y1,c){
+			norm_vec <- function(v){sqrt(sum(v^2))}
+			#d  <- sqrt(((x1-x0)^2)+((y1-y0)^2))
+			p0 <- c(x0, y0)
+			p1 <- c(x1, y1)
+			v  <- p1-p0
+			d  <- norm_vec(v)
+			u  <- v/d
+			d2 <- d*c
+			p3 <- p0 + (d2*u)
+			p3
+		}
+
+		xy3.df           <- do.call(rbind,lapply(1:nrow(coords.df),FUN=function(z){newpoint(x0=coords.df[z,"grp.center.x"],x1=coords.df[z,"x.coords"], y0=coords.df[z,"grp.center.y"],y1=coords.df[z,"y.coords"],c=cstar)}))
+		coords.df[,"x3"] <- xy3.df[,1]
+		coords.df[,"y3"] <- xy3.df[,2]
+		### blank plotting area
+		# ggscatter.tempA <- ggplot2::ggplot(coords.df, ggplot2::aes(x=x.coords, y=y.coords,color=Cluster,shape=Cluster,fill=Cluster)) + ggplot2::theme_classic() + ggplot2::geom_blank()  + ggplot2::scale_x_continuous(name=paste("Discriminant function",xax),limits=xlim) + ggplot2::scale_y_continuous(name=paste("Discriminant function",yax), limits=ylim) + ggplot2::theme(panel.background = ggplot2::element_rect(fill = bg)) + ggplot2::stat_ellipse()
+		ggscatter.tempA      <- ggplot2::ggplot(coords.df, ggplot2::aes(x=x.coords, y=y.coords,color=Cluster,shape=Cluster,fill=Cluster)) + ggplot2::theme_classic() + ggplot2::geom_blank()  + ggplot2::scale_x_continuous(name=paste("Discriminant function",xax)) + ggplot2::scale_y_continuous(name=paste("Discriminant function",yax)) + ggplot2::theme(panel.background = ggplot2::element_rect(fill = bg)) + ggplot2::stat_ellipse(color="white")
+		# Includes box around plotting area, a vertical line at x=0, and a horizontal line at y=0
+		ggscatter.tempB      <- ggscatter.tempA + ggplot2::theme(panel.border = ggplot2::element_rect(color = "black", fill=NA, size=1)) 
+		if(addaxes){
+			ggscatter.tempB  <- ggscatter.tempB + ggplot2::geom_vline(aes(xintercept=0)) + ggplot2::geom_hline(aes(yintercept=0))
+		}
+		# Hide axis ticks and labels
+		if(TRUE){
+			ggscatter.tempC  <- ggscatter.tempB + ggplot2::theme(axis.title.x=ggplot2::element_blank(), axis.text.x=ggplot2::element_blank(),axis.ticks.x=ggplot2::element_blank(), axis.title.y=ggplot2::element_blank(), axis.text.y=ggplot2::element_blank(),axis.ticks.y=ggplot2::element_blank())
+		}
+		### Adding the points. The scale to use for colors of points was defined in ggscatter.tempA so no need to redefine colors here.
+		ggscatter.temp0      <- ggscatter.tempC + ggplot2::geom_point(size=cpoint) + ggplot2::scale_color_manual(values=col) + ggplot2::scale_shape_manual(values=pch) + ggplot2::scale_fill_manual(values=col)
+		# Hide cluster legend
+		if(!legend){
+			ggscatter.temp1  <- ggscatter.temp0 + ggplot2::theme(legend.position = "none")
+		} else {
+			ggscatter.temp1  <- ggscatter.temp0
+		}
+		# Add ellipses around clusters
+		if(cellipse>0){
+			ggscatter.temp2  <- ggscatter.temp1 + ggplot2::stat_ellipse(level=(cellipse*0.43),type="norm")
+		}
+		# Add 'star' lines from each cluster mean to the coordinates of individuals in the cluster.
+		if(cstar > 0){
+			# star.df <- coords.df
+			# ggscatter.temp3 <- ggscatter.temp2 + ggplot2::geom_segment()
+			# lines00.df      <- data.frame(x1 = c(xlim[1],0), x2 = c(xlim[2],0), y1 = c(0,ylim[1]), y2 = c(0,ylim[2])) *1.5
+			ggscatter.temp3 <- ggscatter.temp2 + ggplot2::geom_segment(data = coords.df, aes(x = x3, y = y3, xend = grp.center.x, yend = grp.center.y, color = Cluster))
+		}
+		
+		if (mstree) {
+			meanposi <- apply(x$tab, 2, tapply, grp, mean)
+			D        <- dist(meanposi)^2
+			tre      <- ade4::mstree(D)
+			x0       <- unname(x$grp.coord[tre[, 1], axes[1]])
+			y0       <- unname(x$grp.coord[tre[, 1], axes[2]])
+			x1       <- unname(x$grp.coord[tre[, 2], axes[1]])
+			y1       <- unname(x$grp.coord[tre[, 2], axes[2]])
+			tree.df  <- data.frame(xA=x0,yA=y0,xB=x1,yB=y1)
+			tree.mat <- cbind(x0,y0,x1,y1)
+			coords.df[,"tree.x0"] <- x0
+			coords.df[,"tree.y0"] <- y0
+			coords.df[,"tree.x1"] <- x1
+			coords.df[,"tree.y1"] <- y1
+			ggscatter.temp4 <- ggscatter.temp3 + ggplot2::geom_segment(data = coords.df, ggplot2::aes(x = tree.x0, y = tree.y0, xend = tree.x1, yend = tree.y1), color = segcol, size=lwd,linetype=lty)
+		} else {
+			ggscatter.temp4 <- ggscatter.temp3
+		}
+		if(!is.null(label)){
+			ggscatter.temp5 <- ggscatter.temp4 + ggplot2::geom_label(data=coords.df,ggplot2::aes(x=grp.center.x,y=grp.center.y,label=Cluster),fill="white",size=(clabel*3))
+		}
+	} else {# If only one PC
+		scree.da <- FALSE
+		if(ncol(x$ind.coord) == 1) {
+			pcLab <- 1
+		} else {
+			pcLab <- xax
+		}
+		### Data frame with coordinates of individuals and the posterior assignment of individuals to groups (clusters)
+		coords.df  <- data.frame(coords=x$ind.coord[, pcLab],Cluster=grp)
+		### Apply the density function to the individual coordinates for individuals in each group
+		ldens <- tapply(X=x$ind.coord[, pcLab], INDEX=grp, FUN=density)
+		### The actual x (coorinates) and y (density) values that are to be plotted
+		allx  <- unlist(lapply(ldens, function(e) e$x))
+		ally  <- unlist(lapply(ldens, function(e) e$y))
+		## defining locations for x-axis ticks
+		xat0 <- seq(from=round(min(allx)),to=round(max(allx)))
+		xat  <- xat0[xat0/2 == round(xat0/2)]
+		xpoints <- x$ind.coord[grp == levels(grp)[i], pcLab]
+		ypoints <- rep(0, sum(grp == levels(grp)[i]))
+		
+		### ggplot of PC coordinates of groups.
+		if(onedim.filled){
+			gg.density.temp  <- ggplot2::ggplot(coords.df, ggplot2::aes(x=coords,color=Cluster,fill=Cluster)) + ggplot2::geom_density() + ggplot2::theme_classic() + ggplot2::scale_color_manual(values=col) + ggplot2::scale_fill_manual(values=col) + ggplot2::scale_x_continuous(breaks=xat,name="Discriminant function 1",limits=range(allx))
+			#gg.density       <- gg.density.temp + ggplot2::ylab("Density") + ggplot2::geom_text(aes(x=coords,y=rep(0,length(coords)),label=rep("|",length(coords))),show.legend=FALSE) + ggplot2::theme(panel.border = ggplot2::element_rect(color = "black", fill=NA, size=1), axis.line=ggplot2::element_blank(), axis.text.x = element_text(size=12), axis.text.y = ggplot2::element_text(size=12)) + ggplot2::labs(title=paste0("K=",K))
+		} else {
+			gg.density.temp  <- ggplot2::ggplot(coords.df, ggplot2::aes(x=coords,color=Cluster,fill=NA)) + ggplot2::geom_density() + ggplot2::theme_classic() + ggplot2::scale_color_manual(values=col) + ggplot2::scale_fill_manual(values=NA) + ggplot2::scale_x_continuous(breaks=xat,name="Discriminant function 1",limits=range(allx))
+		}
+		gg.density       <- gg.density.temp + ggplot2::ylab("Density") + ggplot2::geom_text(aes(x=coords,y=rep(0,length(coords)),label=rep("|",length(coords))),show.legend=FALSE) + ggplot2::theme(panel.border = ggplot2::element_rect(color = "black", fill=NA, size=1), axis.line=ggplot2::element_blank(), axis.text.x = element_text(size=12), axis.text.y = ggplot2::element_text(size=12))  + ggplot2::labs(title=paste0("K=",K))
+		### Remove legend if legend = FALSE
+		if(!legend){
+			gg.density <- gg.density + theme(legend.position = "none")
+		}
+	}
+	
+	if(ONEDIM){
+		return(gg.density)
+	} else {
+		return(ggscatter.temp5)
+	}
+}
+
+
+
+#########
+### This function is also from adegenet
+# s.class <- function (dfxy, fac, wt = rep(1, length(fac)), xax = 1, yax = 2, cstar = 1, cellipse = 1.5, axesell = TRUE, label = levels(fac), clabel = 1, cpoint = 1, pch = 20, col = rep(1, length(levels(fac))), xlim = NULL, ylim = NULL, grid = TRUE, addaxes = TRUE, origin = c(0, 0), include.origin = TRUE, sub = "", csub = 1, possub = "bottomleft", cgrid = 1, pixmap = NULL, contour = NULL, area = NULL, add.plot = FALSE) {
+#     opar <- par(mar = par("mar"))
+#     par(mar = c(0.1, 0.1, 0.1, 0.1))
+#     on.exit(par(opar))
+#     dfxy <- data.frame(dfxy)
+#     if (!is.data.frame(dfxy)) 
+#         stop("Non convenient selection for dfxy")
+#     if (any(is.na(dfxy))) 
+#         stop("NA non implemented")
+#     if (!is.factor(fac)) 
+#         stop("factor expected for fac")
+#     dfdistri <- fac2disj(fac) * wt
+#     coul     <- col
+#     w1       <- unlist(lapply(dfdistri, sum))
+#     dfdistri <- t(t(dfdistri)/w1)
+#     coox     <- as.matrix(t(dfdistri)) %*% dfxy[, xax]
+#     cooy     <- as.matrix(t(dfdistri)) %*% dfxy[, yax]
+#     if (nrow(dfxy) != nrow(dfdistri)) 
+#         stop(paste("Non equal row numbers", nrow(dfxy), nrow(dfdistri)))
+#     coo <- scatterutil.base(dfxy = dfxy, xax = xax, yax = yax, xlim = xlim, ylim = ylim, grid = grid, addaxes = addaxes, cgrid = cgrid, include.origin = include.origin, origin = origin, sub = sub, csub = csub, possub = possub, pixmap = pixmap, contour = contour, area = area, add.plot = add.plot)
+#     if (cpoint > 0) 
+#         for (i in 1:ncol(dfdistri)) {
+#             pch <- rep(pch, length = nrow(dfxy))
+#             points(coo$x[dfdistri[, i] > 0], coo$y[dfdistri[, i] > 0], pch = pch[dfdistri[, i] > 0], cex = par("cex") * cpoint, col = coul[i])
+#         }
+#     if (cstar > 0) 
+#         for (i in 1:ncol(dfdistri)) {
+#             scatterutil.star(coo$x, coo$y, dfdistri[, i], cstar = cstar, coul[i])
+#         }
+#     if (cellipse > 0) 
+#         for (i in 1:ncol(dfdistri)) {
+#             scatterutil.ellipse(coo$x, coo$y, dfdistri[, i], 
+#                 cellipse = cellipse, axesell = axesell, coul[i])
+#         }
+#     if (clabel > 0) 
+#         scatterutil.eti(coox, cooy, label, clabel, coul = col)
+#     box()
+#     invisible(match.call())
+# }
 
 
 
