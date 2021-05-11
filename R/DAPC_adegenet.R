@@ -185,7 +185,7 @@ run_DAPC <- function(vcf, kmax=40, coords=NULL, reps=100,probs.out=NULL,save.as=
 		# ind.coords        <- dapc.pcabest.K$ind.coord
 		# grp.coords        <- dapc.pcabest.K$grp.coord
 		scatterPlot.i       <- ggscatter.dapc(dapc.pcabest.K,col=myCols)
-		# scatterPlot[[i]]  <- scatterPlot.i
+		scatterPlot[[i]]    <- scatterPlot.i
 
 		posterior.gg        <- ggplot2::ggplot(posterior.df, ggplot2::aes(fill= pop, x= assignment, y=indv)) + ggplot2::geom_bar(position="stack", stat="identity") + ggplot2::theme_classic() + ggplot2::theme(axis.text.y = ggplot2::element_text(size = label.size), panel.grid.major = ggplot2::element_blank(), panel.grid.minor = ggplot2::element_blank(), panel.background = ggplot2::element_blank()) + ggplot2::labs(x = "Membership Probability",y="",fill="Cluster",title=paste0("K = ",K,"; PCs retained = ",best.npca[i])) + ggplot2::scale_fill_manual(values=myCols[1:K])
 		admixturePlot[[i]]  <- posterior.gg
