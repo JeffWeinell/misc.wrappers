@@ -158,98 +158,64 @@ run_DAPC <- function(vcf, kmax=40, coords=NULL, reps=100,probs.out=NULL,save.as=
 	best.npca.df      <- data.frame(K=2:max.clusters,best.npca=best.npca)
 	best.npca.df$K    <- factor(best.npca.df$K)
 	grp.plot2         <- ggplot2::ggplot(data=best.npca.df, ggplot2::aes(x=K,y=best.npca)) + ggplot2::geom_bar(stat="identity",fill="lightgray") + ggplot2::labs(title= "alpha optimized # of PCs vs. number of clusters", x="Number of clusters", y = "Alpha optimized number of principle components to retain") + ggplot2::theme_classic() + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5))
-#	barplot(best.npca)
-#	mtext(text="Alpha optimized number of principle components to retain",side=2,line=2)
-#	mtext(text="Number of clusters",side=1,line=2)
-#	mtext(text="alpha optimized # of PCs vs. number of clusters",side=3,line=1)
-#	grp.plot2      <- recordPlot()
 	admixturePlot  <- list(); length(admixturePlot)   <- max.clusters-1
 	scatterPlot    <- list(); length(scatterPlot)     <- max.clusters-1
 	assignmentPlot <- list(); length(assignmentPlot)  <- max.clusters-1
 	posterior.list <- list(); length(posterior.list)  <- max.clusters-1
 	mapplot        <- list(); length(mapplot)         <- max.clusters-1
-	q.df           <- NULL
-	dapc.df        <- NULL
+	#q.df           <- NULL
+	q.df           <- list(); length(q.df)         <- max.clusters-1
+	dapc.df        <- list(); length(dapc.df)      <- max.clusters-1
 	for(K in 2:max.clusters){
 		i=(K-1)
-	#	par(mar=c(5.1,4.1,4.1,2.1),mfrow=c(1,1))
 		dapc.pcabest.K      <- adegenet::dapc(genind, grp.mat[,i],n.pca=best.npca[i],n.da=5)
 		posterior           <- dapc.pcabest.K$posterior
 		q.matrix            <- posterior
 		posterior.list[[i]] <- posterior
-		posterior.df        <- data.frame(indv=rep(rownames(posterior),ncol(posterior)), pop=rep(colnames(posterior),each=nrow(posterior)), assignment=c(posterior))
-		q.df                <- rbind(q.df,posterior.df)
-#		test <- cbind(dapc.pcabest.K$assign,dapc.pcabest.K$ind.coord)
-		# rep(repsQmats[i],(KQmats[i]*numind))
-		##### Need to find a way to add a scatterplot as a ggplot
-		# ind.coords        <- dapc.pcabest.K$ind.coord
-		# grp.coords        <- dapc.pcabest.K$grp.coord
+		posterior.df        <- data.frame(indv=rep(rownames(posterior),ncol(posterior)), pop=rep(colnames(posterior),each=nrow(posterior)), assignment=c(posterior),K=K)
+		q.df[[i]]           <- posterior.df
+		##### DAPC scatterplot as a ggplot object
 		scatterPlot.i       <- ggscatter.dapc(dapc.pcabest.K,col=myCols)
 		scatterPlot[[i]]    <- scatterPlot.i
 		posterior.gg        <- ggplot2::ggplot(posterior.df, ggplot2::aes(fill= pop, x= assignment, y=indv)) + ggplot2::geom_bar(position="stack", stat="identity") + ggplot2::theme_classic() + ggplot2::theme(axis.text.y = ggplot2::element_text(size = label.size), panel.grid.major = ggplot2::element_blank(), panel.grid.minor = ggplot2::element_blank(), panel.background = ggplot2::element_blank()) + ggplot2::labs(x = "Membership Probability",y="",fill="Cluster",title=paste0("K = ",K,"; PCs retained = ",best.npca[i])) + ggplot2::scale_fill_manual(values=myCols[1:K])
 		admixturePlot[[i]]  <- posterior.gg
-	#	par(mar=c(5,20,2,2.1))
-		# test
-		#assignment.K  <- ggplot2::ggplot(data=posterior.df, ggplot2::aes(x= pop, y=indv, fill= assignment)) + ggplot2::geom_tile() + ggplot2::theme_classic() + ggplot2::theme(axis.text.y = ggplot2::element_text(size = label.size), panel.grid.major = ggplot2::element_blank(), panel.grid.minor = ggplot2::element_blank(), panel.background = ggplot2::element_blank()) + ggplot2::labs(title = paste0("K = ",K,"; PCs retained = ",best.npca[i]), x="cluster", y="") + ggplot2::scale_colour_gradientn(colours = c("yellow", "orange", "red")) # + scale_fill_brewer(palette = "YlOrRd",trans="probability")
-		#assignment.K   <- ggplot2::ggplot(data=posterior.df, ggplot2::aes(x= pop, y=indv), fill= assignment) + ggplot2::geom_tile() + ggplot2::theme_classic() + ggplot2::theme(axis.text.y = ggplot2::element_text(size = label.size), panel.grid.major = ggplot2::element_blank(), panel.grid.minor = ggplot2::element_blank(), panel.background = ggplot2::element_blank()) + ggplot2::labs(title = paste0("K = ",K,"; PCs retained = ",best.npca[i]), x="cluster", y="") + ggplot2::scale_fill_gradient2(low = "white", mid = "yellow", high = "red", midpoint = 0.5)  # ggplot2::scale_colour_gradient2(colours = c("yellow", "red")) # + scale_fill_brewer(palette = "YlOrRd",trans="probability")
-		indv.KmaxPosterior <- apply(X=q.matrix, MARGIN=1, FUN=function(x){which(x==max(x))})
+		#indv.KmaxPosterior <- apply(X=q.matrix, MARGIN=1, FUN=function(x){which(x==max(x))})
 		indv.maxPosterior  <- apply(X=q.matrix, MARGIN=1, FUN=function(x){max(x)})
 		labels             <- rep("",nrow(posterior.df))
 		labels[posterior.df[,"assignment"] %in% indv.maxPosterior] <- "+"
 		assignment.K       <- ggplot2::ggplot(data=posterior.df, ggplot2::aes(x= pop, y=indv,fill=assignment)) + ggplot2::geom_tile(color="gray") + ggplot2::theme_classic() + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5), axis.text.y = ggplot2::element_text(size = label.size), panel.grid.major = ggplot2::element_blank(), panel.grid.minor = ggplot2::element_blank(), panel.background = ggplot2::element_blank(), legend.position = "none", ) + ggplot2::labs(title = paste0("K = ",K,"; PCs retained = ", best.npca[i]), x="Clusters", y="") + ggplot2::scale_fill_gradient2(low = "white", mid = "yellow", high = "red", midpoint = 0.5) + ggplot2::geom_text(label=labels)
-#		assignment.K        <- adegenet::assignplot(dapc.pcabest.K,cex.lab=(label.size/10))
-#		mtext(text=paste0("K = ",K,"; PCs retained = ",best.npca[i]))
 		assignmentPlot[[i]]  <- assignment.K
-	#	par(mar=c(5.1,4.1,4.1,2.1),mfrow=c(1,1))
 		if(!is.null(coords)){
 			my.palette      <- tess3r::CreatePalette(myCols[1:K], 9)
-		#	xdist           <- geosphere::distm(x=c(x.min,0),y=c(x.max,0))
-		#	ydist           <- geosphere::distm(x=c(0,y.min),y=c(0,y.max))
-		#	xdist2          <- (ydist*(10/6))
-		#	xbuff.deg       <- ((xdist2-xdist)/2)/(111111*cos(((y.max-y.min)*pi)/180))
-		#	x.min2          <- x.min-xbuff.deg
-		#	x.max2          <- x.max+xbuff.deg
 			tess3r.qmat     <- suppressWarnings(tess3r::as.qmatrix(q.matrix))
 			coords.mat      <- as.matrix(coords)
-		#	borders.aes     <- borders(xlim = c(x.min,x.max), ylim=c(y.min,y.max),colour="black")
-		#	gg.extent       <- ggplot() + borders(xlim = c(x.min,x.max), ylim=c(y.min,y.max),colour="black")
-		#	new.x           <- ggplot_build(new.extent)$layout$panel_scales_x[[1]]$range$range
-		#	new.y           <- ggplot_build(new.extent)$layout$panel_scales_y[[1]]$range$range
-			#mapplot.initial <- plot(tess3r.qmat, coords.mat, method = "map.max", interpol = tess3r::FieldsKrigModel(10), main = paste0("Ancestry coefficients; K=",K), xlab = "", ylab = "",resolution = c(100,100), cex = 0.4,col.palette = my.palette, window=c(x.min,x.max,y.min,y.max),asp=xdist/ydist)
-			#mapplot.i       <- plot(tess3r.qmat, coords.mat, method = "map.max", interpol = tess3r::FieldsKrigModel(10), main = paste0("Ancestry coefficients; K=",K), xlab = "", ylab = "",resolution = c(500,500), cex = 0.4,col.palette = my.palette, window=c(par("usr")[1],par("usr")[2],par("usr")[3],par("usr")[4]),asp=xdist/ydist)
-		#	mapplot.initial <- plot(tess3r.qmat, coords.mat, main = "", xlab = "", ylab = "",resolution = c(2,2), col.palette = lapply(X=1:K,FUN=function(x){rep("#FFFFFF",9)}), cex=0,window=c(x.min,x.max,y.min,y.max),asp=xdist/ydist,add=FALSE)
-		#	mapplot.i       <- plot(tess3r.qmat, coords.mat, method = "map.max", interpol = tess3r::FieldsKrigModel(10), main = paste0("Ancestry coefficients; K=",K), xlab = "", ylab = "",resolution = c(500,500), cex = 0.4, col.palette = my.palette, window=par("usr"),asp=xdist/ydist,add=FALSE)
-		#	maps::map(add=TRUE)
-		#	mapplot[[i]]    <- recordPlot()
-		#	mapplot.i       <- tess3r::ggtess3Q(tess3r.qmat,coords.mat, interpolation.model = tess3r::FieldsKrigModel(10),resolution = c(500,500), col.palette = my.palette, window=c(new.x,new.y),background=TRUE,map.polygon=world_sp)
 			mapplot.i       <- tess3r::ggtess3Q(tess3r.qmat,coords.mat, interpolation.model = tess3r::FieldsKrigModel(10),resolution = c(500,500), col.palette = my.palette, window=c(x.min,x.max,y.min,y.max),background=TRUE,map.polygon=world_sp)
-		#	mapplot[[i]]    <- mapplot.i + ggplot2::theme_classic() + ggplot2::labs(title=paste0("Ancestry coefficients; K=",K), x="latitude", y="longitude") + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) + borders.aes + ggplot2::geom_point(data = coords, ggplot2::aes(x = Lon, y = Lat), size = 1, shape = 21, fill = "black")
 			mapplot[[i]]    <- mapplot.i + ggplot2::theme_classic() + ggplot2::labs(title=paste0("Ancestry coefficients; K=",K), x="latitude", y="longitude") + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) + current.gg.sf + ggplot2::geom_point(data = coords, ggplot2::aes(x = Lon, y = Lat), size = 1, shape = 21, fill = "black")
-			# test <- map_data("world")
-			#world_sf   <- sf::st_as_sf(rnaturalearth::ne_countries(scale=10))[1]
-			#world_sf      <- rnaturalearth::ne_countries(scale=10,returnclass="sf")[1]
-			#gg.current <- mapplot.i + current.gg.sf
-			#gg.world   <- world.gg.sf
 		}
 	}
-
-	if(bestK>1){
-		posterior.bestK <- posterior.list[[bestK-1]]
-		colnames(posterior.bestK) <- paste0("K",colnames(posterior.bestK))
-		if(!is.null(probs.out)){
-			write.table(posterior.bestK,file=probs.out,quote=F,col.names=T,row.names=T)
-		}
-	} else {
-		posterior.bestK <- matrix(data=rep(1,numind),ncol=1)
-		rownames(posterior.bestK) <- samplenames
+	q.df    <- do.call(rbind,q.df)
+	#dapc.df <- do.call(rbind,dapc.df)
+	if(".Qlog" %in% include.out){
+		write.table(x=q.df,file=paste0(tools::file_path_sans_ext(save.as),".Qlog"),row.names=FALSE,col.names=TRUE,quote=FALSE,sep="\t")
 	}
+	#if(bestK>1){
+	#	posterior.bestK <- posterior.list[[bestK-1]]
+	#	colnames(posterior.bestK) <- paste0("K",colnames(posterior.bestK))
+	#	if(!is.null(probs.out)){
+	#		write.table(posterior.bestK,file=probs.out,quote=F,col.names=T,row.names=T)
+	#	}
+	#} else {
+	#	posterior.bestK <- matrix(data=rep(1,numind),ncol=1)
+	#	rownames(posterior.bestK) <- samplenames
+	#}
 	#dev.off()
 	if(!is.null(coords)){
 		result <- c(list(BICPlot,grp.plot2),scatterPlot,admixturePlot,assignmentPlot,mapplot)
 	} else {
 		result <- c(list(BICPlot,grp.plot2),scatterPlot,admixturePlot,assignmentPlot)
 	}
-	if(!is.null(save.as)){
+	#if(!is.null(save.as)){
+	if(".pdf" %in% include.out){
 		pdf(height=6,width=10,file=save.as,onefile=TRUE)
 		lapply(X=result,FUN=print)
 		dev.off()
@@ -751,6 +717,8 @@ goodcolors2 <- function(n,plot.palette=FALSE){
 #' @param legend A logical indicating whether a legend for group colours should added to the plot. Default FALSE.
 #' @param onedim.filled Logical indicating, when only one discriminant function is to be plotted, whether or not density plots should be filled or unfilled with the colors indicated by 'col'. Default TRUE.
 #' @param addaxes Logical indicating if reference axes should be drawn at x=a and y=b, with a and b supplied by the 'origin' argument. Default TRUE.
+#' @param ltyaxes Line weight to use for edges of the minimum spanning tree linking the groups. Default 0.5.
+#' @param lwdaxes Line type to use for edges of the minimum spanning tree linking the groups. Default 2 (dashed).
 #' @param cellipse A positive coefficient for the inertia ellipse size. Default 1.5. Setting to zero removes ellipses.
 #' @param cstar A number greater than 0 defining the length of the star size (i.e., the lines radiating from the center of clusters towards individuals). Default 1. Setting to zero removes the star lines; setting =1 connects points to cluster mean; setting > 1 extends lines through their points.
 #' @param mstree A logical indicating whether a minimum spanning tree linking the groups and based on the squared distances between the groups inside the entire space should added to the plot (TRUE), or not (FALSE). Default FALSE.
@@ -790,7 +758,7 @@ goodcolors2 <- function(n,plot.palette=FALSE){
 #' @param only.grp NOT YET IMPLEMENTED. Character vector indicating which groups should be displayed. Values should match values of x$grp. If NULL, all results are displayed.
 #' @return A ggplot object
 #' @export ggscatter.dapc
-ggscatter.dapc <- function (x, xax = 1, yax = 2, grp = x$grp , cpoint=2, col = adegenet::seasun(length(levels(grp))), txt.leg = levels(grp), label = levels(grp), pch = 20, solid = 0.7, scree.da = TRUE, scree.pca = FALSE, posi.da = "bottomright", posi.pca = "bottomleft", bg.inset = "white", ratio.da = 0.25, ratio.pca = 0.25, inset.da = 0.02, inset.pca = 0.02, inset.solid = 0.5, onedim.filled = TRUE, mstree = FALSE, lwd = 1, lty = 1, segcol = "black", legend = FALSE, posi.leg = "topright", cleg = 1, cstar = 1, cellipse = 1.5, axesell = FALSE, clabel = 1, xlim = NULL, ylim = NULL, grid = FALSE, addaxes = TRUE, origin = c(0,0), include.origin = TRUE, sub = "", csub = 1, possub = "bottomleft", cgrid = 1, pixmap = NULL, contour = NULL, area = NULL, label.inds = NULL, new.pred=NULL){
+ggscatter.dapc <- function (x, xax = 1, yax = 2, grp = x$grp , cpoint=2, col = adegenet::seasun(length(levels(grp))), txt.leg = levels(grp), label = levels(grp), pch = 20, solid = 0.7, scree.da = TRUE, scree.pca = FALSE, posi.da = "bottomright", posi.pca = "bottomleft",bg="white", bg.inset = "white", ratio.da = 0.25, ratio.pca = 0.25, inset.da = 0.02, inset.pca = 0.02, inset.solid = 0.5, onedim.filled = TRUE, mstree = FALSE, lwd = 1, lty = 1, segcol = "black", legend = FALSE, posi.leg = "topright", cleg = 1, cstar = 1, cellipse = 1.5, axesell = FALSE, clabel = 1, xlim = NULL, ylim = NULL, grid = FALSE, addaxes = TRUE, ltyaxes=2, lwdaxes=0.5, origin = c(0,0), include.origin = TRUE, sub = "", csub = 1, possub = "bottomleft", cgrid = 1, pixmap = NULL, contour = NULL, area = NULL, label.inds = NULL, new.pred=NULL){
 	### Logical indicating if only one principle component retained
 	ONEDIM   <- xax == yax | ncol(x$ind.coord) == 1
 	col      <- rep(col, length(levels(grp)))
@@ -828,7 +796,7 @@ ggscatter.dapc <- function (x, xax = 1, yax = 2, grp = x$grp , cpoint=2, col = a
 		# Includes box around plotting area, a vertical line at x=0, and a horizontal line at y=0
 		ggscatter.tempB      <- ggscatter.tempA + ggplot2::theme(panel.border = ggplot2::element_rect(color = "black", fill=NA, size=1)) 
 		if(addaxes){
-			ggscatter.tempB  <- ggscatter.tempB + ggplot2::geom_vline(aes(xintercept=0)) + ggplot2::geom_hline(aes(yintercept=0))
+			ggscatter.tempB  <- ggscatter.tempB + ggplot2::geom_vline(ggplot2::aes(xintercept=0,linetype=ltyaxes,size=lwdaxes)) + ggplot2::geom_hline(ggplot2::aes(yintercept=0,linetype=ltyaxes,size=lwdaxes))
 		}
 		# Hide axis ticks and labels
 		if(TRUE){
@@ -848,7 +816,7 @@ ggscatter.dapc <- function (x, xax = 1, yax = 2, grp = x$grp , cpoint=2, col = a
 		}
 		# Add 'star' lines from each cluster mean to the coordinates of individuals in the cluster.
 		if(cstar > 0){
-			ggscatter.temp3 <- ggscatter.temp2 + ggplot2::geom_segment(data = coords.df, aes(x = x3, y = y3, xend = grp.center.x, yend = grp.center.y, color = Cluster))
+			ggscatter.temp3 <- ggscatter.temp2 + ggplot2::geom_segment(data = coords.df, ggplot2::aes(x = x3, y = y3, xend = grp.center.x, yend = grp.center.y, color = Cluster))
 		}
 		if (mstree) {
 			meanposi <- apply(x$tab, 2, tapply, grp, mean)
@@ -896,10 +864,10 @@ ggscatter.dapc <- function (x, xax = 1, yax = 2, grp = x$grp , cpoint=2, col = a
 		} else {
 			gg.density.temp  <- ggplot2::ggplot(coords.df, ggplot2::aes(x=coords,color=Cluster,fill=NA)) + ggplot2::geom_density() + ggplot2::theme_classic() + ggplot2::scale_color_manual(values=col) + ggplot2::scale_fill_manual(values=NA) + ggplot2::scale_x_continuous(breaks=xat,name="Discriminant function 1",limits=range(allx))
 		}
-		gg.density       <- gg.density.temp + ggplot2::ylab("Density") + ggplot2::geom_text(aes(x=coords,y=rep(0,length(coords)),label=rep("|",length(coords))),show.legend=FALSE) + ggplot2::theme(panel.border = ggplot2::element_rect(color = "black", fill=NA, size=1), axis.line=ggplot2::element_blank(), axis.text.x = element_text(size=12), axis.text.y = ggplot2::element_text(size=12))  + ggplot2::labs(title=paste0("K=",K))
+		gg.density       <- gg.density.temp + ggplot2::ylab("Density") + ggplot2::geom_text(ggplot2::aes(x=coords,y=rep(0,length(coords)),label=rep("|",length(coords))),show.legend=FALSE) + ggplot2::theme(panel.border = ggplot2::element_rect(color = "black", fill=NA, size=1), axis.line=ggplot2::element_blank(), axis.text.x = ggplot2::element_text(size=12), axis.text.y = ggplot2::element_text(size=12))  + ggplot2::labs(title=paste0("K=",K))
 		### Remove legend if legend = FALSE
 		if(!legend){
-			gg.density <- gg.density + theme(legend.position = "none")
+			gg.density <- gg.density + ggplot2::theme(legend.position = "none")
 		}
 	}
 	if(ONEDIM){

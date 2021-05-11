@@ -26,6 +26,7 @@ ggscatter.dapc(
   scree.pca = FALSE,
   posi.da = "bottomright",
   posi.pca = "bottomleft",
+  bg = "white",
   bg.inset = "white",
   ratio.da = 0.25,
   ratio.pca = 0.25,
@@ -48,6 +49,8 @@ ggscatter.dapc(
   ylim = NULL,
   grid = FALSE,
   addaxes = TRUE,
+  ltyaxes = 2,
+  lwdaxes = 0.5,
   origin = c(0, 0),
   include.origin = TRUE,
   sub = "",
@@ -89,6 +92,8 @@ ggscatter.dapc(
 \item{posi.da}{NOT YET IMPLEMENTED. The position of the screeplot of discriminant functions. Can match any combination of "top/bottom" and "left/right", or a set of x/y coordinates stored as a list (locator can be used). Default = "bottomright".}
 
 \item{posi.pca}{NOT YET IMPLEMENTED. The position of the screeplot of discriminant functions. Can match any combination of "top/bottom" and "left/right", or a set of x/y coordinates stored as a list (locator can be used). Default = "bottomleft".}
+
+\item{bg}{Color to use for the background of the plot. Default "white".}
 
 \item{bg.inset}{NOT YET IMPLEMENTED. Default "white".}
 
@@ -134,6 +139,10 @@ ggscatter.dapc(
 
 \item{addaxes}{Logical indicating if reference axes should be drawn at x=a and y=b, with a and b supplied by the 'origin' argument. Default TRUE.}
 
+\item{ltyaxes}{Line weight to use for edges of the minimum spanning tree linking the groups. Default 0.5.}
+
+\item{lwdaxes}{Line type to use for edges of the minimum spanning tree linking the groups. Default 2 (dashed).}
+
 \item{origin}{NOT YET IMPLEMENTED. Location of the origin.}
 
 \item{include.origin}{NOT YET IMPLEMENTED. A logical value indicating whether the point "origin" should be belonged to the graph space. Default TRUE.}
@@ -155,8 +164,6 @@ ggscatter.dapc(
 \item{label.inds}{NOT YET IMPLEMENTED. Default NULL. Named list of arguments passed to the orditorp function. This will label individual points witout overlapping. Arguments x and display are hardcoded and should not be specified by user.}
 
 \item{new.pred}{NOT YET IMPLEMENTED. An optional list, as returned by the predict method for dapc objects; if provided, the individuals with unknown groups are added at the bottom of the plot. To visualize these individuals only, specify only.grp="unknown".}
-
-\item{bg}{Color to use for the background of the plot. Default "white".}
 
 \item{only.grp}{NOT YET IMPLEMENTED. Character vector indicating which groups should be displayed. Values should match values of x$grp. If NULL, all results are displayed.}
 }

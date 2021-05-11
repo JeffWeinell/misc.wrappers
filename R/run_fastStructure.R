@@ -202,8 +202,8 @@ run_fastStructure <- function(vcf,coords=NULL,kmax=40,reps=100,save.as=NULL,tole
 	}
 	result <- c(list(margLPlot),admixturePlot,assignmentPlot,mapplot)
 	#### Save the PDF
-	# if(".pdf" %in% include.out){
-	if(!is.null(save.as)){
+	if(".pdf" %in% include.out){
+	#if(!is.null(save.as)){
 		pdf(height=6,width=10,file=save.as,onefile=TRUE)
 		lapply(X=result,FUN=print)
 		dev.off()
