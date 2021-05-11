@@ -723,7 +723,7 @@ goodcolors2 <- function(n,plot.palette=FALSE){
 #' @param cellipse A positive coefficient for the inertia ellipse size. Default 1.5. Setting to zero removes ellipses.
 #' @param cstar A number greater than 0 defining the length of the star size (i.e., the lines radiating from the center of clusters towards individuals). Default 1. Setting to zero removes the star lines; setting =1 connects points to cluster mean; setting > 1 extends lines through their points.
 #' @param mstree A logical indicating whether a minimum spanning tree linking the groups and based on the squared distances between the groups inside the entire space should added to the plot (TRUE), or not (FALSE). Default FALSE.
-#' @param lwd Line weight to use for edges of the minimum spanning tree linking the groups. Default 0.5.
+#' @param lwd Line weight to use for edges of the minimum spanning tree linking the groups. Default 0.25.
 #' @param lty Line type to use for edges of the minimum spanning tree linking the groups. Default 1 (solid).
 #' @param segcol Color to use for edges of the minimum spanning tree linking the groups Default "black".
 #' @param label Name to use for clusters. Default NULL, in which case group will be used.
@@ -759,7 +759,7 @@ goodcolors2 <- function(n,plot.palette=FALSE){
 #' @param only.grp NOT YET IMPLEMENTED. Character vector indicating which groups should be displayed. Values should match values of x$grp. If NULL, all results are displayed.
 #' @return A ggplot object
 #' @export ggscatter.dapc
-ggscatter.dapc <- function (x, xax = 1, yax = 2, grp = x$grp , cpoint=2, col = adegenet::seasun(length(levels(grp))), txt.leg = levels(grp), label = levels(grp), pch = 20, solid = 0.7, hideperimeter=FALSE, scree.da = TRUE, scree.pca = FALSE, posi.da = "bottomright", posi.pca = "bottomleft",bg="white", bg.inset = "white", ratio.da = 0.25, ratio.pca = 0.25, inset.da = 0.02, inset.pca = 0.02, inset.solid = 0.5, onedim.filled = TRUE, mstree = FALSE, lwd = 1, lty = 1, segcol = "black", legend = FALSE, posi.leg = "topright", cleg = 1, cstar = 1, cellipse = 1.5, axesell = FALSE, clabel = 1, xlim = NULL, ylim = NULL, grid = FALSE, addaxes = TRUE, ltyaxes=2, lwdaxes=0.5, origin = c(0,0), include.origin = TRUE, sub = "", csub = 1, possub = "bottomleft", cgrid = 1, pixmap = NULL, contour = NULL, area = NULL, label.inds = NULL, new.pred=NULL){
+ggscatter.dapc <- function (x, xax = 1, yax = 2, grp = x$grp , cpoint=2, col = adegenet::seasun(length(levels(grp))), txt.leg = levels(grp), label = levels(grp), pch = 20, solid = 0.7, hideperimeter=FALSE, scree.da = TRUE, scree.pca = FALSE, posi.da = "bottomright", posi.pca = "bottomleft",bg="white", bg.inset = "white", ratio.da = 0.25, ratio.pca = 0.25, inset.da = 0.02, inset.pca = 0.02, inset.solid = 0.5, onedim.filled = TRUE, mstree = FALSE, lwd = 0.25, lty = 1, segcol = "black", legend = FALSE, posi.leg = "topright", cleg = 1, cstar = 1, cellipse = 1.5, axesell = FALSE, clabel = 1, xlim = NULL, ylim = NULL, grid = FALSE, addaxes = TRUE, ltyaxes=2, lwdaxes=0.5, origin = c(0,0), include.origin = TRUE, sub = "", csub = 1, possub = "bottomleft", cgrid = 1, pixmap = NULL, contour = NULL, area = NULL, label.inds = NULL, new.pred=NULL){
 	### Logical indicating if only one principle component retained
 	ONEDIM     <- xax == yax | ncol(x$ind.coord) == 1
 	simple.col <- transp(col[1:length(levels(grp))],solid)
@@ -798,7 +798,7 @@ ggscatter.dapc <- function (x, xax = 1, yax = 2, grp = x$grp , cpoint=2, col = a
 		ggscatter.tempB      <- ggscatter.tempA + ggplot2::theme(panel.border = ggplot2::element_rect(color = "black", fill=NA, size=1)) 
 		# Add reference lines (axes) at x=0 and y=0
 		if(addaxes){
-			ggscatter.tempB  <- ggscatter.tempB + ggplot2::geom_vline(ggplot2::aes(xintercept=0),linetype=ltyaxes,size=lwdaxes) + ggplot2::geom_hline(ggplot2::aes(yintercept=0),linetype=ltyaxes,size=lwdaxes)
+			ggscatter.tempB  <- ggscatter.tempB + ggplot2::geom_vline(ggplot2::aes(xintercept=0),linetype=ltyaxes,size=lwdaxes,color="lightgray") + ggplot2::geom_hline(ggplot2::aes(yintercept=0),linetype=ltyaxes,size=lwdaxes,color="lightgray")
 		}
 		# Hide axis ticks and labels
 		if(hideperimeter){
@@ -807,25 +807,26 @@ ggscatter.dapc <- function (x, xax = 1, yax = 2, grp = x$grp , cpoint=2, col = a
 			ggscatter.tempC  <- ggscatter.tempB
 		}
 		### Adding the points. The scale to use for colors of points was defined in ggscatter.tempA so no need to redefine colors here.
-		ggscatter.temp0      <- ggscatter.tempC + ggplot2::geom_point(size=cpoint) + ggplot2::scale_color_manual(values=col) + ggplot2::scale_shape_manual(values=pch) #+ ggplot2::scale_fill_manual(values=col,fill=col)
+		ggscatter.temp0      <- ggscatter.tempC + ggplot2::geom_point(size=cpoint,show.legend=TRUE) + ggplot2::scale_color_manual(values=col) + ggplot2::scale_shape_manual(values=pch) #+ ggplot2::scale_fill_manual(values=col,fill=col)
 		# Hide legend (guide)
 		if(!legend){
 			ggscatter.temp1  <- ggscatter.temp0 + ggplot2::theme(legend.position = "none")
 		} else {
 			#ggscatter.temp1  <- ggscatter.temp0 + ggplot2::theme(legend.background = ggplot2::element_rect(fill="lightgray", size=0.5, linetype="solid"), legend.key= ggplot2::element_rect(fill=simple.col))  + ggplot2::scale_fill_manual(values=simple.col) # values=col[1:length(label)], aesthetics=c("fill")
-			ggscatter.temp1  <- ggscatter.temp0 + ggplot2::theme(legend.background = ggplot2::element_rect(fill="white", size=0.5, linetype="solid"), legend.key=ggplot2::element_rect(fill=NA)) + ggplot2::guides(fill = ggplot2::guide_legend(override.aes = list(fill=simple.col,color=simple.col,shape=NULL))) # + ggplot2::scale_fill_manual(values=simple.col) 
+			#ggscatter.temp1  <- ggscatter.temp0 + ggplot2::theme(legend.background = ggplot2::element_rect(fill="white", size=0.25, linetype="solid"), legend.key=ggplot2::element_rect(value=simple.col)) + ggplot2::guides(fill = ggplot2::guide_legend(override.aes = list(fill=simple.col,color=simple.col))) # + ggplot2::scale_fill_manual(values=simple.col) 
+			ggscatter.temp1  <- ggscatter.temp0 + ggplot2::theme(legend.background = ggplot2::element_rect(fill="white", size=0.25, linetype="solid")) + ggplot2::guides(fill = ggplot2::guide_legend(override.aes=list(fill=simple.col,color="black",size=12,shape=22))) # + ggplot2::scale_fill_manual(values=simple.col) 
 		}
-		#return(ggscatter.temp1)
 		# Add ellipses around clusters
 		if(cellipse>0){
-			ggscatter.temp2  <- ggscatter.temp1 + ggplot2::stat_ellipse(level=(cellipse*0.43),type="norm")
+			ggscatter.temp2  <- ggscatter.temp1 + ggplot2::stat_ellipse(level=(cellipse*0.43),type="norm",show.legend=FALSE)
 		}
 		# Add 'star' lines from each cluster mean to the coordinates of individuals in the cluster.
 		if(cstar > 0){
-			ggscatter.temp3 <- ggscatter.temp2 + ggplot2::geom_segment(data = coords.df, ggplot2::aes(x = x3, y = y3, xend = grp.center.x, yend = grp.center.y, color = Cluster))
+			ggscatter.temp3 <- ggscatter.temp2 + ggplot2::geom_segment(data = coords.df, ggplot2::aes(x = x3, y = y3, xend = grp.center.x, yend = grp.center.y, color = Cluster),show.legend=FALSE)
 		}
 		if (mstree) {
 			meanposi <- apply(x$tab, 2, tapply, grp, mean)
+			axes     <- c(xax, yax)
 			D        <- dist(meanposi)^2
 			tre      <- ade4::mstree(D)
 			x0       <- unname(x$grp.coord[tre[, 1], axes[1]])
@@ -838,13 +839,16 @@ ggscatter.dapc <- function (x, xax = 1, yax = 2, grp = x$grp , cpoint=2, col = a
 			coords.df[,"tree.y0"] <- y0
 			coords.df[,"tree.x1"] <- x1
 			coords.df[,"tree.y1"] <- y1
-			ggscatter.temp4 <- ggscatter.temp3 + ggplot2::geom_segment(data = coords.df, ggplot2::aes(x = tree.x0, y = tree.y0, xend = tree.x1, yend = tree.y1), color = segcol, size=lwd,linetype=lty)
+			ggscatter.temp4 <- ggscatter.temp3 + ggplot2::geom_segment(data = coords.df, ggplot2::aes(x = tree.x0, y = tree.y0, xend = tree.x1, yend = tree.y1), color = segcol, size=lwd,linetype=lty,show.legend=FALSE)
 		} else {
 			ggscatter.temp4 <- ggscatter.temp3
 		}
 		if(!is.null(label)){
-			ggscatter.temp5 <- ggscatter.temp4 + ggplot2::geom_label(data=coords.df,ggplot2::aes(x=grp.center.x,y=grp.center.y,label=Cluster),fill="white",size=(clabel*3))
+			ggscatter.temp5 <- ggscatter.temp4 + ggplot2::geom_label(data=coords.df,ggplot2::aes(x=grp.center.x,y=grp.center.y,label=Cluster),fill="white",size=(clabel*3),show.legend=FALSE)
+		} else {
+			ggscatter.temp5 <- ggscatter.temp4
 		}
+		# return(ggscatter.temp5)
 	} else {# If only one PC
 		scree.da <- FALSE
 		if(ncol(x$ind.coord) == 1) {

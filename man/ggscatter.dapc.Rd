@@ -36,7 +36,7 @@ ggscatter.dapc(
   inset.solid = 0.5,
   onedim.filled = TRUE,
   mstree = FALSE,
-  lwd = 1,
+  lwd = 0.25,
   lty = 1,
   segcol = "black",
   legend = FALSE,
@@ -114,7 +114,7 @@ ggscatter.dapc(
 
 \item{mstree}{A logical indicating whether a minimum spanning tree linking the groups and based on the squared distances between the groups inside the entire space should added to the plot (TRUE), or not (FALSE). Default FALSE.}
 
-\item{lwd}{Line weight to use for edges of the minimum spanning tree linking the groups. Default 0.5.}
+\item{lwd}{Line weight to use for edges of the minimum spanning tree linking the groups. Default 0.25.}
 
 \item{lty}{Line type to use for edges of the minimum spanning tree linking the groups. Default 1 (solid).}
 
