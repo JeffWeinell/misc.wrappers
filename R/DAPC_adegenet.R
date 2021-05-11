@@ -732,12 +732,9 @@ goodcolors2 <- function(n,plot.palette=FALSE){
 }
 
 
-#####################################################################################
-#### THIS FUNCTION IS LARGELY BASED ON THE FUNCTION 'scatter.dapc' FROM ADEGENET ####
-#####################################################################################
-
 #' @title Make ggplot with DAPC scatterplot
 #' 
+#' THIS FUNCTION IS LARGELY BASED ON THE FUNCTION 'scatter.dapc' FROM ADEGENET
 #' This function produces plots very similar to those produced by the adegenet function 'scatter.dapc', except that the object returned is a ggplot. This is useful when making lists of plots.
 #' SOME FEATURES STILL IN PROGRESS:
 #' - ability to add screeplot of discriminant functions or PCAs.
@@ -823,18 +820,7 @@ ggscatter.dapc <- function (x, xax = 1, yax = 2, grp = x$grp , cpoint=2, col = a
 			coords.df[rows.temp,"grp.center.x"] <- mean(coords.df[rows.temp,"x.coords"])
 			coords.df[rows.temp,"grp.center.y"] <- mean(coords.df[rows.temp,"y.coords"])
 		}
-		newpoint <-function(x0,y0,x1,y1,c){
-			norm_vec <- function(v){sqrt(sum(v^2))}
-			p0 <- c(x0, y0)
-			p1 <- c(x1, y1)
-			v  <- p1-p0
-			d  <- norm_vec(v)
-			u  <- v/d
-			d2 <- d*c
-			p3 <- p0 + (d2*u)
-			p3
-		}
-		xy3.df           <- do.call(rbind,lapply(1:nrow(coords.df),FUN=function(z){newpoint(x0=coords.df[z,"grp.center.x"],x1=coords.df[z,"x.coords"], y0=coords.df[z,"grp.center.y"],y1=coords.df[z,"y.coords"],c=cstar)}))
+		xy3.df           <- do.call(rbind,lapply(1:nrow(coords.df),FUN=function(z){newpoint(p0=coords.df[z,c("grp.center.x","grp.center.y")], p1=coords.df[z,c("x.coords","y.coords")], c=cstar)}))
 		coords.df[,"x3"] <- xy3.df[,1]
 		coords.df[,"y3"] <- xy3.df[,2]
 		### blank plotting area
@@ -922,4 +908,29 @@ ggscatter.dapc <- function (x, xax = 1, yax = 2, grp = x$grp , cpoint=2, col = a
 		return(ggscatter.temp5)
 	}
 }
+
+
+#' @title Coordinates of point on ray
+#' 
+#' Used in the function ggscatter.dapc to control segments radiating from cluster centers towards individual's pca coordinates.
+#' Returns x,y coordinates of a point (p2) on a ray with origin at p0(x0,y0) and another point at p1(x1,y1), such that the distance from p0 to p2 = c*(distance from p0 to p1).
+#' 
+#' @param p0 Numberical vector with coordinates c(x0,y0) defining the origin of a ray
+#' @param p1 Numberical vector with coordinates c(x1,y1) defining a point on the ray other than the origin.
+#' @param c A number equal to (distance p0 to p2)/(distance p0 to p1)
+#' @return Numberical vector with coordinates c(x2,y2) of p2.
+#' @export newpoint
+newpoint <-function(p0,p1,c){
+	v  <- p1-p0
+	d  <- sqrt(sum(v^2))
+	u  <- v/d
+	d2 <- d*c
+	p2 <- p0 + (d2*u)
+	p2
+}
+
+
+
+
+
 

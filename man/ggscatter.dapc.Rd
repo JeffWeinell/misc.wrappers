@@ -4,6 +4,7 @@
 \alias{ggscatter.dapc}
 \title{Make ggplot with DAPC scatterplot
 
+THIS FUNCTION IS LARGELY BASED ON THE FUNCTION 'scatter.dapc' FROM ADEGENET
 This function produces plots very similar to those produced by the adegenet function 'scatter.dapc', except that the object returned is a ggplot. This is useful when making lists of plots.
 SOME FEATURES STILL IN PROGRESS:
 \itemize{
@@ -165,6 +166,7 @@ A ggplot object
 \description{
 Make ggplot with DAPC scatterplot
 
+THIS FUNCTION IS LARGELY BASED ON THE FUNCTION 'scatter.dapc' FROM ADEGENET
 This function produces plots very similar to those produced by the adegenet function 'scatter.dapc', except that the object returned is a ggplot. This is useful when making lists of plots.
 SOME FEATURES STILL IN PROGRESS:
 \itemize{
