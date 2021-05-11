@@ -716,6 +716,7 @@ goodcolors2 <- function(n,plot.palette=FALSE){
 #' @param solid Number between 0 and 1 indicating the level of transparency to use for colors; 0 = fully transparent; 1 = fully opaque; default = 0.7.
 #' @param legend A logical indicating whether a legend for group colours should added to the plot. Default FALSE.
 #' @param onedim.filled Logical indicating, when only one discriminant function is to be plotted, whether or not density plots should be filled or unfilled with the colors indicated by 'col'. Default TRUE.
+#' @param hideperimeter Logical indicating whether or not to hide the x and y axes and labels (the perimeter area of the plottting area). Default FALSE.
 #' @param addaxes Logical indicating if reference axes should be drawn at x=a and y=b, with a and b supplied by the 'origin' argument. Default TRUE.
 #' @param ltyaxes Line weight to use for edges of the minimum spanning tree linking the groups. Default 0.5.
 #' @param lwdaxes Line type to use for edges of the minimum spanning tree linking the groups. Default 2 (dashed).
@@ -758,13 +759,13 @@ goodcolors2 <- function(n,plot.palette=FALSE){
 #' @param only.grp NOT YET IMPLEMENTED. Character vector indicating which groups should be displayed. Values should match values of x$grp. If NULL, all results are displayed.
 #' @return A ggplot object
 #' @export ggscatter.dapc
-ggscatter.dapc <- function (x, xax = 1, yax = 2, grp = x$grp , cpoint=2, col = adegenet::seasun(length(levels(grp))), txt.leg = levels(grp), label = levels(grp), pch = 20, solid = 0.7, scree.da = TRUE, scree.pca = FALSE, posi.da = "bottomright", posi.pca = "bottomleft",bg="white", bg.inset = "white", ratio.da = 0.25, ratio.pca = 0.25, inset.da = 0.02, inset.pca = 0.02, inset.solid = 0.5, onedim.filled = TRUE, mstree = FALSE, lwd = 1, lty = 1, segcol = "black", legend = FALSE, posi.leg = "topright", cleg = 1, cstar = 1, cellipse = 1.5, axesell = FALSE, clabel = 1, xlim = NULL, ylim = NULL, grid = FALSE, addaxes = TRUE, ltyaxes=2, lwdaxes=0.5, origin = c(0,0), include.origin = TRUE, sub = "", csub = 1, possub = "bottomleft", cgrid = 1, pixmap = NULL, contour = NULL, area = NULL, label.inds = NULL, new.pred=NULL){
+ggscatter.dapc <- function (x, xax = 1, yax = 2, grp = x$grp , cpoint=2, col = adegenet::seasun(length(levels(grp))), txt.leg = levels(grp), label = levels(grp), pch = 20, solid = 0.7, hideperimeter=FALSE, scree.da = TRUE, scree.pca = FALSE, posi.da = "bottomright", posi.pca = "bottomleft",bg="white", bg.inset = "white", ratio.da = 0.25, ratio.pca = 0.25, inset.da = 0.02, inset.pca = 0.02, inset.solid = 0.5, onedim.filled = TRUE, mstree = FALSE, lwd = 1, lty = 1, segcol = "black", legend = FALSE, posi.leg = "topright", cleg = 1, cstar = 1, cellipse = 1.5, axesell = FALSE, clabel = 1, xlim = NULL, ylim = NULL, grid = FALSE, addaxes = TRUE, ltyaxes=2, lwdaxes=0.5, origin = c(0,0), include.origin = TRUE, sub = "", csub = 1, possub = "bottomleft", cgrid = 1, pixmap = NULL, contour = NULL, area = NULL, label.inds = NULL, new.pred=NULL){
 	### Logical indicating if only one principle component retained
-	ONEDIM   <- xax == yax | ncol(x$ind.coord) == 1
-	col      <- rep(col, length(levels(grp)))
-	pch      <- rep(pch, length(levels(grp)))
-	col      <- transp(col, solid)
-	bg.inset <- transp(bg.inset, inset.solid)
+	ONEDIM     <- xax == yax | ncol(x$ind.coord) == 1
+	simple.col <- transp(col[1:length(levels(grp))],solid)
+	col        <- transp(rep(col, length(levels(grp))), solid)
+	pch        <- rep(pch, length(levels(grp)))
+	bg.inset   <- transp(bg.inset, inset.solid)
 	### Posterior assignments of individuals to groups
 	if (is.null(grp)) {
 		grp <- x$grp
@@ -792,24 +793,29 @@ ggscatter.dapc <- function (x, xax = 1, yax = 2, grp = x$grp , cpoint=2, col = a
 		coords.df[,"x3"] <- xy3.df[,1]
 		coords.df[,"y3"] <- xy3.df[,2]
 		### blank plotting area
-		ggscatter.tempA      <- ggplot2::ggplot(coords.df, ggplot2::aes(x=x.coords, y=y.coords,color=Cluster,shape=Cluster,fill=Cluster)) + ggplot2::theme_classic() + ggplot2::geom_blank()  + ggplot2::scale_x_continuous(name=paste("Discriminant function",xax)) + ggplot2::scale_y_continuous(name=paste("Discriminant function",yax)) + ggplot2::theme(panel.background = ggplot2::element_rect(fill = bg)) + ggplot2::stat_ellipse(color="white")
-		# Includes box around plotting area, a vertical line at x=0, and a horizontal line at y=0
+		ggscatter.tempA      <- ggplot2::ggplot(coords.df, ggplot2::aes(x=x.coords, y=y.coords,color=Cluster,shape=Cluster,fill=Cluster)) + ggplot2::scale_x_continuous(name=paste("Discriminant function",xax)) + ggplot2::scale_y_continuous(name=paste("Discriminant function",yax)) + ggplot2::theme(panel.background = ggplot2::element_rect(fill = bg))  + ggplot2::stat_ellipse(color="white") + ggplot2::theme_classic() + ggplot2::geom_blank()
+		# Includes box around plotting area
 		ggscatter.tempB      <- ggscatter.tempA + ggplot2::theme(panel.border = ggplot2::element_rect(color = "black", fill=NA, size=1)) 
+		# Add reference lines (axes) at x=0 and y=0
 		if(addaxes){
-			ggscatter.tempB  <- ggscatter.tempB + ggplot2::geom_vline(ggplot2::aes(xintercept=0,linetype=ltyaxes,size=lwdaxes)) + ggplot2::geom_hline(ggplot2::aes(yintercept=0,linetype=ltyaxes,size=lwdaxes))
+			ggscatter.tempB  <- ggscatter.tempB + ggplot2::geom_vline(ggplot2::aes(xintercept=0),linetype=ltyaxes,size=lwdaxes) + ggplot2::geom_hline(ggplot2::aes(yintercept=0),linetype=ltyaxes,size=lwdaxes)
 		}
 		# Hide axis ticks and labels
-		if(TRUE){
+		if(hideperimeter){
 			ggscatter.tempC  <- ggscatter.tempB + ggplot2::theme(axis.title.x=ggplot2::element_blank(), axis.text.x=ggplot2::element_blank(),axis.ticks.x=ggplot2::element_blank(), axis.title.y=ggplot2::element_blank(), axis.text.y=ggplot2::element_blank(),axis.ticks.y=ggplot2::element_blank())
+		} else {
+			ggscatter.tempC  <- ggscatter.tempB
 		}
 		### Adding the points. The scale to use for colors of points was defined in ggscatter.tempA so no need to redefine colors here.
-		ggscatter.temp0      <- ggscatter.tempC + ggplot2::geom_point(size=cpoint) + ggplot2::scale_color_manual(values=col) + ggplot2::scale_shape_manual(values=pch) + ggplot2::scale_fill_manual(values=col)
-		# Hide cluster legend
+		ggscatter.temp0      <- ggscatter.tempC + ggplot2::geom_point(size=cpoint) + ggplot2::scale_color_manual(values=col) + ggplot2::scale_shape_manual(values=pch) #+ ggplot2::scale_fill_manual(values=col,fill=col)
+		# Hide legend (guide)
 		if(!legend){
 			ggscatter.temp1  <- ggscatter.temp0 + ggplot2::theme(legend.position = "none")
 		} else {
-			ggscatter.temp1  <- ggscatter.temp0
+			#ggscatter.temp1  <- ggscatter.temp0 + ggplot2::theme(legend.background = ggplot2::element_rect(fill="lightgray", size=0.5, linetype="solid"), legend.key= ggplot2::element_rect(fill=simple.col))  + ggplot2::scale_fill_manual(values=simple.col) # values=col[1:length(label)], aesthetics=c("fill")
+			ggscatter.temp1  <- ggscatter.temp0 + ggplot2::theme(legend.background = ggplot2::element_rect(fill="white", size=0.5, linetype="solid"), legend.key=ggplot2::element_rect(fill=NA)) + ggplot2::guides(fill = ggplot2::guide_legend(override.aes = list(fill=simple.col,color=simple.col,shape=NULL))) # + ggplot2::scale_fill_manual(values=simple.col) 
 		}
+		#return(ggscatter.temp1)
 		# Add ellipses around clusters
 		if(cellipse>0){
 			ggscatter.temp2  <- ggscatter.temp1 + ggplot2::stat_ellipse(level=(cellipse*0.43),type="norm")

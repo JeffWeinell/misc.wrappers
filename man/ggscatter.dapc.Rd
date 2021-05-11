@@ -22,6 +22,7 @@ ggscatter.dapc(
   label = levels(grp),
   pch = 20,
   solid = 0.7,
+  hideperimeter = FALSE,
   scree.da = TRUE,
   scree.pca = FALSE,
   posi.da = "bottomright",
@@ -84,6 +85,8 @@ ggscatter.dapc(
 \item{pch}{Either one number indicating pch code of symbol to use for all points (see 'pch' in graphical parameters), or, a numeric vector with pch codes to each for clusters . Default 20.}
 
 \item{solid}{Number between 0 and 1 indicating the level of transparency to use for colors; 0 = fully transparent; 1 = fully opaque; default = 0.7.}
+
+\item{hideperimeter}{Logical indicating whether or not to hide the x and y axes and labels (the perimeter area of the plottting area). Default FALSE.}
 
 \item{scree.da}{NOT YET IMPLEMENTED. Logical indicated whether or not a screeplot of the discriminant functions should be included. Default TRUE.}
 
