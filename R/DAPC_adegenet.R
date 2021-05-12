@@ -617,6 +617,10 @@ dapc.biplot.arrange <- function(x,variable="DF",layout.mat=NULL,row.labels.left=
 			layout.vector[1:length(grobs.list)] <- 1:length(grobs.list)
 			layout.mat    <- matrix(data=layout.vector,ncol=layout.index,byrow=TRUE)
 		}
+		na.rowcheck <- unlist(apply(layout.mat,MARGIN=1,FUN=function(x){all(is.na(x))}))
+		if(any(na.rowcheck)){
+			layout.mat <- layout.mat[which(!na.rowcheck),]
+		}
 	}
 	nm <- nrow(layout.mat)
 	nn <- ncol(layout.mat)
