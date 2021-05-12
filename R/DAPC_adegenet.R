@@ -183,8 +183,8 @@ run_DAPC <- function(vcf, kmax=40, coords=NULL, reps=100,probs.out=NULL,save.as=
 		q.df[[i]]           <- posterior.df
 		##### ggplot scatterplots of discriminant functions
 		###
-#		scatterPlot.i       <- ggscatter.dapc(dapc.pcabest.K,col=myCols,legend=F,cstar=1,cpoint=4,label=T)
-#		scatterPlot[[i]]    <- scatterPlot.i
+		scatterPlot.i       <- ggscatter.dapc(dapc.pcabest.K,col=myCols,legend=F,cstar=1,cpoint=4,label=T)
+		scatterPlot[[i]]    <- scatterPlot.i
 		### density plots of discriminant functions
 		density.da.list.i <- list(); length(density.da.list.i) <- dapc.pcabest.K$n.da
 		for(z in 1:dapc.pcabest.K$n.da){
@@ -233,17 +233,19 @@ run_DAPC <- function(vcf, kmax=40, coords=NULL, reps=100,probs.out=NULL,save.as=
 			mapplot[[i]]    <- mapplot.i + ggplot2::theme_classic() + ggplot2::labs(title=paste0("Ancestry coefficients; K=",K), x="latitude", y="longitude") + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) + current.gg.sf + ggplot2::geom_point(data = coords, ggplot2::aes(x = Lon, y = Lat), size = 1, shape = 21, fill = "black")
 		}
 		da.densityPlot[[i]]  <- density.da.list.i
-		da.biPlot[[i]]       <- biplots.da.list.i
+#		da.biPlot[[i]]       <- biplots.da.list.i
 		pca.densityPlot[[i]] <- density.pca.list.i
-		pca.biPlot[[i]]      <- biplots.pca.list.i
+#		pca.biPlot[[i]]      <- biplots.pca.list.i
 	}
 	
 	da.density.arranged      <- dapc.plot.arrange(da.densityPlot)
 	pca.densityPlot.arranged <- dapc.plot.arrange(pca.densityPlot,variable="PC")
 	### This part wont work. Need to modify function or make new function for biplots such that a page is generated for the combinations DF or PC for a particular K.
-	da.biplot.arranged       <- dapc.plot.arrange(da.biPlot)
-	pca.biPlot.arranged      <- dapc.plot.arrange(pca.biPlot)
-
+#	da.biplot.arranged       <- dapc.plot.arrange(da.biPlot)
+#	pca.biPlot.arranged      <- dapc.plot.arrange(pca.biPlot)
+	scatterPlot.arranged     <- lapply(1:length(scatterPlot),FUN=function(x){gridExtra::arrangeGrob(scatterPlot[[x]],top=paste0("K=",(x+1)))})
+	#scatterPlot.arranged2    <- gridExtra::arrangeGrob(scatterPlot.arranged,nrow=4)
+	 #gridExtra::arrangeGrob(scatterPlot,top=col1.names[z])
 	########
 	## Density plots of discriminant functions
 	### For each K, the number of plots (i.e., number of discriminant functions
@@ -503,6 +505,8 @@ vcf_getSNP      <- function(vcftools.path,vcf,out,indv.keep=NULL,which.site="bes
 
 #' @title Function to arrange plots of density for each DF or PC and each K
 #' 
+#' 
+#' 
 #' @param x 
 #' @param variable Either "DF" or "PC"
 #' @return A gtable object
@@ -511,7 +515,6 @@ dapc.plot.arrange <- function(x,variable="DF"){
 	numplots   <- lengths(x)
 	stat.max   <- max(numplots)
 	layout.mat0 <- matrix(data=NA,nrow=length(numplots), ncol=stat.max)
-	# lapply(X=1:length(numplots.da.density),FUN=function(x){ c(1:numplots.da.density[x],rep(0,max(numplots.da.density)-numplots.da.density[x]))})
 	for(i in 1:length(numplots)){
 		if(numplots[i]==0){
 			next
@@ -522,20 +525,8 @@ dapc.plot.arrange <- function(x,variable="DF"){
 	vals       <- c(t(layout.mat0))
 	ent.update <- which(vals!=0)
 	vals[ent.update] <- 1:length(ent.update)
-	#layout.mat2 <- matrix(data=vals,byrow=TRUE,ncol=ncol(layout.mat0))
-	#layout.mat[ent.update] <- 1:length(ent.update)
-	### flatten the list of lists
 	gg.list    <- do.call(c, x)
-	### convert list of ggplots into list of grobs
 	grobs.list <- lapply(gg.list, FUN=ggplot2::ggplotGrob)
-	### arrange the list of grobs into a gtable
-#	grobs.arranged <- gridExtra::arrangeGrob(grobs=grobs.list,layout_matrix=layout.mat2)
-	### Next, need to add row and column names
-	# something like this 
-	# test <- grid.arrange(arrangeGrob(da.density.arranged[,1],top="DF1"), arrangeGrob(da.density.arranged[,2],top="DF2"),layout_matrix= matrix(data=c(1:2),ncol=2,nrow=1))
-	
-	### Next chunk of code may replace previous version.
-	#if(FALSE){
 		layout.mat <- matrix(data=1:length(vals),nrow=length(numplots), ncol=stat.max,byrow=TRUE)
 		kmax=nrow(layout.mat)+1
 		stat.max <- ncol(layout.mat)
@@ -552,7 +543,6 @@ dapc.plot.arrange <- function(x,variable="DF"){
 		} else {
 			row1.names <- NULL
 		}
-	#	grobs.list <- list(); length(grobs.list) <- length(vals)
 		grobsTable.list <- list(); length(grobsTable.list) <- length(vals)
 		for(i in 1:length(vals)){
 			if(is.na(vals[i])){
@@ -575,43 +565,10 @@ dapc.plot.arrange <- function(x,variable="DF"){
 				grobTable.i <- gridExtra::arrangeGrob(grob.i)
 			}
 			grobsTable.list[[i]] <- grobTable.i
-			#grobs.list[[i]] <- grid::rectGrob(gp=grid::gpar(col=NA))
-			#} else {
-			#	grob.i          <- grobs.list[[vals[i]]]
-			#	if(i==1){
-			#		grobTable.i <- gridExtra::arrangeGrob(grob.i,left="K=2",top="DF1")
-			#	}
-			#	if(i %in% col1.vals){
-#
-			#	}
-			#	if(i %in% row1.vals){
-#
-			#	}
-#
-			#	grobs.list[[i]] <- grobs.list[[vals[i]]]
-			#}
 		}
-		
-		#grobs.arranged <- gridExtra::arrangeGrob(grobs=grobs.list,layout_matrix=layout.mat)
-		#grobs.arranged <- gridExtra::grid.arrange(grobs=grobsTable.list,layout_matrix=layout.mat)
 		grobs.arranged <- gridExtra::arrangeGrob(grobs=grobsTable.list,layout_matrix=layout.mat)
 		grobs.arranged
-	
-#	emptygrob.m1n1  <- grid::rectGrob(gp=grid::gpar(col=NA))
-#	rownames.string <- paste0("K=",2:(nrow(grobs.arranged)+1))
-#	colnames.string <- paste0("DF",1:ncol(grobs.arranged))
-	#rownames.grobs.list <- lapply(1:nrow(grobs.arranged),FUN=function(x){grid::textGrob(rownames.string[x])})
-	#rownames.grobs.mat  <- do.call(rbind,lapply(X=rownames.string,FUN=grid::textGrob))
-	#colnames.grobs.mat  <- do.call(cbind,lapply(X=colnames.string,FUN=grid::textGrob))
-#	rownames.grobs.list  <- lapply(X=rownames.string,FUN=grid::textGrob)
-#	colnames.grobs.list  <- lapply(X=colnames.string,FUN=grid::textGrob)
-#	rownames.grobs.mat   <- gridExtra::arrangeGrob(rownames.grobs.list,layout_matrix=matrix(1:2,nrow=2))
-#	colnames.grobs.mat   <- gridExtra::arrangeGrob(colnames.grobs.list,layout_matrix=matrix(1:2,ncol=2))
-#	cbind(rownames.grobs.mat,grobs.arranged)
-#	grobs.arranged
 }
-
-
 
 
 #' @title Hex to xyz colors
