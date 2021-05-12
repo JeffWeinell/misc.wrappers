@@ -17,13 +17,14 @@ Max number of plots = 25.}
   use.diag = NULL,
   pad = 0.1,
   K = NULL,
-  outer.text = list(NULL, NULL, NULL, NULL)
+  outer.text = list(NULL, NULL, NULL, NULL),
+  maxMat = c(7, 8)
 )
 }
 \arguments{
 \item{x}{A list of ggplots produced by ggscatter.dapc function}
 
-\item{layout.mat}{Custum layout matrix to use. Default is NULL, in which case the layout will be generated automatically as a fucnton of the number of plots.}
+\item{layout.mat}{Custom layout matrix to use. Default is NULL, in which case the layout will be generated automatically as a fucnton of the number of plots.}
 
 \item{row.labels.left}{Text labels to use to the left of the first column of plots. Default NULL (no labels).}
 
@@ -40,6 +41,8 @@ Max number of plots = 25.}
 \item{K}{Which set of biplots to use. If NULL (the default), the function will attemp to draw all biplots for all K (max 25 plots).}
 
 \item{outer.text}{A list with length=4, with each entry either NULL (the default) or character string to use as labels below, left, above, and to the right of the arrangement of plots.}
+
+\item{maxMat}{Numerical vector with length 2 that specifies the maximum number of rows and columns of plots, respectively, in the output gtable. Default = c(7,8).}
 }
 \value{
 A gtable object
