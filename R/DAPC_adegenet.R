@@ -593,9 +593,10 @@ dapc.plot.arrange <- function(x,variable="DF"){
 #' @param col.labels.bottom Text labels to use below the bottom row of plots. Default NULL (no labels).
 #' @param pad Amount of space between plots, in units of line widths (Default 0.1).
 #' @param K Which set of biplots to use. If NULL (the default), the function will attemp to draw all biplots for all K (max 25 plots).
+#' @param title Title to use for the whole table of plots. Default NULL.
 #' @return A gtable object
 #' @export dapc.biplot.arrange
-dapc.biplot.arrange <- function(x,variable="DF",layout.mat=NULL,row.labels.left=NULL,col.labels.top=NULL,row.labels.right=NULL,col.labels.bottom=NULL,pad=0.1,K=NULL){
+dapc.biplot.arrange <- function(x,variable="DF",layout.mat=NULL,row.labels.left=NULL,col.labels.top=NULL,row.labels.right=NULL,col.labels.bottom=NULL,pad=0.1,K=NULL,title=NULL){
 	if(is.null(K)){
 		gg.list  <- do.call(c, x)
 	} else {
@@ -672,13 +673,15 @@ dapc.biplot.arrange <- function(x,variable="DF",layout.mat=NULL,row.labels.left=
 	}
 	#return(grobsTable.list)
 	#grobs.arranged <- gridExtra::arrangeGrob(grobs=grobsTable.list,layout_matrix=layout.mat,padding=unit(pad,"line"))
-	grobs.arranged <- gridExtra::arrangeGrob(grobs=grobsTable.list,layout_matrix=index.matrix,padding=unit(pad,"line"))
-	grobs.arranged
+	grobs.arranged0 <- gridExtra::arrangeGrob(grobs=grobsTable.list,layout_matrix=index.matrix,padding=unit(pad,"line"))
+	if(is.null(title)){
+		grobs.arranged <- gridExtra::arrangeGrob(grobs.arranged0,top=title)
+	} else {
+		grobs.arranged <- grobs.arranged0
+	}
 }
 #' da.biPlot; pca.biPlot
 #' x=da.biPlot
-
-
 
 #' @title Hex to xyz colors
 #' 

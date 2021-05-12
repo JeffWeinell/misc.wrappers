@@ -16,7 +16,8 @@ Max number of plots = 25.}
   row.labels.right = NULL,
   col.labels.bottom = NULL,
   pad = 0.1,
-  K = NULL
+  K = NULL,
+  title = NULL
 )
 }
 \arguments{
@@ -37,6 +38,8 @@ Max number of plots = 25.}
 \item{pad}{Amount of space between plots, in units of line widths (Default 0.1).}
 
 \item{K}{Which set of biplots to use. If NULL (the default), the function will attemp to draw all biplots for all K (max 25 plots).}
+
+\item{title}{Title to use for the whole table of plots. Default NULL.}
 }
 \value{
 A gtable object
