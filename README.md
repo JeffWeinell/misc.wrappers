@@ -1,5 +1,5 @@
 # misc.wrappers
- Collection of wrappers for programs that I did not create.
+ Collection of wrappers for popular PopGen programs, plus some novel tools.
 **Under Developement**
 
 ### Package Description
