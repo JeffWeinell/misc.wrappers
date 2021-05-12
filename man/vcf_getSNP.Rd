@@ -40,36 +40,9 @@ vcf_getSNP(
 List with [\link{1}] path to vcftools, [\link{2}] dataframe with input and output values for VCF filepaths, number of loci (chromosomes), sites (positions), and individuals (samples).
 }
 \description{
-dev.new(height=10,width=6)
-Ahaetulla_Luzon <- run_DAPC(vcf="Ahaetulla-prasina_Luzon_1snpPerLocus.vcf",
-probs.out="Ahaetulla-prasina_Luzon_BestSNP_DAPC_BestK_Membership_run2.txt",
-save.out="Ahaetulla-prasina_Luzon_DAPC_v2.pdf")
-Calamaria_allpops <- run_DAPC(vcf="Calamaria-gervaisii_snps.vcf",
-probs.out="Calamaria-gervaisii_allpops_BestSNP_DAPC_BestK_Membership_run2.txt",
-save.as="Calamaria-gervaisii_allpops_DAPC.pdf")
-dev.new(height=6,width=10)
-cfmodestum_Luzon <- run_DAPC(vcf="Oxyrhabdium-cf.modestum_Luzon_BestSNP.vcf",
-probs.out="Oxyrhabdium-cf.modestum_Luzon_BestSNP_DAPC_BestK_Membership_run2.txt",
-coords="tess3r/Oxyrhabdium-cfmodestum_Luzon_coords.txt",
-save.as="Oxyrhabdium-cfmodestum_Luzon_BestSNP_DAPC_run2.pdf")
-leporinum_Luzon <- run_DAPC(vcf="Oxyrhabdium-leporinum_Luzon_BestSNP.vcf".
-probs.out="Oxyrhabdium-leporinum_Luzon_BestSNP_DAPC_BestK_Membership_run2.txt",
-coords="Oxyrhabdium-leporinum_Luzon_coords.txt",
-save.as="Oxyrhabdium-leporinum_Luzon_BestSNP_DAPC.pdf")
-leporinum  <- run_DAPC(vcf="Oxyrhabdium-leporinum_BestSNP.vcf",
-probs.out="Oxyrhabdium-leporinum_BestSNP_DAPC_BestK_Membership_run2.txt",
-coords="Oxyrhabdium-leporinum_coords.txt",
-save.as="Oxyrhabdium-leporinum_BestSNP_DAPC_run2.pdf")
-modestum   <- run_DAPC(vcf="Oxyrhabdium-modestum_BestSNP.vcf",
-probs.out="Oxyrhabdium-modestum_BestSNP_DAPC_BestK_Membership.txt_run2",
-coords="Oxyrhabdium-modestum_coords.txt",
-save.as="Oxyrhabdium-modestum_BestSNP_DAPC_run2.pdf")
-cfmodestum <- run_DAPC(vcf="Oxyrhabdium-cf.modestum_BestSNP.vcf",
-probs.out="Oxyrhabdium-cf.modestum_BestSNP_DAPC_BestK_Membership_run2.txt",
-coords="Oxyrhabdium-cfmodestum_coords.txt",
-save.as="Oxyrhabdium-cf.modestum_BestSNP_DAPC_run2.pdf")
-Oxyrhabdium <- run_DAPC(vcf="Oxyrhabdium_AllSpecies_BestSNP.vcf",
-probs.out="Oxyrhabdium_AllSpecies_BestSNP_DAPC_BestK_Membership_run2.txt",
-coords="Oxyrhabdium_AllSpecies_coords.txt",
-save.as="Oxyrhabdium_AllSpecies_BestSNP_DAPC_v3.pdf")
+Get Best SNP for each locus from VCF
+
+From a VCF with multiple sites/locus, create a VCF with only the best site/locus.
+The best site is the one with the least missing data. To break ties, take the first site among the best sites.
+Note: I may update this to not require vcftools.
 }

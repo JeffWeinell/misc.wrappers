@@ -15,34 +15,36 @@
 A gtable object
 }
 \description{
-Function to arrange plots of density for each DF or PC and each K
-}
-\examples{
-vcf_getSNP(vcftools.path="/vcftools",vcf="Oxyrhabdium_AllSpecies_AllSNPs.vcf",out="Oxyrhabdium_AllSpecies_BestSNP.vcf")
-
-vcf_getSNP(vcftools.path="/vcftools",vcf="Oxyrhabdium-modestum_AllSNPs.vcf",out="Oxyrhabdium-modestum_BestSNP.vcf")
-
-vcf_getSNP(vcftools.path="/vcftools",vcf="Oxyrhabdium-cf.modestum_AllSNPs.vcf",out="Oxyrhabdium-cf.modestum_BestSNP.vcf")
-
-vcf_getSNP(vcftools.path="/vcftools",vcf="Oxyrhabdium-cf.modestum_Luzon_AllSNPs.vcf",out="Oxyrhabdium-cf.modestum_Luzon_BestSNP.vcf")
-
-vcf_getSNP(vcftools.path="/vcftools",vcf="Oxyrhabdium-leporinum_AllSNPs.vcf",out="Oxyrhabdium-leporinum_BestSNP.vcf")
-
-vcf_getSNP(vcftools.path="/vcftools",vcf="Oxyrhabdium-leporinum_Luzon_AllSNPs.vcf",out="Oxyrhabdium-leporinum_Luzon_BestSNP.vcf")
-
-vcf_getSNP(vcftools.path="/vcftools",vcf="Oxyrhabdium_both-modestum_AllSNPs.vcf",out="Oxyrhabdium_both-modestum_AllSNPs.vcf",which.site="all.passing")
-
-vcf_getSNP(vcftools.path="/vcftools",vcf="Oxyrhabdium_both-modestum_AllSNPs.vcf",out="Oxyrhabdium_both-modestum_BestSNP.vcf",which.site="best")
-
-vcf_getSNP(vcftools.path="/vcftools",vcf="Oxyrhabdium_AllSpecies_AllSNPs.vcf", indv.keep="indv_keep_Oxyrhabdium_both-modestum.txt", out="Oxyrhabdium_both-modestum_BestSNP.vcf", which.site="best")
-
-vcf_getSNP(vcftools.path="/panfs/pfs.local/home/j926w878/programs/vcftools_0.1.13/bin/vcftools",vcf="/panfs/pfs.local/home/j926w878/programs/easySFS/popfiles/Ahaetulla_snps.vcf",indv.keep="/panfs/pfs.local/home/j926w878/programs/easySFS/popfiles/indv_keep_Ahaetulla-prasina_AllLocalities_GoodData.txt",out="/panfs/pfs.local/home/j926w878/work/ddRAD/snps_goodData/Ahaetulla-prasina_AllPops_AllSNPs.vcf",which.site="all.passing")
-
-vcf_getSNP(vcftools.path="/panfs/pfs.local/home/j926w878/programs/vcftools_0.1.13/bin/vcftools",vcf="/panfs/pfs.local/home/j926w878/programs/easySFS/popfiles/Ahaetulla_snps.vcf",indv.keep="/panfs/pfs.local/home/j926w878/programs/easySFS/popfiles/indv_keep_Ahaetulla-prasina_AllLocalities_GoodData.txt",out="/panfs/pfs.local/home/j926w878/work/ddRAD/snps_goodData/Ahaetulla-prasina_AllPops_FirstSNP.vcf",which.site="first")
-
-vcf_getSNP(vcftools.path="/panfs/pfs.local/home/j926w878/programs/vcftools_0.1.13/bin/vcftools",vcf="/panfs/pfs.local/home/j926w878/work/ddRAD/snps_goodData/Ahaetulla-prasina_AllPops_AllSNPs.vcf",indv.keep="/panfs/pfs.local/home/j926w878/programs/easySFS/popfiles/indv_keep_Ahaetulla-prasina_Luzon.txt",out="/panfs/pfs.local/home/j926w878/work/ddRAD/snps_goodData/Ahaetulla-prasina_Luzon_BestSNP.vcf",which.site="best")
-
-vcf_getSNP(vcftools.path="/panfs/pfs.local/home/j926w878/programs/vcftools_0.1.13/bin/vcftools",vcf="/panfs/pfs.local/home/j926w878/work/ddRAD/snps_goodData/Ahaetulla-prasina_AllPops_AllSNPs.vcf",indv.keep="/panfs/pfs.local/home/j926w878/programs/easySFS/popfiles/indv_keep_Ahaetulla-prasina_Luzon.txt",out="/panfs/pfs.local/home/j926w878/work/ddRAD/snps_goodData/Ahaetulla-prasina_Luzon_NoMissingData.vcf",which.site="all.passing",min.n = (19*2))
-
-vcf_getSNP(vcftools.path="/panfs/pfs.local/home/j926w878/programs/vcftools_0.1.13/bin/vcftools",vcf="/panfs/pfs.local/home/j926w878/work/ddRAD/snps_goodData/Calamaria-gervaisii_AllPops_AllSNPs.vcf",indv.keep=NULL,out="/panfs/pfs.local/home/j926w878/work/ddRAD/snps_goodData/Calamaria-gervaisii_AllPops_BestSNP.vcf",which.site="best")
+dev.new(height=10,width=6)
+Ahaetulla_Luzon <- run_DAPC(vcf="Ahaetulla-prasina_Luzon_1snpPerLocus.vcf",
+probs.out="Ahaetulla-prasina_Luzon_BestSNP_DAPC_BestK_Membership_run2.txt",
+save.out="Ahaetulla-prasina_Luzon_DAPC_v2.pdf")
+Calamaria_allpops <- run_DAPC(vcf="Calamaria-gervaisii_snps.vcf",
+probs.out="Calamaria-gervaisii_allpops_BestSNP_DAPC_BestK_Membership_run2.txt",
+save.as="Calamaria-gervaisii_allpops_DAPC.pdf")
+dev.new(height=6,width=10)
+cfmodestum_Luzon <- run_DAPC(vcf="Oxyrhabdium-cf.modestum_Luzon_BestSNP.vcf",
+probs.out="Oxyrhabdium-cf.modestum_Luzon_BestSNP_DAPC_BestK_Membership_run2.txt",
+coords="tess3r/Oxyrhabdium-cfmodestum_Luzon_coords.txt",
+save.as="Oxyrhabdium-cfmodestum_Luzon_BestSNP_DAPC_run2.pdf")
+leporinum_Luzon <- run_DAPC(vcf="Oxyrhabdium-leporinum_Luzon_BestSNP.vcf".
+probs.out="Oxyrhabdium-leporinum_Luzon_BestSNP_DAPC_BestK_Membership_run2.txt",
+coords="Oxyrhabdium-leporinum_Luzon_coords.txt",
+save.as="Oxyrhabdium-leporinum_Luzon_BestSNP_DAPC.pdf")
+leporinum  <- run_DAPC(vcf="Oxyrhabdium-leporinum_BestSNP.vcf",
+probs.out="Oxyrhabdium-leporinum_BestSNP_DAPC_BestK_Membership_run2.txt",
+coords="Oxyrhabdium-leporinum_coords.txt",
+save.as="Oxyrhabdium-leporinum_BestSNP_DAPC_run2.pdf")
+modestum   <- run_DAPC(vcf="Oxyrhabdium-modestum_BestSNP.vcf",
+probs.out="Oxyrhabdium-modestum_BestSNP_DAPC_BestK_Membership.txt_run2",
+coords="Oxyrhabdium-modestum_coords.txt",
+save.as="Oxyrhabdium-modestum_BestSNP_DAPC_run2.pdf")
+cfmodestum <- run_DAPC(vcf="Oxyrhabdium-cf.modestum_BestSNP.vcf",
+probs.out="Oxyrhabdium-cf.modestum_BestSNP_DAPC_BestK_Membership_run2.txt",
+coords="Oxyrhabdium-cfmodestum_coords.txt",
+save.as="Oxyrhabdium-cf.modestum_BestSNP_DAPC_run2.pdf")
+Oxyrhabdium <- run_DAPC(vcf="Oxyrhabdium_AllSpecies_BestSNP.vcf",
+probs.out="Oxyrhabdium_AllSpecies_BestSNP_DAPC_BestK_Membership_run2.txt",
+coords="Oxyrhabdium_AllSpecies_coords.txt",
+save.as="Oxyrhabdium_AllSpecies_BestSNP_DAPC_v3.pdf")
 }

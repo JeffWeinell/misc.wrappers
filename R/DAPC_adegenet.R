@@ -93,55 +93,6 @@ run_DAPC <- function(vcf, kmax=40, coords=NULL, reps=100,probs.out=NULL,save.as=
 	#mode(BIC.df$Kval) <- "character"
 	BIC.df$K <- factor(BIC.df$K, levels=c(1:nrow(BIC.df)))
 	BICPlot  <- ggplot2::ggplot(data=BIC.df,ggplot2::aes(x=K, y=BIC)) + ggplot2::geom_boxplot(fill='lightgray', outlier.colour="black", outlier.shape=16,outlier.size=2, notch=FALSE) + ggplot2::theme_classic() + ggplot2::labs(title= paste0("BIC (",reps," replicates of find.clusters) vs. number of clusters (K)"), x="Number of ancestral populations", y = "BIC") + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) + ggplot2::geom_vline(xintercept=bestK, linetype=2, color="black", size=0.25)
-	### Checking if the max BIC of the next K value is less than the min BIC of the previous K value.
-	#range.BIC.mat     <- do.call(rbind,lapply(X=1:nrow(BIC.mat),FUN=function(x){range(BIC.mat[x,],na.rm=TRUE)}))
-	#BIC.is.nonoverlap <- NULL
-	#BIC.is.reduced    <- NULL
-	#for(i in 2:nrow(range.BIC.mat)){
-	#	BIC.is.nonoverlap     <- c(BIC.is.nonoverlap,range.BIC.mat[i,1] > range.BIC.mat[(i-1),2] | range.BIC.mat[i,2] < range.BIC.mat[(i-1),1])
-	#	BIC.is.reduced     <- c(BIC.is.reduced,range.BIC.mat[i,2] < range.BIC.mat[(i-1),1])
-	#}
-	# If max BIC for K=2 is better than BIC K=1 and if some K values are not better (all BIC lower) than K-1, then find the first K value in which K+1 is not better.
-	#if(any(!BIC.is.reduced) & BIC.is.reduced[1]){
-	#	Kbest.criteria2 <- which(!BIC.is.reduced)[1]
-	#} else {
-	#	Kbest.criteria2 <- 1
-	#}
-	### Which K value (for K>=2) yields the least variable BIC scores.
-	#BICvK.variation <- apply(X=BIC.mat,MARGIN=1,FUN=var)
-	#KminVarBIC      <- which(BICvK.variation==min(BICvK.variation[-1]))
-	#Kbest.criteria3 <- KminVarBIC[1]
-	### Criteria 4: t-tests for BIC of each pairwise adjacent K
-	# for(i in 2:nrow(BIC.mat)){
-	# 	if(BICvK.variation[Kbest.criteria3]==0){
-	# 		Kbest.criteria4 <- NULL
-	# 		break
-	# 	}
-	# 	t.test.i <- t.test(BIC.mat[i-1,],BIC.mat[i,])
-	# 	pval.i   <- t.test.i$p.value
-	# 	stat.i   <- t.test.i$statistic
-	# 	if(pval.i < 0.05 & stat.i > 0){
-	# 		next
-	# 	} else {
-	# 		if(i==nrow(BIC.mat)){
-	# 			Kbest.criteria4 <- NULL
-	# 		} else{
-	# 			Kbest.criteria4 <- (i-1)
-	# 			break
-	# 		}
-	# 	}
-	# }
-#	if(bestK>1){
-#		segments(x0=Kbest.criteria1, y0=par("usr")[3], y1=par("usr")[4],lty=2,col="black")
-#	}
-	# segments(x0=Kbest.criteria1, y0=par("usr")[3], y1=par("usr")[4],lty=2,col="green")
-	# segments(x0=Kbest.criteria2, y0=par("usr")[3], y1=par("usr")[4],lty=2,col="blue")
-	# segments(x0=Kbest.criteria3, y0=par("usr")[3], y1=par("usr")[4],lty=2,col="orange")
-#	mtext(side=1,"Number of ancestral populations",line=2.2)
-#	mtext(side=2,"BIC",line=2.2)
-#	mtext(side=3,paste0("BIC (",reps," replicates of find.clusters) vs. number of clusters (K)"),line=1)
-#	axis(1,at=1:max.clusters)
-#	BICPlot    <- recordPlot()
 	best.npca  <- NULL
 	grp.mat    <- matrix(data=0,nrow=length(grp$grp),ncol=(max.clusters-1))
 	for(K in 2:max.clusters){
@@ -237,14 +188,16 @@ run_DAPC <- function(vcf, kmax=40, coords=NULL, reps=100,probs.out=NULL,save.as=
 		pca.densityPlot[[i]] <- density.pca.list.i
 		pca.biPlot[[i]]      <- biplots.pca.list.i
 	}
-	
+	### Plots of DF or PC density for each given K
 	da.density.arranged      <- dapc.plot.arrange(da.densityPlot)
 	pca.densityPlot.arranged <- dapc.plot.arrange(pca.densityPlot,variable="PC")
-	### This part wont work. Need to modify function or make new function for biplots such that a page is generated for the combinations DF or PC for a particular K.
-	da.biplot.arranged       <- dapc.biplot.arrange(da.biPlot)
+	### Plots of DF vs DF or PC vs PC for each pairwise combination, for given K
+	da.biplot.arranged       <- lapply(2:kmax, FUN=function(i){dapc.biplot.arrange(da.biPlot,K=i,title=paste0("K=",i,"; Biplots of discriminant functions"))})
 	pca.biPlot.arranged      <- dapc.biplot.arrange(pca.biPlot)
+	### Subset of da density and biplots, for the most important DFs of each K.
 	scatterPlot.grobsList <- lapply(X=scatterPlot,FUN=ggplot2::ggplotGrob)
 	scatterPlot.arranged  <- lapply(1:length(scatterPlot.grobsList),FUN=function(x){gridExtra::arrangeGrob(scatterPlot.grobsList[[x]],top=paste0("K=",(x+1)))})
+	### 
 	layout.mat.temp       <- matrix(data=NA,ncol=3,nrow=ceiling(length(scatterPlot.arranged)/3))
 	layout.vector         <- c(layout.mat.temp)
 	layout.vector[1:length(scatterPlot.arranged)] <- 1:length(scatterPlot.arranged)
