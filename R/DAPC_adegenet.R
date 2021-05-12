@@ -109,7 +109,6 @@ run_DAPC <- function(vcf, kmax=40, coords=NULL, reps=100,probs.out=NULL,save.as=
 	best.npca.df      <- data.frame(K=2:max.clusters,best.npca=best.npca)
 	best.npca.df$K    <- factor(best.npca.df$K)
 	grp.plot2         <- ggplot2::ggplot(data=best.npca.df, ggplot2::aes(x=K,y=best.npca)) + ggplot2::geom_bar(stat="identity",fill="lightgray") + ggplot2::labs(title= "alpha optimized # of PCs vs. number of clusters", x="Number of clusters", y = "Alpha optimized number of principle components to retain") + ggplot2::theme_classic() + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5))
-	
 
 	#### Creating lists to be filled furing the loop
 #	dapc.pcabest.list <- list(); length(dapc.pcabest.list) <- max.clusters-1
@@ -159,7 +158,7 @@ run_DAPC <- function(vcf, kmax=40, coords=NULL, reps=100,probs.out=NULL,save.as=
 			biplots.da.list.i <- list(); length(biplots.da.list.i) <- length(da.pairs.i)
 			for(z in 1:length(da.pairs.i)){
 				da.pairs.i.z <- da.pairs.i[[z]]
-				biplots.da.list.i[[z]] <- ggscatter.dapc(dapc.pcabest.K,xax=da.pairs.i.z[1],yax=da.pairs.i.z[2],col=myCols,legend=F,cstar=1,cpoint=4,label=F,show.title=F,hideperimeter=T)
+				biplots.da.list.i[[z]] <- ggscatter.dapc(dapc.pcabest.K,xax=da.pairs.i.z[1],yax=da.pairs.i.z[2],col=myCols,legend=F,cstar=1,cpoint=4,label=F,show.title=F,varname="DF",axis.title.cex=0.7,hideperimeter=T)
 			}
 		} else {
 			biplots.da.list.i  <- NULL
@@ -184,7 +183,7 @@ run_DAPC <- function(vcf, kmax=40, coords=NULL, reps=100,probs.out=NULL,save.as=
 			biplots.pca.list.i <- list(); length(biplots.pca.list.i) <- length(pca.pairs.i)
 			for(z in 1:length(pca.pairs.i)){
 				pca.pairs.i.z           <- pca.pairs.i[[z]]
-				biplots.pca.list.i[[z]] <- ggscatter.dapc(dapc.pcabest.K,vartype="pc",xax=pca.pairs.i.z[1],yax=pca.pairs.i.z[2],col=myCols,legend=F,cstar=0,cpoint=4,label=F,hideperimeter=T,show.title=F)
+				biplots.pca.list.i[[z]] <- ggscatter.dapc(dapc.pcabest.K,vartype="pc",xax=pca.pairs.i.z[1],yax=pca.pairs.i.z[2],col=myCols,legend=F,cstar=0,cpoint=4,label=F,show.title=F,varname="PC",axis.title.cex=0.7,hideperimeter=T)
 			}
 		} else {
 			biplots.pca.list.i  <- NULL
@@ -212,15 +211,15 @@ run_DAPC <- function(vcf, kmax=40, coords=NULL, reps=100,probs.out=NULL,save.as=
 		pca.biPlot[[i]]      <- biplots.pca.list.i
 	}
 	### Plots of DF or PC density for each given K
-	da.density.arranged      <- dapc.plot.arrange(da.densityPlot)
-	pca.densityPlot.arranged <- dapc.plot.arrange(pca.densityPlot,variable="PC")
+	da.density.arranged  <- dapc.plot.arrange(da.densityPlot)
+	pca.density.arranged <- dapc.plot.arrange(pca.densityPlot,variable="PC")
 	### Plots of DF vs DF or PC vs PC for each pairwise combination, for given K
 	if(any(lengths(da.biPlot)>0)){
 		rangeK.da <- c(2:kmax)[which(lengths(da.biPlot)>0)]
 		n.da      <- sapply(X=da.psets[rangeK.da-1],FUN=max,na.rm=TRUE)
 		names.bottom.da  <- lapply(X=1:length(n.da),FUN=function(x){paste0("DF",1:(n.da[[x]]-1))})
 		names.left.da <- lapply(X=1:length(n.da),FUN=function(x){paste0("DF",2:(n.da[[x]]))})
-		da.biplot.arranged <- lapply(rangeK.da, FUN=function(z){dapc.biplot.arrange(da.biPlot,K=z,layout.mat=da.layout.mat[[z-1]],col.labels.bottom=names.bottom.da[[which(rangeK.da==z)]],row.labels.left=names.left.da[[which(rangeK.da==z)]],outer.text=list(NULL,NULL,paste0("K=",z,"; Biplots of discriminant functions"),NULL))})
+		da.biplot.arranged <- lapply(rangeK.da, FUN=function(z){dapc.biplot.arrange(da.biPlot,K=z,layout.mat=da.layout.mat[[z-1]],use.diag=NULL,col.labels.bottom=names.bottom.da[[which(rangeK.da==z)]],row.labels.left=names.left.da[[which(rangeK.da==z)]],outer.text=list(NULL,NULL,paste0("K=",z,"; Biplots of discriminant functions"),NULL))})
 	} else {
 		da.biplot.arranged <- NULL
 	}
@@ -230,11 +229,13 @@ run_DAPC <- function(vcf, kmax=40, coords=NULL, reps=100,probs.out=NULL,save.as=
 		n.pca               <- sapply(X=pca.psets[rangeK.pca-1],FUN=max,na.rm=TRUE)
 		names.bottom.pca    <- lapply(X=1:length(n.pca),FUN=function(x){paste0("PC",1:(n.pca[[x]]-1))})
 		names.left.pca      <- lapply(X=1:length(n.pca),FUN=function(x){paste0("PC",2:(n.pca[[x]]))})
-		pca.biPlot.arranged <- lapply(rangeK.pca, FUN=function(z){dapc.biplot.arrange(pca.biPlot,K=z,layout.mat=pca.layout.mat[[z-1]],col.labels.bottom=names.bottom.pca[[which(rangeK.pca==z)]],row.labels.left=names.left.pca[[which(rangeK.pca==z)]],outer.text=list(NULL,NULL,paste0("K=",z,"; Biplots of retained principle components"),NULL))})
+		pca.biplot.arranged <- lapply(rangeK.pca, FUN=function(z){dapc.biplot.arrange(pca.biPlot,K=z,layout.mat=pca.layout.mat[[z-1]],use.diag=NULL,col.labels.bottom=names.bottom.pca[[which(rangeK.pca==z)]],row.labels.left=names.left.pca[[which(rangeK.pca==z)]],outer.text=list(NULL,NULL,paste0("K=",z,"; Biplots of retained principle components"),NULL))})
 		#pca.biPlot.arranged      <- dapc.biplot.arrange(pca.biPlot)
 	} else {
-		pca.biPlot.arranged <- NULL
+		pca.biplot.arranged <- NULL
 	}
+	dapc.componentPlots <- c(pca.density.arranged,pca.biplot.arranged,da.density.arranged,da.biplot.arranged)
+	
 	### Subset of da density and biplots, for the most important DFs of each K.
 #	scatterPlot.grobsList <- lapply(X=scatterPlot,FUN=ggplot2::ggplotGrob)
 #	scatterPlot.arranged  <- lapply(1:length(scatterPlot.grobsList),FUN=function(x){gridExtra::arrangeGrob(scatterPlot.grobsList[[x]],top=paste0("K=",(x+1)))})
@@ -284,7 +285,7 @@ run_DAPC <- function(vcf, kmax=40, coords=NULL, reps=100,probs.out=NULL,save.as=
 	#}
 	#dev.off()
 	if(!is.null(coords)){
-		result <- c(list(BICPlot,grp.plot2),admixturePlot,assignmentPlot,mapplot)
+		result <- c(list(BICPlot,grp.plot2),admixturePlot,pca.biplot.arranged,assignmentPlot,mapplot)
 	} else {
 		result <- c(list(BICPlot,grp.plot2),admixturePlot,assignmentPlot)
 	}
@@ -429,12 +430,13 @@ dapc.plot.arrange <- function(x,variable="DF"){
 #' @param col.labels.top Text labels to use above the first row of plots. Default NULL (no labels).
 #' @param row.labels.right Text labels to to the right of the last column of plots. Default NULL (no labels).
 #' @param col.labels.bottom Text labels to use below the bottom row of plots. Default NULL (no labels).
+#' @param use.diag NULL (the default) or numerical vector with values in 1:4, indicating which sides of the gtable (1=bottom, 2=left, 3=top, 4=right) should have labels applied to the diagonal rather than the table margin plots. Ignored if layout.mat is not square. For example, if use.diag=1, then the values of col.labels.bottom will appear below the plots on the diagonal rather than below the plots of the bottom row.
 #' @param pad Amount of space between plots, in units of line widths (Default 0.1).
 #' @param K Which set of biplots to use. If NULL (the default), the function will attemp to draw all biplots for all K (max 25 plots).
 #' @param outer.text A list with length=4, with each entry either NULL (the default) or character string to use as labels below, left, above, and to the right of the arrangement of plots.
 #' @return A gtable object
 #' @export dapc.biplot.arrange
-dapc.biplot.arrange <- function(x,layout.mat=NULL,row.labels.left=NULL,col.labels.top=NULL,row.labels.right=NULL,col.labels.bottom=NULL,pad=0.1,K=NULL,outer.text=list(NULL,NULL,NULL,NULL)){
+dapc.biplot.arrange <- function(x,layout.mat=NULL,row.labels.left=NULL,col.labels.top=NULL,row.labels.right=NULL,col.labels.bottom=NULL,use.diag=NULL,pad=0.1,K=NULL,outer.text=list(NULL,NULL,NULL,NULL)){
 	### Reset outer.text argument to default if it is not supplied properly, and show warning.
 	if(length(outer.text)!=4 | !is(outer.text,"list")){
 		outer.text <- rep(list(NULL),4)
@@ -482,19 +484,41 @@ dapc.biplot.arrange <- function(x,layout.mat=NULL,row.labels.left=NULL,col.label
 	if(is.null(col.labels.bottom)){
 		col.labels.bottom <- rep("",ncol(layout.mat))
 	}
+	### character matrix of empty strings
+	empty.matrix <- matrix(data="",nrow=nm,ncol=nn)
 	### Index assigned to each plot of the table of plots
-	index.matrix <- matrix(1:length(layout.mat),ncol=ncol(layout.mat),byrow=TRUE)
+	index.matrix <- matrix(1:length(layout.mat),ncol=ncol(layout.mat),byrow=FALSE)
 	### Matrices holding the bottom, left, top, and right labels, respectively, for each plot.
 	if(nm>1){
-		bottom.mat <- unname(rbind(matrix(data="",nrow=(nm-1),ncol=nn),col.labels.bottom))
-		top.mat    <- unname(rbind(col.labels.top,matrix(data="",nrow=(nm-1),ncol=nn)))
+		if(1 %in% use.diag & nm==nn){
+			bottom.mat <- empty.matrix
+			bottom.mat[diag(index.matrix)] <- col.labels.bottom
+		} else {
+			bottom.mat <- unname(rbind(matrix(data="",nrow=(nm-1),ncol=nn),col.labels.bottom))
+		}
+		if(3 %in% use.diag & nm==nn){
+			top.mat <- empty.matrix
+			top.mat[diag(index.matrix)] <- col.labels.top
+		} else {
+			top.mat    <- unname(rbind(col.labels.top,matrix(data="",nrow=(nm-1),ncol=nn)))
+		}
 	} else {
 		bottom.mat <- matrix(data=col.labels.bottom,nrow=1)
 		top.mat    <- matrix(data=col.labels.top,nrow=1)
 	}
 	if(nn>1){
-		left.mat   <- unname(cbind(row.labels.left,matrix(data="",nrow=nm,ncol=(nn-1))))
-		right.mat  <- unname(cbind(matrix(data="",nrow=nm,ncol=(nn-1)),row.labels.right))
+		if(2 %in% use.diag & nm==nn){
+			left.mat   <- empty.matrix
+			left.mat[diag(index.matrix)] <- row.labels.left
+		} else {
+			left.mat   <- unname(cbind(row.labels.left,matrix(data="",nrow=nm,ncol=(nn-1))))
+		}
+		if(4 %in% use.diag & nm==nn){
+			right.mat  <- empty.matrix
+			right.mat[diag(index.matrix)] <- row.labels.right
+		} else {
+			right.mat  <- unname(cbind(matrix(data="",nrow=nm,ncol=(nn-1)),row.labels.right))
+		}
 	} else {
 		left.mat   <- matrix(data=row.labels.left,ncol=1)
 		right.mat  <- matrix(data=row.labels.right,ncol=1)
@@ -509,18 +533,22 @@ dapc.biplot.arrange <- function(x,layout.mat=NULL,row.labels.left=NULL,col.label
 		}
 		z <- which(index.matrix == i, arr.ind=TRUE)
 		labels.i.list  <- list(bottom.mat[z],left.mat[z],top.mat[z],right.mat[z])
-		labels.i.list2 <- list(); length(labels.i.list2) <- 4
-		for(j in 1:4){
-			if(labels.i.list[[j]]!=""){
-				labels.i.list2[[j]] <- labels.i.list[[j]]
+		if(is.null(use.diag)){
+			labels.i.list2 <- list(); length(labels.i.list2) <- 4
+			for(j in 1:4){
+				if(labels.i.list[[j]]!=""){
+					labels.i.list2[[j]] <- labels.i.list[[j]]
+				}
 			}
+		} else {
+			labels.i.list2 <- labels.i.list
 		}
 	#	grobsTable.list[[i]] <- gridExtra::arrangeGrob(grob.i,bottom=bottom.mat[z],left=left.mat[z],top=top.mat[z],right=right.mat[z])
 		grobsTable.list[[i]] <- gridExtra::arrangeGrob(grob.i,bottom=labels.i.list2[[1]],left=labels.i.list2[[2]],top=labels.i.list2[[3]],right=labels.i.list2[[4]])
 	}
 	#return(grobsTable.list)
 	#grobs.arranged <- gridExtra::arrangeGrob(grobs=grobsTable.list,layout_matrix=layout.mat,padding=unit(pad,"line"))
-	grobs.arranged0 <- gridExtra::arrangeGrob(grobs=grobsTable.list,layout_matrix=index.matrix,padding=unit(pad,"line"))
+	grobs.arranged0 <- gridExtra::arrangeGrob(grobs=grobsTable.list,layout_matrix=index.matrix,padding=unit(pad,"line"),respect=TRUE)
 	if(!is.null(unlist(outer.text))){
 		grobs.arranged <- gridExtra::arrangeGrob(grobs.arranged0,bottom=outer.text[[1]],left=outer.text[[2]],top=outer.text[[3]],right=outer.text[[4]])
 	} else {
@@ -822,6 +850,8 @@ goodcolors2 <- function(n,plot.palette=FALSE){
 #' @param xax Which descriminant function to plot on the x axis.
 #' @param yax Which descriminant function to plot on the y axis. Default 2. Ignored if only one discriminant function exists.
 #' @param vartype Character string indicating which variables to plot. Either "df" for discriminant functions or "pc" for principle components. Default "df".
+#' @param varname Character string with name to use for the type of variable. Determined from the value of vartype when NULL (the default), such that 'varname'='Discriminant function' when vartype="df", and 'varname'="Principle component" when vartype="pc".
+#' @param axis.title.cex Font cex size of x and y axis titles.
 #' @param bg Color to use for the background of the plot. Default "white".
 #' @param grp Object of class 'factor' with length equal to the number of individuals, which indicates individual assignments to clusters. By default posterior assignments are extracted from 'x'.
 #' @param col Vector with color to use for each cluster.
@@ -835,7 +865,7 @@ goodcolors2 <- function(n,plot.palette=FALSE){
 #' @param addaxes Logical indicating if reference axes should be drawn at x=a and y=b, with a and b supplied by the 'origin' argument. Default TRUE.
 #' @param ltyaxes Line weight to use for edges of the minimum spanning tree linking the groups. Default 0.5.
 #' @param lwdaxes Line type to use for edges of the minimum spanning tree linking the groups. Default 2 (dashed).
-#' @param cellipse A positive coefficient for the inertia ellipse size. Default 1.5. Setting to zero removes ellipses.
+#' @param cellipse A positive coefficient for the inertia ellipse size. Default 1.5. Setting to zero removes ellipses. Ignored if axesell is TRUE.
 #' @param cstar A number greater than 0 defining the length of the star size (i.e., the lines radiating from the center of clusters towards individuals). Default 1. Setting to zero removes the star lines; setting =1 connects points to cluster mean; setting > 1 extends lines through their points.
 #' @param mstree A logical indicating whether a minimum spanning tree linking the groups and based on the squared distances between the groups inside the entire space should added to the plot (TRUE), or not (FALSE). Default FALSE.
 #' @param lwd Line weight to use for edges of the minimum spanning tree linking the groups. Default 0.25.
@@ -874,14 +904,18 @@ goodcolors2 <- function(n,plot.palette=FALSE){
 #' @param only.grp NOT YET IMPLEMENTED. Character vector indicating which groups should be displayed. Values should match values of x$grp. If NULL, all results are displayed.
 #' @return A ggplot object
 #' @export ggscatter.dapc
-ggscatter.dapc <- function (x, xax = 1, yax = 2, vartype="df", grp = x$grp , cpoint=2, col = adegenet::seasun(length(levels(grp))), txt.leg = levels(grp), label = TRUE, pch = 20, solid = 0.7, hideperimeter=FALSE, show.title=TRUE,scree.da = TRUE, scree.pca = FALSE, posi.da = "bottomright", posi.pca = "bottomleft",bg="white", bg.inset = "white", ratio.da = 0.25, ratio.pca = 0.25, inset.da = 0.02, inset.pca = 0.02, inset.solid = 0.5, onedim.filled = TRUE, mstree = FALSE, lwd = 0.25, lty = 1, segcol = "black", legend = FALSE, posi.leg = "topright", cleg = 1, cstar = 1, cellipse = 1.5, axesell = FALSE, clabel = 1, xlim = NULL, ylim = NULL, grid = FALSE, addaxes = TRUE, ltyaxes=2, lwdaxes=0.5, origin = c(0,0), include.origin = TRUE, sub = "", csub = 1, possub = "bottomleft", cgrid = 1, pixmap = NULL, contour = NULL, area = NULL, label.inds = NULL, new.pred=NULL){
+ggscatter.dapc <- function (x, xax = 1, yax = 2, vartype="df", varname=NULL,axis.title.cex=1, grp = x$grp , cpoint=2, col = adegenet::seasun(length(levels(grp))), txt.leg = levels(grp), label = TRUE, pch = 20, solid = 0.9, hideperimeter=FALSE, show.title=TRUE,scree.da = TRUE, scree.pca = FALSE, posi.da = "bottomright", posi.pca = "bottomleft",bg="white", bg.inset = "white", ratio.da = 0.25, ratio.pca = 0.25, inset.da = 0.02, inset.pca = 0.02, inset.solid = 0.5, onedim.filled = TRUE, mstree = FALSE, lwd = 0.25, lty = 1, segcol = "black", legend = FALSE, posi.leg = "topright", cleg = 1, cstar = 1, cellipse = 1.5, axesell = FALSE, clabel = 1, xlim = NULL, ylim = NULL, grid = FALSE, addaxes = TRUE, ltyaxes=2, lwdaxes=0.5, origin = c(0,0), include.origin = TRUE, sub = "", csub = 1, possub = "bottomleft", cgrid = 1, pixmap = NULL, contour = NULL, area = NULL, label.inds = NULL, new.pred=NULL){
 	if(vartype=="df"){
 		ind.vals <- x$ind.coord
-		varname  <- "Discriminant function"
+		if(is.null(varname)){
+			varname  <- "Discriminant function"
+		}
 	} else {
 		if(vartype=="pc"){
 			ind.vals <- x$tab
-			varname  <- "Principle component"
+			if(is.null(varname)){
+				varname  <- "Principle component"
+			}
 			mstree   <- FALSE
 		} else {
 			stop("'vartype' must be either 'df' or 'pc'")
@@ -931,7 +965,7 @@ ggscatter.dapc <- function (x, xax = 1, yax = 2, vartype="df", grp = x$grp , cpo
 		if(hideperimeter){
 			ggscatter.tempC  <- ggscatter.tempB + ggplot2::theme(axis.title.x=ggplot2::element_blank(), axis.text.x=ggplot2::element_blank(),axis.ticks.x=ggplot2::element_blank(), axis.title.y=ggplot2::element_blank(), axis.text.y=ggplot2::element_blank(),axis.ticks.y=ggplot2::element_blank())
 		} else {
-			ggscatter.tempC  <- ggscatter.tempB
+			ggscatter.tempC  <- ggscatter.tempB + ggplot2::theme(axis.title.x=ggplot2::element_text(size=(axis.title.cex*12)), axis.text.x=ggplot2::element_text(size=(axis.title.cex*10)), axis.title.y=ggplot2::element_text(size=(axis.title.cex*12)), axis.text.y=ggplot2::element_text(size=(axis.title.cex*10)))
 		}
 		### Adding the points. The scale to use for colors of points was defined in ggscatter.tempA so no need to redefine colors here.
 		ggscatter.temp0      <- ggscatter.tempC + ggplot2::geom_point(size=cpoint,show.legend=TRUE) + ggplot2::scale_color_manual(values=col) + ggplot2::scale_shape_manual(values=pch) #+ ggplot2::scale_fill_manual(values=col,fill=col)

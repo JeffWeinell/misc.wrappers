@@ -14,6 +14,7 @@ Max number of plots = 25.}
   col.labels.top = NULL,
   row.labels.right = NULL,
   col.labels.bottom = NULL,
+  use.diag = NULL,
   pad = 0.1,
   K = NULL,
   outer.text = list(NULL, NULL, NULL, NULL)
@@ -31,6 +32,8 @@ Max number of plots = 25.}
 \item{row.labels.right}{Text labels to to the right of the last column of plots. Default NULL (no labels).}
 
 \item{col.labels.bottom}{Text labels to use below the bottom row of plots. Default NULL (no labels).}
+
+\item{use.diag}{NULL (the default) or numerical vector with values in 1:4, indicating which sides of the gtable (1=bottom, 2=left, 3=top, 4=right) should have labels applied to the diagonal rather than the table margin plots. Ignored if layout.mat is not square. For example, if use.diag=1, then the values of col.labels.bottom will appear below the plots on the diagonal rather than below the plots of the bottom row.}
 
 \item{pad}{Amount of space between plots, in units of line widths (Default 0.1).}
 

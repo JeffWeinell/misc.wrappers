@@ -16,13 +16,15 @@ ggscatter.dapc(
   xax = 1,
   yax = 2,
   vartype = "df",
+  varname = NULL,
+  axis.title.cex = 1,
   grp = x$grp,
   cpoint = 2,
   col = adegenet::seasun(length(levels(grp))),
   txt.leg = levels(grp),
   label = TRUE,
   pch = 20,
-  solid = 0.7,
+  solid = 0.9,
   hideperimeter = FALSE,
   show.title = TRUE,
   scree.da = TRUE,
@@ -75,6 +77,10 @@ ggscatter.dapc(
 \item{yax}{Which descriminant function to plot on the y axis. Default 2. Ignored if only one discriminant function exists.}
 
 \item{vartype}{Character string indicating which variables to plot. Either "df" for discriminant functions or "pc" for principle components. Default "df".}
+
+\item{varname}{Character string with name to use for the type of variable. Determined from the value of vartype when NULL (the default), such that 'varname'='Discriminant function' when vartype="df", and 'varname'="Principle component" when vartype="pc".}
+
+\item{axis.title.cex}{Font cex size of x and y axis titles.}
 
 \item{grp}{Object of class 'factor' with length equal to the number of individuals, which indicates individual assignments to clusters. By default posterior assignments are extracted from 'x'.}
 
@@ -134,7 +140,7 @@ ggscatter.dapc(
 
 \item{cstar}{A number greater than 0 defining the length of the star size (i.e., the lines radiating from the center of clusters towards individuals). Default 1. Setting to zero removes the star lines; setting =1 connects points to cluster mean; setting > 1 extends lines through their points.}
 
-\item{cellipse}{A positive coefficient for the inertia ellipse size. Default 1.5. Setting to zero removes ellipses.}
+\item{cellipse}{A positive coefficient for the inertia ellipse size. Default 1.5. Setting to zero removes ellipses. Ignored if axesell is TRUE.}
 
 \item{axesell}{NOT YET IMPLEMENTED. A logical value indicating whether the ellipse axes should be drawn. Default FALSE.}
 
