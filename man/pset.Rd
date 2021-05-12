@@ -4,18 +4,24 @@
 \alias{pset}
 \title{Powerset
 
-Function to return the powerset for a numeric or character vector of set elements.}
+Function to return the powerset for a numeric or character vector of set elements, with options for filtering sets by setlength.
+Changing min.length or max.length arguments from default values produces a subset of the powerset.}
 \usage{
-pset(x)
+pset(x, min.length = 0, max.length = NULL)
 }
 \arguments{
 \item{x}{Numerical or character vector}
+
+\item{min.length}{Minimum length of a set to return the set. Default = 0, therefore the NULL set is included by default.}
+
+\item{max.length}{Maximum length of a set to return the set. Default = NULL, meaning any set at least as large as min.length will be returned.}
 }
 \value{
-List with powerset of x
+List with powerset of x, or a subset of the powerset if min.length != 0 and/or max.length != NULL.
 }
 \description{
 Powerset
 
-Function to return the powerset for a numeric or character vector of set elements.
+Function to return the powerset for a numeric or character vector of set elements, with options for filtering sets by setlength.
+Changing min.length or max.length arguments from default values produces a subset of the powerset.
 }

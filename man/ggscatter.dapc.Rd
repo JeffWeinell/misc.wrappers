@@ -15,14 +15,16 @@ ggscatter.dapc(
   x,
   xax = 1,
   yax = 2,
+  vartype = "df",
   grp = x$grp,
   cpoint = 2,
   col = adegenet::seasun(length(levels(grp))),
   txt.leg = levels(grp),
-  label = levels(grp),
+  label = TRUE,
   pch = 20,
   solid = 0.7,
   hideperimeter = FALSE,
+  show.title = TRUE,
   scree.da = TRUE,
   scree.pca = FALSE,
   posi.da = "bottomright",
@@ -72,6 +74,8 @@ ggscatter.dapc(
 
 \item{yax}{Which descriminant function to plot on the y axis. Default 2. Ignored if only one discriminant function exists.}
 
+\item{vartype}{Character string indicating which variables to plot. Either "df" for discriminant functions or "pc" for principle components. Default "df".}
+
 \item{grp}{Object of class 'factor' with length equal to the number of individuals, which indicates individual assignments to clusters. By default posterior assignments are extracted from 'x'.}
 
 \item{cpoint}{Number with cex size to use for points.}
@@ -80,13 +84,15 @@ ggscatter.dapc(
 
 \item{txt.leg}{NOT YET IMPLEMENTED. Labels to use for clusters in the legend.}
 
-\item{label}{Name to use for clusters. Default NULL, in which case group will be used.}
+\item{label}{Logical indicating whether or not clusters should be labeled in discriminant function biplots. Default TRUE.}
 
 \item{pch}{Either one number indicating pch code of symbol to use for all points (see 'pch' in graphical parameters), or, a numeric vector with pch codes to each for clusters . Default 20.}
 
 \item{solid}{Number between 0 and 1 indicating the level of transparency to use for colors; 0 = fully transparent; 1 = fully opaque; default = 0.7.}
 
 \item{hideperimeter}{Logical indicating whether or not to hide the x and y axes and labels (the perimeter area of the plottting area). Default FALSE.}
+
+\item{show.title}{Logical indicating whether or not to include a plot title. Default TRUE. Overriden if hideperimeter=TRUE.}
 
 \item{scree.da}{NOT YET IMPLEMENTED. Logical indicated whether or not a screeplot of the discriminant functions should be included. Default TRUE.}
 
