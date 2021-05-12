@@ -354,160 +354,6 @@ run_DAPC <- function(vcf, kmax=40, coords=NULL, reps=100,probs.out=NULL,save.as=
 #'                            coords="Oxyrhabdium_AllSpecies_coords.txt",
 #'                            save.as="Oxyrhabdium_AllSpecies_BestSNP_DAPC_v3.pdf")
 
-#' @title Get Best SNP for each locus from VCF
-#' 
-#' From a VCF with multiple sites/locus, create a VCF with only the best site/locus.
-#' The best site is the one with the least missing data. To break ties, take the first site among the best sites.
-#' Note: I may update this to not require vcftools.
-#' 
-#' @param vcf Character string with path to input vcf.
-#' @param vcftools.path Character string with path to the vcftools executable.
-#' @param out Character string where to write output vcf.
-#' @param indv.keep Character string with names of individuals to keep. Default is NULL (all individuals kept).
-#' @param min.n Minimum number of non-missing alleles required to keep a site. Default = 4. If set to "all", then no sites with any missing data are removed (after first filtering individuals if indv.keep is non-NULL).
-#' @param min.n0 Minimum number of individuals required to have at least one copy of the major allele to keep a site. Default = 2.
-#' @param min.n1 Minimum number of individuals required to have at least one copy of the minor allele to keep a site. Default = 1.
-#' @param which.site Character string indicating the method for choosing a site to keep for each locus (or chromosome). Default = "best", which is considered the one with the least missing data, or the first among sites tied for least missing data. Other options are "all.passing", which retains all sites (positions) that pass variation filters (min.n, min.0.n.0, min.1.n), "first" (first site kept at each locus), or "random".
-#' @return List with [[1]] path to vcftools, [[2]] dataframe with input and output values for VCF filepaths, number of loci (chromosomes), sites (positions), and individuals (samples).
-#' @export vcf_getSNP
-vcf_getSNP      <- function(vcftools.path,vcf,out,indv.keep=NULL,which.site="best",min.n=4,min.n0=2,min.n1=1){
-	vcf.obj     <- vcfR::read.vcfR(vcf)
-	samplenames <- colnames(vcf.obj@gt)[-1]
-	# matrix with "fixed" columns, which are the columns with site-specific stats across all samples
-	# fix.mat    <- attributes(vcf.obj)[["fix"]]
-	fix.mat    <- vcf.obj@fix
-	# matrix with genotype columns, which are the columns with site-specific stats across all samples
-	# gt.mat     <- attributes(vcf.obj)[["gt"]]
-	# gt.mat     <- vcf.obj@gt[,-1]
-	# Remove first column of gt
-	#gt.mat     <- gt.mat[,-1]
-	# Remove everything after ":" in strings
-	#gt.mat     <- gsub(":.+","",gt.mat)
-	gt.mat <- gsub(":.+","",vcf.obj@gt[,-1])
-	if(!is.null(indv.keep)){
-		if(is(indv.keep,"character") & length(indv.keep)==1){
-			if(file.exists(indv.keep)){
-				#indv.keep <- unname(unlist(read.table(indv.keep)))
-				indv.keep <- suppressWarnings(readLines(indv.keep))
-			}
-		}
-		### Check that all names in indv.keep actually exist in the vcf, and then update gt.mat to only include individuals that pass
-		if(all(indv.keep %in% colnames(gt.mat))){
-			gt.mat <- gt.mat[,indv.keep,drop=F]
-		} else {
-			stop(paste(paste(setdiff(indv.keep,colnames(gt.mat)),collapse=","), "not in VCF"))
-		}
-	}
-	# If min.n = "all", update min.all to equal the maximum possible number of alleles at a site.
-	if(min.n=="all"){
-		test.sample <- unlist(gt.mat)[!is.na(unlist(gt.mat))][1]
-		ploidy <- length(unlist(strsplit(test.sample,split="/",fixed=T)))
-		min.n  <- ploidy*ncol(gt.mat)
-	}
-	# For each site, the number of non-missing alleles
-	site.NS      <- vapply(X=1:nrow(gt.mat),FUN=function(x){length(grep(".", unlist(strsplit(gt.mat[x,],split="/",fixed=T)),fixed=T,invert=T))},FUN.VALUE=1)
-	# For each site, the number of individuals with at least one copy of the major allele
-	site.0.NS    <- vapply(X=1:nrow(gt.mat),FUN=function(x){length(grep("0", gt.mat[x,],fixed=T,invert=F))},FUN.VALUE=1)
-	# For each site, the number of individuals with at least one copy of the minor allele
-	site.1.NS    <- vapply(X=1:nrow(gt.mat),FUN=function(x){length(grep("1", gt.mat[x,],fixed=T,invert=F))},FUN.VALUE=1)
-	# Matrix with "CHROM" and "POS" from fix.mat, plus columns containing site.NS, site.0.NS, and site.1.NS
-	chrom.pos.mat <- cbind(fix.mat[,c("CHROM","POS")],site.NS,site.0.NS,site.1.NS)
-	
-	chrom.pos.df <- data.frame(CHROM=fix.mat[,"CHROM"],POS=fix.mat[,"POS"],site.NS=site.NS,site.0.NS=site.0.NS,site.1.NS=site.1.NS)
-	mode(chrom.pos.df[,"CHROM"])     <- "character"
-	mode(chrom.pos.df[,"POS"])       <- "character"
-	mode(chrom.pos.df[,"site.NS"])   <- "numeric"
-	mode(chrom.pos.df[,"site.0.NS"]) <- "numeric"
-	mode(chrom.pos.df[,"site.1.NS"]) <- "numeric"
-	if(any(chrom.pos.df[,"site.NS"] >= min.n & chrom.pos.df[,"site.0.NS"] >= min.n0 & chrom.pos.df[,"site.1.NS"] >= min.n1)){
-		# filter1 <- which(chrom.pos.df[,"site.1.NS"] >=2)
-		filter1 <- which(chrom.pos.df[,"site.NS"] >= min.n & chrom.pos.df[,"site.0.NS"] >= min.n0 & chrom.pos.df[,"site.1.NS"] >= min.n1)
-	} else {
-		stop("no sites pass filtering criteria")
-		#stop("no sites in which the minor allele occurs in more than 1 individual")
-	}
-	chrom.pos.df.filtered1 <- chrom.pos.df[filter1,]
-	# vector with loci names for each site retained
-	loci        <- chrom.pos.df.filtered1[,"CHROM"]
-	# vector with unique loci names
-	loci.unique <- unique(loci)
-	# For each unique locus ("CHROM") in chrom.pos.df.filtered1, return the row number for the site with the greatest site.NS
-	chrom.pos.list.filtered2 <- list(); length(chrom.pos.list.filtered2) <- length(loci.unique)
-	for(i in 1:length(loci.unique)){
-		locus.i <- loci.unique[i]
-		chrom.pos.df.i <- chrom.pos.df.filtered1[which(chrom.pos.df.filtered1[,"CHROM"]==locus.i),,drop=F]
-		site.NS.i <- chrom.pos.df.i[,"site.NS"]
-		max.i     <- max(site.NS.i)
-		if(which.site=="best"){
-			chrom.pos.list.filtered2[[i]]    <- chrom.pos.df.i[(which(site.NS.i==max.i)[1]),]
-		}
-		if(which.site=="first"){
-			chrom.pos.list.filtered2[[i]]    <- chrom.pos.df.i[1,]
-		}
-		if(which.site=="random"){
-			chrom.pos.list.filtered2[[i]]    <- chrom.pos.df.i[sample(1:length(site.NS.i),1),]
-		}
-		if(which.site=="all.passing"){
-			chrom.pos.list.filtered2[[i]]    <- chrom.pos.df.i
-		}
-	}
-	chrom.pos.df.filtered2 <- do.call(rbind, chrom.pos.list.filtered2)
-	chrom.pos.filtered.df  <- chrom.pos.df.filtered2[,c("CHROM","POS")]
-	### Need to test if any individuals have only missing data; if TRUE, stop and suggest that these individuals be removed or that a different filtering scheme be used.
-	gt.mat2      <- gt.mat[which(fix.mat[,"CHROM"] %in% chrom.pos.filtered.df[,"CHROM"] & fix.mat[,"POS"] %in% chrom.pos.filtered.df[,"POS"]),]
-	sitesPerIndv <- unlist(apply(X=gt.mat2,MARGIN=2,FUN=function(x){length(grep("/",x,fixed=TRUE))}))
-	if(any(sitesPerIndv==0)){
-		noDataIndvs <- names(which(sitesPerIndv==0))
-		stop(paste("After filtering,",noDataIndvs,"individuals without data."))
-	}
-	# Write chrom.pos.filtered.mat to a file as a tab-separated table. This file will be used by vcftools to extract only these sites from the input vcf.
-	temp.file <- file.path(getwd(),"temp_filtertable.txt")
-	write.table(chrom.pos.filtered.df, temp.file, quote=F, sep="\t", col.names=F, row.names=F)
-	# Write list of individuals that should be included in the final set
-	temp.file2 <- file.path(getwd(),"temp_filtertable2.txt")
-	writeLines(text=colnames(gt.mat),con=temp.file2)
-	vcf.command <- paste(vcftools.path,"--vcf",vcf,"--positions",temp.file,"--keep",temp.file2,"--recode -c > ",out)
-	system(vcf.command)
-	system(paste("rm",temp.file))
-	system(paste("rm",temp.file2))
-	log.path <- file.path(getwd(),"out.log")
-	system(paste("rm",log.path))
-	InOut.df <- data.frame(input=c(vcf,length(unique(fix.mat[,"CHROM"])),nrow(vcf.obj@gt),length(samplenames)),output=c(out,length(unique(chrom.pos.filtered.df[,"CHROM"])),nrow(chrom.pos.filtered.df),ncol(gt.mat)))
-	rownames(InOut.df) <- c("VCF_filepath","N_loci","N_sites","N_samples")
-	colnames(InOut.df) <- c("Input","Output")
-	return(list(vcftools.path=vcftools.path,InputOutput=InOut.df))
-	#return(c(vcftools.path=vcftools.path, vcf=vcf, out=out, nloci.out=length(unique(chrom.pos.filtered.df[,"CHROM"])), nsites.out=nrow(chrom.pos.filtered.df),numind.out=ncol(gt.mat)))
-}
-#' @examples
-#' vcf_getSNP(vcftools.path="/vcftools",vcf="Oxyrhabdium_AllSpecies_AllSNPs.vcf",out="Oxyrhabdium_AllSpecies_BestSNP.vcf")
-#' 
-#' vcf_getSNP(vcftools.path="/vcftools",vcf="Oxyrhabdium-modestum_AllSNPs.vcf",out="Oxyrhabdium-modestum_BestSNP.vcf")
-#' 
-#' vcf_getSNP(vcftools.path="/vcftools",vcf="Oxyrhabdium-cf.modestum_AllSNPs.vcf",out="Oxyrhabdium-cf.modestum_BestSNP.vcf")
-#' 
-#' vcf_getSNP(vcftools.path="/vcftools",vcf="Oxyrhabdium-cf.modestum_Luzon_AllSNPs.vcf",out="Oxyrhabdium-cf.modestum_Luzon_BestSNP.vcf")
-#' 
-#' vcf_getSNP(vcftools.path="/vcftools",vcf="Oxyrhabdium-leporinum_AllSNPs.vcf",out="Oxyrhabdium-leporinum_BestSNP.vcf")
-#' 
-#' vcf_getSNP(vcftools.path="/vcftools",vcf="Oxyrhabdium-leporinum_Luzon_AllSNPs.vcf",out="Oxyrhabdium-leporinum_Luzon_BestSNP.vcf")
-#' 
-#' vcf_getSNP(vcftools.path="/vcftools",vcf="Oxyrhabdium_both-modestum_AllSNPs.vcf",out="Oxyrhabdium_both-modestum_AllSNPs.vcf",which.site="all.passing")
-#'
-#' vcf_getSNP(vcftools.path="/vcftools",vcf="Oxyrhabdium_both-modestum_AllSNPs.vcf",out="Oxyrhabdium_both-modestum_BestSNP.vcf",which.site="best")
-#' 
-#' vcf_getSNP(vcftools.path="/vcftools",vcf="Oxyrhabdium_AllSpecies_AllSNPs.vcf", indv.keep="indv_keep_Oxyrhabdium_both-modestum.txt", out="Oxyrhabdium_both-modestum_BestSNP.vcf", which.site="best")
-#'
-#' vcf_getSNP(vcftools.path="/panfs/pfs.local/home/j926w878/programs/vcftools_0.1.13/bin/vcftools",vcf="/panfs/pfs.local/home/j926w878/programs/easySFS/popfiles/Ahaetulla_snps.vcf",indv.keep="/panfs/pfs.local/home/j926w878/programs/easySFS/popfiles/indv_keep_Ahaetulla-prasina_AllLocalities_GoodData.txt",out="/panfs/pfs.local/home/j926w878/work/ddRAD/snps_goodData/Ahaetulla-prasina_AllPops_AllSNPs.vcf",which.site="all.passing")
-#'
-#' vcf_getSNP(vcftools.path="/panfs/pfs.local/home/j926w878/programs/vcftools_0.1.13/bin/vcftools",vcf="/panfs/pfs.local/home/j926w878/programs/easySFS/popfiles/Ahaetulla_snps.vcf",indv.keep="/panfs/pfs.local/home/j926w878/programs/easySFS/popfiles/indv_keep_Ahaetulla-prasina_AllLocalities_GoodData.txt",out="/panfs/pfs.local/home/j926w878/work/ddRAD/snps_goodData/Ahaetulla-prasina_AllPops_FirstSNP.vcf",which.site="first")
-#'
-#' vcf_getSNP(vcftools.path="/panfs/pfs.local/home/j926w878/programs/vcftools_0.1.13/bin/vcftools",vcf="/panfs/pfs.local/home/j926w878/work/ddRAD/snps_goodData/Ahaetulla-prasina_AllPops_AllSNPs.vcf",indv.keep="/panfs/pfs.local/home/j926w878/programs/easySFS/popfiles/indv_keep_Ahaetulla-prasina_Luzon.txt",out="/panfs/pfs.local/home/j926w878/work/ddRAD/snps_goodData/Ahaetulla-prasina_Luzon_BestSNP.vcf",which.site="best")
-#' 
-#' vcf_getSNP(vcftools.path="/panfs/pfs.local/home/j926w878/programs/vcftools_0.1.13/bin/vcftools",vcf="/panfs/pfs.local/home/j926w878/work/ddRAD/snps_goodData/Ahaetulla-prasina_AllPops_AllSNPs.vcf",indv.keep="/panfs/pfs.local/home/j926w878/programs/easySFS/popfiles/indv_keep_Ahaetulla-prasina_Luzon.txt",out="/panfs/pfs.local/home/j926w878/work/ddRAD/snps_goodData/Ahaetulla-prasina_Luzon_NoMissingData.vcf",which.site="all.passing",min.n = (19*2))
-#' 
-#' vcf_getSNP(vcftools.path="/panfs/pfs.local/home/j926w878/programs/vcftools_0.1.13/bin/vcftools",vcf="/panfs/pfs.local/home/j926w878/work/ddRAD/snps_goodData/Calamaria-gervaisii_AllPops_AllSNPs.vcf",indv.keep=NULL,out="/panfs/pfs.local/home/j926w878/work/ddRAD/snps_goodData/Calamaria-gervaisii_AllPops_BestSNP.vcf",which.site="best")
-
-#####
 
 #' @title Function to arrange plots of density for each DF or PC and each K
 #' 
@@ -1208,6 +1054,159 @@ newpoint <-function(p0,p1,c){
 	p2
 }
 
+
+#' @title Get Best SNP for each locus from VCF
+#' 
+#' From a VCF with multiple sites/locus, create a VCF with only the best site/locus.
+#' The best site is the one with the least missing data. To break ties, take the first site among the best sites.
+#' Note: I may update this to not require vcftools.
+#' 
+#' @param vcf Character string with path to input vcf.
+#' @param vcftools.path Character string with path to the vcftools executable.
+#' @param out Character string where to write output vcf.
+#' @param indv.keep Character string with names of individuals to keep. Default is NULL (all individuals kept).
+#' @param min.n Minimum number of non-missing alleles required to keep a site. Default = 4. If set to "all", then no sites with any missing data are removed (after first filtering individuals if indv.keep is non-NULL).
+#' @param min.n0 Minimum number of individuals required to have at least one copy of the major allele to keep a site. Default = 2.
+#' @param min.n1 Minimum number of individuals required to have at least one copy of the minor allele to keep a site. Default = 1.
+#' @param which.site Character string indicating the method for choosing a site to keep for each locus (or chromosome). Default = "best", which is considered the one with the least missing data, or the first among sites tied for least missing data. Other options are "all.passing", which retains all sites (positions) that pass variation filters (min.n, min.0.n.0, min.1.n), "first" (first site kept at each locus), or "random".
+#' @return List with [[1]] path to vcftools, [[2]] dataframe with input and output values for VCF filepaths, number of loci (chromosomes), sites (positions), and individuals (samples).
+#' @export vcf_getSNP
+vcf_getSNP      <- function(vcftools.path,vcf,out,indv.keep=NULL,which.site="best",min.n=4,min.n0=2,min.n1=1){
+	vcf.obj     <- vcfR::read.vcfR(vcf)
+	samplenames <- colnames(vcf.obj@gt)[-1]
+	# matrix with "fixed" columns, which are the columns with site-specific stats across all samples
+	# fix.mat    <- attributes(vcf.obj)[["fix"]]
+	fix.mat    <- vcf.obj@fix
+	# matrix with genotype columns, which are the columns with site-specific stats across all samples
+	# gt.mat     <- attributes(vcf.obj)[["gt"]]
+	# gt.mat     <- vcf.obj@gt[,-1]
+	# Remove first column of gt
+	#gt.mat     <- gt.mat[,-1]
+	# Remove everything after ":" in strings
+	#gt.mat     <- gsub(":.+","",gt.mat)
+	gt.mat <- gsub(":.+","",vcf.obj@gt[,-1])
+	if(!is.null(indv.keep)){
+		if(is(indv.keep,"character") & length(indv.keep)==1){
+			if(file.exists(indv.keep)){
+				#indv.keep <- unname(unlist(read.table(indv.keep)))
+				indv.keep <- suppressWarnings(readLines(indv.keep))
+			}
+		}
+		### Check that all names in indv.keep actually exist in the vcf, and then update gt.mat to only include individuals that pass
+		if(all(indv.keep %in% colnames(gt.mat))){
+			gt.mat <- gt.mat[,indv.keep,drop=F]
+		} else {
+			stop(paste(paste(setdiff(indv.keep,colnames(gt.mat)),collapse=","), "not in VCF"))
+		}
+	}
+	# If min.n = "all", update min.all to equal the maximum possible number of alleles at a site.
+	if(min.n=="all"){
+		test.sample <- unlist(gt.mat)[!is.na(unlist(gt.mat))][1]
+		ploidy <- length(unlist(strsplit(test.sample,split="/",fixed=T)))
+		min.n  <- ploidy*ncol(gt.mat)
+	}
+	# For each site, the number of non-missing alleles
+	site.NS      <- vapply(X=1:nrow(gt.mat),FUN=function(x){length(grep(".", unlist(strsplit(gt.mat[x,],split="/",fixed=T)),fixed=T,invert=T))},FUN.VALUE=1)
+	# For each site, the number of individuals with at least one copy of the major allele
+	site.0.NS    <- vapply(X=1:nrow(gt.mat),FUN=function(x){length(grep("0", gt.mat[x,],fixed=T,invert=F))},FUN.VALUE=1)
+	# For each site, the number of individuals with at least one copy of the minor allele
+	site.1.NS    <- vapply(X=1:nrow(gt.mat),FUN=function(x){length(grep("1", gt.mat[x,],fixed=T,invert=F))},FUN.VALUE=1)
+	# Matrix with "CHROM" and "POS" from fix.mat, plus columns containing site.NS, site.0.NS, and site.1.NS
+	chrom.pos.mat <- cbind(fix.mat[,c("CHROM","POS")],site.NS,site.0.NS,site.1.NS)
+	
+	chrom.pos.df <- data.frame(CHROM=fix.mat[,"CHROM"],POS=fix.mat[,"POS"],site.NS=site.NS,site.0.NS=site.0.NS,site.1.NS=site.1.NS)
+	mode(chrom.pos.df[,"CHROM"])     <- "character"
+	mode(chrom.pos.df[,"POS"])       <- "character"
+	mode(chrom.pos.df[,"site.NS"])   <- "numeric"
+	mode(chrom.pos.df[,"site.0.NS"]) <- "numeric"
+	mode(chrom.pos.df[,"site.1.NS"]) <- "numeric"
+	if(any(chrom.pos.df[,"site.NS"] >= min.n & chrom.pos.df[,"site.0.NS"] >= min.n0 & chrom.pos.df[,"site.1.NS"] >= min.n1)){
+		# filter1 <- which(chrom.pos.df[,"site.1.NS"] >=2)
+		filter1 <- which(chrom.pos.df[,"site.NS"] >= min.n & chrom.pos.df[,"site.0.NS"] >= min.n0 & chrom.pos.df[,"site.1.NS"] >= min.n1)
+	} else {
+		stop("no sites pass filtering criteria")
+		#stop("no sites in which the minor allele occurs in more than 1 individual")
+	}
+	chrom.pos.df.filtered1 <- chrom.pos.df[filter1,]
+	# vector with loci names for each site retained
+	loci        <- chrom.pos.df.filtered1[,"CHROM"]
+	# vector with unique loci names
+	loci.unique <- unique(loci)
+	# For each unique locus ("CHROM") in chrom.pos.df.filtered1, return the row number for the site with the greatest site.NS
+	chrom.pos.list.filtered2 <- list(); length(chrom.pos.list.filtered2) <- length(loci.unique)
+	for(i in 1:length(loci.unique)){
+		locus.i <- loci.unique[i]
+		chrom.pos.df.i <- chrom.pos.df.filtered1[which(chrom.pos.df.filtered1[,"CHROM"]==locus.i),,drop=F]
+		site.NS.i <- chrom.pos.df.i[,"site.NS"]
+		max.i     <- max(site.NS.i)
+		if(which.site=="best"){
+			chrom.pos.list.filtered2[[i]]    <- chrom.pos.df.i[(which(site.NS.i==max.i)[1]),]
+		}
+		if(which.site=="first"){
+			chrom.pos.list.filtered2[[i]]    <- chrom.pos.df.i[1,]
+		}
+		if(which.site=="random"){
+			chrom.pos.list.filtered2[[i]]    <- chrom.pos.df.i[sample(1:length(site.NS.i),1),]
+		}
+		if(which.site=="all.passing"){
+			chrom.pos.list.filtered2[[i]]    <- chrom.pos.df.i
+		}
+	}
+	chrom.pos.df.filtered2 <- do.call(rbind, chrom.pos.list.filtered2)
+	chrom.pos.filtered.df  <- chrom.pos.df.filtered2[,c("CHROM","POS")]
+	### Need to test if any individuals have only missing data; if TRUE, stop and suggest that these individuals be removed or that a different filtering scheme be used.
+	gt.mat2      <- gt.mat[which(fix.mat[,"CHROM"] %in% chrom.pos.filtered.df[,"CHROM"] & fix.mat[,"POS"] %in% chrom.pos.filtered.df[,"POS"]),]
+	sitesPerIndv <- unlist(apply(X=gt.mat2,MARGIN=2,FUN=function(x){length(grep("/",x,fixed=TRUE))}))
+	if(any(sitesPerIndv==0)){
+		noDataIndvs <- names(which(sitesPerIndv==0))
+		stop(paste("After filtering,",noDataIndvs,"individuals without data."))
+	}
+	# Write chrom.pos.filtered.mat to a file as a tab-separated table. This file will be used by vcftools to extract only these sites from the input vcf.
+	temp.file <- file.path(getwd(),"temp_filtertable.txt")
+	write.table(chrom.pos.filtered.df, temp.file, quote=F, sep="\t", col.names=F, row.names=F)
+	# Write list of individuals that should be included in the final set
+	temp.file2 <- file.path(getwd(),"temp_filtertable2.txt")
+	writeLines(text=colnames(gt.mat),con=temp.file2)
+	vcf.command <- paste(vcftools.path,"--vcf",vcf,"--positions",temp.file,"--keep",temp.file2,"--recode -c > ",out)
+	system(vcf.command)
+	system(paste("rm",temp.file))
+	system(paste("rm",temp.file2))
+	log.path <- file.path(getwd(),"out.log")
+	system(paste("rm",log.path))
+	InOut.df <- data.frame(input=c(vcf,length(unique(fix.mat[,"CHROM"])),nrow(vcf.obj@gt),length(samplenames)),output=c(out,length(unique(chrom.pos.filtered.df[,"CHROM"])),nrow(chrom.pos.filtered.df),ncol(gt.mat)))
+	rownames(InOut.df) <- c("VCF_filepath","N_loci","N_sites","N_samples")
+	colnames(InOut.df) <- c("Input","Output")
+	return(list(vcftools.path=vcftools.path,InputOutput=InOut.df))
+	#return(c(vcftools.path=vcftools.path, vcf=vcf, out=out, nloci.out=length(unique(chrom.pos.filtered.df[,"CHROM"])), nsites.out=nrow(chrom.pos.filtered.df),numind.out=ncol(gt.mat)))
+}
+#' @examples
+#' vcf_getSNP(vcftools.path="/vcftools",vcf="Oxyrhabdium_AllSpecies_AllSNPs.vcf",out="Oxyrhabdium_AllSpecies_BestSNP.vcf")
+#' 
+#' vcf_getSNP(vcftools.path="/vcftools",vcf="Oxyrhabdium-modestum_AllSNPs.vcf",out="Oxyrhabdium-modestum_BestSNP.vcf")
+#' 
+#' vcf_getSNP(vcftools.path="/vcftools",vcf="Oxyrhabdium-cf.modestum_AllSNPs.vcf",out="Oxyrhabdium-cf.modestum_BestSNP.vcf")
+#' 
+#' vcf_getSNP(vcftools.path="/vcftools",vcf="Oxyrhabdium-cf.modestum_Luzon_AllSNPs.vcf",out="Oxyrhabdium-cf.modestum_Luzon_BestSNP.vcf")
+#' 
+#' vcf_getSNP(vcftools.path="/vcftools",vcf="Oxyrhabdium-leporinum_AllSNPs.vcf",out="Oxyrhabdium-leporinum_BestSNP.vcf")
+#' 
+#' vcf_getSNP(vcftools.path="/vcftools",vcf="Oxyrhabdium-leporinum_Luzon_AllSNPs.vcf",out="Oxyrhabdium-leporinum_Luzon_BestSNP.vcf")
+#' 
+#' vcf_getSNP(vcftools.path="/vcftools",vcf="Oxyrhabdium_both-modestum_AllSNPs.vcf",out="Oxyrhabdium_both-modestum_AllSNPs.vcf",which.site="all.passing")
+#'
+#' vcf_getSNP(vcftools.path="/vcftools",vcf="Oxyrhabdium_both-modestum_AllSNPs.vcf",out="Oxyrhabdium_both-modestum_BestSNP.vcf",which.site="best")
+#' 
+#' vcf_getSNP(vcftools.path="/vcftools",vcf="Oxyrhabdium_AllSpecies_AllSNPs.vcf", indv.keep="indv_keep_Oxyrhabdium_both-modestum.txt", out="Oxyrhabdium_both-modestum_BestSNP.vcf", which.site="best")
+#'
+#' vcf_getSNP(vcftools.path="/panfs/pfs.local/home/j926w878/programs/vcftools_0.1.13/bin/vcftools",vcf="/panfs/pfs.local/home/j926w878/programs/easySFS/popfiles/Ahaetulla_snps.vcf",indv.keep="/panfs/pfs.local/home/j926w878/programs/easySFS/popfiles/indv_keep_Ahaetulla-prasina_AllLocalities_GoodData.txt",out="/panfs/pfs.local/home/j926w878/work/ddRAD/snps_goodData/Ahaetulla-prasina_AllPops_AllSNPs.vcf",which.site="all.passing")
+#'
+#' vcf_getSNP(vcftools.path="/panfs/pfs.local/home/j926w878/programs/vcftools_0.1.13/bin/vcftools",vcf="/panfs/pfs.local/home/j926w878/programs/easySFS/popfiles/Ahaetulla_snps.vcf",indv.keep="/panfs/pfs.local/home/j926w878/programs/easySFS/popfiles/indv_keep_Ahaetulla-prasina_AllLocalities_GoodData.txt",out="/panfs/pfs.local/home/j926w878/work/ddRAD/snps_goodData/Ahaetulla-prasina_AllPops_FirstSNP.vcf",which.site="first")
+#'
+#' vcf_getSNP(vcftools.path="/panfs/pfs.local/home/j926w878/programs/vcftools_0.1.13/bin/vcftools",vcf="/panfs/pfs.local/home/j926w878/work/ddRAD/snps_goodData/Ahaetulla-prasina_AllPops_AllSNPs.vcf",indv.keep="/panfs/pfs.local/home/j926w878/programs/easySFS/popfiles/indv_keep_Ahaetulla-prasina_Luzon.txt",out="/panfs/pfs.local/home/j926w878/work/ddRAD/snps_goodData/Ahaetulla-prasina_Luzon_BestSNP.vcf",which.site="best")
+#' 
+#' vcf_getSNP(vcftools.path="/panfs/pfs.local/home/j926w878/programs/vcftools_0.1.13/bin/vcftools",vcf="/panfs/pfs.local/home/j926w878/work/ddRAD/snps_goodData/Ahaetulla-prasina_AllPops_AllSNPs.vcf",indv.keep="/panfs/pfs.local/home/j926w878/programs/easySFS/popfiles/indv_keep_Ahaetulla-prasina_Luzon.txt",out="/panfs/pfs.local/home/j926w878/work/ddRAD/snps_goodData/Ahaetulla-prasina_Luzon_NoMissingData.vcf",which.site="all.passing",min.n = (19*2))
+#' 
+#' vcf_getSNP(vcftools.path="/panfs/pfs.local/home/j926w878/programs/vcftools_0.1.13/bin/vcftools",vcf="/panfs/pfs.local/home/j926w878/work/ddRAD/snps_goodData/Calamaria-gervaisii_AllPops_AllSNPs.vcf",indv.keep=NULL,out="/panfs/pfs.local/home/j926w878/work/ddRAD/snps_goodData/Calamaria-gervaisii_AllPops_BestSNP.vcf",which.site="best")
 
 
 
