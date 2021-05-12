@@ -15,7 +15,6 @@ hex2dec(hex)
 xyz color coordinates
 }
 \description{
-Hex to xyz colors
-
-Hex to xyz color coordinates
+da.biPlot; pca.biPlot
+x=da.biPlot
 }

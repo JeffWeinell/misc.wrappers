@@ -7,7 +7,7 @@
 \method{dapc}{plot.arrange}(x, variable = "DF")
 }
 \arguments{
-\item{x}{}
+\item{x}{A list of ggplots produced by ggscatter.dapc function}
 
 \item{variable}{Either "DF" or "PC"}
 }
