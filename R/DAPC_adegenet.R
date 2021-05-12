@@ -243,7 +243,7 @@ run_DAPC <- function(vcf, kmax=40, coords=NULL, reps=100,probs.out=NULL,save.as=
 	} else {
 		pca.biplot.arranged <- NULL
 	}
-	dapc.componentPlots <- c(pca.density.arranged,pca.biplot.arranged,da.density.arranged,da.biplot.arranged)
+	dapc.componentPlots <- c(list(pca.density.arranged,da.density.arranged),pca.biplot.arranged,da.biplot.arranged)
 	
 	### Subset of da density and biplots, for the most important DFs of each K.
 #	scatterPlot.grobsList <- lapply(X=scatterPlot,FUN=ggplot2::ggplotGrob)
@@ -294,15 +294,15 @@ run_DAPC <- function(vcf, kmax=40, coords=NULL, reps=100,probs.out=NULL,save.as=
 	#}
 	#dev.off()
 	if(!is.null(coords)){
-		result <- c(list(BICPlot,grp.plot2),admixturePlot,pca.biplot.arranged,assignmentPlot,mapplot)
+		result <- c(list(BICPlot,grp.plot2),dapc.componentPlots,admixturePlot,assignmentPlot,mapplot)
 	} else {
-		result <- c(list(BICPlot,grp.plot2),admixturePlot,assignmentPlot)
+		result <- c(list(BICPlot,grp.plot2),dapc.componentPlots,admixturePlot,assignmentPlot)
 	}
 	#if(!is.null(save.as)){
 	if(".pdf" %in% include.out){
 		pdf(height=6,width=10,file=save.as,onefile=TRUE)
-	#	lapply(X=result,FUN=print)
-		lapply(X=result,FUN=function(x){ifelse(is(x,"gtable"),grid.draw(x),print(x))})
+		lapply(X=result,FUN=print)
+	#	lapply(X=result,FUN=function(x){ifelse(is(x,"gtable"),grid::grid.draw(x),print(x))})
 		dev.off()
 	}
 	result
