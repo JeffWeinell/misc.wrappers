@@ -8,7 +8,8 @@ Run adagenet DAPC analyses and generate plots of BIC vs number of clusters, bapl
 If sample coordinates are supplied, this function interpolates cluster membership probabilities on a map, using functions from tess3r package.}
 \usage{
 run_DAPC(
-  vcf,
+  x,
+  format = "VCF",
   kmax = 40,
   coords = NULL,
   reps = 100,
@@ -18,7 +19,9 @@ run_DAPC(
 )
 }
 \arguments{
-\item{vcf}{Character string with path to vcf file containing snp data}
+\item{x}{Character string with path to file containing snp data, with data format specified by 'format' argument (currently only VCF files can be used).}
+
+\item{format}{Character string indicating the format (filetype) of the data. Currently only "VCF" is allowed, but other types may be added.}
 
 \item{kmax}{Number indicating the maximum number of clusters to evaluate. Default is 40, which is converted using kmax = min(kmax, number of individuals-1)}
 

@@ -3,7 +3,8 @@
 #' Run adagenet DAPC analyses and generate plots of BIC vs number of clusters, baplot of alpha optimum number of principle components at each K, admixture for each K, assignments at each K.
 #' If sample coordinates are supplied, this function interpolates cluster membership probabilities on a map, using functions from tess3r package.
 #' 
-#' @param vcf Character string with path to vcf file containing snp data
+#' @param x Character string with path to file containing snp data, with data format specified by 'format' argument (currently only VCF files can be used).
+#' @param format Character string indicating the format (filetype) of the data. Currently only "VCF" is allowed, but other types may be added.
 #' @param kmax Number indicating the maximum number of clusters to evaluate. Default is 40, which is converted using kmax = min(kmax, number of individuals-1)
 #' @param coords Optional character string with path to a table with longitude and latitude of individuals in the vcf file, or a matrix or data frame with longitude and latitude columns. Default is NULL, in which case membership probabilities are not interpolated onto a map.
 #' @param reps Number indicating the number of replicates of 'find.clusters'. Default 100.
@@ -12,18 +13,23 @@
 #' @param save.as Character string with where to save the output PDF with plots of results. Default is NULL.
 #' @return A list of plots.
 #' @export run_DAPC
-run_DAPC <- function(vcf, kmax=40, coords=NULL, reps=100,probs.out=NULL,save.as=NULL,include.out=c(".pdf",".Qlog",".BIClog")){
+run_DAPC <- function(x, format="VCF", kmax=40, coords=NULL, reps=100,probs.out=NULL,save.as=NULL,include.out=c(".pdf",".Qlog",".BIClog")){
 	if(is.null(save.as)){
 		save.as <- file.path(getwd(),"result_DAPC.pdf")
 	}
 	if(file.exists(save.as)){
 		stop("Output file already exists. Use a different name for 'save.as' argument.")
 	}
-	#dev.new(width=10,height=6)
-	vcf.obj     <- vcfR::read.vcfR(vcf,verbose=F)
-	samplenames <- colnames(vcf.obj@gt)[-1]
-	genind      <- suppressWarnings(vcfR::vcfR2genind(vcf.obj))
-	numind      <- (dim(attributes(vcf.obj)[["gt"]])[2])-1
+	if(format=="VCF"){
+		#dev.new(width=10,height=6)
+		vcf         <- x
+		vcf.obj     <- vcfR::read.vcfR(vcf,verbose=F)
+		samplenames <- colnames(vcf.obj@gt)[-1]
+		genind      <- suppressWarnings(vcfR::vcfR2genind(vcf.obj))
+		numind      <- (dim(attributes(vcf.obj)[["gt"]])[2])-1
+	} else {
+		stop("Currently, 'format' must be 'VCF'")
+	}
 	label.size  <- min((288/numind),7)
 	message("step 0")
 	if(!is.null(coords)){
@@ -1456,6 +1462,14 @@ vcf_getSNP      <- function(vcftools.path,vcf,out,indv.keep=NULL,which.site="bes
 #' vcf_getSNP(vcftools.path="/panfs/pfs.local/home/j926w878/programs/vcftools_0.1.13/bin/vcftools",vcf="/panfs/pfs.local/home/j926w878/work/ddRAD/snps_goodData/Ahaetulla-prasina_AllPops_AllSNPs.vcf",indv.keep="/panfs/pfs.local/home/j926w878/programs/easySFS/popfiles/indv_keep_Ahaetulla-prasina_Luzon.txt",out="/panfs/pfs.local/home/j926w878/work/ddRAD/snps_goodData/Ahaetulla-prasina_Luzon_NoMissingData.vcf",which.site="all.passing",min.n = (19*2))
 #' 
 #' vcf_getSNP(vcftools.path="/panfs/pfs.local/home/j926w878/programs/vcftools_0.1.13/bin/vcftools",vcf="/panfs/pfs.local/home/j926w878/work/ddRAD/snps_goodData/Calamaria-gervaisii_AllPops_AllSNPs.vcf",indv.keep=NULL,out="/panfs/pfs.local/home/j926w878/work/ddRAD/snps_goodData/Calamaria-gervaisii_AllPops_BestSNP.vcf",which.site="best")
+
+
+
+
+
+
+
+
 
 
 

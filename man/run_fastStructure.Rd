@@ -11,7 +11,8 @@ Requires python 2
 Cross validation with the "cv.iter" argument not implemented because it crashes my copy of fastStructure, probably due to a python build problem on my end}
 \usage{
 run_fastStructure(
-  vcf,
+  x,
+  format = "VCF",
   coords = NULL,
   kmax = 40,
   reps = 100,
@@ -27,7 +28,9 @@ run_fastStructure(
 )
 }
 \arguments{
-\item{vcf}{Path to input VCF file with SNP data.}
+\item{x}{Character string with path to file containing SNP data formatted according to the 'format' argument. Currently VCF or 'fastStructure' (a specific type of STRUCTURE format) can be used.}
+
+\item{format}{Character string indicating the format of the data. Currently only "VCF" or "fastStructure" allowed. Other types may be added.}
 
 \item{coords}{Either a character string with path to file containing coordinates (longitude in first column, latitude in second column), or matrix object with longitude and latitude columns.}
 
