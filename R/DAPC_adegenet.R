@@ -42,7 +42,7 @@ run_DAPC <- function(vcf, kmax=40, coords=NULL, reps=100,probs.out=NULL,save.as=
 		#world_df <- ggplot2::map_data(rnaturalearth::ne_countries(scale=10))
 		world_sf      <- rnaturalearth::ne_countries(scale=10,returnclass="sf")[1]
 		world_sp      <- rnaturalearth::ne_countries(scale=10,returnclass="sp")
-		current_sf    <- sf::st_crop(world_sf,xmin=x.min,xmax=x.max,ymin=y.min,ymax=y.max)
+		current_sf    <- suppressMessages(sf::st_crop(world_sf,xmin=x.min,xmax=x.max,ymin=y.min,ymax=y.max))
 		current.gg.sf <- ggplot2::geom_sf(data=current_sf,colour = "black", fill = NA)
 		#world.gg.sf   <- ggplot2::geom_sf(data=world_sf,colour = "black", fill = NA)
 	} else {
