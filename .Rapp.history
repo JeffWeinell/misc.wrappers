@@ -1,979 +1,1101 @@
-plot(biplots.da.list.i[[2]])
-devtools::document()
-for(z in 1:length(da.pairs.i)){#
-				da.pairs.i.z <- da.pairs.i[[z]]#
-				biplots.da.list.i[[z]] <- ggscatter.dapc(dapc.pcabest.K,xax=da.pairs.i.z[1],yax=da.pairs.i.z[2],col=myCols,legend=F,cstar=1,cpoint=4,label=F,show.title=F,varname="DF",axis.title.cex=0.5,hideperimeter=F)#
-			}
-plot(biplots.da.list.i[[2]])
-for(z in 1:length(da.pairs.i)){#
-				da.pairs.i.z <- da.pairs.i[[z]]#
-				biplots.da.list.i[[z]] <- ggscatter.dapc(dapc.pcabest.K,xax=da.pairs.i.z[1],yax=da.pairs.i.z[2],col=myCols,legend=F,cstar=1,cpoint=4,label=F,show.title=F,varname="DF",axis.title.cex=1,hideperimeter=F)#
-			}
-plot(biplots.da.list.i[[2]])
-12*0.5
-devtools::document()
-for(z in 1:length(da.pairs.i)){#
-				da.pairs.i.z <- da.pairs.i[[z]]#
-				biplots.da.list.i[[z]] <- ggscatter.dapc(dapc.pcabest.K,xax=da.pairs.i.z[1],yax=da.pairs.i.z[2],col=myCols,legend=F,cstar=1,cpoint=4,label=F,show.title=F,varname="DF",axis.title.cex=1,hideperimeter=F)#
-			}
-plot(biplots.da.list.i[[2]])
-for(z in 1:length(da.pairs.i)){#
-				da.pairs.i.z <- da.pairs.i[[z]]#
-				biplots.da.list.i[[z]] <- ggscatter.dapc(dapc.pcabest.K,xax=da.pairs.i.z[1],yax=da.pairs.i.z[2],col=myCols,legend=F,cstar=1,cpoint=4,label=F,show.title=F,varname="DF",axis.title.cex=0.5,hideperimeter=F)#
-			}
-plot(biplots.da.list.i[[2]])
-for(z in 1:length(da.pairs.i)){#
-				da.pairs.i.z <- da.pairs.i[[z]]#
-				biplots.da.list.i[[z]] <- ggscatter.dapc(dapc.pcabest.K,xax=da.pairs.i.z[1],yax=da.pairs.i.z[2],col=myCols,legend=F,cstar=1,cpoint=4,label=F,show.title=F,varname="DF",axis.title.cex=0.7,hideperimeter=F)#
-			}
-plot(biplots.da.list.i[[2]])
-devtools::document()
-for(K in 2:max.clusters){#
-		i=(K-1)#
-		dapc.pcabest.K      <- adegenet::dapc(genind, grp.mat[,i],n.pca=best.npca[i],n.da=5)#
-		dapc.pcabest.list[[i]] <- dapc.pcabest.K#
-		posterior           <- dapc.pcabest.K$posterior#
-		q.matrix            <- posterior#
-		posterior.list[[i]] <- posterior#
-		posterior.df        <- data.frame(indv=rep(rownames(posterior),ncol(posterior)), pop=rep(colnames(posterior),each=nrow(posterior)), assignment=c(posterior),K=K)#
-		q.df[[i]]           <- posterior.df#
-		##### ggplot scatterplots of discriminant functions#
-		####
-	#	scatterPlot.i       <- ggscatter.dapc(dapc.pcabest.K,col=myCols,legend=F,cstar=1,cpoint=4,label=T)#
-	#	scatterPlot[[i]]    <- scatterPlot.i#
-		### density plots of discriminant functions#
-		density.da.list.i <- list(); length(density.da.list.i) <- dapc.pcabest.K$n.da#
-		for(z in 1:dapc.pcabest.K$n.da){#
-			density.da.list.i[[z]] <- ggscatter.dapc(dapc.pcabest.K,xax=z,yax=z,col=myCols,legend=F,show.title=F,hideperimeter=T)#
-		}#
-		### biplots of discriminant functions#
-		if(dapc.pcabest.K$n.da>1){#
-			da.pairs.i     <- pset(x=1:dapc.pcabest.K$n.da,min.length=2,max.length=2)#
-			da.pairs.mat.i    <- do.call(rbind,da.pairs.i)#
-			da.psets[[i]]     <- da.pairs.mat.i#
-			da.layout.mat.i   <- matrix(data=NA,nrow=max(da.pairs.mat.i[,1]),ncol=max(da.pairs.mat.i[,2]))#
-			for(j in 1:length(da.pairs.i)){#
-				da.layout.mat.i[da.pairs.mat.i[j,1],da.pairs.mat.i[j,2]] <- j#
-			}#
-			da.layout.mat[[i]] <- da.layout.mat.i[,c(2:ncol(da.layout.mat.i)),drop=F]#
-			biplots.da.list.i <- list(); length(biplots.da.list.i) <- length(da.pairs.i)#
-			for(z in 1:length(da.pairs.i)){#
-				da.pairs.i.z <- da.pairs.i[[z]]#
-				biplots.da.list.i[[z]] <- ggscatter.dapc(dapc.pcabest.K,xax=da.pairs.i.z[1],yax=da.pairs.i.z[2],col=myCols,legend=F,cstar=1,cpoint=4,label=F,show.title=F,varname="DF",axis.title.cex=0.7,hideperimeter=F)#
-			}#
-		} else {#
-			biplots.da.list.i  <- NULL#
-			da.psets[[i]]      <- NULL#
-			da.layout.mat[[i]] <- NULL#
-		}#
-		##### ggplot density plots of principle components#
-		density.pca.list.i <- list(); length(density.pca.list.i) <- dapc.pcabest.K$n.pca#
-		for(z in 1:dapc.pcabest.K$n.pca){#
-			density.pca.list.i[[z]] <- ggscatter.dapc(dapc.pcabest.K,vartype="pc",xax=z,yax=z,col=myCols,legend=F,show.title=F,hideperimeter=T)#
-		}#
-		### ggplot biplots of principle components#
-		if(dapc.pcabest.K$n.pca>1){#
-			pca.pairs.i        <- pset(x=1:dapc.pcabest.K$n.pca,min.length=2,max.length=2)#
-			pca.pairs.mat.i    <- do.call(rbind,pca.pairs.i)#
-			pca.psets[[i]]     <- pca.pairs.mat.i#
-			pca.layout.mat.i   <- matrix(data=NA,nrow=max(pca.pairs.mat.i[,1]),ncol=max(pca.pairs.mat.i[,2]))#
-			for(j in 1:length(pca.pairs.i)){#
-				pca.layout.mat.i[pca.pairs.mat.i[j,1],pca.pairs.mat.i[j,2]] <- j#
-			}#
-			pca.layout.mat[[i]] <- pca.layout.mat.i[,c(2:ncol(pca.layout.mat.i)),drop=F]#
-			biplots.pca.list.i <- list(); length(biplots.pca.list.i) <- length(pca.pairs.i)#
-			for(z in 1:length(pca.pairs.i)){#
-				pca.pairs.i.z           <- pca.pairs.i[[z]]#
-				biplots.pca.list.i[[z]] <- ggscatter.dapc(dapc.pcabest.K,vartype="pc",xax=pca.pairs.i.z[1],yax=pca.pairs.i.z[2],col=myCols,legend=F,cstar=0,cpoint=4,label=F,show.title=F,varname="PC",axis.title.cex=0.7,hideperimeter=F)#
-			}#
-		} else {#
-			biplots.pca.list.i  <- NULL#
-			pca.psets[[i]]      <- NULL#
-			pca.layout.mat[[i]] <- NULL#
-		}#
-		posterior.gg        <- ggplot2::ggplot(posterior.df, ggplot2::aes(fill= pop, x= assignment, y=indv)) + ggplot2::geom_bar(position="stack", stat="identity") + ggplot2::theme_classic() + ggplot2::theme(axis.text.y = ggplot2::element_text(size = label.size), panel.grid.major = ggplot2::element_blank(), panel.grid.minor = ggplot2::element_blank(), panel.background = ggplot2::element_blank()) + ggplot2::labs(x = "Membership Probability",y="",fill="Cluster",title=paste0("K = ",K,"; PCs retained = ",best.npca[i])) + ggplot2::scale_fill_manual(values=myCols[1:K])#
-		admixturePlot[[i]]  <- posterior.gg#
-		#indv.KmaxPosterior <- apply(X=q.matrix, MARGIN=1, FUN=function(x){which(x==max(x))})#
-		indv.maxPosterior  <- apply(X=q.matrix, MARGIN=1, FUN=function(x){max(x)})#
-		labels             <- rep("",nrow(posterior.df))#
-		labels[posterior.df[,"assignment"] %in% indv.maxPosterior] <- "+"#
-		assignment.K       <- ggplot2::ggplot(data=posterior.df, ggplot2::aes(x= pop, y=indv,fill=assignment)) + ggplot2::geom_tile(color="gray") + ggplot2::theme_classic() + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5), axis.text.y = ggplot2::element_text(size = label.size), panel.grid.major = ggplot2::element_blank(), panel.grid.minor = ggplot2::element_blank(), panel.background = ggplot2::element_blank(), legend.position = "none", ) + ggplot2::labs(title = paste0("K = ",K,"; PCs retained = ", best.npca[i]), x="Clusters", y="") + ggplot2::scale_fill_gradient2(low = "white", mid = "yellow", high = "red", midpoint = 0.5) + ggplot2::geom_text(label=labels)#
-		assignmentPlot[[i]]  <- assignment.K#
-		if(!is.null(coords)){#
-			my.palette      <- tess3r::CreatePalette(myCols[1:K], 9)#
-			tess3r.qmat     <- suppressWarnings(tess3r::as.qmatrix(q.matrix))#
-			coords.mat      <- as.matrix(coords)#
-			mapplot.i       <- tess3r::ggtess3Q(tess3r.qmat,coords.mat, interpolation.model = tess3r::FieldsKrigModel(10),resolution = c(500,500), col.palette = my.palette, window=c(x.min,x.max,y.min,y.max),background=TRUE,map.polygon=world_sp)#
-			mapplot[[i]]    <- mapplot.i + ggplot2::theme_classic() + ggplot2::labs(title=paste0("Ancestry coefficients; K=",K), x="latitude", y="longitude") + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) + current.gg.sf + ggplot2::geom_point(data = coords, ggplot2::aes(x = Lon, y = Lat), size = 1, shape = 21, fill = "black")#
-		}#
-		da.densityPlot[[i]]  <- density.da.list.i#
-		da.biPlot[[i]]       <- biplots.da.list.i#
-		pca.densityPlot[[i]] <- density.pca.list.i#
-		pca.biPlot[[i]]      <- biplots.pca.list.i#
-	}#
-	### Plots of DF or PC density for each given K
-da.density.arranged      <- dapc.plot.arrange(da.densityPlot)#
-	pca.densityPlot.arranged <- dapc.plot.arrange(pca.densityPlot,variable="PC")#
-	### Plots of DF vs DF or PC vs PC for each pairwise combination, for given K#
-	if(any(lengths(da.biPlot)>0)){#
-		rangeK.da <- c(2:kmax)[which(lengths(da.biPlot)>0)]#
-		n.da      <- sapply(X=da.psets[rangeK.da-1],FUN=max,na.rm=TRUE)#
-		names.bottom.da  <- lapply(X=1:length(n.da),FUN=function(x){paste0("DF",1:(n.da[[x]]-1))})#
-		names.left.da <- lapply(X=1:length(n.da),FUN=function(x){paste0("DF",2:(n.da[[x]]))})#
-		da.biplot.arranged <- lapply(rangeK.da, FUN=function(z){dapc.biplot.arrange(da.biPlot,K=z,layout.mat=da.layout.mat[[z-1]],col.labels.bottom=names.bottom.da[[which(rangeK.da==z)]],row.labels.left=names.left.da[[which(rangeK.da==z)]],outer.text=list(NULL,NULL,paste0("K=",z,"; Biplots of discriminant functions"),NULL))})#
+any(!entropy.is.reduced) & entropy.is.reduced[1]
+if(any(!entropy.is.reduced) & entropy.is.reduced[1]){#
+		Kbest.criteria2 <- which(!entropy.is.reduced)[1]#
 	} else {#
-		da.biplot.arranged <- NULL#
-	}#
-	if(any(lengths(pca.biPlot)>0)){#
-		rangeK.pca <- c(2:kmax)[which(lengths(pca.biPlot)>0)]#
-		#n.pca      <- sapply(X=pca.layout.mat[rangeK.pca-1],FUN=max,na.rm=TRUE)#
-		n.pca               <- sapply(X=pca.psets[rangeK.pca-1],FUN=max,na.rm=TRUE)#
-		names.bottom.pca    <- lapply(X=1:length(n.pca),FUN=function(x){paste0("PC",1:(n.pca[[x]]-1))})#
-		names.left.pca      <- lapply(X=1:length(n.pca),FUN=function(x){paste0("PC",2:(n.pca[[x]]))})#
-		pca.biPlot.arranged <- lapply(rangeK.pca, FUN=function(z){dapc.biplot.arrange(pca.biPlot,K=z,layout.mat=pca.layout.mat[[z-1]],col.labels.bottom=names.bottom.pca[[which(rangeK.pca==z)]],row.labels.left=names.left.pca[[which(rangeK.pca==z)]],outer.text=list(NULL,NULL,paste0("K=",z,"; Biplots of retained principle components"),NULL))})#
-		#pca.biPlot.arranged      <- dapc.biplot.arrange(pca.biPlot)#
-	} else {#
-		pca.biPlot.arranged <- NULL#
+		Kbest.criteria2 <- 1#
 	}
-plot(pca.biPlot.arranged[[1]])
-if(any(lengths(da.biPlot)>0)){#
-		rangeK.da <- c(2:kmax)[which(lengths(da.biPlot)>0)]#
-		n.da      <- sapply(X=da.psets[rangeK.da-1],FUN=max,na.rm=TRUE)#
-		names.bottom.da  <- lapply(X=1:length(n.da),FUN=function(x){paste0("DF",1:(n.da[[x]]-1))})#
-		names.left.da <- lapply(X=1:length(n.da),FUN=function(x){paste0("DF",2:(n.da[[x]]))})#
-		da.biplot.arranged <- lapply(rangeK.da, FUN=function(z){dapc.biplot.arrange(da.biPlot,K=z,layout.mat=da.layout.mat[[z-1]],use.diag=c(1,2),col.labels.bottom=names.bottom.da[[which(rangeK.da==z)]],row.labels.left=names.left.da[[which(rangeK.da==z)]],outer.text=list(NULL,NULL,paste0("K=",z,"; Biplots of discriminant functions"),NULL))})#
-	} else {#
-		da.biplot.arranged <- NULL#
-	}#
-	if(any(lengths(pca.biPlot)>0)){#
-		rangeK.pca <- c(2:kmax)[which(lengths(pca.biPlot)>0)]#
-		#n.pca      <- sapply(X=pca.layout.mat[rangeK.pca-1],FUN=max,na.rm=TRUE)#
-		n.pca               <- sapply(X=pca.psets[rangeK.pca-1],FUN=max,na.rm=TRUE)#
-		names.bottom.pca    <- lapply(X=1:length(n.pca),FUN=function(x){paste0("PC",1:(n.pca[[x]]-1))})#
-		names.left.pca      <- lapply(X=1:length(n.pca),FUN=function(x){paste0("PC",2:(n.pca[[x]]))})#
-		pca.biPlot.arranged <- lapply(rangeK.pca, FUN=function(z){dapc.biplot.arrange(pca.biPlot,K=z,layout.mat=pca.layout.mat[[z-1]],use.diag=c(1,2),col.labels.bottom=names.bottom.pca[[which(rangeK.pca==z)]],row.labels.left=names.left.pca[[which(rangeK.pca==z)]],outer.text=list(NULL,NULL,paste0("K=",z,"; Biplots of retained principle components"),NULL))})#
-		#pca.biPlot.arranged      <- dapc.biplot.arrange(pca.biPlot)#
-	} else {#
-		pca.biPlot.arranged <- NULL#
-	}
-plot(pca.biPlot.arranged[[1]])
-index.mat
-index.matrix
-t(index.matrix)
-layout.mat
-t(layout.mat)
-devtools::document()
-if(any(lengths(da.biPlot)>0)){#
-		rangeK.da <- c(2:kmax)[which(lengths(da.biPlot)>0)]#
-		n.da      <- sapply(X=da.psets[rangeK.da-1],FUN=max,na.rm=TRUE)#
-		names.bottom.da  <- lapply(X=1:length(n.da),FUN=function(x){paste0("DF",1:(n.da[[x]]-1))})#
-		names.left.da <- lapply(X=1:length(n.da),FUN=function(x){paste0("DF",2:(n.da[[x]]))})#
-		da.biplot.arranged <- lapply(rangeK.da, FUN=function(z){dapc.biplot.arrange(da.biPlot,K=z,layout.mat=da.layout.mat[[z-1]],use.diag=c(1,2),col.labels.bottom=names.bottom.da[[which(rangeK.da==z)]],row.labels.left=names.left.da[[which(rangeK.da==z)]],outer.text=list(NULL,NULL,paste0("K=",z,"; Biplots of discriminant functions"),NULL))})#
-	} else {#
-		da.biplot.arranged <- NULL#
-	}#
-	if(any(lengths(pca.biPlot)>0)){#
-		rangeK.pca <- c(2:kmax)[which(lengths(pca.biPlot)>0)]#
-		#n.pca      <- sapply(X=pca.layout.mat[rangeK.pca-1],FUN=max,na.rm=TRUE)#
-		n.pca               <- sapply(X=pca.psets[rangeK.pca-1],FUN=max,na.rm=TRUE)#
-		names.bottom.pca    <- lapply(X=1:length(n.pca),FUN=function(x){paste0("PC",1:(n.pca[[x]]-1))})#
-		names.left.pca      <- lapply(X=1:length(n.pca),FUN=function(x){paste0("PC",2:(n.pca[[x]]))})#
-		pca.biPlot.arranged <- lapply(rangeK.pca, FUN=function(z){dapc.biplot.arrange(pca.biPlot,K=z,layout.mat=pca.layout.mat[[z-1]],use.diag=c(1,2),col.labels.bottom=names.bottom.pca[[which(rangeK.pca==z)]],row.labels.left=names.left.pca[[which(rangeK.pca==z)]],outer.text=list(NULL,NULL,paste0("K=",z,"; Biplots of retained principle components"),NULL))})#
-		#pca.biPlot.arranged      <- dapc.biplot.arrange(pca.biPlot)#
-	} else {#
-		pca.biPlot.arranged <- NULL#
-	}
-plot(pca.biPlot.arranged[[1]])
-index.matrix <- matrix(1:length(layout.mat),ncol=ncol(layout.mat),byrow=TRUE)
-index.matrix
-devtools::document()
-if(any(lengths(da.biPlot)>0)){#
-		rangeK.da <- c(2:kmax)[which(lengths(da.biPlot)>0)]#
-		n.da      <- sapply(X=da.psets[rangeK.da-1],FUN=max,na.rm=TRUE)#
-		names.bottom.da  <- lapply(X=1:length(n.da),FUN=function(x){paste0("DF",1:(n.da[[x]]-1))})#
-		names.left.da <- lapply(X=1:length(n.da),FUN=function(x){paste0("DF",2:(n.da[[x]]))})#
-		da.biplot.arranged <- lapply(rangeK.da, FUN=function(z){dapc.biplot.arrange(da.biPlot,K=z,layout.mat=da.layout.mat[[z-1]],use.diag=c(1,2),col.labels.bottom=names.bottom.da[[which(rangeK.da==z)]],row.labels.left=names.left.da[[which(rangeK.da==z)]],outer.text=list(NULL,NULL,paste0("K=",z,"; Biplots of discriminant functions"),NULL))})#
-	} else {#
-		da.biplot.arranged <- NULL#
-	}#
-	if(any(lengths(pca.biPlot)>0)){#
-		rangeK.pca <- c(2:kmax)[which(lengths(pca.biPlot)>0)]#
-		#n.pca      <- sapply(X=pca.layout.mat[rangeK.pca-1],FUN=max,na.rm=TRUE)#
-		n.pca               <- sapply(X=pca.psets[rangeK.pca-1],FUN=max,na.rm=TRUE)#
-		names.bottom.pca    <- lapply(X=1:length(n.pca),FUN=function(x){paste0("PC",1:(n.pca[[x]]-1))})#
-		names.left.pca      <- lapply(X=1:length(n.pca),FUN=function(x){paste0("PC",2:(n.pca[[x]]))})#
-		pca.biPlot.arranged <- lapply(rangeK.pca, FUN=function(z){dapc.biplot.arrange(pca.biPlot,K=z,layout.mat=pca.layout.mat[[z-1]],use.diag=c(1,2),col.labels.bottom=names.bottom.pca[[which(rangeK.pca==z)]],row.labels.left=names.left.pca[[which(rangeK.pca==z)]],outer.text=list(NULL,NULL,paste0("K=",z,"; Biplots of retained principle components"),NULL))})#
-		#pca.biPlot.arranged      <- dapc.biplot.arrange(pca.biPlot)#
-	} else {#
-		pca.biPlot.arranged <- NULL#
-	}
-plot(pca.biPlot.arranged[[1]])
-devtools::document()
-if(any(lengths(da.biPlot)>0)){#
-		rangeK.da <- c(2:kmax)[which(lengths(da.biPlot)>0)]#
-		n.da      <- sapply(X=da.psets[rangeK.da-1],FUN=max,na.rm=TRUE)#
-		names.bottom.da  <- lapply(X=1:length(n.da),FUN=function(x){paste0("DF",1:(n.da[[x]]-1))})#
-		names.left.da <- lapply(X=1:length(n.da),FUN=function(x){paste0("DF",2:(n.da[[x]]))})#
-		da.biplot.arranged <- lapply(rangeK.da, FUN=function(z){dapc.biplot.arrange(da.biPlot,K=z,layout.mat=da.layout.mat[[z-1]],use.diag=c(1,2),col.labels.bottom=names.bottom.da[[which(rangeK.da==z)]],row.labels.left=names.left.da[[which(rangeK.da==z)]],outer.text=list(NULL,NULL,paste0("K=",z,"; Biplots of discriminant functions"),NULL))})#
-	} else {#
-		da.biplot.arranged <- NULL#
-	}#
-	if(any(lengths(pca.biPlot)>0)){#
-		rangeK.pca <- c(2:kmax)[which(lengths(pca.biPlot)>0)]#
-		#n.pca      <- sapply(X=pca.layout.mat[rangeK.pca-1],FUN=max,na.rm=TRUE)#
-		n.pca               <- sapply(X=pca.psets[rangeK.pca-1],FUN=max,na.rm=TRUE)#
-		names.bottom.pca    <- lapply(X=1:length(n.pca),FUN=function(x){paste0("PC",1:(n.pca[[x]]-1))})#
-		names.left.pca      <- lapply(X=1:length(n.pca),FUN=function(x){paste0("PC",2:(n.pca[[x]]))})#
-		pca.biPlot.arranged <- lapply(rangeK.pca, FUN=function(z){dapc.biplot.arrange(pca.biPlot,K=z,layout.mat=pca.layout.mat[[z-1]],use.diag=c(1,2),col.labels.bottom=names.bottom.pca[[which(rangeK.pca==z)]],row.labels.left=names.left.pca[[which(rangeK.pca==z)]],outer.text=list(NULL,NULL,paste0("K=",z,"; Biplots of retained principle components"),NULL))})#
-		#pca.biPlot.arranged      <- dapc.biplot.arrange(pca.biPlot)#
-	} else {#
-		pca.biPlot.arranged <- NULL#
-	}
-if(any(lengths(da.biPlot)>0)){#
-		rangeK.da <- c(2:kmax)[which(lengths(da.biPlot)>0)]#
-		n.da      <- sapply(X=da.psets[rangeK.da-1],FUN=max,na.rm=TRUE)#
-		names.bottom.da  <- lapply(X=1:length(n.da),FUN=function(x){paste0("DF",1:(n.da[[x]]-1))})#
-		names.left.da <- lapply(X=1:length(n.da),FUN=function(x){paste0("DF",2:(n.da[[x]]))})#
-		da.biplot.arranged <- lapply(rangeK.da, FUN=function(z){dapc.biplot.arrange(da.biPlot,K=z,layout.mat=da.layout.mat[[z-1]],use.diag=NULL,col.labels.bottom=names.bottom.da[[which(rangeK.da==z)]],row.labels.left=names.left.da[[which(rangeK.da==z)]],outer.text=list(NULL,NULL,paste0("K=",z,"; Biplots of discriminant functions"),NULL))})#
-	} else {#
-		da.biplot.arranged <- NULL#
-	}#
-	if(any(lengths(pca.biPlot)>0)){#
-		rangeK.pca <- c(2:kmax)[which(lengths(pca.biPlot)>0)]#
-		#n.pca      <- sapply(X=pca.layout.mat[rangeK.pca-1],FUN=max,na.rm=TRUE)#
-		n.pca               <- sapply(X=pca.psets[rangeK.pca-1],FUN=max,na.rm=TRUE)#
-		names.bottom.pca    <- lapply(X=1:length(n.pca),FUN=function(x){paste0("PC",1:(n.pca[[x]]-1))})#
-		names.left.pca      <- lapply(X=1:length(n.pca),FUN=function(x){paste0("PC",2:(n.pca[[x]]))})#
-		pca.biPlot.arranged <- lapply(rangeK.pca, FUN=function(z){dapc.biplot.arrange(pca.biPlot,K=z,layout.mat=pca.layout.mat[[z-1]],use.diag=NULL,col.labels.bottom=names.bottom.pca[[which(rangeK.pca==z)]],row.labels.left=names.left.pca[[which(rangeK.pca==z)]],outer.text=list(NULL,NULL,paste0("K=",z,"; Biplots of retained principle components"),NULL))})#
-		#pca.biPlot.arranged      <- dapc.biplot.arrange(pca.biPlot)#
-	} else {#
-		pca.biPlot.arranged <- NULL#
-	}
-plot(pca.biPlot.arranged[[1]])
-devtools::document()
-for(K in 2:max.clusters){#
-		i=(K-1)#
-		dapc.pcabest.K      <- adegenet::dapc(genind, grp.mat[,i],n.pca=best.npca[i],n.da=5)#
-		dapc.pcabest.list[[i]] <- dapc.pcabest.K#
-		posterior           <- dapc.pcabest.K$posterior#
-		q.matrix            <- posterior#
-		posterior.list[[i]] <- posterior#
-		posterior.df        <- data.frame(indv=rep(rownames(posterior),ncol(posterior)), pop=rep(colnames(posterior),each=nrow(posterior)), assignment=c(posterior),K=K)#
-		q.df[[i]]           <- posterior.df#
-		##### ggplot scatterplots of discriminant functions#
-		####
-	#	scatterPlot.i       <- ggscatter.dapc(dapc.pcabest.K,col=myCols,legend=F,cstar=1,cpoint=4,label=T)#
-	#	scatterPlot[[i]]    <- scatterPlot.i#
-		### density plots of discriminant functions#
-		density.da.list.i <- list(); length(density.da.list.i) <- dapc.pcabest.K$n.da#
-		for(z in 1:dapc.pcabest.K$n.da){#
-			density.da.list.i[[z]] <- ggscatter.dapc(dapc.pcabest.K,xax=z,yax=z,col=myCols,legend=F,show.title=F,hideperimeter=T)#
-		}#
-		### biplots of discriminant functions#
-		if(dapc.pcabest.K$n.da>1){#
-			da.pairs.i     <- pset(x=1:dapc.pcabest.K$n.da,min.length=2,max.length=2)#
-			da.pairs.mat.i    <- do.call(rbind,da.pairs.i)#
-			da.psets[[i]]     <- da.pairs.mat.i#
-			da.layout.mat.i   <- matrix(data=NA,nrow=max(da.pairs.mat.i[,1]),ncol=max(da.pairs.mat.i[,2]))#
-			for(j in 1:length(da.pairs.i)){#
-				da.layout.mat.i[da.pairs.mat.i[j,1],da.pairs.mat.i[j,2]] <- j#
-			}#
-			da.layout.mat[[i]] <- da.layout.mat.i[,c(2:ncol(da.layout.mat.i)),drop=F]#
-			biplots.da.list.i <- list(); length(biplots.da.list.i) <- length(da.pairs.i)#
-			for(z in 1:length(da.pairs.i)){#
-				da.pairs.i.z <- da.pairs.i[[z]]#
-				biplots.da.list.i[[z]] <- ggscatter.dapc(dapc.pcabest.K,xax=da.pairs.i.z[1],yax=da.pairs.i.z[2],col=myCols,legend=F,cstar=1,cpoint=4,label=F,show.title=F,varname="DF",axis.title.cex=0.7,hideperimeter=T)#
-			}#
-		} else {#
-			biplots.da.list.i  <- NULL#
-			da.psets[[i]]      <- NULL#
-			da.layout.mat[[i]] <- NULL#
-		}#
-		##### ggplot density plots of principle components#
-		density.pca.list.i <- list(); length(density.pca.list.i) <- dapc.pcabest.K$n.pca#
-		for(z in 1:dapc.pcabest.K$n.pca){#
-			density.pca.list.i[[z]] <- ggscatter.dapc(dapc.pcabest.K,vartype="pc",xax=z,yax=z,col=myCols,legend=F,show.title=F,hideperimeter=T)#
-		}#
-		### ggplot biplots of principle components#
-		if(dapc.pcabest.K$n.pca>1){#
-			pca.pairs.i        <- pset(x=1:dapc.pcabest.K$n.pca,min.length=2,max.length=2)#
-			pca.pairs.mat.i    <- do.call(rbind,pca.pairs.i)#
-			pca.psets[[i]]     <- pca.pairs.mat.i#
-			pca.layout.mat.i   <- matrix(data=NA,nrow=max(pca.pairs.mat.i[,1]),ncol=max(pca.pairs.mat.i[,2]))#
-			for(j in 1:length(pca.pairs.i)){#
-				pca.layout.mat.i[pca.pairs.mat.i[j,1],pca.pairs.mat.i[j,2]] <- j#
-			}#
-			pca.layout.mat[[i]] <- pca.layout.mat.i[,c(2:ncol(pca.layout.mat.i)),drop=F]#
-			biplots.pca.list.i <- list(); length(biplots.pca.list.i) <- length(pca.pairs.i)#
-			for(z in 1:length(pca.pairs.i)){#
-				pca.pairs.i.z           <- pca.pairs.i[[z]]#
-				biplots.pca.list.i[[z]] <- ggscatter.dapc(dapc.pcabest.K,vartype="pc",xax=pca.pairs.i.z[1],yax=pca.pairs.i.z[2],col=myCols,legend=F,cstar=0,cpoint=4,label=F,show.title=F,varname="PC",axis.title.cex=0.7,hideperimeter=T)#
-			}#
-		} else {#
-			biplots.pca.list.i  <- NULL#
-			pca.psets[[i]]      <- NULL#
-			pca.layout.mat[[i]] <- NULL#
-		}#
-		posterior.gg        <- ggplot2::ggplot(posterior.df, ggplot2::aes(fill= pop, x= assignment, y=indv)) + ggplot2::geom_bar(position="stack", stat="identity") + ggplot2::theme_classic() + ggplot2::theme(axis.text.y = ggplot2::element_text(size = label.size), panel.grid.major = ggplot2::element_blank(), panel.grid.minor = ggplot2::element_blank(), panel.background = ggplot2::element_blank()) + ggplot2::labs(x = "Membership Probability",y="",fill="Cluster",title=paste0("K = ",K,"; PCs retained = ",best.npca[i])) + ggplot2::scale_fill_manual(values=myCols[1:K])#
-		admixturePlot[[i]]  <- posterior.gg#
-		#indv.KmaxPosterior <- apply(X=q.matrix, MARGIN=1, FUN=function(x){which(x==max(x))})#
-		indv.maxPosterior  <- apply(X=q.matrix, MARGIN=1, FUN=function(x){max(x)})#
-		labels             <- rep("",nrow(posterior.df))#
-		labels[posterior.df[,"assignment"] %in% indv.maxPosterior] <- "+"#
-		assignment.K       <- ggplot2::ggplot(data=posterior.df, ggplot2::aes(x= pop, y=indv,fill=assignment)) + ggplot2::geom_tile(color="gray") + ggplot2::theme_classic() + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5), axis.text.y = ggplot2::element_text(size = label.size), panel.grid.major = ggplot2::element_blank(), panel.grid.minor = ggplot2::element_blank(), panel.background = ggplot2::element_blank(), legend.position = "none", ) + ggplot2::labs(title = paste0("K = ",K,"; PCs retained = ", best.npca[i]), x="Clusters", y="") + ggplot2::scale_fill_gradient2(low = "white", mid = "yellow", high = "red", midpoint = 0.5) + ggplot2::geom_text(label=labels)#
-		assignmentPlot[[i]]  <- assignment.K#
-		if(!is.null(coords)){#
-			my.palette      <- tess3r::CreatePalette(myCols[1:K], 9)#
-			tess3r.qmat     <- suppressWarnings(tess3r::as.qmatrix(q.matrix))#
-			coords.mat      <- as.matrix(coords)#
-			mapplot.i       <- tess3r::ggtess3Q(tess3r.qmat,coords.mat, interpolation.model = tess3r::FieldsKrigModel(10),resolution = c(500,500), col.palette = my.palette, window=c(x.min,x.max,y.min,y.max),background=TRUE,map.polygon=world_sp)#
-			mapplot[[i]]    <- mapplot.i + ggplot2::theme_classic() + ggplot2::labs(title=paste0("Ancestry coefficients; K=",K), x="latitude", y="longitude") + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) + current.gg.sf + ggplot2::geom_point(data = coords, ggplot2::aes(x = Lon, y = Lat), size = 1, shape = 21, fill = "black")#
-		}#
-		da.densityPlot[[i]]  <- density.da.list.i#
-		da.biPlot[[i]]       <- biplots.da.list.i#
-		pca.densityPlot[[i]] <- density.pca.list.i#
-		pca.biPlot[[i]]      <- biplots.pca.list.i#
-	}#
-	### Plots of DF or PC density for each given K#
-	da.density.arranged      <- dapc.plot.arrange(da.densityPlot)#
-	pca.densityPlot.arranged <- dapc.plot.arrange(pca.densityPlot,variable="PC")#
-	### Plots of DF vs DF or PC vs PC for each pairwise combination, for given K#
-	if(any(lengths(da.biPlot)>0)){#
-		rangeK.da <- c(2:kmax)[which(lengths(da.biPlot)>0)]#
-		n.da      <- sapply(X=da.psets[rangeK.da-1],FUN=max,na.rm=TRUE)#
-		names.bottom.da  <- lapply(X=1:length(n.da),FUN=function(x){paste0("DF",1:(n.da[[x]]-1))})#
-		names.left.da <- lapply(X=1:length(n.da),FUN=function(x){paste0("DF",2:(n.da[[x]]))})#
-		da.biplot.arranged <- lapply(rangeK.da, FUN=function(z){dapc.biplot.arrange(da.biPlot,K=z,layout.mat=da.layout.mat[[z-1]],use.diag=NULL,col.labels.bottom=names.bottom.da[[which(rangeK.da==z)]],row.labels.left=names.left.da[[which(rangeK.da==z)]],outer.text=list(NULL,NULL,paste0("K=",z,"; Biplots of discriminant functions"),NULL))})#
-	} else {#
-		da.biplot.arranged <- NULL#
-	}#
-	if(any(lengths(pca.biPlot)>0)){#
-		rangeK.pca <- c(2:kmax)[which(lengths(pca.biPlot)>0)]#
-		#n.pca      <- sapply(X=pca.layout.mat[rangeK.pca-1],FUN=max,na.rm=TRUE)#
-		n.pca               <- sapply(X=pca.psets[rangeK.pca-1],FUN=max,na.rm=TRUE)#
-		names.bottom.pca    <- lapply(X=1:length(n.pca),FUN=function(x){paste0("PC",1:(n.pca[[x]]-1))})#
-		names.left.pca      <- lapply(X=1:length(n.pca),FUN=function(x){paste0("PC",2:(n.pca[[x]]))})#
-		pca.biPlot.arranged <- lapply(rangeK.pca, FUN=function(z){dapc.biplot.arrange(pca.biPlot,K=z,layout.mat=pca.layout.mat[[z-1]],use.diag=NULL,col.labels.bottom=names.bottom.pca[[which(rangeK.pca==z)]],row.labels.left=names.left.pca[[which(rangeK.pca==z)]],outer.text=list(NULL,NULL,paste0("K=",z,"; Biplots of retained principle components"),NULL))})#
-		#pca.biPlot.arranged      <- dapc.biplot.arrange(pca.biPlot)#
-	} else {#
-		pca.biPlot.arranged <- NULL#
-	}
-plot(pca.biPlot.arranged[[1]])
-devtools::document()
-plot(da.biPlot.arranged[[1]])
-da.biPlot.arranged
-da.biplot.arranged
-plot(da.biplot.arranged[[1]])
-plot(da.biplot.arranged[[2]])
-plot(da.biplot.arranged[[3]])
-plot(da.biplot.arranged[[4]])
-plot(da.biplot.arranged[[5]])
-plot(da.biplot.arranged[[4]])
-n.da
-n.pca
-plot(da.biplot.arranged[[5]])
-plot(da.biplot.arranged[[4]])
-plot(pca.biPlot.arranged[[4]])
-devtools::document()
-save.as
-q.df    <- do.call(rbind,q.df)#
-	#dapc.df <- do.call(rbind,dapc.df)#
-	if(".Qlog" %in% include.out){#
-		write.table(x=q.df,file=paste0(tools::file_path_sans_ext(save.as),".Qlog"),row.names=FALSE,col.names=TRUE,quote=FALSE,sep="\t")#
-	}#
-	#if(bestK>1){
-dapc.componentPlots <- c(da.density.arranged,da.biplot.arranged,pca.densityPlot.arranged,pca.biplot.arranged)
-pca.biplot.arranged <- pca.biPlot.arranged
-dapc.componentPlots <- c(da.density.arranged,da.biplot.arranged,pca.densityPlot.arranged,pca.biplot.arranged)
-length(dapc.componentPlots)
-plot(dapc.componentPlots[[1])
-plot(dapc.componentPlots[[1]])
-class(dapc.componentPlots[[1]])
-dapc.componentPlots <- do.call(c, c(da.density.arranged,da.biplot.arranged,pca.densityPlot.arranged,pca.biplot.arranged))
-length(dapc.componentPlots)
-plot(dapc.componentPlots)
-class(da.density.arranged0
-class(da.density.arranged)
-plot(da.density.arranged[[1]])
-plot(da.density.arranged[1])
-plot(da.density.arranged)
-plot(pca.density.arranged)
-pca.density.arranged <- dapc.plot.arrange(pca.densityPlot,variable="PC")
-plot(pca.density.arranged)
-plot(da.density.arranged)
-devtools::document()
-lengths(pca.densityPlot)
-lengths(da.densityPlot)
-plot(pca.density.arranged)
-2:(length(lengths(da.densityPlot))+1)
-n.da
-n.da.density      <- max(lengths(da.densityPlot),na.rm=TRUE)
-n.da.density
-rangeK.da.density <- 2:(length(lengths(da.densityPlot))+1)#
-	n.da.density      <- max(lengths(da.densityPlot),na.rm=TRUE)#
-	rangeK.pca.density <- 2:(length(lengths(pca.densityPlot))+1)#
-	n.pca.density      <- max(lengths(pca.densityPlot),na.rm=TRUE)
-rangeK.da.density#
-	n.da.density      #
-	rangeK.pca.density#
-	n.pca.density
-lengths(da.densityPlot)
-x=pca.densityPlot#
-variable="PC"
-layout.mat=NULL#
-row.labels.left=NULL#
-col.labels.top=NULL#
-row.labels.right=NULL#
-col.labels.bottom=NULL#
-pad=0.1#
-K=NULL#
-outer.text=list(NULL,NULL,paste0("Principle component densities vs. K"), NULL)
-numplots   <- lengths(x)#
-	stat.max   <- max(numplots)#
-	#layout.mat0 <- matrix(data=NA,nrow=length(numplots), ncol=stat.max)#
-	#for(i in 1:length(numplots)){#
-	#	if(numplots[i]==0){#
-	#		next#
-	#	} else {#
-	#		layout.mat0[i,1:numplots[i]] <- rep(1,numplots[i])#
-	#	}#
-	#}#
-	#vals       <- c(t(layout.mat0))#
-	#ent.update <- which(vals!=0)#
-	#vals[ent.update] <- 1:length(ent.update)#
-	vals <- do.call(c,lapply(1:length(numplots),FUN=function(x){c(rep(1, numplots[x]),rep(NA,c(stat.max-numplots)[x]))}))#
-	vals[which(vals!=0)] <- 1:length(which(vals!=0))#
-	gg.list    <- do.call(c, x)#
-	grobs.list <- lapply(gg.list, FUN=ggplot2::ggplotGrob)#
-	layout.mat <- matrix(data=1:length(vals),nrow=length(numplots), ncol=stat.max,byrow=TRUE)#
-	kmax=nrow(layout.mat)+1#
-	stat.max <- ncol(layout.mat)#
-	col1.vals  <- c(layout.mat[,1])[-1]#
-	row1.vals  <- c(layout.mat[1,])[-1]#
-	m1n1.names <- c("K=2",paste0(variable,"1"))
-if(stat.max>1){#
-		col1.names     <- paste0(variable,2:stat.max)#
-		col.labels.top <- col1.names#
-	} else {#
-		col1.names <- NULL#
-	}#
-	if(kmax>2){#
-		row1.names      <- paste0("K=",3:kmax)#
-		row.labels.left <- row1.names#
-	} else {#
-		row1.names <- NULL#
-	}
-row.labels.left
-col.labels.top
-nm  <- nrow(layout.mat)#
-	nn  <- ncol(layout.mat)#
-	len <- nm*nn
-nm
-nn
-len
-if(is.null(row.labels.left)){#
-		row.labels.left <- rep("",nrow(layout.mat))#
-	}#
-	if(is.null(row.labels.right)){#
-		row.labels.right <- rep("",nrow(layout.mat))#
-	}#
-	if(is.null(col.labels.top)){#
-		col.labels.top <- rep("",ncol(layout.mat))#
-	}#
-	if(is.null(col.labels.bottom)){#
-		col.labels.bottom <- rep("",ncol(layout.mat))#
-	}
-empty.matrix <- matrix(data="",nrow=nm,ncol=nn)#
-	### Index assigned to each plot of the table of plots#
-	index.matrix <- matrix(1:length(layout.mat),ncol=ncol(layout.mat),byrow=FALSE)
-index.matrix
-empty.matrix
-if(nm>1){#
-		if(1 %in% use.diag & nm==nn){#
-			bottom.mat <- empty.matrix#
-			bottom.mat[diag(index.matrix)] <- col.labels.bottom#
-		} else {#
-			bottom.mat <- unname(rbind(matrix(data="",nrow=(nm-1),ncol=nn),col.labels.bottom))#
-		}#
-		if(3 %in% use.diag & nm==nn){#
-			top.mat <- empty.matrix#
-			top.mat[diag(index.matrix)] <- col.labels.top#
-		} else {#
-			top.mat    <- unname(rbind(col.labels.top,matrix(data="",nrow=(nm-1),ncol=nn)))#
-		}#
-	} else {#
-		bottom.mat <- matrix(data=col.labels.bottom,nrow=1)#
-		top.mat    <- matrix(data=col.labels.top,nrow=1)#
-	}#
-	if(nn>1){#
-		if(2 %in% use.diag & nm==nn){#
-			left.mat   <- empty.matrix#
-			left.mat[diag(index.matrix)] <- row.labels.left#
-		} else {#
-			left.mat   <- unname(cbind(row.labels.left,matrix(data="",nrow=nm,ncol=(nn-1))))#
-		}#
-		if(4 %in% use.diag & nm==nn){#
-			right.mat  <- empty.matrix#
-			right.mat[diag(index.matrix)] <- row.labels.right#
-		} else {#
-			right.mat  <- unname(cbind(matrix(data="",nrow=nm,ncol=(nn-1)),row.labels.right))#
-		}#
-	} else {#
-		left.mat   <- matrix(data=row.labels.left,ncol=1)#
-		right.mat  <- matrix(data=row.labels.right,ncol=1)#
-	}
-col.labels.top
-nn
-ncol(layout.mat)
-if(stat.max>1){#
-		col1.names     <- paste0(variable,2:stat.max)#
-		row.labels.left <- row1.names#
-	} else {#
-		col1.names <- NULL#
-	}#
-	if(kmax>2){#
-		row1.names      <- paste0("K=",3:kmax)#
-		col.labels.top <- col1.names#
-	} else {#
-		row1.names <- NULL#
-	}#
-#
-	nm  <- nrow(layout.mat)#
-	nn  <- ncol(layout.mat)#
-	len <- nm*nn#
-	#vals     <- c(t(layout.mat))#
-	#numplots <- length(vals)#
-	if(is.null(row.labels.left)){#
-		row.labels.left <- rep("",nrow(layout.mat))#
-	}#
-	if(is.null(row.labels.right)){#
-		row.labels.right <- rep("",nrow(layout.mat))#
-	}#
-	if(is.null(col.labels.top)){#
-		col.labels.top <- rep("",ncol(layout.mat))#
-	}#
-	if(is.null(col.labels.bottom)){#
-		col.labels.bottom <- rep("",ncol(layout.mat))#
-	}#
-	### character matrix of empty strings#
-	empty.matrix <- matrix(data="",nrow=nm,ncol=nn)#
-	### Index assigned to each plot of the table of plots#
-	index.matrix <- matrix(1:length(layout.mat),ncol=ncol(layout.mat),byrow=FALSE)#
-	### Matrices holding the bottom, left, top, and right labels, respectively, for each plot.
-if(nm>1){#
-		if(1 %in% use.diag & nm==nn){#
-			bottom.mat <- empty.matrix#
-			bottom.mat[diag(index.matrix)] <- col.labels.bottom#
-		} else {#
-			bottom.mat <- unname(rbind(matrix(data="",nrow=(nm-1),ncol=nn),col.labels.bottom))#
-		}#
-		if(3 %in% use.diag & nm==nn){#
-			top.mat <- empty.matrix#
-			top.mat[diag(index.matrix)] <- col.labels.top#
-		} else {#
-			top.mat    <- unname(rbind(col.labels.top,matrix(data="",nrow=(nm-1),ncol=nn)))#
-		}#
-	} else {#
-		bottom.mat <- matrix(data=col.labels.bottom,nrow=1)#
-		top.mat    <- matrix(data=col.labels.top,nrow=1)#
-	}
-nm
-nn
-col.labels.top
-col.labels.top  <- paste0(variable,2:stat.max)#
-	row.labels.left <- paste0("K=",2:kmax)
-if(is.null(row.labels.left)){#
-		row.labels.left <- rep("",nrow(layout.mat))#
-	}#
-	if(is.null(row.labels.right)){#
-		row.labels.right <- rep("",nrow(layout.mat))#
-	}#
-	if(is.null(col.labels.top)){#
-		col.labels.top <- rep("",ncol(layout.mat))#
-	}#
-	if(is.null(col.labels.bottom)){#
-		col.labels.bottom <- rep("",ncol(layout.mat))#
-	}#
-	### character matrix of empty strings#
-	empty.matrix <- matrix(data="",nrow=nm,ncol=nn)#
-	### Index assigned to each plot of the table of plots#
-	index.matrix <- matrix(1:length(layout.mat),ncol=ncol(layout.mat),byrow=FALSE)
-if(nm>1){#
-		if(1 %in% use.diag & nm==nn){#
-			bottom.mat <- empty.matrix#
-			bottom.mat[diag(index.matrix)] <- col.labels.bottom#
-		} else {#
-			bottom.mat <- unname(rbind(matrix(data="",nrow=(nm-1),ncol=nn),col.labels.bottom))#
-		}#
-		if(3 %in% use.diag & nm==nn){#
-			top.mat <- empty.matrix#
-			top.mat[diag(index.matrix)] <- col.labels.top#
-		} else {#
-			top.mat    <- unname(rbind(col.labels.top,matrix(data="",nrow=(nm-1),ncol=nn)))#
-		}#
-	} else {#
-		bottom.mat <- matrix(data=col.labels.bottom,nrow=1)#
-		top.mat    <- matrix(data=col.labels.top,nrow=1)#
-	}
-col.labels.top
-nm
-nn
-col.labels.top  <- paste0(variable,1:stat.max)#
-	row.labels.left <- paste0("K=",2:kmax)
-nm  <- nrow(layout.mat)#
-	nn  <- ncol(layout.mat)#
-	len <- nm*nn#
-	#vals     <- c(t(layout.mat))#
-	#numplots <- length(vals)#
-	if(is.null(row.labels.left)){#
-		row.labels.left <- rep("",nrow(layout.mat))#
-	}#
-	if(is.null(row.labels.right)){#
-		row.labels.right <- rep("",nrow(layout.mat))#
-	}#
-	if(is.null(col.labels.top)){#
-		col.labels.top <- rep("",ncol(layout.mat))#
-	}#
-	if(is.null(col.labels.bottom)){#
-		col.labels.bottom <- rep("",ncol(layout.mat))#
-	}#
-	### character matrix of empty strings#
-	empty.matrix <- matrix(data="",nrow=nm,ncol=nn)#
-	### Index assigned to each plot of the table of plots#
-	index.matrix <- matrix(1:length(layout.mat),ncol=ncol(layout.mat),byrow=FALSE)#
-	### Matrices holding the bottom, left, top, and right labels, respectively, for each plot.
-if(nm>1){#
-		if(1 %in% use.diag & nm==nn){#
-			bottom.mat <- empty.matrix#
-			bottom.mat[diag(index.matrix)] <- col.labels.bottom#
-		} else {#
-			bottom.mat <- unname(rbind(matrix(data="",nrow=(nm-1),ncol=nn),col.labels.bottom))#
-		}#
-		if(3 %in% use.diag & nm==nn){#
-			top.mat <- empty.matrix#
-			top.mat[diag(index.matrix)] <- col.labels.top#
-		} else {#
-			top.mat    <- unname(rbind(col.labels.top,matrix(data="",nrow=(nm-1),ncol=nn)))#
-		}#
-	} else {#
-		bottom.mat <- matrix(data=col.labels.bottom,nrow=1)#
-		top.mat    <- matrix(data=col.labels.top,nrow=1)#
-	}
-if(nn>1){#
-		if(2 %in% use.diag & nm==nn){#
-			left.mat   <- empty.matrix#
-			left.mat[diag(index.matrix)] <- row.labels.left#
-		} else {#
-			left.mat   <- unname(cbind(row.labels.left,matrix(data="",nrow=nm,ncol=(nn-1))))#
-		}#
-		if(4 %in% use.diag & nm==nn){#
-			right.mat  <- empty.matrix#
-			right.mat[diag(index.matrix)] <- row.labels.right#
-		} else {#
-			right.mat  <- unname(cbind(matrix(data="",nrow=nm,ncol=(nn-1)),row.labels.right))#
-		}#
-	} else {#
-		left.mat   <- matrix(data=row.labels.left,ncol=1)#
-		right.mat  <- matrix(data=row.labels.right,ncol=1)#
-	}
-grobsTable.list <- list(); length(grobsTable.list) <- length(vals)
-for(i in 1:length(vals)){#
-		#### Either creating an empty grob or getting a grob from grobs.list#
-		if(is.na(vals[i])){#
-			grob.i          <- grid::rectGrob(gp=grid::gpar(col=NA))#
-		} else {#
-			grob.i          <- grobs.list[[vals[i]]]#
-		}#
-		z <- which(index.matrix == i, arr.ind=TRUE)#
-		labels.i.list  <- list(bottom.mat[z],left.mat[z],top.mat[z],right.mat[z])#
-		if(is.null(use.diag)){#
-			labels.i.list2 <- list(); length(labels.i.list2) <- 4#
-			for(j in 1:4){#
-				if(labels.i.list[[j]]!=""){#
-					labels.i.list2[[j]] <- labels.i.list[[j]]#
-				}#
-			}#
-		} else {#
-			labels.i.list2 <- labels.i.list#
-		}#
-	#	grobsTable.list[[i]] <- gridExtra::arrangeGrob(grob.i,bottom=bottom.mat[z],left=left.mat[z],top=top.mat[z],right=right.mat[z])#
-		grobsTable.list[[i]] <- gridExtra::arrangeGrob(grob.i,bottom=labels.i.list2[[1]],left=labels.i.list2[[2]],top=labels.i.list2[[3]],right=labels.i.list2[[4]])#
-	}
-grobs.arranged0 <- gridExtra::arrangeGrob(grobs=grobsTable.list,layout_matrix=index.matrix,padding=unit(pad,"line"),respect=TRUE)
-if(!is.null(unlist(outer.text))){#
-		grobs.arranged <- gridExtra::arrangeGrob(grobs.arranged0,bottom=outer.text[[1]],left=outer.text[[2]],top=outer.text[[3]],right=outer.text[[4]])#
-	} else {#
-		grobs.arranged <- grobs.arranged0#
-	}
-plot(grobs.arranged)
-layout.mat
-is.null(use.diag)
-use.diag
-use.diag <- NULL
-grobsTable.list <- list(); length(grobsTable.list) <- length(vals)#
-	for(i in 1:length(vals)){#
-		#### Either creating an empty grob or getting a grob from grobs.list#
-		if(is.na(vals[i])){#
-			grob.i          <- grid::rectGrob(gp=grid::gpar(col=NA))#
-		} else {#
-			grob.i          <- grobs.list[[vals[i]]]#
-		}#
-		z <- which(index.matrix == i, arr.ind=TRUE)#
-		labels.i.list  <- list(bottom.mat[z],left.mat[z],top.mat[z],right.mat[z])#
-		if(is.null(use.diag)){#
-			labels.i.list2 <- list(); length(labels.i.list2) <- 4#
-			for(j in 1:4){#
-				if(labels.i.list[[j]]!=""){#
-					labels.i.list2[[j]] <- labels.i.list[[j]]#
-				}#
-			}#
-		} else {#
-			labels.i.list2 <- labels.i.list#
-		}#
-	#	grobsTable.list[[i]] <- gridExtra::arrangeGrob(grob.i,bottom=bottom.mat[z],left=left.mat[z],top=top.mat[z],right=right.mat[z])#
-		grobsTable.list[[i]] <- gridExtra::arrangeGrob(grob.i,bottom=labels.i.list2[[1]],left=labels.i.list2[[2]],top=labels.i.list2[[3]],right=labels.i.list2[[4]])#
-	}
-grobs.arranged0 <- gridExtra::arrangeGrob(grobs=grobsTable.list,layout_matrix=index.matrix,padding=unit(pad,"line"),respect=TRUE)#
-	if(!is.null(unlist(outer.text))){#
-		grobs.arranged <- gridExtra::arrangeGrob(grobs.arranged0,bottom=outer.text[[1]],left=outer.text[[2]],top=outer.text[[3]],right=outer.text[[4]])#
-	} else {#
-		grobs.arranged <- grobs.arranged0#
-	}
-plot(grobs.arranged)
-index.matrix <- matrix(1:length(layout.mat),ncol=ncol(layout.mat),byrow=TRUE)
-if(nm>1){#
-		if(1 %in% use.diag & nm==nn){#
-			bottom.mat <- empty.matrix#
-			bottom.mat[diag(index.matrix)] <- col.labels.bottom#
-		} else {#
-			bottom.mat <- unname(rbind(matrix(data="",nrow=(nm-1),ncol=nn),col.labels.bottom))#
-		}#
-		if(3 %in% use.diag & nm==nn){#
-			top.mat <- empty.matrix#
-			top.mat[diag(index.matrix)] <- col.labels.top#
-		} else {#
-			top.mat    <- unname(rbind(col.labels.top,matrix(data="",nrow=(nm-1),ncol=nn)))#
-		}#
-	} else {#
-		bottom.mat <- matrix(data=col.labels.bottom,nrow=1)#
-		top.mat    <- matrix(data=col.labels.top,nrow=1)#
-	}#
-	if(nn>1){#
-		if(2 %in% use.diag & nm==nn){#
-			left.mat   <- empty.matrix#
-			left.mat[diag(index.matrix)] <- row.labels.left#
-		} else {#
-			left.mat   <- unname(cbind(row.labels.left,matrix(data="",nrow=nm,ncol=(nn-1))))#
-		}#
-		if(4 %in% use.diag & nm==nn){#
-			right.mat  <- empty.matrix#
-			right.mat[diag(index.matrix)] <- row.labels.right#
-		} else {#
-			right.mat  <- unname(cbind(matrix(data="",nrow=nm,ncol=(nn-1)),row.labels.right))#
-		}#
-	} else {#
-		left.mat   <- matrix(data=row.labels.left,ncol=1)#
-		right.mat  <- matrix(data=row.labels.right,ncol=1)#
-	}#
-	grobsTable.list <- list(); length(grobsTable.list) <- length(vals)#
-	for(i in 1:length(vals)){#
-		#### Either creating an empty grob or getting a grob from grobs.list#
-		if(is.na(vals[i])){#
-			grob.i          <- grid::rectGrob(gp=grid::gpar(col=NA))#
-		} else {#
-			grob.i          <- grobs.list[[vals[i]]]#
-		}#
-		z <- which(index.matrix == i, arr.ind=TRUE)#
-		labels.i.list  <- list(bottom.mat[z],left.mat[z],top.mat[z],right.mat[z])#
-		if(is.null(use.diag)){#
-			labels.i.list2 <- list(); length(labels.i.list2) <- 4#
-			for(j in 1:4){#
-				if(labels.i.list[[j]]!=""){#
-					labels.i.list2[[j]] <- labels.i.list[[j]]#
-				}#
-			}#
-		} else {#
-			labels.i.list2 <- labels.i.list#
-		}#
-	#	grobsTable.list[[i]] <- gridExtra::arrangeGrob(grob.i,bottom=bottom.mat[z],left=left.mat[z],top=top.mat[z],right=right.mat[z])#
-		grobsTable.list[[i]] <- gridExtra::arrangeGrob(grob.i,bottom=labels.i.list2[[1]],left=labels.i.list2[[2]],top=labels.i.list2[[3]],right=labels.i.list2[[4]])#
-	}#
-	grobs.arranged0 <- gridExtra::arrangeGrob(grobs=grobsTable.list,layout_matrix=index.matrix,padding=unit(pad,"line"),respect=TRUE)#
-	if(!is.null(unlist(outer.text))){#
-		grobs.arranged <- gridExtra::arrangeGrob(grobs.arranged0,bottom=outer.text[[1]],left=outer.text[[2]],top=outer.text[[3]],right=outer.text[[4]])#
-	} else {#
-		grobs.arranged <- grobs.arranged0#
-	}
-plot(grobs.arranged)
-devtools::document()
-da.density.arranged  <- dapc.plot.arrange(da.densityPlot,variable="DF",outer.text=list(NULL,NULL,paste0("Density of discriminant function vs. K"), NULL))
-plot(da.density.arranged)
-devtools::document()
-da.density.arranged  <- dapc.plot.arrange(da.densityPlot,variable="DF",outer.text=list(NULL,NULL,paste0("Density of discriminant function vs. K"), NULL))
-plot(da.density.arranged)
-da.density.arranged[1:2,1:2]
-dim(da.density.arranged)
-dim(grobs.arranged0)
-plot(grobs.arranged0)
-plot(grobs.arranged0[1:2,1:2])
-nrow(grobs.arranged0)
-devtools::document()
-devtools::document()
-vcf
-include.out
-probs.out
-probs.out=NULL
-coords
-coords2
-coords=coords2
-kmax=7
-reps=2
-save.as
-save.as <- "/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/DAPC/test3.pdf"
-dapc.componentPlots <- c(pca.density.arranged,pca.biplot.arranged,da.density.arranged,da.biplot.arranged)
-length(dapc.componentPlots)
-plot(dapc.componentPlots[1])
-plot(dapc.componentPlots[[1]])
-names(dapc.componentPlots)
-dapc.componentPlots <- do.call(list,pca.density.arranged,pca.biplot.arranged,da.density.arranged,da.biplot.arranged)
-dapc.componentPlots <- do.call(list,list(pca.density.arranged,pca.biplot.arranged,da.density.arranged,da.biplot.arranged))
-length(dapc.componentPlots)
-plot(dapc.componentPlots)
-plot(dapc.componentPlots[[1]])
-plot(dapc.componentPlots[[2]])
-class(dapc.componentPlots[[2]])
-length(dapc.componentPlots[[2]])
-test <- do.call(c,pca.biplot.arranged)
+Kbest.criteria2
+KminVarBIC      <- which(BICvK.variation==min(BICvK.variation[-1]))
+Entropy.variation <- apply(X=crossentropy.mat,MARGIN=1,FUN=var,na.rm=TRUE)#
+	Kbest.criteria3   <- which(Entropy.variation==min(Entropy.variation[-1]))
+Kbest.criteria3
+segments(x0=bestK,y0=par("usr")[3],y1=par("usr")[4],lty=2)
+segments(x0=bestK,y0=par("usr")[3],y1=par("usr")[4],lty=2,col="green")
+segments(x0=Kbest.criteria2,y0=par("usr")[3],y1=par("usr")[4],lty=2,col="blue")#
+	segments(x0=Kbest.criteria3,y0=par("usr")[3],y1=par("usr")[4],lty=2,col="red")
+t.test(crossentropy.mat[2,],crossentropy.mat[3,])
+test <- t.test(crossentropy.mat[2,],crossentropy.mat[3,])
+test
 class(test)
-length(test)
-class(test[[1]])
-test <- c(pca.biplot.arranged,da.biplot.arranged)
-length(pca.biplot.arranged)
-length(da.biplot.arranged)
-length(test)
-test <- c(list(pca.density.arranged,da.density.arranged),pca.biplot.arranged,da.biplot.arranged)
-length(test)
-plot(test[[1]])
-plot(test[[2]])
-plot(test[[3]])
-dapc.componentPlots <- c(list(pca.density.arranged,da.density.arranged),pca.biplot.arranged,da.biplot.arranged)
-length(dapc.componentPlots)
-result <- c(list(BICPlot,grp.plot2),dapc.componentPlots,admixturePlot,assignmentPlot)
-pdf(height=6,width=10,file=save.as,onefile=TRUE)
-lapply(X=result,FUN=function(x){ifelse(is(x,"gtable"),grid.draw(x),print(x))})
-?grid.draw
-dev.off()
-dev.off()
-pdf(height=6,width=10,file=save.as,onefile=TRUE)
-lapply(X=result,FUN=function(x){ifelse(is(x,"gtable"),grid::grid.draw(x),print(x))})
-x
-dev.off()
-pdf(height=6,width=10,file=save.as,onefile=TRUE)
-lapply(X=result,FUN=print)
-dev.off()
-lapply(result,class)
-devtools::document()
-pdf(height=6,width=10,file=save.as,onefile=TRUE)
-length(dapc.componentPlots)
-lapply(X=dapc.componentPlots,FUN=grid::grid.draw)
-dev.off()
-library(grid)
-?grid.draw
-pdf(height=6,width=10,file=save.as,onefile=TRUE);grid.draw(dapc.componentPlots);dev.off()
-pdf(height=6,width=10,file=save.as,onefile=TRUE);grid.draw(dapc.componentPlots[[1]]);dev.off()
-pdf(height=6,width=10,file=save.as,onefile=TRUE);grid.draw(dapc.componentPlots[[2]]);dev.off()
-pdf(height=6,width=10,file=save.as,onefile=TRUE);lapply(X=1:length(dapc.componentPlots),FUN=function(x){grid::grid.draw(dapc.componentPlots[[x]]);grid.newpage()});dev.off()
-pdf(height=6,width=10,file=save.as,onefile=TRUE)#
-		#lapply(X=1:length(dapc.componentPlots),FUN=function(x){})#
-		for(i in 1:length(dapc.componentPlots)){#
-			grid::grid.draw(dapc.componentPlots[[i]])#
-			if(i < length(dapc.componentPlots)){#
-				grid.newpage()#
-			}#
+attributes(test)
+test$p.value
+mtext(side=1,"Number of ancestral populations",line=2.2)#
+	mtext(side=2,"Cross-entropy",line=2.2)#
+	mtext(side=3,paste0("Cross-entropy (",reps," replicates) vs. number of ancestral populations (K)"),line=1)#
+	axis(1,at=Krange)
+entropyPlot    <- recordPlot()#
+	Krange.plot    <- setdiff(Krange,1)
+Krange.plot
+entropyPlot
+admixturePlot  <- list(); length(admixturePlot)   <- length(Krange.plot)#
+	mapplot        <- list(); length(mapplot)         <- length(Krange.plot)
+K=2
+i=(K-1)#
+		ce           <- LEA::cross.entropy(snmf.obj, K = K)#
+		best         <- which.min(ce)#
+	#	q.matrix.best <- suppressWarnings(tess3r::as.qmatrix(LEA::Q(snmf.obj,K=bestK,run=best)))#
+		if(K < 5){#
+			myCols          <- goodcolors(K,thresh=100)#
 		}#
-		dev.off()
-length(BICPlot)
-plot(BICPlot)
-BICPlot
-class(BICPlot)
-dev.off()
-dev.off()
-BICPlot
-length(BICPlot)
-class(BICPlot)
-class(grp.plot2)
-results1 <- list(BICPlot,grp.plot2)#
-	results2 <- dapc.componentPlots#
-	if(!is.null(coords)){#
-#		result <- c(list(BICPlot,grp.plot2),dapc.componentPlots,admixturePlot,assignmentPlot,mapplot)#
-		results3 <- c(admixturePlot,assignmentPlot,mapplot)#
-	} else {#
-#		result <- c(list(BICPlot,grp.plot2),dapc.componentPlots,admixturePlot,assignmentPlot)#
-		results3 <- c(admixturePlot,assignmentPlot)#
-	}
-".pdf" %in% include.out
-pdf(height=6,width=10,file=save.as,onefile=TRUE)#
-		#lapply(X=1:length(dapc.componentPlots),FUN=function(x){})#
-		lapply(X=results1,FUN=print)#
-		for(i in 1:length(results2)){#
-			grid::grid.draw(results2[[i]])#
-			if(i < length(results2)){#
-				grid.newpage()#
-			}#
+		if(K >= 5 & K < 7){#
+			myCols          <- goodcolors(K,thresh=100,cbspace="deut")#
 		}#
-		lapply(X=results1,FUN=print)#
-		dev.off()
-dapc.plot.arrange
-results1.grobs.list <- lapply(results1, FUN=ggplot2::ggplotGrob)
-results1.gtable <- lapply(X=results1.grobs.list,FUN=gridExtra::arrangeGrob)
+		if(K >= 7 & K < 15){#
+			myCols          <- goodcolors(K,thresh=100,cbspace="")#
+		}#
+		if(K>=15){#
+			myCols          <- c(goodcolors(14,thresh=100,cbspace=""), sample(adegenet::funky(100), size=K-14))#
+		}
+q.matrix           <- LEA::Q(snmf.obj,K=K,run=best)#
+		rownames(q.matrix) <- samplenames#
+		colnames(q.matrix) <- paste0("cluster",1:ncol(q.matrix))#
+		posterior.df       <- data.frame(indv=rep(rownames(q.matrix),ncol(q.matrix)), pop=rep(colnames(q.matrix),each=nrow(q.matrix)), assignment=c(unlist(unname(q.matrix))))#
+		posterior.gg       <- ggplot2::ggplot(posterior.df, aes(fill= pop, x= assignment, y=indv)) + geom_bar(position="stack", stat="identity") + theme_classic() + theme(axis.text.y = element_text(size = label.size), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank()) + ggplot2::labs(x = "Membership Probability",y="",fill="Cluster",title=paste0("K = ",K)) + scale_fill_manual(values=myCols[1:K])#
+		plot(posterior.gg)#
+		admixturePlot[[i]]   <- recordPlot()
 if(!is.null(coords)){#
-#		result <- c(list(BICPlot,grp.plot2),dapc.componentPlots,admixturePlot,assignmentPlot,mapplot)#
-		results3 <- c(admixturePlot,assignmentPlot,mapplot)#
-	} else {#
-#		result <- c(list(BICPlot,grp.plot2),dapc.componentPlots,admixturePlot,assignmentPlot)#
-		results3 <- c(admixturePlot,assignmentPlot)#
-	}#
-	results3.grobs.list <- lapply(results3, FUN=ggplot2::ggplotGrob)#
-	results3.gtable     <- lapply(X=results3.grobs.list,FUN=gridExtra::arrangeGrob)
-class(results3)
-sapply(results3,class)
+			my.palette      <- tess3r::CreatePalette(myCols, 9)#
+			xdist           <- geosphere::distm(x=c(x.min,0),y=c(x.max,0))#
+			ydist           <- geosphere::distm(x=c(0,y.min),y=c(0,y.max))#
+			mapplot.initial <- plot(suppressWarnings(tess3r::as.qmatrix(q.matrix)), as.matrix(coords), method = "map.max", interpol = FieldsKrigModel(10), main = paste0("Ancestry coefficients; K=",K), xlab = "", ylab = "",resolution = c(100,100), cex = 0.4,col.palette = my.palette, window=c(x.min,x.max,y.min,y.max),asp=xdist/ydist)#
+			mapplot.i       <- plot(suppressWarnings(tess3r::as.qmatrix(q.matrix)), as.matrix(coords), method = "map.max", interpol = FieldsKrigModel(10), main = paste0("Ancestry coefficients; K=",K), xlab = "", ylab = "",resolution = c(500,500), cex = 0.4,col.palette = my.palette, window=c(par("usr")[1],par("usr")[2],par("usr")[3],par("usr")[4]),asp=xdist/ydist)#
+			mapplot[[i]]    <- recordPlot()#
+		}
+posterior.gg
 !is.null(coords)
+my.palette      <- tess3r::CreatePalette(myCols, 9)
+myCols
 coords
-coords=NULL
-if(!is.null(coords)){#
-#		result <- c(list(BICPlot,grp.plot2),dapc.componentPlots,admixturePlot,assignmentPlot,mapplot)#
-		results3 <- c(admixturePlot,assignmentPlot,mapplot)#
-	} else {#
-#		result <- c(list(BICPlot,grp.plot2),dapc.componentPlots,admixturePlot,assignmentPlot)#
-		results3 <- c(admixturePlot,assignmentPlot)#
-	}#
-	results3.grobs.list <- lapply(results3, FUN=ggplot2::ggplotGrob)#
-	results3.gtable     <- lapply(X=results3.grobs.list,FUN=gridExtra::arrangeGrob)
-class(results3.gtable )
-test<-c(results1.gtable,results2,results3.gtable)
-class(test)
-length(test)
-length(results1.gtable)
-length(results2)
-length(results3.gtable)
-result <- c(results1.gtable,results2,results3.gtable)
-if(".pdf" %in% include.out){#
-		#pdf(height=6,width=10,file=save.as,onefile=TRUE)#
-		#lapply(X=result,FUN=print)#
-	#	#lapply(X=result,FUN=function(x){ifelse(is(x,"gtable"),grid::grid.draw(x),print(x))})#
-		#dev.off()#
-		pdf(height=6,width=10,file=save.as,onefile=TRUE)#
-		#lapply(X=1:length(dapc.componentPlots),FUN=function(x){})#
-		#lapply(X=results1,FUN=print)#
-		for(i in 1:length(result)){#
-			grid::grid.draw(result[[i]])#
-			if(i < length(result)){#
-				grid.newpage()#
+xdist           <- geosphere::distm(x=c(x.min,0),y=c(x.max,0))#
+			ydist           <- geosphere::distm(x=c(0,y.min),y=c(0,y.max))
+xdist
+ydist
+mapplot.initial <- plot(suppressWarnings(tess3r::as.qmatrix(q.matrix)), as.matrix(coords), method = "map.max", interpol = FieldsKrigModel(10), main = paste0("Ancestry coefficients; K=",K), xlab = "", ylab = "",resolution = c(100,100), cex = 0.4,col.palette = my.palette, window=c(x.min,x.max,y.min,y.max),asp=xdist/ydist)
+as.qmatrix(q.matrix)
+q.matrix           <- LEA::Q(snmf.obj,K=K,run=best)
+q.matrix
+snmf.obj
+class(snmf.obj)
+attributes(snmf.obj)
+vcf
+samplenames
+vcf.obj     <- vcfR::read.vcfR(vcf)
+samplenames <- colnames(vcf.obj@gt)[-1]#
+	numind      <- length(samplenames)
+numind
+vcftools.path="/panfs/pfs.local/home/j926w878/programs/vcftools_0.1.13/bin/vcftools";vcf="/panfs/pfs.local/home/j926w878/work/ddRAD/snps_goodData/Oxyrhabdium_AllSpecies_AllSNPs.vcf"; indv.keep=indvskeep; out="/panfs/pfs.local/home/j926w878/work/ddRAD/snps_goodData/Oxyrhabdium_both-modestum_BestSNP.vcf"; which.site="best"
+indvkeep
+indv.keep
+indv.keep="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/tess3r/indv_keep_Oxyrhabdium_both-modestum.txt"
+!is.null(indv.keep)
+is(indv.keep,"character"))
+is(indv.keep,"character")
+is(indv.keep,"character") & length(indv.keep)==1
+file.exists(indv.keep)
+indv.keep <- read.table(indv.keep)
+indv.keep
+indv.keep="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/tess3r/indv_keep_Oxyrhabdium_both-modestum.txt"
+unlist(read.table(indv.keep))
+unname(unlist(read.table(indv.keep)))
+indv.keep <- unname(unlist(read.table(indv.keep)))
+indv.keep
+readLines(indv.keep)
+indv.keep="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/tess3r/indv_keep_Oxyrhabdium_both-modestum.txt"
+readLines(indv.keep)
+indv.keep <- suppressWarnings(readLines(indv.keep))
+indv.keep
+vcf.obj    <- vcfR::read.vcfR(vcf)#
+	# matrix with "fixed" columns, which are the columns with site-specific stats across all samples#
+	# fix.mat    <- attributes(vcf.obj)[["fix"]]#
+	fix.mat    <- vcf.obj@fix
+vcf
+vcf="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/DAPC/Oxyrhabdium_both-modestum_BestSNP.vcf"
+vcftools.path
+vcftools.path=vcftools
+vcftools.path="vcftools"
+vcf.obj    <- vcfR::read.vcfR(vcf)#
+	# matrix with "fixed" columns, which are the columns with site-specific stats across all samples#
+	# fix.mat    <- attributes(vcf.obj)[["fix"]]#
+	fix.mat    <- vcf.obj@fix
+gt.mat     <- gsub(":.+","",vcf.obj@gt[,-1])
+dim(gt.mat)
+indv.keep
+!is.null(indv.keep)
+if(!is.null(indv.keep)){#
+		if(is(indv.keep,"character") & length(indv.keep)==1){#
+			if(file.exists(indv.keep)){#
+				#indv.keep <- unname(unlist(read.table(indv.keep)))#
+				indv.keep <- suppressWarnings(readLines(indv.keep))#
 			}#
 		}#
-		#lapply(X=results1,FUN=print)#
-		dev.off()#
+		### Check that all names in indv.keep actually exist in the vcf#
+		if(all(indv.keep %in% colnames(gt.mat))){#
+			gt.mat <- gt.mat[,indv.keep,drop=F]#
+		} else {#
+			stop(paste(paste(setdiff(indv.keep,colnames(gt.mat)),collapse=","), "not in VCF"))#
+		}#
 	}
-devtools:document()
+dim(gt.mat)
+min.n=4;min.n0=2;min.n1=1;which.site="best"
+out
+out="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/DAPC/Oxyrhabdium_both-modestum_BestSNP_v2.vcf"
+vcf
+which.site="best"
+site.NS      <- vapply(X=1:nrow(gt.mat),FUN=function(x){length(grep(".", unlist(strsplit(gt.mat[x,],split="/",fixed=T)),fixed=T,invert=T))},FUN.VALUE=1)
+site.0.NS    <- vapply(X=1:nrow(gt.mat),FUN=function(x){length(grep("0", gt.mat[x,],fixed=T,invert=F))},FUN.VALUE=1)
+site.1.NS    <- vapply(X=1:nrow(gt.mat),FUN=function(x){length(grep("1", gt.mat[x,],fixed=T,invert=F))},FUN.VALUE=1)#
+	# Matrix with "CHROM" and "POS" from fix.mat, plus columns containing site.NS, site.0.NS, and site.1.NS#
+	chrom.pos.mat <- cbind(fix.mat[,c("CHROM","POS")],site.NS,site.0.NS,site.1.NS)
+chrom.pos.df <- data.frame(CHROM=fix.mat[,"CHROM"],POS=fix.mat[,"POS"],site.NS=site.NS,site.0.NS=site.0.NS,site.1.NS=site.1.NS)#
+	mode(chrom.pos.df[,"CHROM"])     <- "character"#
+	mode(chrom.pos.df[,"POS"])       <- "character"#
+	mode(chrom.pos.df[,"site.NS"])   <- "numeric"#
+	mode(chrom.pos.df[,"site.0.NS"]) <- "numeric"#
+	mode(chrom.pos.df[,"site.1.NS"]) <- "numeric"#
+	if(any(chrom.pos.df[,"site.NS"] >= min.n & chrom.pos.df[,"site.0.NS"] >= min.n0 & chrom.pos.df[,"site.1.NS"] >= min.n1)){#
+		# filter1 <- which(chrom.pos.df[,"site.1.NS"] >=2)#
+		filter1 <- which(chrom.pos.df[,"site.NS"] >= min.n & chrom.pos.df[,"site.0.NS"] >= min.n0 & chrom.pos.df[,"site.1.NS"] >= min.n1)#
+	} else {#
+		stop("no sites in which the minor allele occurs in more than 1 individual")#
+	}
+chrom.pos.df.filtered1 <- chrom.pos.df[filter1,]#
+	# vector with loci names for each site retained#
+	loci        <- chrom.pos.df.filtered1[,"CHROM"]#
+	# vector with unique loci names#
+	loci.unique <- unique(loci)#
+	# For each unique locus ("CHROM") in chrom.pos.df.filtered1, return the row number for the site with the greatest site.NS#
+	chrom.pos.list.filtered2 <- list(); length(chrom.pos.list.filtered2) <- length(loci.unique)
+length(loci.unique)
+for(i in 1:length(loci.unique)){#
+		locus.i <- loci.unique[i]#
+		chrom.pos.df.i <- chrom.pos.df.filtered1[which(chrom.pos.df.filtered1[,"CHROM"]==locus.i),,drop=F]#
+		site.NS.i <- chrom.pos.df.i[,"site.NS"]#
+		max.i     <- max(site.NS.i)#
+		if(which.site=="best"){#
+			chrom.pos.list.filtered2[[i]]    <- chrom.pos.df.i[(which(site.NS.i==max.i)[1]),]#
+		}#
+		if(which.site=="first"){#
+			chrom.pos.list.filtered2[[i]]    <- chrom.pos.df.i[1,]#
+		}#
+		if(which.site=="random"){#
+			chrom.pos.list.filtered2[[i]]    <- chrom.pos.df.i[sample(1:length(site.NS.i),1),]#
+		}#
+		if(which.site=="all.passing"){#
+			chrom.pos.list.filtered2[[i]]    <- chrom.pos.df.i#
+		}#
+	}#
+	chrom.pos.df.filtered2 <- do.call(rbind, chrom.pos.list.filtered2)
+chrom.pos.filtered.df <- chrom.pos.df.filtered2[,c("CHROM","POS")]
+temp.file <- file.path(getwd(),"temp_filtertable.txt")#
+	write.table(chrom.pos.filtered.df, temp.file, quote=F, sep="\t", col.names=F, row.names=F)#
+	vcf.command <- paste(vcftools.path,"--vcf",vcf,"--positions",temp.file,"--recode -c > ",out)
+system(vcf.command)
+vcf.command
+dim(olnames(chrom.pos.df.filtered2))
+dim(colnames(chrom.pos.df.filtered2))
+colnames(chrom.pos.df.filtered2)
+colnames(gt.mat)
+temp.file2 <- file.path(getwd(),"temp_filtertable2.txt")
+temp.file2
+writeLines(text=colnames(gt.mat),con=temp.file2)
+vcf
+vcf.obj     <- vcfR::read.vcfR(vcf)#
+	samplenames <- colnames(vcf.obj@gt)[-1]#
+	numind      <- length(samplenames)#
+	label.size  <- min((288/numind),7)
+!is.null(coords)
+if(is(coords,"array") | is(coords,"data.frame")){#
+			coords <-  coords#
+		} else {#
+			if(file.exists(coords)){#
+				coords   <- read.table(coords)#
+			}#
+		}
+coords
+setdiff(rownames(coords),samplenames)
+setdiff(samplenames,rownames(coords))
+c(setdiff(rownames(coords),samplenames),setdiff(samplenames,rownames(coords)))
+length(c(setdiff(rownames(coords),samplenames),setdiff(samplenames,rownames(coords))))==0
+all(samplenames %in% rownames(coords))
+all(samplenames %in% rownames(coords) & rownames(coords) %in% samplenames)
+if(!all(samplenames %in% rownames(coords) & rownames(coords) %in% samplenames)){#
+			stop("All individuals in coords file must be in vcf")#
+		}#
+		x.min <- min((coords[,1]-0.5))#
+		x.max <- max((coords[,1]+0.5))#
+		y.min <- min((coords[,2]-0.5))#
+		y.max <- max((coords[,2]+0.5))#
+		maxK <- min(nrow(unique(coords)),(numind-1))
+maxK
+if(max(Krange) > maxK){#
+		Krange <- 1:maxK#
+	}
+Krange
+geno.temp.path <- paste0(tempfile(),".geno")#
+	geno.obj       <- vcfR2geno(vcf=vcf,out=geno.temp.path)#
+	snmf.obj       <- LEA::snmf(geno.temp.path,K=Krange, repetitions=reps,entropy=entropy,project="new",iterations=iter,CPU=CPU)#
+	crossentropy.mat  <- t(do.call(cbind,lapply(X=Krange,FUN=function(x){LEA::cross.entropy(snmf.obj,K = x)})))#
+	rownames(crossentropy.mat) <- Krange#
+	colnames(crossentropy.mat) <- paste0("rep",1:reps)#
+	boxplot(t(crossentropy.mat))#
+	mean.entropy   <- apply(crossentropy.mat,MARGIN=1,FUN=mean,na.rm=TRUE)
+if(any(diff(mean.entropy)>0)){#
+		bestK <- unname(which(diff(mean.entropy)>0)[1])#
+	} else {#
+		bestK <- unname(Krange[1])#
+	}#
+	Kbest.criteria1   <- bestK#
+	### Checking if the max BIC of the next K value is less than the min BIC of the previous K value.#
+	range.entropy.mat <- do.call(rbind,lapply(X=1:nrow(crossentropy.mat),FUN=function(x){range(crossentropy.mat[x,],na.rm=TRUE)}))#
+	entropy.is.nonoverlap <- NULL#
+	entropy.is.reduced    <- NULL#
+	for(i in 2:nrow(range.entropy.mat)){#
+		entropy.is.nonoverlap  <- c(entropy.is.nonoverlap, range.entropy.mat[i,1] > range.entropy.mat[(i-1),2] | range.entropy.mat[i,2] < range.entropy.mat[(i-1),1])#
+		entropy.is.reduced     <- c(entropy.is.reduced, range.entropy.mat[i,2] < range.entropy.mat[(i-1),1])#
+	}#
+	# If max BIC for K=2 is better than BIC K=1 and if some K values are not better (all BIC lower) than K-1, then find the first K value in which K+1 is not better.#
+	if(any(!entropy.is.reduced) & entropy.is.reduced[1]){#
+		Kbest.criteria2 <- which(!entropy.is.reduced)[1]#
+	} else {#
+		Kbest.criteria2 <- 1#
+	}#
+	### Which K value (for K>=2) yields the least variable BIC scores.#
+	Entropy.variation <- apply(X=crossentropy.mat,MARGIN=1,FUN=var,na.rm=TRUE)#
+	Kbest.criteria3   <- which(Entropy.variation==min(Entropy.variation[-1]))
+Kbest.criteria1
+Kbest.criteria2
+Kbest.criteria3
+segments(x0=bestK,y0=par("usr")[3],y1=par("usr")[4],lty=2,col="black")
+mtext(side=1,"Number of ancestral populations",line=2.2)#
+	mtext(side=2,"Cross-entropy",line=2.2)#
+	mtext(side=3,paste0("Cross-entropy (",reps," replicates) vs. number of ancestral populations (K)"),line=1)#
+	axis(1,at=Krange)
+entropyPlot    <- recordPlot()#
+	Krange.plot    <- setdiff(Krange,1)#
+	admixturePlot  <- list(); length(admixturePlot)   <- length(Krange.plot)#
+	mapplot        <- list(); length(mapplot)         <- length(Krange.plot)
+for(K in Krange.plot){#
+		i=(K-1)#
+		ce           <- LEA::cross.entropy(snmf.obj, K = K)#
+		best         <- which.min(ce)#
+	#	q.matrix.best <- suppressWarnings(tess3r::as.qmatrix(LEA::Q(snmf.obj,K=bestK,run=best)))#
+		if(K < 5){#
+			myCols          <- goodcolors(K,thresh=100)#
+		}#
+		if(K >= 5 & K < 7){#
+			myCols          <- goodcolors(K,thresh=100,cbspace="deut")#
+		}#
+		if(K >= 7 & K < 15){#
+			myCols          <- goodcolors(K,thresh=100,cbspace="")#
+		}#
+		if(K>=15){#
+			myCols          <- c(goodcolors(14,thresh=100,cbspace=""), sample(adegenet::funky(100), size=K-14))#
+		}#
+		q.matrix           <- LEA::Q(snmf.obj,K=K,run=best)#
+		rownames(q.matrix) <- samplenames#
+		colnames(q.matrix) <- paste0("cluster",1:ncol(q.matrix))#
+		posterior.df       <- data.frame(indv=rep(rownames(q.matrix),ncol(q.matrix)), pop=rep(colnames(q.matrix),each=nrow(q.matrix)), assignment=c(unlist(unname(q.matrix))))#
+		posterior.gg       <- ggplot2::ggplot(posterior.df, aes(fill= pop, x= assignment, y=indv)) + geom_bar(position="stack", stat="identity") + theme_classic() + theme(axis.text.y = element_text(size = label.size), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank()) + ggplot2::labs(x = "Membership Probability",y="",fill="Cluster",title=paste0("K = ",K)) + scale_fill_manual(values=myCols[1:K])#
+		plot(posterior.gg)#
+		admixturePlot[[i]]   <- recordPlot()#
+		if(!is.null(coords)){#
+			my.palette      <- tess3r::CreatePalette(myCols, 9)#
+			xdist           <- geosphere::distm(x=c(x.min,0),y=c(x.max,0))#
+			ydist           <- geosphere::distm(x=c(0,y.min),y=c(0,y.max))#
+			mapplot.initial <- plot(suppressWarnings(tess3r::as.qmatrix(q.matrix)), as.matrix(coords), method = "map.max", interpol = FieldsKrigModel(10), main = paste0("Ancestry coefficients; K=",K), xlab = "", ylab = "",resolution = c(100,100), cex = 0.4,col.palette = my.palette, window=c(x.min,x.max,y.min,y.max),asp=xdist/ydist)#
+			mapplot.i       <- plot(suppressWarnings(tess3r::as.qmatrix(q.matrix)), as.matrix(coords), method = "map.max", interpol = FieldsKrigModel(10), main = paste0("Ancestry coefficients; K=",K), xlab = "", ylab = "",resolution = c(500,500), cex = 0.4,col.palette = my.palette, window=c(par("usr")[1],par("usr")[2],par("usr")[3],par("usr")[4]),asp=xdist/ydist)#
+			mapplot[[i]]    <- recordPlot()#
+		}#
+	}
+if(!is.null(coords)){#
+		result <- c(list(entropyPlot),admixturePlot,mapplot)#
+	} else {#
+		result <- c(list(entropyPlot),admixturePlot)#
+	}
+!is.null(save.as)
+save.as
+pdf(height=6,width=10,file=save.as,onefile=TRUE)
+result
+dev.off()
+save.as
+crossentropy.mat
+i=2
+t.test(crossentropy.mat[i-1,],crossentropy.mat[i,])
+t.test.i <- t.test(crossentropy.mat[i-1,],crossentropy.mat[i,])
+attributes(t.test.i)
+pval.i   <- t.test.i$p.value
+pval.i
+t.test.i$statistic
+t.test.i$parameter
+t.test.i$conf.int
+t.test.i$null.value
+t.test.i$alternative
+boxplot(t(crossentropy.mat))
+stat.i   <- t.test.i$statistic
+stat.i
+i
+t.test.i <- t.test(crossentropy.mat[i-1,],crossentropy.mat[i,])#
+		pval.i   <- t.test.i$p.value#
+		stat.i   <- t.test.i$statistic
+pval.i < 0.05 & stat.i > 0
+i=3
+t.test.i <- t.test(crossentropy.mat[i-1,],crossentropy.mat[i,])#
+		pval.i   <- t.test.i$p.value#
+		stat.i   <- t.test.i$statistic
+pval.i
+stat.i
+pval.i < 0.05 & stat.i > 0
+i
+i=4
+t.test.i <- t.test(crossentropy.mat[i-1,],crossentropy.mat[i,])#
+		pval.i   <- t.test.i$p.value#
+		stat.i   <- t.test.i$statistic
+pval.i
+stat.i
+i=i+1
+i
+t.test.i <- t.test(crossentropy.mat[i-1,],crossentropy.mat[i,])#
+		pval.i   <- t.test.i$p.value#
+		stat.i   <- t.test.i$statistic
+pval.i
+stat.i
+pval.i < 0.05 & stat.i > 0
+i==nrow(crossentropy.mat)
+Kbest.criteria4 <- (i-1)
+Kbest.criteria4
+for(i in 2:nrow(crossentropy.mat)){#
+		t.test.i <- t.test(crossentropy.mat[i-1,],crossentropy.mat[i,])#
+		pval.i   <- t.test.i$p.value#
+		stat.i   <- t.test.i$statistic#
+		if(pval.i < 0.05 & stat.i > 0){#
+			next#
+		} else {#
+			if(i==nrow(crossentropy.mat)){#
+				Kbest.criteria4 <- NULL#
+			} else{#
+				Kbest.criteria4 <- (i-1)#
+			}#
+		}#
+	}
+Kbest.criteria4
+for(i in 2:nrow(crossentropy.mat)){#
+		t.test.i <- t.test(crossentropy.mat[i-1,],crossentropy.mat[i,])#
+		pval.i   <- t.test.i$p.value#
+		stat.i   <- t.test.i$statistic#
+		if(pval.i < 0.05 & stat.i > 0){#
+			next#
+		} else {#
+			if(i==nrow(crossentropy.mat)){#
+				Kbest.criteria4 <- NULL#
+			} else{#
+				Kbest.criteria4 <- (i-1)#
+				i <- nrow(crossentropy.mat)#
+			}#
+		}#
+	}
+Kbest.criteria4
+i
+for(i in 2:nrow(crossentropy.mat)){#
+		t.test.i <- t.test(crossentropy.mat[i-1,],crossentropy.mat[i,])#
+		pval.i   <- t.test.i$p.value#
+		stat.i   <- t.test.i$statistic#
+		if(pval.i < 0.05 & stat.i > 0){#
+			next#
+		} else {#
+			if(i==nrow(crossentropy.mat)){#
+				Kbest.criteria4 <- NULL#
+			} else{#
+				Kbest.criteria4 <- (i-1)#
+				break#
+			}#
+		}#
+	}
+i
+Kbest.criteria4
+segments(x0=bestK,y0=par("usr")[3],y1=par("usr")[4],lty=2,col="black")
+run_SNMF <- function(vcf,coords=NULL,Krange=1:40,reps=100,entropy=TRUE,project="new",iter=500,CPU=2,save.as=NULL){#
+	vcf.obj     <- vcfR::read.vcfR(vcf)#
+	samplenames <- colnames(vcf.obj@gt)[-1]#
+	numind      <- length(samplenames)#
+	label.size  <- min((288/numind),7)#
+	if(!is.null(coords)){#
+		if(is(coords,"array") | is(coords,"data.frame")){#
+			coords <-  coords#
+		} else {#
+			if(file.exists(coords)){#
+				coords   <- read.table(coords)#
+			}#
+		}#
+		### Check that all individuals with coords are in the vcf file, and vice versa.#
+		if(!all(samplenames %in% rownames(coords) & rownames(coords) %in% samplenames)){#
+			stop("All individuals in coords file must be in vcf")#
+		}#
+		x.min <- min((coords[,1]-0.5))#
+		x.max <- max((coords[,1]+0.5))#
+		y.min <- min((coords[,2]-0.5))#
+		y.max <- max((coords[,2]+0.5))#
+		maxK <- min(nrow(unique(coords)),(numind-1))#
+	} else {#
+		maxK <- (numind-1)#
+	}#
+	if(max(Krange) > maxK){#
+		Krange <- 1:maxK#
+	}#
+	geno.temp.path <- paste0(tempfile(),".geno")#
+	geno.obj       <- vcfR2geno(vcf=vcf,out=geno.temp.path)#
+	snmf.obj       <- LEA::snmf(geno.temp.path,K=Krange, repetitions=reps,entropy=entropy,project="new",iterations=iter,CPU=CPU)#
+	crossentropy.mat  <- t(do.call(cbind,lapply(X=Krange,FUN=function(x){LEA::cross.entropy(snmf.obj,K = x)})))#
+	rownames(crossentropy.mat) <- Krange#
+	colnames(crossentropy.mat) <- paste0("rep",1:reps)#
+	boxplot(t(crossentropy.mat))#
+	mean.entropy   <- apply(crossentropy.mat,MARGIN=1,FUN=mean,na.rm=TRUE)#
+#	plot(Krange,mean.entropy,pch=21,col="blue",xlab="",ylab="",xlim=range(Krange), ylim=range(range.entropy.mat))#
+#	arrows(x0=Krange,y0=range.entropy.mat[,1],y1=range.entropy.mat[,2],length=0.07,col="black",angle=90,code=3)#
+#	lines(Krange,mean.entropy,col="blue")#
+	if(any(diff(mean.entropy)>0)){#
+		bestK <- unname(which(diff(mean.entropy)>0)[1])#
+	} else {#
+		bestK <- unname(Krange[1])#
+	}#
+	Kbest.criteria1   <- bestK#
+	### Checking if the max BIC of the next K value is less than the min BIC of the previous K value.#
+	range.entropy.mat <- do.call(rbind,lapply(X=1:nrow(crossentropy.mat),FUN=function(x){range(crossentropy.mat[x,],na.rm=TRUE)}))#
+	entropy.is.nonoverlap <- NULL#
+	entropy.is.reduced    <- NULL#
+	for(i in 2:nrow(range.entropy.mat)){#
+		entropy.is.nonoverlap  <- c(entropy.is.nonoverlap, range.entropy.mat[i,1] > range.entropy.mat[(i-1),2] | range.entropy.mat[i,2] < range.entropy.mat[(i-1),1])#
+		entropy.is.reduced     <- c(entropy.is.reduced, range.entropy.mat[i,2] < range.entropy.mat[(i-1),1])#
+	}#
+	# If max BIC for K=2 is better than BIC K=1 and if some K values are not better (all BIC lower) than K-1, then find the first K value in which K+1 is not better.#
+	if(any(!entropy.is.reduced) & entropy.is.reduced[1]){#
+		Kbest.criteria2 <- which(!entropy.is.reduced)[1]#
+	} else {#
+		Kbest.criteria2 <- 1#
+	}#
+	### Which K value (for K>=2) yields the least variable BIC scores.#
+	Entropy.variation <- apply(X=crossentropy.mat,MARGIN=1,FUN=var,na.rm=TRUE)#
+	Kbest.criteria3   <- which(Entropy.variation==min(Entropy.variation[-1]))#
+	### Criteria 4: t-tests for entropy of each pairwise adjacent K#
+	for(i in 2:nrow(crossentropy.mat)){#
+		t.test.i <- t.test(crossentropy.mat[i-1,],crossentropy.mat[i,])#
+		pval.i   <- t.test.i$p.value#
+		stat.i   <- t.test.i$statistic#
+		if(pval.i < 0.05 & stat.i > 0){#
+			next#
+		} else {#
+			if(i==nrow(crossentropy.mat)){#
+				Kbest.criteria4 <- NULL#
+			} else{#
+				Kbest.criteria4 <- (i-1)#
+				break#
+			}#
+		}#
+	}#
+	segments(x0=bestK,y0=par("usr")[3],y1=par("usr")[4],lty=2,col="black")#
+	# segments(x0=bestK,y0=par("usr")[3],y1=par("usr")[4],lty=2,col="green")#
+	# segments(x0=Kbest.criteria2,y0=par("usr")[3],y1=par("usr")[4],lty=2,col="blue")#
+	# segments(x0=Kbest.criteria3,y0=par("usr")[3],y1=par("usr")[4],lty=2,col="red")#
+	mtext(side=1,"Number of ancestral populations",line=2.2)#
+	mtext(side=2,"Cross-entropy",line=2.2)#
+	mtext(side=3,paste0("Cross-entropy (",reps," replicates) vs. number of ancestral populations (K)"),line=1)#
+	axis(1,at=Krange)#
+	entropyPlot    <- recordPlot()#
+	Krange.plot    <- setdiff(Krange,1)#
+	admixturePlot  <- list(); length(admixturePlot)   <- length(Krange.plot)#
+	mapplot        <- list(); length(mapplot)         <- length(Krange.plot)#
+	for(K in Krange.plot){#
+		i=(K-1)#
+		ce           <- LEA::cross.entropy(snmf.obj, K = K)#
+		best         <- which.min(ce)#
+	#	q.matrix.best <- suppressWarnings(tess3r::as.qmatrix(LEA::Q(snmf.obj,K=bestK,run=best)))#
+		if(K < 5){#
+			myCols          <- goodcolors(K,thresh=100)#
+		}#
+		if(K >= 5 & K < 7){#
+			myCols          <- goodcolors(K,thresh=100,cbspace="deut")#
+		}#
+		if(K >= 7 & K < 15){#
+			myCols          <- goodcolors(K,thresh=100,cbspace="")#
+		}#
+		if(K>=15){#
+			myCols          <- c(goodcolors(14,thresh=100,cbspace=""), sample(adegenet::funky(100), size=K-14))#
+		}#
+		q.matrix           <- LEA::Q(snmf.obj,K=K,run=best)#
+		rownames(q.matrix) <- samplenames#
+		colnames(q.matrix) <- paste0("cluster",1:ncol(q.matrix))#
+		posterior.df       <- data.frame(indv=rep(rownames(q.matrix),ncol(q.matrix)), pop=rep(colnames(q.matrix),each=nrow(q.matrix)), assignment=c(unlist(unname(q.matrix))))#
+		posterior.gg       <- ggplot2::ggplot(posterior.df, aes(fill= pop, x= assignment, y=indv)) + geom_bar(position="stack", stat="identity") + theme_classic() + theme(axis.text.y = element_text(size = label.size), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank()) + ggplot2::labs(x = "Membership Probability",y="",fill="Cluster",title=paste0("K = ",K)) + scale_fill_manual(values=myCols[1:K])#
+		plot(posterior.gg)#
+		admixturePlot[[i]]   <- recordPlot()#
+		if(!is.null(coords)){#
+			my.palette      <- tess3r::CreatePalette(myCols, 9)#
+			xdist           <- geosphere::distm(x=c(x.min,0),y=c(x.max,0))#
+			ydist           <- geosphere::distm(x=c(0,y.min),y=c(0,y.max))#
+			mapplot.initial <- plot(suppressWarnings(tess3r::as.qmatrix(q.matrix)), as.matrix(coords), method = "map.max", interpol = FieldsKrigModel(10), main = paste0("Ancestry coefficients; K=",K), xlab = "", ylab = "",resolution = c(100,100), cex = 0.4,col.palette = my.palette, window=c(x.min,x.max,y.min,y.max),asp=xdist/ydist)#
+			mapplot.i       <- plot(suppressWarnings(tess3r::as.qmatrix(q.matrix)), as.matrix(coords), method = "map.max", interpol = FieldsKrigModel(10), main = paste0("Ancestry coefficients; K=",K), xlab = "", ylab = "",resolution = c(500,500), cex = 0.4,col.palette = my.palette, window=c(par("usr")[1],par("usr")[2],par("usr")[3],par("usr")[4]),asp=xdist/ydist)#
+			mapplot[[i]]    <- recordPlot()#
+		}#
+	}#
+	if(!is.null(coords)){#
+		result <- c(list(entropyPlot),admixturePlot,mapplot)#
+	} else {#
+		result <- c(list(entropyPlot),admixturePlot)#
+	}#
+	if(!is.null(save.as)){#
+		pdf(height=6,width=10,file=save.as,onefile=TRUE)#
+		lapply(X=result,FUN=print)#
+		dev.off()#
+	}#
+	result#
+}
+bothmodestum <- run_SNMF(vcf="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/DAPC/Oxyrhabdium_both-modestum_BestSNP.vcf",#
+	                           coords="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/tess3r/Oxyrhabdium_bothmodestum_coords.txt",reps=30,Krange=1:4,#
+	                           save.as="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/LEA/Oxyrhabdium_both-modestum_BestSNP_sNMF_run1.pdf")
+bothmodestum <- run_SNMF(vcf="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/DAPC/Oxyrhabdium_both-modestum_BestSNP.vcf",#
+	                           coords="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/tess3r/Oxyrhabdium_bothmodestum_coords.txt",reps=30,Krange=1:4,#
+	                           save.as="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/LEA/Oxyrhabdium_both-modestum_BestSNP_sNMF_test.pdf")
+runtess <- function(vcf,coords=NULL,Krange=1:40,ploidy=2,mask=0.05,reps=100,max.iteration=500,save.as=NULL){#
+	vcf.obj     <- vcfR::read.vcfR(vcf)#
+	samplenames <- colnames(vcf.obj@gt)[-1]#
+	numind      <- length(samplenames)#
+	label.size  <- min((288/numind),7)#
+	lfmm.obj    <- vcfR2lfmm(vcf=vcf)#
+	if(is(coords,"array") | is(coords,"data.frame")){#
+		coords <-  coords#
+	} else {#
+		if(file.exists(coords)){#
+			coords   <- read.table(coords)#
+		}#
+	}#
+	maxK <- min(nrow(unique(coords)),(numind-1))#
+	if(max(Krange) > maxK){#
+		Krange <- 1:maxK#
+	}#
+	tess.obj <- tess3r::tess3(X = lfmm.obj, coord = as.matrix(coords), K=Krange, ploidy = ploidy, verbose=FALSE ,mask=0.05, rep=reps, max.iteration=max.iteration,keep="all")#
+	crossentropy.mat <- do.call(rbind,lapply(X=1:length(tess.obj),FUN=function(x){matrix(unlist(tess.obj[[x]]["crossentropy"]),nrow=1)}))#
+	rownames(crossentropy.mat) <- Krange#
+	colnames(crossentropy.mat) <- paste0("rep",1:reps)#
+	par(mfrow=c(1,1))#
+	mean.entropy <- apply(crossentropy.mat,MARGIN=1,FUN=mean,na.rm=TRUE)#
+	range.entropy.mat <- do.call(rbind,lapply(X=1:nrow(crossentropy.mat),FUN=function(x){range(crossentropy.mat[x,],na.rm=TRUE)}))#
+	boxplot(t(crossentropy.mat))#
+	if(any(diff(mean.entropy)>0)){#
+		bestK <- unname(which(diff(mean.entropy)>0)[1])#
+	} else {#
+		bestK <- unname(Krange[1])#
+	}#
+	### Criteria 3: Which K value (for K>=2) yields the least variable entropy scores.#
+	Entropy.variation <- apply(X=crossentropy.mat,MARGIN=1,FUN=var,na.rm=TRUE)#
+	Kbest.criteria3   <- which(Entropy.variation==min(Entropy.variation[-1]))#
+	### Criteria 4: t-tests for entropy of each pairwise adjacent K#
+	for(i in 2:nrow(crossentropy.mat)){#
+		t.test.i <- t.test(crossentropy.mat[i-1,],crossentropy.mat[i,])#
+		pval.i   <- t.test.i$p.value#
+		stat.i   <- t.test.i$statistic#
+		if(pval.i < 0.05 & stat.i > 0){#
+			next#
+		} else {#
+			if(i==nrow(crossentropy.mat)){#
+				Kbest.criteria4 <- NULL#
+			} else{#
+				Kbest.criteria4 <- (i-1)#
+				break#
+			}#
+		}#
+	}#
+	####
+	if(bestK>1){#
+		segments(x0=bestK,y0=par("usr")[3],y1=par("usr")[4],lty=2)#
+	}#
+	mtext(side=1,"Number of ancestral populations",line=2.2)#
+	mtext(side=2,"Cross-validation score",line=2.2)#
+	mtext(side=3,paste0("Cross-validation score (",reps," replicates) vs. number of ancestral populations (K)"),line=1)#
+	axis(1,at=Krange)#
+	entropyPlot <- recordPlot()#
+	## List holding population assignment probabilities for each K#
+	slist <- lapply(X=Krange,FUN=function(x){as.data.frame(tess3r::qmatrix(tess3=tess.obj, K = x))})#
+	par(mar=c(5.1,4.1,4.1,2.1),mfrow=c(1,1))#
+	Krange.plot    <- setdiff(Krange,1)#
+	admixturePlot  <- list(); length(admixturePlot)   <- length(Krange.plot)#
+	mapplot        <- list(); length(mapplot)         <- length(Krange.plot)#
+	x.min <- min((coords[,1]-0.5))#
+	x.max <- max((coords[,1]+0.5))#
+	y.min <- min((coords[,2]-0.5))#
+	y.max <- max((coords[,2]+0.5))#
+	for(K in Krange.plot){#
+		i=(K-1)#
+		q.matrix  <- slist[[K]]#
+		rownames(q.matrix) <- samplenames#
+		colnames(q.matrix) <- paste0("cluster",1:ncol(q.matrix))#
+		posterior.df       <- data.frame(indv=rep(rownames(q.matrix),ncol(q.matrix)), pop=rep(colnames(q.matrix),each=nrow(q.matrix)), assignment=c(unlist(unname(q.matrix))))#
+		if(K < 5){#
+			myCols          <- goodcolors(K,thresh=100)#
+		}#
+		if(K >= 5 & K < 7){#
+			myCols          <- goodcolors(K,thresh=100,cbspace="deut")#
+		}#
+		if(K >= 7 & K < 15){#
+			myCols          <- goodcolors(K,thresh=100,cbspace="")#
+		}#
+		if(K>=15){#
+			myCols          <- c(goodcolors(14,thresh=100,cbspace=""), sample(adegenet::funky(100), size=K-14))#
+		}#
+		posterior.gg        <- ggplot2::ggplot(posterior.df, aes(fill= pop, x= assignment, y=indv)) + geom_bar(position="stack", stat="identity") + theme_classic() + theme(axis.text.y = element_text(size = label.size), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank()) + ggplot2::labs(x = "Membership Probability",y="",fill="Cluster",title=paste0("K = ",K)) + scale_fill_manual(values=myCols[1:K])#
+		plot(posterior.gg)#
+		admixturePlot[[i]]   <- recordPlot()#
+		my.palette   <- tess3r::CreatePalette(myCols, 9)#
+		xdist        <- geosphere::distm(x=c(x.min,0),y=c(x.max,0))#
+		ydist        <- geosphere::distm(x=c(0,y.min),y=c(0,y.max))#
+		mapplot.initial <- plot(suppressWarnings(tess3r::as.qmatrix(q.matrix)), as.matrix(coords), method = "map.max", interpol = FieldsKrigModel(10), main = paste0("Ancestry coefficients; K=",K), xlab = "", ylab = "",resolution = c(100,100), cex = 0.4,col.palette = my.palette, window=c(x.min,x.max,y.min,y.max),asp=xdist/ydist)#
+		mapplot.i       <- plot(suppressWarnings(tess3r::as.qmatrix(q.matrix)), as.matrix(coords), method = "map.max", interpol = FieldsKrigModel(10), main = paste0("Ancestry coefficients; K=",K), xlab = "", ylab = "",resolution = c(500,500), cex = 0.4,col.palette = my.palette, window=c(par("usr")[1],par("usr")[2],par("usr")[3],par("usr")[4]),asp=xdist/ydist)#
+		mapplot[[i]]    <- recordPlot()#
+	}#
+	result <- c(list(entropyPlot),admixturePlot,mapplot)#
+	if(!is.null(save.as)){#
+		pdf(height=6,width=10,file=save.as,onefile=TRUE)#
+		lapply(X=result,FUN=print)#
+		dev.off()#
+	}#
+	result#
+}
+run_DAPC <- function(vcf, kmax=50, coords=NULL, reps=100,probs.out=NULL,save.as=NULL){#
+	dev.new(width=10,height=6)#
+	vcf.obj     <- vcfR::read.vcfR(vcf,verbose=F)#
+	samplenames <- colnames(vcf.obj@gt)[-1]#
+	genind      <- suppressWarnings(vcfR::vcfR2genind(vcf.obj))#
+	numind      <- (dim(attributes(vcf.obj)[["gt"]])[2])-1#
+	label.size  <- min((288/numind),7)#
+	if(!is.null(coords)){#
+		if(is(coords,"array") | is(coords,"data.frame")){#
+			coords <-  coords#
+		} else {#
+			if(file.exists(coords)){#
+				coords   <- read.table(coords)#
+			}#
+		}#
+		x.min <- min((coords[,1]-0.5))#
+		x.max <- max((coords[,1]+0.5))#
+		y.min <- min((coords[,2]-0.5))#
+		y.max <- max((coords[,2]+0.5))#
+		maxK <- min(nrow(unique(coords)),(numind-1))#
+	} else {#
+		maxK <- (numind-1)#
+	}#
+	if(is.null(kmax)){#
+		kmax <- maxK#
+	} else {#
+		if(kmax > maxK){#
+			kmax <- maxK#
+		}#
+	}#
+	max.clusters <- kmax#
+	grp          <- adegenet::find.clusters(genind, max.n.clust=max.clusters,n.pca=max.clusters,choose.n.clust=F)#
+	grp.list <- list(); length(grp.list) <- reps#
+	par(mar=c(3.5,4,3,2.1))#
+	for(i in 1:reps){#
+		grp.list[[i]] <- adegenet::find.clusters(genind, max.n.clust=max.clusters,n.pca=max.clusters,choose.n.clust=F)#
+	}#
+	BIC.mat           <- do.call(cbind,lapply(X=1:reps,FUN=function(x){grp.list[[x]]$Kstat}))#
+	rownames(BIC.mat) <- 1:max.clusters#
+	colnames(BIC.mat) <- paste0("rep",1:reps)#
+	boxplot(t(BIC.mat))#
+	mean.BIC        <- apply(BIC.mat,MARGIN=1,FUN=mean,na.rm=TRUE)#
+	### Lowest K with a lower mean BIC than K+1 mean BIC.#
+	if(any(diff(mean.BIC)>0)){#
+		bestK <- unname(which(diff(mean.BIC)>0)[1])#
+	} else {#
+		bestK <- 1#
+	}#
+	Kbest.criteria1   <- bestK#
+	### Checking if the max BIC of the next K value is less than the min BIC of the previous K value.#
+	range.BIC.mat     <- do.call(rbind,lapply(X=1:nrow(BIC.mat),FUN=function(x){range(BIC.mat[x,],na.rm=TRUE)}))#
+	BIC.is.nonoverlap <- NULL#
+	BIC.is.reduced    <- NULL#
+	for(i in 2:nrow(range.BIC.mat)){#
+		BIC.is.nonoverlap     <- c(BIC.is.nonoverlap,range.BIC.mat[i,1] > range.BIC.mat[(i-1),2] | range.BIC.mat[i,2] < range.BIC.mat[(i-1),1])#
+		BIC.is.reduced     <- c(BIC.is.reduced,range.BIC.mat[i,2] < range.BIC.mat[(i-1),1])#
+	}#
+	# If max BIC for K=2 is better than BIC K=1 and if some K values are not better (all BIC lower) than K-1, then find the first K value in which K+1 is not better.#
+	if(any(!BIC.is.reduced) & BIC.is.reduced[1]){#
+		Kbest.criteria2 <- which(!BIC.is.reduced)[1]#
+	} else {#
+		Kbest.criteria2 <- 1#
+	}#
+	### Which K value (for K>=2) yields the least variable BIC scores.#
+	BICvK.variation <- apply(X=BIC.mat,MARGIN=1,FUN=var)#
+	KminVarBIC      <- which(BICvK.variation==min(BICvK.variation[-1]))#
+	Kbest.criteria3 <- KminVarBIC#
+	### Criteria 4: t-tests for BIC of each pairwise adjacent K#
+	for(i in 2:nrow(BIC.mat)){#
+		t.test.i <- t.test(BIC.mat[i-1,],BIC.mat[i,])#
+		pval.i   <- t.test.i$p.value#
+		stat.i   <- t.test.i$statistic#
+		if(pval.i < 0.05 & stat.i > 0){#
+			next#
+		} else {#
+			if(i==nrow(BIC.mat)){#
+				Kbest.criteria4 <- NULL#
+			} else{#
+				Kbest.criteria4 <- (i-1)#
+				break#
+			}#
+		}#
+	}#
+	if(bestK>1){#
+		segments(x0=Kbest.criteria1, y0=par("usr")[3], y1=par("usr")[4],lty=2,col="black")#
+	}#
+	# segments(x0=Kbest.criteria1, y0=par("usr")[3], y1=par("usr")[4],lty=2,col="green")#
+	# segments(x0=Kbest.criteria2, y0=par("usr")[3], y1=par("usr")[4],lty=2,col="blue")#
+	# segments(x0=Kbest.criteria3, y0=par("usr")[3], y1=par("usr")[4],lty=2,col="orange")#
+	mtext(side=1,"Number of ancestral populations",line=2.2)#
+	mtext(side=2,"BIC",line=2.2)#
+	mtext(side=3,paste0("BIC (",reps," replicates of find.clusters) vs. number of clusters (K)"),line=1)#
+	axis(1,at=1:max.clusters)#
+	BICPlot    <- recordPlot()#
+	best.npca    <- NULL#
+	grp.mat      <- matrix(data=0,nrow=length(grp$grp),ncol=(max.clusters-1))#
+	for(K in 2:max.clusters){#
+		i=(K-1)#
+		grp.K         <- adegenet::find.clusters(genind, max.n.clust=max.clusters,n.pca=max.clusters,n.clust=K)#
+		grp.mat[,i]   <- grp.K$grp#
+		dapc.pcamax.K <- suppressWarnings(adegenet::dapc(genind, grp.K$grp,n.pca=max.clusters,n.da=5))#
+		alpha_optim.K <- suppressWarnings(adegenet::optim.a.score(dapc.pcamax.K,plot=FALSE))#
+		best.npca     <- c(best.npca,alpha_optim.K$best)#
+	}#
+	##### Plot 2: BIC vs. K when number of PCs retained = alpha optimized #
+	par(mar=c(4,4,3,2.1))#
+	names(best.npca) <- 2:max.clusters#
+	barplot(best.npca)#
+	mtext(text="Alpha optimized number of principle components to retain",side=2,line=2)#
+	mtext(text="Number of clusters",side=1,line=2)#
+	mtext(text="alpha optimized # of PCs vs. number of clusters",side=3,line=1)#
+	grp.plot2      <- recordPlot()#
+	par(mfrow=c(1,1))#
+	admixturePlot  <- list(); length(admixturePlot)   <- max.clusters-1#
+	assignmentPlot <- list(); length(assignmentPlot)  <- max.clusters-1#
+	posterior.list <- list(); length(posterior.list)  <- max.clusters-1#
+	mapplot <- list(); length(mapplot)  <- max.clusters-1#
+	for(K in 2:max.clusters){#
+		i=(K-1)#
+		par(mar=c(5.1,4.1,4.1,2.1),mfrow=c(1,1))#
+		dapc.pcabest.K  <- adegenet::dapc(genind, grp.mat[,i],n.pca=best.npca[i],n.da=5)#
+		posterior       <- dapc.pcabest.K$posterior#
+		q.matrix        <- posterior#
+		posterior.list[[i]] <- posterior#
+		posterior.df    <- data.frame(indv=rep(rownames(posterior),ncol(posterior)), pop=rep(colnames(posterior),each=nrow(posterior)), assignment=c(posterior))#
+		if(K < 5){#
+			myCols          <- goodcolors(K,thresh=100)#
+		}#
+		if(K >= 5 & K < 7){#
+			myCols          <- goodcolors(K,thresh=100,cbspace="deut")#
+		}#
+		if(K >= 7 & K < 15){#
+			myCols          <- goodcolors(K,thresh=100,cbspace="")#
+		}#
+		if(K>=15){#
+			myCols          <- c(goodcolors(14,thresh=100,cbspace=""), sample(adegenet::funky(100), size=K-14))#
+		}#
+		posterior.gg        <- ggplot2::ggplot(posterior.df, aes(fill= pop, x= assignment, y=indv)) + geom_bar(position="stack", stat="identity") + theme_classic() + theme(axis.text.y = element_text(size = label.size), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank()) + ggplot2::labs(x = "Membership Probability",y="",fill="Cluster",title=paste0("K = ",K,"; PCs retained = ",best.npca[i])) + scale_fill_manual(values=myCols[1:K])#
+		plot(posterior.gg)#
+		admixturePlot[[i]]   <- recordPlot()#
+		par(mar=c(5,20,2,2.1),mfrow=c(1,1))#
+		assignment.K         <- adegenet::assignplot(dapc.pcabest.K,cex.lab=(label.size/10))#
+		mtext(text=paste0("K = ",K,"; PCs retained = ",best.npca[i]))#
+		assignmentPlot[[i]]  <- recordPlot()#
+		par(mar=c(5.1,4.1,4.1,2.1),mfrow=c(1,1))#
+		if(!is.null(coords)){#
+			my.palette      <- tess3r::CreatePalette(myCols, 9)#
+			xdist           <- geosphere::distm(x=c(x.min,0),y=c(x.max,0))#
+			ydist           <- geosphere::distm(x=c(0,y.min),y=c(0,y.max))#
+			tess3r.qmat     <- suppressWarnings(tess3r::as.qmatrix(q.matrix))#
+			coords.mat      <- as.matrix(coords)#
+			mapplot.initial <- plot(tess3r.qmat, coords.mat, method = "map.max", interpol = FieldsKrigModel(10), main = paste0("Ancestry coefficients; K=",K), xlab = "", ylab = "",resolution = c(100,100), cex = 0.4,col.palette = my.palette, window=c(x.min,x.max,y.min,y.max),asp=xdist/ydist)#
+			mapplot.i       <- plot(tess3r.qmat, coords.mat, method = "map.max", interpol = FieldsKrigModel(10), main = paste0("Ancestry coefficients; K=",K), xlab = "", ylab = "",resolution = c(500,500), cex = 0.4,col.palette = my.palette, window=c(par("usr")[1],par("usr")[2],par("usr")[3],par("usr")[4]),asp=xdist/ydist)#
+			mapplot[[i]]    <- recordPlot()#
+		}#
+	}#
+	if(bestK>1){#
+		posterior.bestK <- posterior.list[[bestK-1]]#
+		colnames(posterior.bestK) <- paste0("K",colnames(posterior.bestK))#
+		if(!is.null(probs.out)){#
+			write.table(posterior.bestK,file=probs.out,quote=F,col.names=T,row.names=T)#
+		}#
+	} else {#
+		posterior.bestK <- matrix(data=rep(1,numind),ncol=1)#
+		rownames(posterior.bestK) <- samplenames#
+	}#
+	dev.off()#
+	if(!is.null(coords)){#
+		result <- c(list(BICPlot,grp.plot2),admixturePlot,assignmentPlot,mapplot)#
+	} else {#
+		result <- c(list(BICPlot,grp.plot2),admixturePlot,assignmentPlot)#
+	}#
+	if(!is.null(save.as)){#
+		pdf(height=6,width=10,file=save.as,onefile=TRUE)#
+		lapply(X=result,FUN=print)#
+		dev.off()#
+	}#
+	result#
+}
+bothmodestum <- run_SNMF(vcf="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/DAPC/Oxyrhabdium_both-modestum_BestSNP.vcf",#
+	                           coords="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/tess3r/Oxyrhabdium_bothmodestum_coords.txt",#
+	                           save.as="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/LEA/Oxyrhabdium_both-modestum_BestSNP_sNMF_run2.pdf")
+source("/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/DAPC/DAPC_adegenet.R")
+q()
+library(ade4)#
+	library(adegenet)#
+	library(vcfR)#
+	library(ggplot2)#
+	library(tess3r)#
+	library(rworldmap)#
+	library(LEA)#
+	library(geosphere)#
+	library(maps)#
+	library(dartR)#
+	source("/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/DAPC/DAPC_adegenet.R")#
+	source("/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/runtess.R")#
+	source("/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/LEA/run_SNMF.R")
+dev.new(width=10,height=6)
+cfmodestum_Luzon <- run_DAPC(vcf="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/DAPC/Oxyrhabdium-cf.modestum_Luzon_BestSNP.vcf",#
+                            probs.out="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/DAPC/Oxyrhabdium-cf.modestum_Luzon_BestSNP_DAPC_BestK_Membership_run2.txt",#
+                            coords="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/tess3r/Oxyrhabdium-cfmodestum_Luzon_coords.txt",#
+                            save.as="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/DAPC/Oxyrhabdium-cfmodestum_Luzon_BestSNP_DAPC_run1.pdf")
+vcf="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/DAPC/Oxyrhabdium-cf.modestum_Luzon_BestSNP.vcf";#
+                             probs.out="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/DAPC/Oxyrhabdium-cf.modestum_Luzon_BestSNP_DAPC_BestK_Membership_run2.txt";#
+                             coords="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/tess3r/Oxyrhabdium-cfmodestum_Luzon_coords.txt";#
+                             save.as="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/DAPC/Oxyrhabdium-cfmodestum_Luzon_BestSNP_DAPC_run1.pdf"
+kmax=50
+reps=100
+vcf.obj     <- vcfR::read.vcfR(vcf,verbose=F)#
+	samplenames <- colnames(vcf.obj@gt)[-1]#
+	genind      <- suppressWarnings(vcfR::vcfR2genind(vcf.obj))#
+	numind      <- (dim(attributes(vcf.obj)[["gt"]])[2])-1#
+	label.size  <- min((288/numind),7)
+samplenames
+!is.null(coords)
+if(is(coords,"array") | is(coords,"data.frame")){#
+			coords <-  coords#
+		} else {#
+			if(file.exists(coords)){#
+				coords   <- read.table(coords)#
+			}#
+		}
+coords
+x.min <- min((coords[,1]-0.5))#
+		x.max <- max((coords[,1]+0.5))#
+		y.min <- min((coords[,2]-0.5))#
+		y.max <- max((coords[,2]+0.5))#
+		maxK <- min(nrow(unique(coords)),(numind-1))
+if(is.null(kmax)){#
+		kmax <- maxK#
+	} else {#
+		if(kmax > maxK){#
+			kmax <- maxK#
+		}#
+	}
+max.clusters <- kmax
+grp          <- adegenet::find.clusters(genind, max.n.clust=max.clusters,n.pca=max.clusters,choose.n.clust=F)
+for(i in 1:reps){#
+		grp.list[[i]] <- adegenet::find.clusters(genind, max.n.clust=max.clusters,n.pca=max.clusters,choose.n.clust=F)#
+	}#
+	BIC.mat           <- do.call(cbind,lapply(X=1:reps,FUN=function(x){grp.list[[x]]$Kstat}))
+grp.list <- list(); length(grp.list) <- reps#
+	par(mar=c(3.5,4,3,2.1))#
+	for(i in 1:reps){#
+		grp.list[[i]] <- adegenet::find.clusters(genind, max.n.clust=max.clusters,n.pca=max.clusters,choose.n.clust=F)#
+	}#
+	BIC.mat           <- do.call(cbind,lapply(X=1:reps,FUN=function(x){grp.list[[x]]$Kstat}))
+rownames(BIC.mat) <- 1:max.clusters#
+	colnames(BIC.mat) <- paste0("rep",1:reps)#
+	boxplot(t(BIC.mat))#
+	mean.BIC        <- apply(BIC.mat,MARGIN=1,FUN=mean,na.rm=TRUE)
+if(any(diff(mean.BIC)>0)){#
+		bestK <- unname(which(diff(mean.BIC)>0)[1])#
+	} else {#
+		bestK <- 1#
+	}#
+	Kbest.criteria1   <- bestK
+Kbest.criteria1
+range.BIC.mat     <- do.call(rbind,lapply(X=1:nrow(BIC.mat),FUN=function(x){range(BIC.mat[x,],na.rm=TRUE)}))#
+	BIC.is.nonoverlap <- NULL#
+	BIC.is.reduced    <- NULL
+range.BIC.mat
+for(i in 2:nrow(range.BIC.mat)){#
+		BIC.is.nonoverlap     <- c(BIC.is.nonoverlap,range.BIC.mat[i,1] > range.BIC.mat[(i-1),2] | range.BIC.mat[i,2] < range.BIC.mat[(i-1),1])#
+		BIC.is.reduced     <- c(BIC.is.reduced,range.BIC.mat[i,2] < range.BIC.mat[(i-1),1])#
+	}
+if(any(!BIC.is.reduced) & BIC.is.reduced[1]){#
+		Kbest.criteria2 <- which(!BIC.is.reduced)[1]#
+	} else {#
+		Kbest.criteria2 <- 1#
+	}
+BICvK.variation <- apply(X=BIC.mat,MARGIN=1,FUN=var)
+BICvK.variation
+KminVarBIC      <- which(BICvK.variation==min(BICvK.variation[-1]))
+KminVarBIC
+Kbest.criteria3 <- KminVarBIC[1]
+Kbest.criteria3
+for(i in 2:nrow(BIC.mat)){#
+		t.test.i <- t.test(BIC.mat[i-1,],BIC.mat[i,])#
+		pval.i   <- t.test.i$p.value#
+		stat.i   <- t.test.i$statistic#
+		if(pval.i < 0.05 & stat.i > 0){#
+			next#
+		} else {#
+			if(i==nrow(BIC.mat)){#
+				Kbest.criteria4 <- NULL#
+			} else{#
+				Kbest.criteria4 <- (i-1)#
+				break#
+			}#
+		}#
+	}
+t.test.i <- t.test(BIC.mat[i-1,],BIC.mat[i,])
+for(i in 2:nrow(BIC.mat)){#
+		if(KminVarBIC==0){#
+			Kbest.criteria4 <- NULL#
+			break#
+		}#
+		t.test.i <- t.test(BIC.mat[i-1,],BIC.mat[i,])#
+		pval.i   <- t.test.i$p.value#
+		stat.i   <- t.test.i$statistic#
+		if(pval.i < 0.05 & stat.i > 0){#
+			next#
+		} else {#
+			if(i==nrow(BIC.mat)){#
+				Kbest.criteria4 <- NULL#
+			} else{#
+				Kbest.criteria4 <- (i-1)#
+				break#
+			}#
+		}#
+	}
+KminVarBIC==0
+BICvK.variation[Kbest.criteria3]
+for(i in 2:nrow(BIC.mat)){#
+		if(BICvK.variation[Kbest.criteria3]==0){#
+			Kbest.criteria4 <- NULL#
+			break#
+		}#
+		t.test.i <- t.test(BIC.mat[i-1,],BIC.mat[i,])#
+		pval.i   <- t.test.i$p.value#
+		stat.i   <- t.test.i$statistic#
+		if(pval.i < 0.05 & stat.i > 0){#
+			next#
+		} else {#
+			if(i==nrow(BIC.mat)){#
+				Kbest.criteria4 <- NULL#
+			} else{#
+				Kbest.criteria4 <- (i-1)#
+				break#
+			}#
+		}#
+	}
+if(bestK>1){#
+		segments(x0=Kbest.criteria1, y0=par("usr")[3], y1=par("usr")[4],lty=2,col="black")#
+	}
+bestK
+if(bestK>1){#
+		segments(x0=Kbest.criteria1, y0=par("usr")[3], y1=par("usr")[4],lty=2,col="black")#
+	}
+mtext(side=1,"Number of ancestral populations",line=2.2)#
+	mtext(side=2,"BIC",line=2.2)#
+	mtext(side=3,paste0("BIC (",reps," replicates of find.clusters) vs. number of clusters (K)"),line=1)
+axis(1,at=1:max.clusters)#
+	BICPlot    <- recordPlot()#
+	best.npca    <- NULL#
+	grp.mat      <- matrix(data=0,nrow=length(grp$grp),ncol=(max.clusters-1))#
+	for(K in 2:max.clusters){#
+		i=(K-1)#
+		grp.K         <- adegenet::find.clusters(genind, max.n.clust=max.clusters,n.pca=max.clusters,n.clust=K)#
+		grp.mat[,i]   <- grp.K$grp#
+		dapc.pcamax.K <- suppressWarnings(adegenet::dapc(genind, grp.K$grp,n.pca=max.clusters,n.da=5))#
+		alpha_optim.K <- suppressWarnings(adegenet::optim.a.score(dapc.pcamax.K,plot=FALSE))#
+		best.npca     <- c(best.npca,alpha_optim.K$best)#
+	}
+##### Plot 2: BIC vs. K when number of PCs retained = alpha optimized #
+	par(mar=c(4,4,3,2.1))#
+	names(best.npca) <- 2:max.clusters#
+	barplot(best.npca)#
+	mtext(text="Alpha optimized number of principle components to retain",side=2,line=2)#
+	mtext(text="Number of clusters",side=1,line=2)#
+	mtext(text="alpha optimized # of PCs vs. number of clusters",side=3,line=1)#
+	grp.plot2      <- recordPlot()#
+	par(mfrow=c(1,1))#
+	admixturePlot  <- list(); length(admixturePlot)   <- max.clusters-1#
+	assignmentPlot <- list(); length(assignmentPlot)  <- max.clusters-1#
+	posterior.list <- list(); length(posterior.list)  <- max.clusters-1#
+	mapplot <- list(); length(mapplot)  <- max.clusters-1
+for(K in 2:max.clusters){#
+		i=(K-1)#
+		par(mar=c(5.1,4.1,4.1,2.1),mfrow=c(1,1))#
+		dapc.pcabest.K  <- adegenet::dapc(genind, grp.mat[,i],n.pca=best.npca[i],n.da=5)#
+		posterior       <- dapc.pcabest.K$posterior#
+		q.matrix        <- posterior#
+		posterior.list[[i]] <- posterior#
+		posterior.df    <- data.frame(indv=rep(rownames(posterior),ncol(posterior)), pop=rep(colnames(posterior),each=nrow(posterior)), assignment=c(posterior))#
+		if(K < 5){#
+			myCols          <- goodcolors(K,thresh=100)#
+		}#
+		if(K >= 5 & K < 7){#
+			myCols          <- goodcolors(K,thresh=100,cbspace="deut")#
+		}#
+		if(K >= 7 & K < 15){#
+			myCols          <- goodcolors(K,thresh=100,cbspace="")#
+		}#
+		if(K>=15){#
+			myCols          <- c(goodcolors(14,thresh=100,cbspace=""), sample(adegenet::funky(100), size=K-14))#
+		}#
+		posterior.gg        <- ggplot2::ggplot(posterior.df, aes(fill= pop, x= assignment, y=indv)) + geom_bar(position="stack", stat="identity") + theme_classic() + theme(axis.text.y = element_text(size = label.size), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank()) + ggplot2::labs(x = "Membership Probability",y="",fill="Cluster",title=paste0("K = ",K,"; PCs retained = ",best.npca[i])) + scale_fill_manual(values=myCols[1:K])#
+		plot(posterior.gg)#
+		admixturePlot[[i]]   <- recordPlot()#
+		par(mar=c(5,20,2,2.1),mfrow=c(1,1))#
+		assignment.K         <- adegenet::assignplot(dapc.pcabest.K,cex.lab=(label.size/10))#
+		mtext(text=paste0("K = ",K,"; PCs retained = ",best.npca[i]))#
+		assignmentPlot[[i]]  <- recordPlot()#
+		par(mar=c(5.1,4.1,4.1,2.1),mfrow=c(1,1))#
+		if(!is.null(coords)){#
+			my.palette      <- tess3r::CreatePalette(myCols, 9)#
+			xdist           <- geosphere::distm(x=c(x.min,0),y=c(x.max,0))#
+			ydist           <- geosphere::distm(x=c(0,y.min),y=c(0,y.max))#
+			tess3r.qmat     <- suppressWarnings(tess3r::as.qmatrix(q.matrix))#
+			coords.mat      <- as.matrix(coords)#
+			mapplot.initial <- plot(tess3r.qmat, coords.mat, method = "map.max", interpol = FieldsKrigModel(10), main = paste0("Ancestry coefficients; K=",K), xlab = "", ylab = "",resolution = c(100,100), cex = 0.4,col.palette = my.palette, window=c(x.min,x.max,y.min,y.max),asp=xdist/ydist)#
+			mapplot.i       <- plot(tess3r.qmat, coords.mat, method = "map.max", interpol = FieldsKrigModel(10), main = paste0("Ancestry coefficients; K=",K), xlab = "", ylab = "",resolution = c(500,500), cex = 0.4,col.palette = my.palette, window=c(par("usr")[1],par("usr")[2],par("usr")[3],par("usr")[4]),asp=xdist/ydist)#
+			mapplot[[i]]    <- recordPlot()#
+		}#
+	}
+if(bestK>1){#
+		posterior.bestK <- posterior.list[[bestK-1]]#
+		colnames(posterior.bestK) <- paste0("K",colnames(posterior.bestK))#
+		if(!is.null(probs.out)){#
+			write.table(posterior.bestK,file=probs.out,quote=F,col.names=T,row.names=T)#
+		}#
+	} else {#
+		posterior.bestK <- matrix(data=rep(1,numind),ncol=1)#
+		rownames(posterior.bestK) <- samplenames#
+	}
+if(!is.null(coords)){#
+		result <- c(list(BICPlot,grp.plot2),admixturePlot,assignmentPlot,mapplot)#
+	} else {#
+		result <- c(list(BICPlot,grp.plot2),admixturePlot,assignmentPlot)#
+	}
+pdf(height=6,width=10,file=save.as,onefile=TRUE)
+result
+dev.off()
+dev.new(height=6,width=10)
+source("/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/DAPC/DAPC_adegenet.R")
+q()
+library(remotes)
+remotes::install_github("JeffWeinell/misc.wrappers",upgrade=FALSE,auth_token="323d9e4cd00247a39a805dbb66f37db6403cfb8b")
+library(misc.wrappers)
+q()
+remotes::install_github("JeffWeinell/misc.wrappers",upgrade=FALSE)
+library(misc.wrappers)
+test <- run_DAPC <- function(vcf="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/DAPC/Oxyrhabdium_AllSpecies_BestSNP.vcf", kmax=10, coords="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/tess3r/Oxyrhabdium_AllSpecies_coords.txt", reps=3, probs.out=NULL, save.as="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/DAPC/Oxyrhabdium_test4.pdf",include.out=c(".pdf",".Qlog",".BIClog"))
+test <- run_DAPC(vcf="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/DAPC/Oxyrhabdium_AllSpecies_BestSNP.vcf", kmax=10, coords="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/tess3r/Oxyrhabdium_AllSpecies_coords.txt", reps=3, probs.out=NULL, save.as="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/DAPC/Oxyrhabdium_test4.pdf",include.out=c(".pdf",".Qlog",".BIClog"))
+setwd("Documents/misc.packages")
+setwd("Documents/misc.wrappers")
 devtools::document()
+remotes::install_github("JeffWeinell/misc.wrappers",upgrade=FALSE)
 q()
