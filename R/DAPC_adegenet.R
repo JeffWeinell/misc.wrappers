@@ -131,12 +131,17 @@ run_DAPC <- function(vcf, kmax=40, coords=NULL, reps=100,probs.out=NULL,save.as=
 	empty.set <- list(); length(empty.set) <- max.clusters-1
 	dapc.pcabest.list <- admixturePlot <- da.densityPlot <- da.biPlot <- pca.densityPlot <- pca.biPlot <- da.psets <- da.layout.mat<- pca.psets <- pca.layout.mat <- assignmentPlot <- posterior.list <- mapplot <- q.df <- dapc.df <- empty.set
 	message("step 3")
+	density.stop<-FALSE
 	for(K in 2:max.clusters){
 		print(paste(K,"step 3.1"))
 		i=(K-1)
 		dapc.pcabest.K      <- adegenet::dapc(genind, grp.mat[,i],n.pca=best.npca[i],n.da=5)
 		### Fewest number of individuals assigned to any cluster.
 		minsize.grp <- min(as.numeric(dapc.pcabest.K$assign))
+		# switch density.stop to TRUE the first time minsize.grp is 1
+		if(!minsize.grp > 1 & !density.stop){
+			density.stop <- TRUE
+		}
 		dapc.pcabest.list[[i]] <- dapc.pcabest.K
 		posterior           <- dapc.pcabest.K$posterior
 		q.matrix            <- posterior
@@ -149,7 +154,7 @@ run_DAPC <- function(vcf, kmax=40, coords=NULL, reps=100,probs.out=NULL,save.as=
 	#	scatterPlot[[i]]    <- scatterPlot.i
 		message(paste(K,"step 3.2"))
 		### density plots of discriminant functions
-		if(minsize.grp>1){
+		if(density.stop){
 			density.da.list.i <- list(); length(density.da.list.i) <- dapc.pcabest.K$n.da
 			for(z in 1:dapc.pcabest.K$n.da){
 				density.da.list.i[[z]] <- ggscatter.dapc(dapc.pcabest.K,xax=z,yax=z,col=myCols,legend=F,show.title=F,hideperimeter=T)
@@ -180,7 +185,7 @@ run_DAPC <- function(vcf, kmax=40, coords=NULL, reps=100,probs.out=NULL,save.as=
 		}
 		message(paste(K,"step 3.4"))
 		##### ggplot density plots of principle components
-		if(minsize.grp>1){
+		if(density.stop){
 			density.pca.list.i <- list(); length(density.pca.list.i) <- dapc.pcabest.K$n.pca
 			for(z in 1:dapc.pcabest.K$n.pca){
 				density.pca.list.i[[z]] <- ggscatter.dapc(dapc.pcabest.K,vartype="pc",xax=z,yax=z,col=myCols,legend=F,show.title=F,hideperimeter=T)
@@ -235,15 +240,23 @@ run_DAPC <- function(vcf, kmax=40, coords=NULL, reps=100,probs.out=NULL,save.as=
 	}
 	### Plots of DF or PC density for each given K
 	message("step 4")
-	da.density.arranged  <- dapc.plot.arrange(da.densityPlot,variable="DF",pos.x.labs=1,pos.y.labs=2,outer.text=list(NULL,NULL,paste0("Density of discriminant function vs. K"), NULL))
+	if(any(lengths(da.densityPlot)>0)){
+		da.densityPlot <- da.densityPlot[which(lengths(da.densityPlot)>0)]
+		da.density.arranged  <- dapc.plot.arrange(da.densityPlot,variable="DF",pos.x.labs=1,pos.y.labs=2,outer.text=list(NULL,NULL,paste0("Density of discriminant function vs. K"), NULL))
+	} else {
+		da.density.arranged  <- NULL
+	}
 	message("step 5")
-	pca.density.arranged <- dapc.plot.arrange(pca.densityPlot,variable="PC",pos.x.labs=1,pos.y.labs=2,outer.text=list(NULL,NULL,paste0("Density of principle component vs. K"), NULL))
-	
+	if(any(lengths(pca.densityPlot)>0)){
+		pca.densityPlot <- pca.densityPlot[which(lengths(pca.densityPlot)>0)]
+		pca.density.arranged <- dapc.plot.arrange(pca.densityPlot,variable="PC",pos.x.labs=1,pos.y.labs=2,outer.text=list(NULL,NULL,paste0("Density of principle component vs. K"), NULL))
+	} else {
+		pca.density.arranged <- NULL
+	}
 	# rangeK.da.density  <- 2:(length(lengths(da.densityPlot))+1)
 	# n.da.density       <- max(lengths(da.densityPlot),na.rm=TRUE)
 	# rangeK.pca.density <- 2:(length(lengths(pca.densityPlot))+1)
 	# n.pca.density      <- max(lengths(pca.densityPlot),na.rm=TRUE)
-
 
 # dapc.biplot.arrange(pca.densityPlot,K=NULL,layout.mat=NULL,use.diag=NULL,col.labels.bottom=names.bottom.da[[which(rangeK.da==z)]],row.labels.left=names.left.da[[which(rangeK.da==z)]],outer.text=list(NULL,NULL,paste0("K=",z,"; Biplots of discriminant functions"),NULL))
 	message("step 6")

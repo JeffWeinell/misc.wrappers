@@ -1,82 +1,3 @@
-entropy.is.reduced
-entropy.is.nonoverlap
-any(!entropy.is.reduced) & entropy.is.reduced[1]
-if(any(!entropy.is.reduced) & entropy.is.reduced[1]){#
-		Kbest.criteria2 <- which(!entropy.is.reduced)[1]#
-	} else {#
-		Kbest.criteria2 <- 1#
-	}
-Kbest.criteria2
-KminVarBIC      <- which(BICvK.variation==min(BICvK.variation[-1]))
-Entropy.variation <- apply(X=crossentropy.mat,MARGIN=1,FUN=var,na.rm=TRUE)#
-	Kbest.criteria3   <- which(Entropy.variation==min(Entropy.variation[-1]))
-Kbest.criteria3
-segments(x0=bestK,y0=par("usr")[3],y1=par("usr")[4],lty=2)
-segments(x0=bestK,y0=par("usr")[3],y1=par("usr")[4],lty=2,col="green")
-segments(x0=Kbest.criteria2,y0=par("usr")[3],y1=par("usr")[4],lty=2,col="blue")#
-	segments(x0=Kbest.criteria3,y0=par("usr")[3],y1=par("usr")[4],lty=2,col="red")
-t.test(crossentropy.mat[2,],crossentropy.mat[3,])
-test <- t.test(crossentropy.mat[2,],crossentropy.mat[3,])
-test
-class(test)
-attributes(test)
-test$p.value
-mtext(side=1,"Number of ancestral populations",line=2.2)#
-	mtext(side=2,"Cross-entropy",line=2.2)#
-	mtext(side=3,paste0("Cross-entropy (",reps," replicates) vs. number of ancestral populations (K)"),line=1)#
-	axis(1,at=Krange)
-entropyPlot    <- recordPlot()#
-	Krange.plot    <- setdiff(Krange,1)
-Krange.plot
-entropyPlot
-admixturePlot  <- list(); length(admixturePlot)   <- length(Krange.plot)#
-	mapplot        <- list(); length(mapplot)         <- length(Krange.plot)
-K=2
-i=(K-1)#
-		ce           <- LEA::cross.entropy(snmf.obj, K = K)#
-		best         <- which.min(ce)#
-	#	q.matrix.best <- suppressWarnings(tess3r::as.qmatrix(LEA::Q(snmf.obj,K=bestK,run=best)))#
-		if(K < 5){#
-			myCols          <- goodcolors(K,thresh=100)#
-		}#
-		if(K >= 5 & K < 7){#
-			myCols          <- goodcolors(K,thresh=100,cbspace="deut")#
-		}#
-		if(K >= 7 & K < 15){#
-			myCols          <- goodcolors(K,thresh=100,cbspace="")#
-		}#
-		if(K>=15){#
-			myCols          <- c(goodcolors(14,thresh=100,cbspace=""), sample(adegenet::funky(100), size=K-14))#
-		}
-q.matrix           <- LEA::Q(snmf.obj,K=K,run=best)#
-		rownames(q.matrix) <- samplenames#
-		colnames(q.matrix) <- paste0("cluster",1:ncol(q.matrix))#
-		posterior.df       <- data.frame(indv=rep(rownames(q.matrix),ncol(q.matrix)), pop=rep(colnames(q.matrix),each=nrow(q.matrix)), assignment=c(unlist(unname(q.matrix))))#
-		posterior.gg       <- ggplot2::ggplot(posterior.df, aes(fill= pop, x= assignment, y=indv)) + geom_bar(position="stack", stat="identity") + theme_classic() + theme(axis.text.y = element_text(size = label.size), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank()) + ggplot2::labs(x = "Membership Probability",y="",fill="Cluster",title=paste0("K = ",K)) + scale_fill_manual(values=myCols[1:K])#
-		plot(posterior.gg)#
-		admixturePlot[[i]]   <- recordPlot()
-if(!is.null(coords)){#
-			my.palette      <- tess3r::CreatePalette(myCols, 9)#
-			xdist           <- geosphere::distm(x=c(x.min,0),y=c(x.max,0))#
-			ydist           <- geosphere::distm(x=c(0,y.min),y=c(0,y.max))#
-			mapplot.initial <- plot(suppressWarnings(tess3r::as.qmatrix(q.matrix)), as.matrix(coords), method = "map.max", interpol = FieldsKrigModel(10), main = paste0("Ancestry coefficients; K=",K), xlab = "", ylab = "",resolution = c(100,100), cex = 0.4,col.palette = my.palette, window=c(x.min,x.max,y.min,y.max),asp=xdist/ydist)#
-			mapplot.i       <- plot(suppressWarnings(tess3r::as.qmatrix(q.matrix)), as.matrix(coords), method = "map.max", interpol = FieldsKrigModel(10), main = paste0("Ancestry coefficients; K=",K), xlab = "", ylab = "",resolution = c(500,500), cex = 0.4,col.palette = my.palette, window=c(par("usr")[1],par("usr")[2],par("usr")[3],par("usr")[4]),asp=xdist/ydist)#
-			mapplot[[i]]    <- recordPlot()#
-		}
-posterior.gg
-!is.null(coords)
-my.palette      <- tess3r::CreatePalette(myCols, 9)
-myCols
-coords
-xdist           <- geosphere::distm(x=c(x.min,0),y=c(x.max,0))#
-			ydist           <- geosphere::distm(x=c(0,y.min),y=c(0,y.max))
-xdist
-ydist
-mapplot.initial <- plot(suppressWarnings(tess3r::as.qmatrix(q.matrix)), as.matrix(coords), method = "map.max", interpol = FieldsKrigModel(10), main = paste0("Ancestry coefficients; K=",K), xlab = "", ylab = "",resolution = c(100,100), cex = 0.4,col.palette = my.palette, window=c(x.min,x.max,y.min,y.max),asp=xdist/ydist)
-as.qmatrix(q.matrix)
-q.matrix           <- LEA::Q(snmf.obj,K=K,run=best)
-q.matrix
-snmf.obj
 class(snmf.obj)
 attributes(snmf.obj)
 vcf
@@ -1094,8 +1015,51 @@ library(misc.wrappers)
 q()
 library(misc.wrappers)
 test <- run_DAPC(vcf="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/DAPC/Oxyrhabdium_AllSpecies_BestSNP.vcf", kmax=10, coords="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/tess3r/Oxyrhabdium_AllSpecies_coords.txt", reps=3, probs.out=NULL, save.as="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/DAPC/Oxyrhabdium_test4.pdf",include.out=c(".pdf",".Qlog",".BIClog"))
-test <- run_DAPC(vcf="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/DAPC/Oxyrhabdium_AllSpecies_BestSNP.vcf", kmax=10, coords=NULL, reps=3, probs.out=NULL, save.as="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/DAPC/Oxyrhabdium_test4.pdf",include.out=c(".pdf",".Qlog",".BIClog"))
-library(devtools)
+getwd()
+setwd("Document/misc.wrappers")
 setwd("Documents/misc.wrappers")
 devtools::document()
+test <- run_DAPC(vcf="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/DAPC/Oxyrhabdium_AllSpecies_BestSNP.vcf", kmax=10, coords="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/tess3r/Oxyrhabdium_AllSpecies_coords.txt", reps=3, probs.out=NULL, save.as="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/DAPC/Oxyrhabdium_test4.pdf",include.out=c(".pdf",".Qlog",".BIClog"))
+test
+?print
+message("test")
+message("step 0")
+devtools::document()
+devtools::document()
+test <- run_DAPC(vcf="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/DAPC/Oxyrhabdium_AllSpecies_BestSNP.vcf", kmax=10, coords="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/tess3r/Oxyrhabdium_AllSpecies_coords.txt", reps=3, probs.out=NULL, save.as="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/DAPC/Oxyrhabdium_test4.pdf",include.out=c(".pdf",".Qlog",".BIClog"))
+vcf <- "/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/DAPC/Oxyrhabdium_AllSpecies_BestSNP.vcf"
+vcf.obj     <- vcfR::read.vcfR(vcf,verbose=F)#
+	samplenames <- colnames(vcf.obj@gt)[-1]#
+	genind      <- suppressWarnings(vcfR::vcfR2genind(vcf.obj))#
+	numind      <- (dim(attributes(vcf.obj)[["gt"]])[2])-1#
+	label.size  <- min((288/numind),7)
+grp.K         <- adegenet::find.clusters(genind, max.n.clust=10,n.pca=10,n.clust=8)
+i=9
+grp.mat[,i]   <- grp.K$grp
+grp.mat    <- matrix(data=0,nrow=64,ncol=(9))
+grp.mat[,i]   <- grp.K$grp
+max.clusters
+max.clusters <- 10
+dapc.pcamax.K <- suppressWarnings(adegenet::dapc(genind, grp.K$grp,n.pca=max.clusters,n.da=5))
+alpha_optim.K <- suppressWarnings(adegenet::optim.a.score(dapc.pcamax.K,plot=FALSE))
+best.npca <- NULL
+best.npca     <- c(best.npca,alpha_optim.K$best)
+best.npca
+dapc.pcabest.K      <- adegenet::dapc(genind, grp.mat[,8],n.pca=5,n.da=5)
+grp.mat[,8]
+grp.mat[,9]
+dapc.pcabest.K      <- adegenet::dapc(genind, grp.mat[,9],n.pca=5,n.da=5)
+dapc.pcabest.K
+dapc.pcabest.list[[i]] <- dapc.pcabest.K
+names(dapc.pcabest.K)
+length(dapc.pcabest.K$assign)
+dapc.pcabest.K$assign
+min(dapc.pcabest.K$assign)
+min(as.numeric(dapc.pcabest.K$assign))
+max(as.numeric(dapc.pcabest.K$assign))
+as.numeric(dapc.pcabest.K$assign)
+minsize.grp <- min(as.numeric(dapc.pcabest.K$assign))
+minsize.grp
+devtools::document()
+remotes::install_github("JeffWeinell/misc.wrappers",upgrade=FALSE)
 q()
