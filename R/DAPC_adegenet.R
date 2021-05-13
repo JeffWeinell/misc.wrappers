@@ -1182,8 +1182,10 @@ ggscatter.dapc <- function (x, xax = 1, yax = 2, vartype="df", varname=NULL,axis
 		## defining locations for x-axis ticks
 		xat0 <- seq(from=round(min(allx)),to=round(max(allx)))
 		xat  <- xat0[xat0/2 == round(xat0/2)]
-		xpoints <- ind.vals[grp == levels(grp)[i], pcLab]
-		ypoints <- rep(0, sum(grp == levels(grp)[i]))
+		
+		#xpoints <- ind.vals[grp == levels(grp)[i], pcLab]
+		#ypoints <- rep(0, sum(grp == levels(grp)[i]))
+		
 		### ggplot of PC coordinates of groups.
 		if(onedim.filled){
 			gg.density.temp  <- ggplot2::ggplot(coords.df, ggplot2::aes(x=coords,color=Cluster,fill=Cluster)) + ggplot2::geom_density() + ggplot2::theme_classic() + ggplot2::scale_color_manual(values=col) + ggplot2::scale_fill_manual(values=col) + ggplot2::scale_x_continuous(breaks=xat,name=paste(varname,xax),limits=range(allx))
