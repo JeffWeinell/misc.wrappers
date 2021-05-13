@@ -1,78 +1,12 @@
-#' @title Filter (query) genotype by variation
-#' 
-#' Functon to test that a column of the genotypic matrix is a snp. Using default values for min.freqs this function tests if a site is a SNP.
-#' This function is used internally in several other functions.
-#' 
-#' @param alignment.site Character vector containing alleles for each individual at a site.
-#' @param min.freqs Numerical vector with minimum frequency of the most common allele, minimum frequency of the second most common allele, ect.. The length of this vector determines how many individuals must have non-missing data.
-#' @return TRUE if site meets criteria specified by min.freqs, otherwise false.
-#' @export filter.var
-filter.var <- function(alignment.site,min.freqs=c(2,1,0,0)){
-	## Number of each type of character in a given column
-	allele.counts      <- table(tolower(alignment.site))
-	#ACGT.counts        <- allele.counts[(names(allele.counts) %in% c("a","c","g","t"))]
-	allele.counts.sorted <- sort(allele.counts,decreasing=T)
-	### If the number of alleles (i.e., length of allele.counts) is more than the length of min.freqs,
-	### go to the else argument and return FALSE because the site is too variable.
-	if(length(allele.counts) <= length(min.freqs)){
-		### If min.freqs only contains zeros, keep the site because even invariant sites are allowed.
-		if(all(min.freqs==0)){
-			result <- TRUE
-		} else {
-			### If the number of alleles is equal or greater than the number required by min.freqs (i.e., the number of nonzeros entries), continue, otherwise return FALSE.
-			if(length(allele.counts) >= length(min.freqs[min.freqs>0])){
-				### If min.freqs subtracted from allele.counts.sorted is a vector containing only zeros and/or positive numbers, then return TRUE, otherwise return FALSE.
-				if(all((allele.counts.sorted[min.freqs>0]-min.freqs[min.freqs>0])>=0)){
-					result <- TRUE
-				} else {
-					result <- FALSE
-				}
-			} else {
-				result <- FALSE
-			}
-		} 
-	} else {
-		result <- FALSE
-	}
-	result
-}
-
-#' @title Reads a VCF object (including those not usually compatible with LEA) and returns a genotypic matrix equivalent to the lfmm-format used by LEA
-#' 
-#' The object returned by vcfR2lfmm can be used as input in the LEA function tess3.
-#' Optionally supply a character string with path where lfmm object will be saved
-#' This function is used in the function runtess
-#' 
-#' @param vcf Character string with path to input VCF file.
-#' @param out Character string with path where output lfmm file should be saved. Default is NULL.
-#' @return Matrix with genotypes in lfmm format
-#' @export vcfR2lfmm
-vcfR2lfmm <- function(vcf,out=NULL){
-	vcf.obj   <- vcfR::read.vcfR(vcf,verbose=FALSE)
-	gt.mat    <- gsub(":.+","",vcf.obj@gt[,-1])
-	mat.temp0 <- gsub("|","/",gt.mat,fixed=TRUE)
-	mat.temp1 <- gsub("^0/0$","0",mat.temp0)
-	mat.temp2 <- gsub("^1/1$","2",mat.temp1)
-	mat.temp3 <- gsub("^0/1$","1",mat.temp2)
-	mat.temp4 <- gsub("./.",NA,mat.temp3,fixed=T)
-	mat.temp5 <- unname(t(mat.temp4))
-	mode(mat.temp5)     <- "numeric"
-	colnames(mat.temp5) <- paste0("V",1:ncol(mat.temp5))
-	if(length(unique(c(mat.temp5)))>4){
-		stop("Some sites with >2 alleles")
-	}
-	if(!is.null(out)){
-		write.table(mat.temp5,file=out,col.names=FALSE,row.names=FALSE,quote=FALSE,sep=" ")
-	}
-	mat.temp5
-}
-
 #' @title Run tess3r and plot results
 #'
-#' This is a wrapper for several functions from the tess3r package. The benefit of using this function is that data can be supplied as a VCF file, and results are plotted in multiple useful ways.
+#' Pipeline with wrappers for several functions from the tess3r package.
+#' Data can be supplied as a VCF file and results are plotted in multiple useful ways.
 #' 
-#' @param vcf Path to input VCF file with SNP data.
+#' @param x 'vcfR' object (see package::vcfR) or character string with path to SNPs dataset fornatted to match the 'format' argument. Currently only VCF can be used, but others may be added soon.
+#' @param format Character string indicating the format of the data. Currently only "VCF" or "fastStructure" allowed. Other types may be added. Ignored if x is a vcfR object.
 #' @param coords Either a character string with path to file containing coordinates (longitude in first column, latitude in second column), or matrix object with longitude and latitude columns.
+#' @param samplenames NULL or a character string vector with names of samples (in same order) as data in x and coords. If NULL (the default), sample names are extracted from x.
 #' @param kmax Numerical vector with set of values to use for K. Default 40.
 #' @param reps Number of repititions. Default 100.
 #' @param save.as Where to save the output PDF. Default is NULL.
@@ -80,7 +14,7 @@ vcfR2lfmm <- function(vcf,out=NULL){
 #' @param max.iteration Max iterations. Default 500.
 #' @return List of plots
 #' @export runtess
-runtess <- function(vcf,coords=NULL,kmax=40,reps=100,save.as=NULL,mask=0.05,max.iteration=500){
+runtess <- function(x,format="VCF",coords,samplenames=NULL,kmax=40,reps=100,save.as=NULL,mask=0.05,max.iteration=500){
 	if(is.null(save.as)){
 		save.as <- file.path(getwd(),"result_tess.pdf")
 	}
@@ -88,15 +22,26 @@ runtess <- function(vcf,coords=NULL,kmax=40,reps=100,save.as=NULL,mask=0.05,max.
 		stop("Output file already exists. Use a different name for 'save.as' argument.")
 	}
 	Krange=1:kmax
-	vcf.obj     <- vcfR::read.vcfR(vcf)
-	gt.mat      <- gsub(":.+","",vcf.obj@gt[,-1])
-	# Detect ploidy from genotype matrix of vcf
-	test.sample <- unlist(gt.mat)[!is.na(unlist(gt.mat))][1]
-	ploidy      <- length(unlist(strsplit(gt.mat[1],split="/",fixed=T)))
-	samplenames <- colnames(vcf.obj@gt)[-1]
+	if(format=="VCF" | is(x,"vcfR")){
+		if(is(x,"vcfR")){
+			vcf.obj <- vcf <- x
+		} else {
+			vcf <- x
+			vcf.obj     <- vcfR::read.vcfR(vcf)
+		}
+		gt.mat      <- gsub(":.+","",vcf.obj@gt[,-1])
+		# Detect ploidy from genotype matrix of vcf
+		test.sample <- unlist(gt.mat)[!is.na(unlist(gt.mat))][1]
+		ploidy      <- length(unlist(strsplit(gt.mat[1],split="/",fixed=T)))
+		if(is.null(samplenames)){
+			samplenames <- colnames(vcf.obj@gt)[-1]
+		}
+		lfmm.obj    <- vcfR2lfmm(vcf=vcf)
+	} else {
+		stop("Currently, 'format' must be 'VCF'")
+	}
 	numind      <- length(samplenames)
 	label.size  <- min((288/numind),7)
-	lfmm.obj    <- vcfR2lfmm(vcf=vcf)
 	if(is(coords,"array") | is(coords,"data.frame")){
 		coords <-  coords
 	} else {
@@ -281,6 +226,75 @@ runtess <- function(vcf,coords=NULL,kmax=40,reps=100,save.as=NULL,mask=0.05,max.
 #'                            max.iteration=500,
 #'                            save.as="Oxyrhabdium-cf.modestum_Luzon_BestSNP_tess3r_run3.pdf")
 
+
+#' @title Filter (query) genotype by variation
+#' 
+#' Functon to test that a column of the genotypic matrix is a snp. Using default values for min.freqs this function tests if a site is a SNP.
+#' This function is used internally in several other functions.
+#' 
+#' @param alignment.site Character vector containing alleles for each individual at a site.
+#' @param min.freqs Numerical vector with minimum frequency of the most common allele, minimum frequency of the second most common allele, ect.. The length of this vector determines how many individuals must have non-missing data.
+#' @return TRUE if site meets criteria specified by min.freqs, otherwise false.
+#' @export filter.var
+filter.var <- function(alignment.site,min.freqs=c(2,1,0,0)){
+	## Number of each type of character in a given column
+	allele.counts      <- table(tolower(alignment.site))
+	#ACGT.counts        <- allele.counts[(names(allele.counts) %in% c("a","c","g","t"))]
+	allele.counts.sorted <- sort(allele.counts,decreasing=T)
+	### If the number of alleles (i.e., length of allele.counts) is more than the length of min.freqs,
+	### go to the else argument and return FALSE because the site is too variable.
+	if(length(allele.counts) <= length(min.freqs)){
+		### If min.freqs only contains zeros, keep the site because even invariant sites are allowed.
+		if(all(min.freqs==0)){
+			result <- TRUE
+		} else {
+			### If the number of alleles is equal or greater than the number required by min.freqs (i.e., the number of nonzeros entries), continue, otherwise return FALSE.
+			if(length(allele.counts) >= length(min.freqs[min.freqs>0])){
+				### If min.freqs subtracted from allele.counts.sorted is a vector containing only zeros and/or positive numbers, then return TRUE, otherwise return FALSE.
+				if(all((allele.counts.sorted[min.freqs>0]-min.freqs[min.freqs>0])>=0)){
+					result <- TRUE
+				} else {
+					result <- FALSE
+				}
+			} else {
+				result <- FALSE
+			}
+		} 
+	} else {
+		result <- FALSE
+	}
+	result
+}
+
+#' @title Reads a VCF object (including those not usually compatible with LEA) and returns a genotypic matrix equivalent to the lfmm-format used by LEA
+#' 
+#' The object returned by vcfR2lfmm can be used as input in the LEA function tess3.
+#' Optionally supply a character string with path where lfmm object will be saved
+#' This function is used in the function runtess
+#' 
+#' @param vcf Character string with path to input VCF file.
+#' @param out Character string with path where output lfmm file should be saved. Default is NULL.
+#' @return Matrix with genotypes in lfmm format
+#' @export vcfR2lfmm
+vcfR2lfmm <- function(vcf,out=NULL){
+	vcf.obj   <- vcfR::read.vcfR(vcf,verbose=FALSE)
+	gt.mat    <- gsub(":.+","",vcf.obj@gt[,-1])
+	mat.temp0 <- gsub("|","/",gt.mat,fixed=TRUE)
+	mat.temp1 <- gsub("^0/0$","0",mat.temp0)
+	mat.temp2 <- gsub("^1/1$","2",mat.temp1)
+	mat.temp3 <- gsub("^0/1$","1",mat.temp2)
+	mat.temp4 <- gsub("./.",NA,mat.temp3,fixed=T)
+	mat.temp5 <- unname(t(mat.temp4))
+	mode(mat.temp5)     <- "numeric"
+	colnames(mat.temp5) <- paste0("V",1:ncol(mat.temp5))
+	if(length(unique(c(mat.temp5)))>4){
+		stop("Some sites with >2 alleles")
+	}
+	if(!is.null(out)){
+		write.table(mat.temp5,file=out,col.names=FALSE,row.names=FALSE,quote=FALSE,sep=" ")
+	}
+	mat.temp5
+}
 
 
 

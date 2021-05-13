@@ -4,11 +4,14 @@
 \alias{runtess}
 \title{Run tess3r and plot results
 
-This is a wrapper for several functions from the tess3r package. The benefit of using this function is that data can be supplied as a VCF file, and results are plotted in multiple useful ways.}
+Pipeline with wrappers for several functions from the tess3r package.
+Data can be supplied as a VCF file and results are plotted in multiple useful ways.}
 \usage{
 runtess(
-  vcf,
-  coords = NULL,
+  x,
+  format = "VCF",
+  coords,
+  samplenames = NULL,
   kmax = 40,
   reps = 100,
   save.as = NULL,
@@ -17,9 +20,13 @@ runtess(
 )
 }
 \arguments{
-\item{vcf}{Path to input VCF file with SNP data.}
+\item{x}{'vcfR' object (see package::vcfR) or character string with path to SNPs dataset fornatted to match the 'format' argument. Currently only VCF can be used, but others may be added soon.}
+
+\item{format}{Character string indicating the format of the data. Currently only "VCF" or "fastStructure" allowed. Other types may be added. Ignored if x is a vcfR object.}
 
 \item{coords}{Either a character string with path to file containing coordinates (longitude in first column, latitude in second column), or matrix object with longitude and latitude columns.}
+
+\item{samplenames}{NULL or a character string vector with names of samples (in same order) as data in x and coords. If NULL (the default), sample names are extracted from x.}
 
 \item{kmax}{Numerical vector with set of values to use for K. Default 40.}
 
@@ -37,5 +44,6 @@ List of plots
 \description{
 Run tess3r and plot results
 
-This is a wrapper for several functions from the tess3r package. The benefit of using this function is that data can be supplied as a VCF file, and results are plotted in multiple useful ways.
+Pipeline with wrappers for several functions from the tess3r package.
+Data can be supplied as a VCF file and results are plotted in multiple useful ways.
 }

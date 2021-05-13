@@ -4,11 +4,13 @@
 \alias{run_sNMF}
 \title{Wrapper for LEA snmf
 
-Runs LEA function snmf function from VCF input file and optionally interpolates cluster assignments onto a map (if 'coords' argument is non-NULL).}
+Runs LEA function snmf function and generate a pdf with various useful plots; optionally interpolate cluster assignments onto a map.}
 \usage{
 run_sNMF(
-  vcf,
+  x,
+  format = "VCF",
   coords = NULL,
+  samplenames = NULL,
   kmax = 40,
   reps = 100,
   entropy = TRUE,
@@ -18,9 +20,13 @@ run_sNMF(
 )
 }
 \arguments{
-\item{vcf}{Path to input VCF file with SNP data}
+\item{x}{'vcfR' object (see package::vcfR) or a character string with path to a SNPs dataset formatted according to the 'format' argument. Currently VCF or 'fastStructure' (a type of STRUCTURE format) can be used.}
+
+\item{format}{Character string indicating the format of the data. Currently only "VCF" or "fastStructure" allowed. Other types may be added. Ignored if x is a vcfR object.}
 
 \item{coords}{Either a character string with path to file containing coordinates (longitude in first column, latitude in second column), or matrix object with longitude and latitude columns.}
+
+\item{samplenames}{NULL or a character string vector with names of samples (in same order) as data in x and coords. If NULL (the default), sample names are extracted from x.}
 
 \item{kmax}{Number indicating the maximum number of clusters to evaluate. Default is 40, which is converted using kmax = min(kmax, number of individuals-1)}
 
@@ -42,5 +48,5 @@ List of plots
 \description{
 Wrapper for LEA snmf
 
-Runs LEA function snmf function from VCF input file and optionally interpolates cluster assignments onto a map (if 'coords' argument is non-NULL).
+Runs LEA function snmf function and generate a pdf with various useful plots; optionally interpolate cluster assignments onto a map.
 }

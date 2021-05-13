@@ -23,3 +23,41 @@ Filter (query) genotype by variation
 Functon to test that a column of the genotypic matrix is a snp. Using default values for min.freqs this function tests if a site is a SNP.
 This function is used internally in several other functions.
 }
+\examples{
+library(misc.wrappers)
+Oxyrhabdium_AllSpecies <- runtess(vcf="Oxyrhabdium_AllSpecies_BestSNP.vcf",
+                     coords="Oxyrhabdium_AllSpecies_coords.txt",
+                     Krange=1:15,
+                     max.iteration=500,
+                     save.as="Oxyrhabdium_AllSpecies_BestSNP_tess3r_run2.pdf")
+
+leporinum <- runtess(vcf="Oxyrhabdium-leporinum_BestSNP.vcf",
+                     coords="Oxyrhabdium-leporinum_coords.txt",
+                     Krange=1:15,
+                     max.iteration=500,
+                     save.as="Oxyrhabdium-leporinum_BestSNP_tess3r_run3.pdf")
+
+modestum        <- runtess(vcf="Oxyrhabdium-modestum_BestSNP.vcf",
+                           coords="Oxyrhabdium-modestum_coords.txt",
+                           Krange=1:15,
+                           max.iteration=500,
+                           save.as="Oxyrhabdium-modestum_BestSNP_tess3r_run3.pdf")
+
+cfmodestum        <- runtess(vcf="Oxyrhabdium-cf.modestum_BestSNP.vcf",
+                           coords="Oxyrhabdium-cfmodestum_coords.txt",
+                           Krange=1:15,
+                           max.iteration=500,
+                           save.as="Oxyrhabdium-cf.modestum_BestSNP_tess3r_run2.pdf")
+
+leporinum_Luzon <- runtess(vcf="Oxyrhabdium-leporinum_Luzon_BestSNP.vcf",
+                           coords="Oxyrhabdium-leporinum_Luzon_coords.txt",
+                           Krange=1:15,
+                           max.iteration=500,
+                           save.as="Oxyrhabdium-leporinum_Luzon_BestSNP_tess3r_run2.pdf")
+
+cfmodestum_Luzon        <- runtess(vcf="Oxyrhabdium-cf.modestum_Luzon_BestSNP.vcf",
+                           coords="Oxyrhabdium-cfmodestum_Luzon_coords.txt",
+                           Krange=1:15,
+                           max.iteration=500,
+                           save.as="Oxyrhabdium-cf.modestum_Luzon_BestSNP_tess3r_run3.pdf")
+}

@@ -12,6 +12,7 @@ run_DAPC(
   format = "VCF",
   kmax = 40,
   coords = NULL,
+  samplenames = NULL,
   reps = 100,
   probs.out = NULL,
   save.as = NULL,
@@ -19,7 +20,7 @@ run_DAPC(
 )
 }
 \arguments{
-\item{x}{Character string with path to file containing snp data, with data format specified by 'format' argument (currently only VCF files can be used).}
+\item{x}{'vcfR' object (see package::vcfR) or character string with path to file containing snp data, with data format specified by 'format' argument (currently only VCF files can be used).}
 
 \item{format}{Character string indicating the format (filetype) of the data. Currently only "VCF" is allowed, but other types may be added.}
 

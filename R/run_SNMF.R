@@ -1,9 +1,11 @@
 #' @title Wrapper for LEA snmf
 #' 
-#' Runs LEA function snmf function from VCF input file and optionally interpolates cluster assignments onto a map (if 'coords' argument is non-NULL).
+#' Runs LEA function snmf function and generate a pdf with various useful plots; optionally interpolate cluster assignments onto a map.
 #' 
-#' @param vcf Path to input VCF file with SNP data
+#' @param x 'vcfR' object (see package::vcfR) or a character string with path to a SNPs dataset formatted according to the 'format' argument. Currently VCF or 'fastStructure' (a type of STRUCTURE format) can be used.
+#' @param format Character string indicating the format of the data. Currently only "VCF" or "fastStructure" allowed. Other types may be added. Ignored if x is a vcfR object.
 #' @param coords Either a character string with path to file containing coordinates (longitude in first column, latitude in second column), or matrix object with longitude and latitude columns.
+#' @param samplenames NULL or a character string vector with names of samples (in same order) as data in x and coords. If NULL (the default), sample names are extracted from x.
 #' @param kmax Number indicating the maximum number of clusters to evaluate. Default is 40, which is converted using kmax = min(kmax, number of individuals-1)
 #' @param reps Number of repititions. Default 100.
 #' @param entropy Default TRUE
@@ -13,7 +15,7 @@
 #' @param save.as Character string with where to save the output PDF with plots of results. Default is NULL.
 #' @return List of plots
 #' @export run_sNMF
-run_sNMF <- function(vcf,coords=NULL,kmax=40,reps=100,entropy=TRUE,project="new",iter=500,save.as=NULL){
+run_sNMF <- function(x,format="VCF",coords=NULL,samplenames=NULL,kmax=40,reps=100,entropy=TRUE,project="new",iter=500,save.as=NULL){
 	if(is.null(save.as)){
 		save.as <- file.path(getwd(),"result_LEA-sNMF.pdf")
 	}
@@ -21,8 +23,19 @@ run_sNMF <- function(vcf,coords=NULL,kmax=40,reps=100,entropy=TRUE,project="new"
 		stop("Output file already exists. Use a different name for 'save.as' argument.")
 	}
 	Krange=1:kmax
-	vcf.obj     <- vcfR::read.vcfR(vcf)
-	samplenames <- colnames(vcf.obj@gt)[-1]
+	if(format=="VCF" | is(x,"vcfR")){
+		if(is(x,"vcfR")){
+			vcf.obj <- vcf <- x
+		} else {
+			vcf <- x
+			vcf.obj     <- vcfR::read.vcfR(vcf)
+		}
+		if(is.null(samplenames)){
+			samplenames <- colnames(vcf.obj@gt)[-1]
+		}
+	} else {
+		stop("Currently, 'format' must be 'VCF'")
+	}
 	numind      <- length(samplenames)
 	label.size  <- min((288/numind),7)
 	if(!is.null(coords)){

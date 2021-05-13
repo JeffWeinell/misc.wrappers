@@ -8,12 +8,13 @@ This fucntion is a wrapper that enables running fastStructure with SNP data in e
 
 Notes for running fastStructure:
 Requires python 2
-Cross validation with the "cv.iter" argument not implemented because it crashes my copy of fastStructure, probably due to a python build problem on my end}
+fastStructure 'cv' (cross-validation) feature is not yet implemented here.}
 \usage{
 run_fastStructure(
   x,
   format = "VCF",
   coords = NULL,
+  samplenames = NULL,
   kmax = 40,
   reps = 100,
   save.as = NULL,
@@ -28,11 +29,13 @@ run_fastStructure(
 )
 }
 \arguments{
-\item{x}{Character string with path to file containing SNP data formatted according to the 'format' argument. Currently VCF or 'fastStructure' (a specific type of STRUCTURE format) can be used.}
+\item{x}{'vcfR' object (see package::vcfR) or a character string with path to a SNPs dataset formatted according to the 'format' argument. Currently VCF or 'fastStructure' (a type of STRUCTURE format) can be used.}
 
-\item{format}{Character string indicating the format of the data. Currently only "VCF" or "fastStructure" allowed. Other types may be added.}
+\item{format}{Character string indicating the format of the data. Currently only "VCF" or "fastStructure" allowed. Other types may be added. Ignored if x is a vcfR object.}
 
 \item{coords}{Either a character string with path to file containing coordinates (longitude in first column, latitude in second column), or matrix object with longitude and latitude columns.}
+
+\item{samplenames}{NULL or a character string vector with names of samples in the input data, and coords file if supplied. If NULL (the default), sample names are extracted from the SNPs datafile.}
 
 \item{kmax}{Numerical vector with set of values to use for K. Default 40.}
 
@@ -66,5 +69,5 @@ This fucntion is a wrapper that enables running fastStructure with SNP data in e
 
 Notes for running fastStructure:
 Requires python 2
-Cross validation with the "cv.iter" argument not implemented because it crashes my copy of fastStructure, probably due to a python build problem on my end
+fastStructure 'cv' (cross-validation) feature is not yet implemented here.
 }

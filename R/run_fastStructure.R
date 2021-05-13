@@ -4,11 +4,12 @@
 #' 
 #' Notes for running fastStructure:
 #'    Requires python 2
-#'    Cross validation with the "cv.iter" argument not implemented because it crashes my copy of fastStructure, probably due to a python build problem on my end
+#'    fastStructure 'cv' (cross-validation) feature is not yet implemented here.
 #' 
-#' @param x Character string with path to file containing SNP data formatted according to the 'format' argument. Currently VCF or 'fastStructure' (a specific type of STRUCTURE format) can be used.
-#' @param format Character string indicating the format of the data. Currently only "VCF" or "fastStructure" allowed. Other types may be added.
+#' @param x 'vcfR' object (see package::vcfR) or a character string with path to a SNPs dataset formatted according to the 'format' argument. Currently VCF or 'fastStructure' (a type of STRUCTURE format) can be used.
+#' @param format Character string indicating the format of the data. Currently only "VCF" or "fastStructure" allowed. Other types may be added. Ignored if x is a vcfR object.
 #' @param coords Either a character string with path to file containing coordinates (longitude in first column, latitude in second column), or matrix object with longitude and latitude columns.
+#' @param samplenames NULL or a character string vector with names of samples in the input data, and coords file if supplied. If NULL (the default), sample names are extracted from the SNPs datafile.
 #' @param kmax Numerical vector with set of values to use for K. Default 40.
 #' @param reps Number of repititions. Default 100.
 #' @param save.as Where to save the output PDF. Default is NULL.
@@ -22,7 +23,7 @@
 #' @param include.out Character vector indicating which type of files should be included as output. Default is c(".pdf",".Qlog",".margLlog"). An additional file ".Plog" can be included but can be very large.
 #' @return List of plots
 #' @export run_fastStructure
-run_fastStructure <- function(x,format="VCF",coords=NULL,kmax=40,reps=100,save.as=NULL,tolerance=10e-6,prior="simple",full=FALSE,seed=NULL,python.path=NULL,fastStructure.path=NULL,cleanup=TRUE,include.out=c(".pdf",".Qlog",".margLlog")){
+run_fastStructure <- function(x,format="VCF",coords=NULL,samplenames=NULL,kmax=40,reps=100,save.as=NULL,tolerance=10e-6,prior="simple",full=FALSE,seed=NULL,python.path=NULL,fastStructure.path=NULL,cleanup=TRUE,include.out=c(".pdf",".Qlog",".margLlog")){
 	if(is.null(save.as)){
 		save.as <- file.path(getwd(),"result_fastStructure.pdf")
 	}
@@ -30,16 +31,20 @@ run_fastStructure <- function(x,format="VCF",coords=NULL,kmax=40,reps=100,save.a
 		stop("Output file already exists. Use a different name for 'save.as' argument.")
 	}
 	Krange=1:kmax
-	if(format=="VCF"){
-		vcf <- x
-		vcf.obj     <- vcfR::read.vcfR(vcf)
+	if(format=="VCF" | is(x,"vcfR")){
+		if(is(x,"vcfR")){
+			vcf.obj <- vcf <- x
+		} else {
+			vcf <- x
+			vcf.obj     <- vcfR::read.vcfR(vcf)
+		}
 		gt.mat      <- gsub(":.+","",vcf.obj@gt[,-1])
 		# Detect ploidy from genotype matrix of vcf
 		test.sample <- unlist(gt.mat)[!is.na(unlist(gt.mat))][1]
 		ploidy      <- length(unlist(strsplit(gt.mat[1],split="/",fixed=T)))
-		samplenames <- colnames(vcf.obj@gt)[-1]
-		numind      <- length(samplenames)
-		label.size  <- min((288/numind),7)
+		if(is.null(samplenames)){
+			samplenames <- colnames(vcf.obj@gt)[-1]
+		}
 		### Generate fastStrusture file from vcfR object
 		str.path0   <- vcf2fastStructure(vcf=vcf.obj)
 		str.path    <- tools::file_path_sans_ext(str.path0)
@@ -51,6 +56,9 @@ run_fastStructure <- function(x,format="VCF",coords=NULL,kmax=40,reps=100,save.a
 				stop("Data must be supplied in VCF or fastStructure format")
 			}
 	}
+	numind      <- length(samplenames)
+	label.size  <- min((288/numind),7)
+		
 	### Checking that python2 exists and is executable
 	if(is.null(python.path)){
 		python.testpath <- find.exe.path("python")
