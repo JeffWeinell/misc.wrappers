@@ -20,7 +20,7 @@ Function to arrange plots of density for each DF or PC and each K}
   pad = 0.1,
   K = NULL,
   outer.text = list(NULL, NULL, NULL, NULL),
-  maxMat = c(7, 8)
+  maxMat = c(7, 7)
 )
 }
 \arguments{

@@ -137,9 +137,9 @@ run_DAPC <- function(vcf, kmax=40, coords=NULL, reps=100,probs.out=NULL,save.as=
 		i=(K-1)
 		dapc.pcabest.K      <- adegenet::dapc(genind, grp.mat[,i],n.pca=best.npca[i],n.da=5)
 		### Fewest number of individuals assigned to any cluster.
-		minsize.grp <- min(as.numeric(dapc.pcabest.K$assign))
+		minsize.grp <- min(table(as.numeric(dapc.pcabest.K$assign)))
 		# switch density.stop to TRUE the first time minsize.grp is 1
-		if(!minsize.grp > 1 & !density.stop){
+		if(!(minsize.grp > 1) & !density.stop){
 			density.stop <- TRUE
 		}
 		dapc.pcabest.list[[i]] <- dapc.pcabest.K
@@ -154,7 +154,7 @@ run_DAPC <- function(vcf, kmax=40, coords=NULL, reps=100,probs.out=NULL,save.as=
 	#	scatterPlot[[i]]    <- scatterPlot.i
 		message(paste(K,"step 3.2"))
 		### density plots of discriminant functions
-		if(density.stop){
+		if(!density.stop){
 			density.da.list.i <- list(); length(density.da.list.i) <- dapc.pcabest.K$n.da
 			for(z in 1:dapc.pcabest.K$n.da){
 				density.da.list.i[[z]] <- ggscatter.dapc(dapc.pcabest.K,xax=z,yax=z,col=myCols,legend=F,show.title=F,hideperimeter=T)
@@ -185,7 +185,7 @@ run_DAPC <- function(vcf, kmax=40, coords=NULL, reps=100,probs.out=NULL,save.as=
 		}
 		message(paste(K,"step 3.4"))
 		##### ggplot density plots of principle components
-		if(density.stop){
+		if(!density.stop){
 			density.pca.list.i <- list(); length(density.pca.list.i) <- dapc.pcabest.K$n.pca
 			for(z in 1:dapc.pcabest.K$n.pca){
 				density.pca.list.i[[z]] <- ggscatter.dapc(dapc.pcabest.K,vartype="pc",xax=z,yax=z,col=myCols,legend=F,show.title=F,hideperimeter=T)
@@ -225,6 +225,7 @@ run_DAPC <- function(vcf, kmax=40, coords=NULL, reps=100,probs.out=NULL,save.as=
 		assignment.K       <- ggplot2::ggplot(data=posterior.df, ggplot2::aes(x= pop, y=indv,fill=assignment)) + ggplot2::geom_tile(color="gray") + ggplot2::theme_classic() + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5), axis.text.y = ggplot2::element_text(size = label.size), panel.grid.major = ggplot2::element_blank(), panel.grid.minor = ggplot2::element_blank(), panel.background = ggplot2::element_blank(), legend.position = "none", ) + ggplot2::labs(title = paste0("K = ",K,"; PCs retained = ", best.npca[i]), x="Clusters", y="") + ggplot2::scale_fill_gradient2(low = "white", mid = "yellow", high = "red", midpoint = 0.5) + ggplot2::geom_text(label=labels)
 		assignmentPlot[[i]]  <- assignment.K
 		message(paste(K,"step 3.8"))
+		message(paste0("smallest cluster has ",minsize.grp," individuals"))
 		if(!is.null(coords)){
 			my.palette      <- tess3r::CreatePalette(myCols[1:K], 9)
 			tess3r.qmat     <- suppressWarnings(tess3r::as.qmatrix(q.matrix))
@@ -240,16 +241,18 @@ run_DAPC <- function(vcf, kmax=40, coords=NULL, reps=100,probs.out=NULL,save.as=
 	}
 	### Plots of DF or PC density for each given K
 	message("step 4")
-	if(any(lengths(da.densityPlot)>0)){
-		da.densityPlot <- da.densityPlot[which(lengths(da.densityPlot)>0)]
-		da.density.arranged  <- dapc.plot.arrange(da.densityPlot,variable="DF",pos.x.labs=1,pos.y.labs=2,outer.text=list(NULL,NULL,paste0("Density of discriminant function vs. K"), NULL))
+	da.dens.plotsPerK <- sapply(1:length(da.densityPlot),FUN=function(x){max(lengths(da.densityPlot[[x]]))})
+	if(any(da.dens.plotsPerK>0)){
+		da.densityPlot2      <- da.densityPlot[which(da.dens.plotsPerK>0)]
+		da.density.arranged  <- dapc.plot.arrange(da.densityPlot2,variable="DF",pos.x.labs=1,pos.y.labs=2,outer.text=list(NULL,NULL,paste0("Density of discriminant function vs. K"), NULL))
 	} else {
 		da.density.arranged  <- NULL
 	}
 	message("step 5")
-	if(any(lengths(pca.densityPlot)>0)){
-		pca.densityPlot <- pca.densityPlot[which(lengths(pca.densityPlot)>0)]
-		pca.density.arranged <- dapc.plot.arrange(pca.densityPlot,variable="PC",pos.x.labs=1,pos.y.labs=2,outer.text=list(NULL,NULL,paste0("Density of principle component vs. K"), NULL))
+	pca.dens.plotsPerK <- sapply(1:length(pca.densityPlot),FUN=function(x){max(lengths(pca.densityPlot[[x]]))})
+	if(any(pca.dens.plotsPerK>0)){
+		pca.densityPlot2 <- pca.densityPlot[which(pca.dens.plotsPerK>0)]
+		pca.density.arranged <- dapc.plot.arrange(pca.densityPlot2,variable="PC",pos.x.labs=1,pos.y.labs=2,outer.text=list(NULL,NULL,paste0("Density of principle component vs. K"), NULL))
 	} else {
 		pca.density.arranged <- NULL
 	}
@@ -438,7 +441,7 @@ run_DAPC <- function(vcf, kmax=40, coords=NULL, reps=100,probs.out=NULL,save.as=
 #' @param maxMat Numerical vector with length 2 that specifies the maximum number of rows and columns of plots, respectively, in the output gtable. Default = c(7,8).
 #' @return A gtable object
 #' @export dapc.plot.arrange
-dapc.plot.arrange <- function(x,variable="DF",layout.mat=NULL,pos.x.labs=1,pos.y.labs=2,row.labels.left=NULL,col.labels.top=NULL,row.labels.right=NULL,col.labels.bottom=NULL,use.diag=NULL,pad=0.1,K=NULL,outer.text=list(NULL,NULL,NULL,NULL),maxMat=c(7,8)){
+dapc.plot.arrange <- function(x,variable="DF",layout.mat=NULL,pos.x.labs=1,pos.y.labs=2,row.labels.left=NULL,col.labels.top=NULL,row.labels.right=NULL,col.labels.bottom=NULL,use.diag=NULL,pad=0.1,K=NULL,outer.text=list(NULL,NULL,NULL,NULL),maxMat=c(7,7)){
 	numplots   <- lengths(x)
 	stat.max   <- max(numplots)
 	#layout.mat0 <- matrix(data=NA,nrow=length(numplots), ncol=stat.max)
@@ -630,7 +633,7 @@ dapc.plot.arrange <- function(x,variable="DF",layout.mat=NULL,pos.x.labs=1,pos.y
 #' @param maxMat Numerical vector with length 2 that specifies the maximum number of rows and columns of plots, respectively, in the output gtable. Default = c(7,8).
 #' @return A gtable object
 #' @export dapc.biplot.arrange
-dapc.biplot.arrange <- function(x,layout.mat=NULL,row.labels.left=NULL,col.labels.top=NULL,row.labels.right=NULL,col.labels.bottom=NULL,use.diag=NULL,pad=0.1,K=NULL,outer.text=list(NULL,NULL,NULL,NULL), maxMat=c(7,8)){
+dapc.biplot.arrange <- function(x,layout.mat=NULL,row.labels.left=NULL,col.labels.top=NULL,row.labels.right=NULL,col.labels.bottom=NULL,use.diag=NULL,pad=0.1,K=NULL,outer.text=list(NULL,NULL,NULL,NULL), maxMat=c(7,7)){
 	### Reset outer.text argument to default if it is not supplied properly, and show warning.
 	if(length(outer.text)!=4 | !is(outer.text,"list")){
 		outer.text <- rep(list(NULL),4)
