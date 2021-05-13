@@ -293,16 +293,26 @@ run_DAPC <- function(vcf, kmax=40, coords=NULL, reps=100,probs.out=NULL,save.as=
 	#	rownames(posterior.bestK) <- samplenames
 	#}
 	#dev.off()
+	results1            <- list(BICPlot,grp.plot2)
+	results1.grobs.list <- lapply(results1, FUN=ggplot2::ggplotGrob)
+	results1.gtable     <- lapply(X=results1.grobs.list,FUN=gridExtra::arrangeGrob)
+	results2 <- dapc.componentPlots
 	if(!is.null(coords)){
-		result <- c(list(BICPlot,grp.plot2),dapc.componentPlots,admixturePlot,assignmentPlot,mapplot)
+		results3 <- c(admixturePlot,assignmentPlot,mapplot)
 	} else {
-		result <- c(list(BICPlot,grp.plot2),dapc.componentPlots,admixturePlot,assignmentPlot)
+		results3 <- c(admixturePlot,assignmentPlot)
 	}
-	#if(!is.null(save.as)){
+	results3.grobs.list <- lapply(results3, FUN=ggplot2::ggplotGrob)
+	results3.gtable     <- lapply(X=results3.grobs.list,FUN=gridExtra::arrangeGrob)
+	result <- c(results1.gtable,results2,results3.gtable)
 	if(".pdf" %in% include.out){
 		pdf(height=6,width=10,file=save.as,onefile=TRUE)
-		lapply(X=result,FUN=print)
-	#	lapply(X=result,FUN=function(x){ifelse(is(x,"gtable"),grid::grid.draw(x),print(x))})
+		for(i in 1:length(result)){
+			grid::grid.draw(result[[i]])
+			if(i < length(result)){
+				grid.newpage()
+			}
+		}
 		dev.off()
 	}
 	result
