@@ -1,3 +1,5 @@
+entropy.is.reduced
+entropy.is.nonoverlap
 any(!entropy.is.reduced) & entropy.is.reduced[1]
 if(any(!entropy.is.reduced) & entropy.is.reduced[1]){#
 		Kbest.criteria2 <- which(!entropy.is.reduced)[1]#
@@ -1090,12 +1092,10 @@ library(remotes)
 remotes::install_github("JeffWeinell/misc.wrappers",upgrade=FALSE,auth_token="323d9e4cd00247a39a805dbb66f37db6403cfb8b")
 library(misc.wrappers)
 q()
-remotes::install_github("JeffWeinell/misc.wrappers",upgrade=FALSE)
 library(misc.wrappers)
-test <- run_DAPC <- function(vcf="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/DAPC/Oxyrhabdium_AllSpecies_BestSNP.vcf", kmax=10, coords="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/tess3r/Oxyrhabdium_AllSpecies_coords.txt", reps=3, probs.out=NULL, save.as="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/DAPC/Oxyrhabdium_test4.pdf",include.out=c(".pdf",".Qlog",".BIClog"))
 test <- run_DAPC(vcf="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/DAPC/Oxyrhabdium_AllSpecies_BestSNP.vcf", kmax=10, coords="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/tess3r/Oxyrhabdium_AllSpecies_coords.txt", reps=3, probs.out=NULL, save.as="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/DAPC/Oxyrhabdium_test4.pdf",include.out=c(".pdf",".Qlog",".BIClog"))
-setwd("Documents/misc.packages")
+test <- run_DAPC(vcf="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/DAPC/Oxyrhabdium_AllSpecies_BestSNP.vcf", kmax=10, coords=NULL, reps=3, probs.out=NULL, save.as="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/DAPC/Oxyrhabdium_test4.pdf",include.out=c(".pdf",".Qlog",".BIClog"))
+library(devtools)
 setwd("Documents/misc.wrappers")
 devtools::document()
-remotes::install_github("JeffWeinell/misc.wrappers",upgrade=FALSE)
 q()
