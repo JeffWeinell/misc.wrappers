@@ -133,7 +133,7 @@ run_DAPC <- function(vcf, kmax=40, coords=NULL, reps=100,probs.out=NULL,save.as=
 	message("step 3")
 	density.stop<-FALSE
 	for(K in 2:max.clusters){
-		print(paste(K,"step 3.1"))
+		print(paste0("K=",K," step 3.1"))
 		i=(K-1)
 		dapc.pcabest.K      <- adegenet::dapc(genind, grp.mat[,i],n.pca=best.npca[i],n.da=5)
 		### Fewest number of individuals assigned to any cluster.
@@ -142,6 +142,11 @@ run_DAPC <- function(vcf, kmax=40, coords=NULL, reps=100,probs.out=NULL,save.as=
 		if(!(minsize.grp > 1) & !density.stop){
 			density.stop <- TRUE
 		}
+		#if(!(minsize.grp < 4)){
+		#	ellipse.size <- 0
+		#} else {
+		#	ellipse.size <- 1.5
+		#}
 		dapc.pcabest.list[[i]] <- dapc.pcabest.K
 		posterior           <- dapc.pcabest.K$posterior
 		q.matrix            <- posterior
@@ -152,7 +157,7 @@ run_DAPC <- function(vcf, kmax=40, coords=NULL, reps=100,probs.out=NULL,save.as=
 		###
 	#	scatterPlot.i       <- ggscatter.dapc(dapc.pcabest.K,col=myCols,legend=F,cstar=1,cpoint=4,label=T)
 	#	scatterPlot[[i]]    <- scatterPlot.i
-		message(paste(K,"step 3.2"))
+		message(paste0("K=",K," step 3.2"))
 		### density plots of discriminant functions
 		if(!density.stop){
 			density.da.list.i <- list(); length(density.da.list.i) <- dapc.pcabest.K$n.da
@@ -162,7 +167,7 @@ run_DAPC <- function(vcf, kmax=40, coords=NULL, reps=100,probs.out=NULL,save.as=
 		} else {
 			density.da.list.i <- list(NULL)
 		}
-		message(paste(K,"step 3.3"))
+		message(paste0("K=",K," step 3.3"))
 		### biplots of discriminant functions
 		if(dapc.pcabest.K$n.da>1){
 			da.pairs.i     <- pset(x=1:dapc.pcabest.K$n.da,min.length=2,max.length=2)
@@ -176,14 +181,14 @@ run_DAPC <- function(vcf, kmax=40, coords=NULL, reps=100,probs.out=NULL,save.as=
 			biplots.da.list.i <- list(); length(biplots.da.list.i) <- length(da.pairs.i)
 			for(z in 1:length(da.pairs.i)){
 				da.pairs.i.z <- da.pairs.i[[z]]
-				biplots.da.list.i[[z]] <- ggscatter.dapc(dapc.pcabest.K,xax=da.pairs.i.z[1],yax=da.pairs.i.z[2],col=myCols,legend=F,cstar=1,cpoint=4,label=F,show.title=F,varname="DF",axis.title.cex=0.7,hideperimeter=T)
+				biplots.da.list.i[[z]] <- ggscatter.dapc(dapc.pcabest.K,xax=da.pairs.i.z[1],yax=da.pairs.i.z[2],col=myCols,legend=F,cstar=0,cellipse=0,cpoint=4,label=F,show.title=F,varname="DF",axis.title.cex=0.7,hideperimeter=T)
 			}
 		} else {
 			biplots.da.list.i  <- NULL
 			da.psets[[i]]      <- NULL
 			da.layout.mat[[i]] <- NULL
 		}
-		message(paste(K,"step 3.4"))
+		message(paste0("K=",K," step 3.4"))
 		##### ggplot density plots of principle components
 		if(!density.stop){
 			density.pca.list.i <- list(); length(density.pca.list.i) <- dapc.pcabest.K$n.pca
@@ -193,7 +198,7 @@ run_DAPC <- function(vcf, kmax=40, coords=NULL, reps=100,probs.out=NULL,save.as=
 		} else {
 			density.pca.list.i <- list(NULL)
 		}
-		message(paste(K,"step 3.5"))
+		message(paste0("K=",K," step 3.5"))
 		### ggplot biplots of principle components
 		if(dapc.pcabest.K$n.pca>1){
 			pca.pairs.i        <- pset(x=1:dapc.pcabest.K$n.pca,min.length=2,max.length=2)
@@ -207,24 +212,24 @@ run_DAPC <- function(vcf, kmax=40, coords=NULL, reps=100,probs.out=NULL,save.as=
 			biplots.pca.list.i <- list(); length(biplots.pca.list.i) <- length(pca.pairs.i)
 			for(z in 1:length(pca.pairs.i)){
 				pca.pairs.i.z           <- pca.pairs.i[[z]]
-				biplots.pca.list.i[[z]] <- ggscatter.dapc(dapc.pcabest.K,vartype="pc",xax=pca.pairs.i.z[1],yax=pca.pairs.i.z[2],col=myCols,legend=F,cstar=0,cpoint=4,label=F,show.title=F,varname="PC",axis.title.cex=0.7,hideperimeter=T)
+				biplots.pca.list.i[[z]] <- ggscatter.dapc(dapc.pcabest.K,vartype="pc",xax=pca.pairs.i.z[1],yax=pca.pairs.i.z[2],col=myCols,legend=F,cstar=0,cellipse=0,cpoint=4,label=F,show.title=F,varname="PC",axis.title.cex=0.7,hideperimeter=T)
 			}
 		} else {
 			biplots.pca.list.i  <- NULL
 			pca.psets[[i]]      <- NULL
 			pca.layout.mat[[i]] <- NULL
 		}
-		message(paste(K,"step 3.6"))
+		message(paste0("K=",K," step 3.6"))
 		posterior.gg        <- ggplot2::ggplot(posterior.df, ggplot2::aes(fill= pop, x= assignment, y=indv)) + ggplot2::geom_bar(position="stack", stat="identity") + ggplot2::theme_classic() + ggplot2::theme(axis.text.y = ggplot2::element_text(size = label.size), panel.grid.major = ggplot2::element_blank(), panel.grid.minor = ggplot2::element_blank(), panel.background = ggplot2::element_blank()) + ggplot2::labs(x = "Membership Probability",y="",fill="Cluster",title=paste0("K = ",K,"; PCs retained = ",best.npca[i])) + ggplot2::scale_fill_manual(values=myCols[1:K])
 		admixturePlot[[i]]  <- posterior.gg
 		#indv.KmaxPosterior <- apply(X=q.matrix, MARGIN=1, FUN=function(x){which(x==max(x))})
-		message(paste(K,"step 3.7"))
+		message(paste0("K=",K," step 3.7"))
 		indv.maxPosterior  <- apply(X=q.matrix, MARGIN=1, FUN=function(x){max(x)})
 		labels             <- rep("",nrow(posterior.df))
 		labels[posterior.df[,"assignment"] %in% indv.maxPosterior] <- "+"
 		assignment.K       <- ggplot2::ggplot(data=posterior.df, ggplot2::aes(x= pop, y=indv,fill=assignment)) + ggplot2::geom_tile(color="gray") + ggplot2::theme_classic() + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5), axis.text.y = ggplot2::element_text(size = label.size), panel.grid.major = ggplot2::element_blank(), panel.grid.minor = ggplot2::element_blank(), panel.background = ggplot2::element_blank(), legend.position = "none", ) + ggplot2::labs(title = paste0("K = ",K,"; PCs retained = ", best.npca[i]), x="Clusters", y="") + ggplot2::scale_fill_gradient2(low = "white", mid = "yellow", high = "red", midpoint = 0.5) + ggplot2::geom_text(label=labels)
 		assignmentPlot[[i]]  <- assignment.K
-		message(paste(K,"step 3.8"))
+		message(paste0("K=",K," step 3.8"))
 		message(paste0("smallest cluster has ",minsize.grp," individuals"))
 		if(!is.null(coords)){
 			my.palette      <- tess3r::CreatePalette(myCols[1:K], 9)
@@ -233,7 +238,7 @@ run_DAPC <- function(vcf, kmax=40, coords=NULL, reps=100,probs.out=NULL,save.as=
 			mapplot.i       <- tess3r::ggtess3Q(tess3r.qmat,coords.mat, interpolation.model = tess3r::FieldsKrigModel(10),resolution = c(500,500), col.palette = my.palette, window=c(x.min,x.max,y.min,y.max),background=TRUE,map.polygon=world_sp)
 			mapplot[[i]]    <- mapplot.i + ggplot2::theme_classic() + ggplot2::labs(title=paste0("Ancestry coefficients; K=",K), x="latitude", y="longitude") + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) + current.gg.sf + ggplot2::geom_point(data = coords, ggplot2::aes(x = Lon, y = Lat), size = 1, shape = 21, fill = "black")
 		}
-		message(paste(K,"step 3.9"))
+		message(paste0("K=",K," step 3.9"))
 		da.densityPlot[[i]]  <- density.da.list.i
 		da.biPlot[[i]]       <- biplots.da.list.i
 		pca.densityPlot[[i]] <- density.pca.list.i
@@ -244,7 +249,7 @@ run_DAPC <- function(vcf, kmax=40, coords=NULL, reps=100,probs.out=NULL,save.as=
 	da.dens.plotsPerK <- sapply(1:length(da.densityPlot),FUN=function(x){max(lengths(da.densityPlot[[x]]))})
 	if(any(da.dens.plotsPerK>0)){
 		da.densityPlot2      <- da.densityPlot[which(da.dens.plotsPerK>0)]
-		da.density.arranged  <- dapc.plot.arrange(da.densityPlot2,variable="DF",pos.x.labs=1,pos.y.labs=2,outer.text=list(NULL,NULL,paste0("Density of discriminant function vs. K"), NULL))
+		da.density.arranged  <- dapc.plot.arrange(da.densityPlot2,variable="DF",pos.x.labs=1,pos.y.labs=2,outer.text=list(NULL,NULL,paste0("For each K, the density distribution of each discriminant function for each population cluster"), NULL))
 	} else {
 		da.density.arranged  <- NULL
 	}
@@ -252,7 +257,7 @@ run_DAPC <- function(vcf, kmax=40, coords=NULL, reps=100,probs.out=NULL,save.as=
 	pca.dens.plotsPerK <- sapply(1:length(pca.densityPlot),FUN=function(x){max(lengths(pca.densityPlot[[x]]))})
 	if(any(pca.dens.plotsPerK>0)){
 		pca.densityPlot2 <- pca.densityPlot[which(pca.dens.plotsPerK>0)]
-		pca.density.arranged <- dapc.plot.arrange(pca.densityPlot2,variable="PC",pos.x.labs=1,pos.y.labs=2,outer.text=list(NULL,NULL,paste0("Density of principle component vs. K"), NULL))
+		pca.density.arranged <- dapc.plot.arrange(pca.densityPlot2,variable="PC",pos.x.labs=1,pos.y.labs=2,outer.text=list(NULL,NULL,paste0("For each K, the density distribution of each retained principle component for each population cluster"), NULL))
 	} else {
 		pca.density.arranged <- NULL
 	}
@@ -278,9 +283,10 @@ run_DAPC <- function(vcf, kmax=40, coords=NULL, reps=100,probs.out=NULL,save.as=
 		rangeK.pca <- c(2:kmax)[which(lengths(pca.biPlot)>0)]
 		#n.pca      <- sapply(X=pca.layout.mat[rangeK.pca-1],FUN=max,na.rm=TRUE)
 		n.pca               <- sapply(X=pca.psets[rangeK.pca-1],FUN=max,na.rm=TRUE)
+		names(n.pca)        <- paste0("K",rangeK.pca)
 		names.bottom.pca    <- lapply(X=1:length(n.pca),FUN=function(x){paste0("PC",1:(n.pca[[x]]-1))})
 		names.left.pca      <- lapply(X=1:length(n.pca),FUN=function(x){paste0("PC",2:(n.pca[[x]]))})
-		pca.biplot.arranged <- lapply(rangeK.pca, FUN=function(z){dapc.biplot.arrange(pca.biPlot,K=z,layout.mat=pca.layout.mat[[z-1]],use.diag=NULL,col.labels.bottom=names.bottom.pca[[which(rangeK.pca==z)]],row.labels.left=names.left.pca[[which(rangeK.pca==z)]],outer.text=list(NULL,NULL,paste0("K=",z,"; Biplots of retained principle components"),NULL))})
+		pca.biplot.arranged <- lapply(rangeK.pca, FUN=function(k){dapc.biplot.arrange(pca.biPlot,K=k,layout.mat=pca.layout.mat[[k-1]],use.diag=NULL,col.labels.bottom=names.bottom.pca[[which(rangeK.pca==k)]],row.labels.left=names.left.pca[[which(rangeK.pca==k)]],outer.text=list(NULL,NULL,paste0("K=",k,"; Biplots of retained principle components"),NULL))})
 		#pca.biPlot.arranged      <- dapc.biplot.arrange(pca.biPlot)
 	} else {
 		pca.biplot.arranged <- NULL
@@ -363,7 +369,7 @@ run_DAPC <- function(vcf, kmax=40, coords=NULL, reps=100,probs.out=NULL,save.as=
 		for(i in 1:length(result)){
 			grid::grid.draw(result[[i]])
 			if(i < length(result)){
-				grid.newpage()
+				grid::grid.newpage()
 			}
 		}
 		dev.off()
@@ -441,7 +447,7 @@ run_DAPC <- function(vcf, kmax=40, coords=NULL, reps=100,probs.out=NULL,save.as=
 #' @param maxMat Numerical vector with length 2 that specifies the maximum number of rows and columns of plots, respectively, in the output gtable. Default = c(7,8).
 #' @return A gtable object
 #' @export dapc.plot.arrange
-dapc.plot.arrange <- function(x,variable="DF",layout.mat=NULL,pos.x.labs=1,pos.y.labs=2,row.labels.left=NULL,col.labels.top=NULL,row.labels.right=NULL,col.labels.bottom=NULL,use.diag=NULL,pad=0.1,K=NULL,outer.text=list(NULL,NULL,NULL,NULL),maxMat=c(7,7)){
+dapc.plot.arrange <- function(x,variable="DF",layout.mat=NULL,pos.x.labs=1,pos.y.labs=2,row.labels.left=NULL,col.labels.top=NULL,row.labels.right=NULL,col.labels.bottom=NULL,use.diag=NULL,pad=0.1,K=NULL,outer.text=list(NULL,NULL,NULL,NULL),maxMat=c(5,5)){
 	numplots   <- lengths(x)
 	stat.max   <- max(numplots)
 	#layout.mat0 <- matrix(data=NA,nrow=length(numplots), ncol=stat.max)
@@ -633,7 +639,7 @@ dapc.plot.arrange <- function(x,variable="DF",layout.mat=NULL,pos.x.labs=1,pos.y
 #' @param maxMat Numerical vector with length 2 that specifies the maximum number of rows and columns of plots, respectively, in the output gtable. Default = c(7,8).
 #' @return A gtable object
 #' @export dapc.biplot.arrange
-dapc.biplot.arrange <- function(x,layout.mat=NULL,row.labels.left=NULL,col.labels.top=NULL,row.labels.right=NULL,col.labels.bottom=NULL,use.diag=NULL,pad=0.1,K=NULL,outer.text=list(NULL,NULL,NULL,NULL), maxMat=c(7,7)){
+dapc.biplot.arrange <- function(x,layout.mat=NULL,row.labels.left=NULL,col.labels.top=NULL,row.labels.right=NULL,col.labels.bottom=NULL,use.diag=NULL,pad=0.1,K=NULL,outer.text=list(NULL,NULL,NULL,NULL), maxMat=c(5,5)){
 	### Reset outer.text argument to default if it is not supplied properly, and show warning.
 	if(length(outer.text)!=4 | !is(outer.text,"list")){
 		outer.text <- rep(list(NULL),4)
@@ -647,9 +653,9 @@ dapc.biplot.arrange <- function(x,layout.mat=NULL,row.labels.left=NULL,col.label
 	gg.list2 <- gg.list[which(lengths(gg.list)!=0)]
 	## convert a list of lists of ggplots into a list of ggplots
 	grobs.list <- suppressWarnings(lapply(gg.list2, FUN=ggplot2::ggplotGrob))
-	if(length(grobs.list) > 25){
-		grobs.list <- grobs.list[1:25]
-	}
+	#if(length(grobs.list) > 25){
+	#	grobs.list <- grobs.list[1:25]
+	#}
 	if(is.null(layout.mat)){
 		range.list   <- list(c(1),c(2:4),c(5:9),c(10:16),c(17:25))
 		layout.test  <- sapply(1:length(range.list),function(x){length(grobs.list) %in% range.list[[x]]})
@@ -1159,7 +1165,11 @@ ggscatter.dapc <- function (x, xax = 1, yax = 2, vartype="df", varname=NULL,axis
 		coords.df[,"x3"] <- xy3.df[,1]
 		coords.df[,"y3"] <- xy3.df[,2]
 		### blank plotting area
-		ggscatter.tempA      <- ggplot2::ggplot(coords.df, ggplot2::aes(x=x.coords, y=y.coords,color=Cluster,shape=Cluster,fill=Cluster)) + ggplot2::scale_x_continuous(name=paste(varname,xax)) + ggplot2::scale_y_continuous(name=paste(varname,yax)) + ggplot2::theme(panel.background = ggplot2::element_rect(fill = bg))  + ggplot2::stat_ellipse(color="white") + ggplot2::theme_classic() + ggplot2::geom_blank()
+		if(cellipse>0){
+			ggscatter.tempA      <- ggplot2::ggplot(coords.df, ggplot2::aes(x=x.coords, y=y.coords,color=Cluster,shape=Cluster,fill=Cluster)) + ggplot2::scale_x_continuous(name=paste(varname,xax)) + ggplot2::scale_y_continuous(name=paste(varname,yax)) + ggplot2::theme(panel.background = ggplot2::element_rect(fill = bg))  + ggplot2::stat_ellipse(color="white") + ggplot2::theme_classic() + ggplot2::geom_blank()
+		} else {
+			ggscatter.tempA      <- ggplot2::ggplot(coords.df, ggplot2::aes(x=x.coords, y=y.coords,color=Cluster,shape=Cluster,fill=Cluster)) + ggplot2::scale_x_continuous(name=paste(varname,xax)) + ggplot2::scale_y_continuous(name=paste(varname,yax)) + ggplot2::theme(panel.background = ggplot2::element_rect(fill = bg)) + ggplot2::theme_classic() + ggplot2::geom_blank()
+		}
 		# Includes box around plotting area
 		ggscatter.tempB      <- ggscatter.tempA + ggplot2::theme(panel.border = ggplot2::element_rect(color = "black", fill=NA, size=1)) 
 		# Add reference lines (axes) at x=0 and y=0
