@@ -25,7 +25,7 @@ run_DAPC <- function(x, format="VCF", kmax=40, coords=NULL, samplenames=NULL,rep
 			vcf.obj <- vcf <- x
 		} else {
 			vcf <- x
-			vcf.obj     <- vcfR::read.vcfR(vcf,verbose=F)
+			vcf.obj     <- vcfR::read.vcfR(vcf,verbose=F,checkFile=F)
 		}
 		if(is.null(samplenames)){
 			samplenames <- colnames(vcf.obj@gt)[-1]
@@ -1363,7 +1363,7 @@ vcf_getSNP      <- function(vcftools.path,vcf,out,indv.keep=NULL,which.site="bes
 	# If min.n = "all", update min.all to equal the maximum possible number of alleles at a site.
 	if(min.n=="all"){
 		test.sample <- unlist(gt.mat)[!is.na(unlist(gt.mat))][1]
-		ploidy <- length(unlist(strsplit(test.sample,split="/",fixed=T)))
+		ploidy <- length(unlist(strsplit(test.sample,split="[/,|]",fixed=T)))
 		min.n  <- ploidy*ncol(gt.mat)
 	}
 	# For each site, the number of non-missing alleles
@@ -1471,13 +1471,206 @@ vcf_getSNP      <- function(vcftools.path,vcf,out,indv.keep=NULL,which.site="bes
 
 
 
+#' @title Filter a VCF file or vcfR object.
+#' 
+#' Filter or sample individuals or sites of a SNPs dataset held in either a VCF file or vcfR object. Possible filtering criteria include missingness, site variation, homozygosity (not yet implemented), and the function provides three simple methods for obtaining "unlinked" SNPs.
+#' Includes options for changing some aspects of formatting, but still within withi the VCF specifications. The function depends on the vcfR. for reading and writing VCF files into R are from the package vcfR.
+#' NOT QUITE FUNCTIONAL.
+#' 
+#' @param x Either a vcfR object or a character string to the input VCF file.
+#' @param save.as Null or a character string where output VCF should be saved.
+#' @param nsample A vector with two values, each NA or a number, specifying the number of individuals and sites, respectively, to randomly retain after applying the other filtering rules. Default value c(NA,NA) retains all individuals and sites that pass other filtering criteria.
+#' @param specificSites Numerical vector with which sites to keep or to sample within. Default NULL.
+#' @param specificIndv Character string with names of individuals to keep or to sample within. Default is NULL (all individuals kept).
+#' @param only.GT Logical indicating whether or not extra, non-genotype information should be included in the genotype columns of the output VCF. Default FALSE. If TRUE, all entries of the 'FORMAT' column will be 'GT', and the genotype columns will only include genotype data.
+#' @param sep.GT Character string with the separator to use for haplotypes if individuals are polyploid. Default "/", but "|" is also valid. No other separators valid.
+#' @param min.n Minimum number of non-missing alleles required to keep a site. Default = 4. If set to "all", then no sites with any missing data are removed (after first filtering individuals if indv.keep is non-NULL).
+#' @param min.n0 Minimum number of individuals required to have at least one copy of the major allele to keep a site. Default = 2.
+#' @param min.n1 Minimum number of individuals required to have at least one copy of the minor allele to keep a site. Default = 1.
+#' @param method.linked Character string indicating the method for choosing a site to keep for each locus (or chromosome). Default = "best", which is considered the one with the least missing data, or the first among sites tied for least missing data. Other options are "all.passing", which retains all sites (positions) that pass variation filters (min.n, min.0.n.0, min.1.n), "first" (first site kept at each locus), or "random".
+#' @param no.indv Logical. If TRUE, specifies that the VCF does not include genotype information for specific individuals. Default FALSE. If there are no individuals and this is left FALSE then an error will be generated.
+#' @return A vcfR object
+#' @export filter.vcf
+filter.vcf <- function(x,save.as=NULL,nsample=c(NA,NA), specificSites=NULL,specificIndv=NULL, only.GT=TRUE, sep.GT="/",min.n=4,min.n0=2,min.n1=1,method.linked="best",no.indv=FALSE){
+	vcf.obj  <- vcfR::read.vcfR(x,checkFile=F)
+	### Matrix of individual genotypes and potential other individual-specific information. The first column specifies the format, including if any other information is present.
+	gt <- vcf.obj@gt
+	### Matrix with eight columns and as many rows as sites, holding site-specific information not associated with particular individuals.
+	fx <- vcf.obj@fix
+	### character vector with meta data lines.
+	md <- vcf.obj@meta
+	if(ncol(gt)>1){
+		# Data of first site of first individual. Used for detecting ploidy and the character used to separate haplotypes in the input data.
+		testsite <- unname(gsub(":.+","",gt[1,2]))
+		# Detect ploidy
+		ploidy      <- lengths(strsplit(testsite,split="[/,|]"))
+		# Determine which haplotype separator character was used for input data
+		if(ploidy>1){
+			testsplit1 <-  lengths(strsplit(testsite,split="[/]"))
+			testsplit2 <- lengths(strsplit(testsite,split="[|]"))
+			input.separator <- c("/","|")[which(c(testsplit1,testsplit2)==ploidy)]
+		}
+		# Genotype matrix of input file, starting with the first column with data and excluding any extra information.
+		# gt0 <- gt[,-1]
+		# Remove extra individual-specific info except genotype and sample names
+		if(only.GT){
+			gt1 <- gsub(":.+","",gt)
+			fx1 <- fx
+		} else {
+			gt1 <- gt
+			fx1 <- fx
+		}
+		#### Use different haplotype separator if needed.
+		if(sep.GT!=input.separator){
+			gt2 <- gsub(input.separator,sep.GT,gt1,fixed=TRUE)
+			fx2 <- fx1
+		} else {
+			gt2 <- gt1
+			fx2 <- fx1
+		}
+		### Convert nsample into a list and use NULL instead of NA
+		# nsample <- lapply(nsample,FUN=function(i){if(!is.na(i))i})
+		if(!is.na(nsample[1])){
+			indv.keep <- sample(2:ncol(gt2),size=nsample[1])
+			gt10 <- gt2[,indv.keep,drop=FALSE]
+			fx10 <- fx2
+		} else {
+			gt10 <- gt2
+			fx10 <- fx2
+		}
+		if(!is.na(nsample[2])){
+			sites.keep <- sample(1:nrow(gt10),size=nsample[2])
+			gt11 <- gt10[sites.keep,,drop=FALSE]
+			fx11 <- fx10[sites.keep,,drop=FALSE]
+		} else {
+			gt11 <- gt10
+			fx11 <- fx10
+		}
+	} else {
+		stop("Input VCF contains no individuals. Feature not yet implemented.")
+		if(!no.indv){
+			message("Input VCF contains no individuals")
+		}
+	}
+	vcf.out <- vcf.obj
+	vcf.out@fix <- fx11
+	vcf.out@gt  <- gt11
+
+	if(!is.null(save.as)){
+		vcfR::write.vcf(x=vcf.out,file=save.as)
+	}
+	vcf.out
+}
 
 
-
-
-
-
-
+#' Simulate SNPs as VCF
+#' 
+#' Create a simulated SNP dataset from either an input VCF file, an object of class vcfR, or by specifying characteristics of the simulated dataset using the function arguments.
+#' Most of the work is done by a call to the function 'glSim' from the 'adegenet' package.
+#' Currently, including missing data in simulated datasets is not possible.
+#' 
+#' @param x Path to input VCF or a vcfR object. Default NULL. Used to extract probabilities that a site has a particular pair of Reference and Alternative nucleotides. If NULL 'probs' must be supplied.
+#' @param save.as Null or a character string where the output VCF containing the simulated dataset should be saved.
+#' @param RA.probs Either one of the character strings "equal" or "empirical", or a numerical vector with length 12 that sums to 1; each value is probability that a SNP has reference allele = i, alternative allele = j, for all [i,j]{A,C,G,T}. If elements of the vector are unnamed, assumed names will be c("AC","AG","AT","CA","CG","CT","GA","GC","GT","TA","TC","TG"), with the first character specifying the reference allele and the second the alternative allele.
+#' The default value of RA.probs is 'equal', which is equivalent to RA.probs=sapply(c("AC","AG","AT","CA","CG","CT","GA","GC","GT","TA","TC","TG"),assign,(1/12)).
+#' If RA.probs="empirical", the frequencies of each Reference:Alternative allele combination is calculated for the input dataset and used for sampling probabilities for the simulated dataset.
+#' @param n.ind Number of individuals to include in simulated dataset. Default NULL, in which case the number of simulated individuals will match the number of individuals in 'x'.
+#' @param n.snps Number of SNPs. If n.snp.nonstruc is NULL and x is non-NULL, n.snp.nonstruc will equal half the number of SNPs in the input dataset.
+#' @param snp.str Fraction of SNPs that are structured. Default 0.5.
+##' @param n.snp.nonstruc Number of nonstructured SNPs. If n.snp.nonstruc is NULL and x is non-NULL, n.snp.nonstruc will equal half the number of SNPs in the input dataset.
+##' @param n.snp.struc Number of structured SNPs. If n.snp.nonstruc is NULL and x is non-NULL, 'n.snp.nonstruc' will equal the number of SNPs in the input dataset minus the value of 'n.snp.nonstruc'. Meaningless if K = 1.
+#' @param ploidy Number indicating ploidy of individuals. Probably can only be 1 or 2?
+#' @param K Number of populations. Default 1.
+#' @param ... Additional arguments passed to the function 'glSim' from 'adegenet' package.
+#' @return An object with class vcfR (see 'vcfR' package for details regarding this class)
+#' @export sim.vcf
+sim.vcf <- function(x=NULL,save.as=NULL,RA.probs="equal",n.ind=NULL, n.snps=NULL, snp.str = 0.5, ploidy=NULL, K=1, ...){
+#	args  <- list(...)
+	RA.pairnames <- c("AC","AG","AT","CA","CG","CT","GA","GC","GT","TA","TC","TG")
+	if(!is.null(x)){
+		vcf   <- vcfR::read.vcfR(x,verbose=F,checkFile=F)
+		gt    <- vcf@gt
+		fx    <- vcf@fix
+		met   <- vcf@meta
+		RA    <- paste0(fx[,"REF"],fx[,"ALT"])
+		fRA   <- table(RA)
+		pRA   <- fRA/sum(fRA) ### Use this for drawing samples from names(RA)
+	} else {
+		if(length(c(RA.probs,n.ind,n.snp.nonstruc,ploidy)) !=3){
+			stop("'n.ind','n.snp.nonstruc', and 'ploidy' must be non-NULL if 'x' is NULL")
+		}
+	}
+	if(is(RA.probs[1],"character")){
+		if(RA.probs=="equal"){
+			RA.probs <- sapply(RA.pairnames,assign,(1/12))
+		} else {
+			if(RA.probs=="empirical"){
+				if(is.null(x)){
+					stop("'x' must be non-NULL if 'RA.probs'='empirical' ")
+				} else {
+					RA.probs <- pRA
+				}
+			}
+		}
+	} else {
+		if(is(RA.probs,"numeric") & length(RA.probs)==12 & sum(RA.probs)==1){
+			if(is.null(names(RA.probs))){
+				names(RA.probs) <- RA.pairnames
+			} else {
+				if(!all(RA.pairnames %in% names(RA.probs))){
+					stop("invalid RA.probs")
+				}
+			}
+		} else{
+			stop("invalid RA.probs")
+		}
+	}
+	if(is.null(n.ind)){
+		n.ind <- (ncol(gt)-1)
+	}
+	if(is.null(n.snps)){
+		n.snps <- nrow(gt)
+	}
+	if(is.null(ploidy)){
+		testsite <- unname(gsub(":.+","",gt[1,2]))
+		ploidy   <- lengths(strsplit(testsite,split="[/,|]"))
+	}
+	n.snp.struc    <- round(n.snps*snp.str)
+	n.snp.nonstruc <- n.snps-n.snp.struc
+	### Perform simulation
+#	simK2 <- adegenet::glSim(n.ind=n.ind,n.snp.nonstruc=n.snp.nonstruc,ploidy=ploidy,K=K,args)
+	sim <- adegenet::glSim(n.ind=n.ind,n.snp.nonstruc=n.snp.nonstruc,n.snp.struc=n.snp.struc,ploidy=ploidy,k=K)
+	### Arrange genotype matrix
+	sim.gt0 <- t(as.matrix(sim))
+	mode(sim.gt0) <- "character"
+	sim.gt1 <- gsub("^0$","0/0",sim.gt0)
+	sim.gt2 <- gsub("^1$","0/1",sim.gt1)
+	sim.gt3 <- gsub("^2$","1/1",sim.gt2)
+	# Add sample names
+	colnames(sim.gt3) <- paste0("Sample",c(1:ncol(sim.gt3)))
+	### Change sim.gt3 to the penultimate gt version
+	sim.gt <- cbind("FORMAT"=rep("GT",nrow(sim.gt3)),sim.gt3)
+	### Arrange fixed matrix for simulated dataset
+	# Sample Reference and Alternative allele pair for each SNP
+	sim.RA <- do.call(rbind,strsplit(sample(names(RA.probs),size=n.snps,replace=TRUE,prob=RA.probs),split=""))
+	colnames(sim.RA) <- c("REF","ALT")
+	sim.fx <- cbind("CHROM"=c(1:n.snps),"POS"=rep(1,n.snps),"ID"=rep(NA,n.snps),sim.RA,"QUAL"=rep(NA,n.snps),"FILTER"=rep("PASS",n.snps),"INFO"=rep(NA,n.snps))
+	### Construct metadata lines.
+	sim.meta <- c("##fileformat=VCFv4.2",
+		paste0("##fileDate=",gsub("-","",Sys.Date())),
+		"##source=\"misc.wrappers\"",
+		"##INFO=<ID=AF,Number=A,Type=Float,Description=\"Allele Frequency\">",
+		"##FORMAT=<ID=GT,Number=1,Type=String,Description=\"Genotype\">")
+	#### Create vcfR object with simulated dataset
+	vcf.sim <- new("vcfR", meta=sim.meta,fix=sim.fx,gt=sim.gt)
+	if(!is.null(save.as)){
+		### Use extension ".vcf.gz" even is ".vcf" is specified as the extension.
+		save.as <- gsub(".vcf$",".vcf.gz",save.as)
+		vcfR::write.vcf(x=vcf.sim,file=save.as)
+	}
+	### Return the simulated dataset as vcfR object
+	vcf.sim
+}
 
 
 

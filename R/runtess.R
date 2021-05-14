@@ -27,12 +27,12 @@ runtess <- function(x,format="VCF",coords,samplenames=NULL,kmax=40,reps=100,save
 			vcf.obj <- vcf <- x
 		} else {
 			vcf <- x
-			vcf.obj     <- vcfR::read.vcfR(vcf)
+			vcf.obj     <- vcfR::read.vcfR(vcf,verbose=F,checkFile=F)
 		}
 		gt.mat      <- gsub(":.+","",vcf.obj@gt[,-1])
 		# Detect ploidy from genotype matrix of vcf
 		test.sample <- unlist(gt.mat)[!is.na(unlist(gt.mat))][1]
-		ploidy      <- length(unlist(strsplit(gt.mat[1],split="/",fixed=T)))
+		ploidy      <- length(unlist(strsplit(gt.mat[1],split="[/,|]",fixed=T)))
 		if(is.null(samplenames)){
 			samplenames <- colnames(vcf.obj@gt)[-1]
 		}

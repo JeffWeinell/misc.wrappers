@@ -28,7 +28,7 @@ run_sNMF <- function(x,format="VCF",coords=NULL,samplenames=NULL,kmax=40,reps=10
 			vcf.obj <- vcf <- x
 		} else {
 			vcf <- x
-			vcf.obj     <- vcfR::read.vcfR(vcf)
+			vcf.obj     <- vcfR::read.vcfR(vcf,verbose=F,checkFile=F)
 		}
 		if(is.null(samplenames)){
 			samplenames <- colnames(vcf.obj@gt)[-1]
