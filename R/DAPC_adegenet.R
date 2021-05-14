@@ -388,6 +388,17 @@ run_DAPC <- function(x, format="VCF", kmax=40, coords=NULL, samplenames=NULL,rep
 	}
 	result
 }
+#' @examples
+#' library(misc.wrappers)
+#' # Define path to input VCF file containing similated data for 500 SNPs from 50 individuals in three populations.
+#' example_vcf_path <- file.path(system.file("extdata", package = "misc.wrappers"),"example_simulated.vcf.gz")
+#' # Perform DAPC analyses on the simulated dataset for for K=2–10 and 30 replicates of adegenet::find.clusters (explanation below). Save output graphs to a file called "DAPC_example.pdf" in your current directory.
+#' run_DAPC(x=example_vcf_path, kmax=10, reps=30, save.as="DAPC_example.pdf", include.out=c(".pdf"))
+
+
+#' specifically, perform 30 replicates adegenet::find.clusters and plot boxplots of the K vs. BIC;  on the simulated dataset; 
+
+
 #######
 # module load R/4.0
 # module load gdal
@@ -459,7 +470,7 @@ run_DAPC <- function(x, format="VCF", kmax=40, coords=NULL, samplenames=NULL,rep
 #' @param maxMat Numerical vector with length 2 that specifies the maximum number of rows and columns of plots, respectively, in the output gtable. Default = c(7,8).
 #' @return A gtable object
 #' @export dapc.plot.arrange
-dapc.plot.arrange <- function(x,variable="DF",layout.mat=NULL,pos.x.labs=1,pos.y.labs=2,row.labels.left=NULL,col.labels.top=NULL,row.labels.right=NULL,col.labels.bottom=NULL,use.diag=NULL,pad=0.1,K=NULL,outer.text=list(NULL,NULL,NULL,NULL),maxMat=c(5,5)){
+dapc.plot.arrange <- function(x,variable="DF",layout.mat=NULL,pos.x.labs=1,pos.y.labs=2,row.labels.left=NULL,col.labels.top=NULL,row.labels.right=NULL,col.labels.bottom=NULL,use.diag=NULL,pad=0.1,K=NULL,outer.text=list(NULL,NULL,NULL,NULL),maxMat=c(4,4)){
 	numplots   <- lengths(x)
 	stat.max   <- max(numplots)
 	#layout.mat0 <- matrix(data=NA,nrow=length(numplots), ncol=stat.max)
@@ -651,7 +662,7 @@ dapc.plot.arrange <- function(x,variable="DF",layout.mat=NULL,pos.x.labs=1,pos.y
 #' @param maxMat Numerical vector with length 2 that specifies the maximum number of rows and columns of plots, respectively, in the output gtable. Default = c(7,8).
 #' @return A gtable object
 #' @export dapc.biplot.arrange
-dapc.biplot.arrange <- function(x,layout.mat=NULL,row.labels.left=NULL,col.labels.top=NULL,row.labels.right=NULL,col.labels.bottom=NULL,use.diag=NULL,pad=0.1,K=NULL,outer.text=list(NULL,NULL,NULL,NULL), maxMat=c(5,5)){
+dapc.biplot.arrange <- function(x,layout.mat=NULL,row.labels.left=NULL,col.labels.top=NULL,row.labels.right=NULL,col.labels.bottom=NULL,use.diag=NULL,pad=0.1,K=NULL,outer.text=list(NULL,NULL,NULL,NULL), maxMat=c(4,4)){
 	### Reset outer.text argument to default if it is not supplied properly, and show warning.
 	if(length(outer.text)!=4 | !is(outer.text,"list")){
 		outer.text <- rep(list(NULL),4)
@@ -1675,8 +1686,15 @@ sim.vcf <- function(x=NULL,save.as=NULL,RA.probs="equal",n.ind=NULL, n.snps=NULL
 #' library(misc.wrappers)
 #' # Define path to input VCF containing 5000 variants and 100 individuals
 #' vcf.path <- file.path(system.file("extdata", package = "misc.wrappers"),"example.vcf.gz")
-#' # Simulate a dataset of 500 variants and 50 individuals, with K=3 populations, and save the simulated dataset in the current directory as "example_simulated.vcf.gz"
-#' simulated.data <- sim.vcf(x=vcf.path,save.as="example_simulated.vcf.gz",n.ind=500,n.snps=50,K=3)
+#'
+#' # Simulate a dataset of 1000 variants and 50 individuals in one population, and save the simulated dataset in the current directory as "example_simulated.vcf.gz"
+#' simK1 <- sim.vcf(x=vcf.path,save.as="example_simulated.vcf.gz",n.ind=50,n.snps=1000,K=1)
+#' 
+#' # Simulate a dataset of 1000 variants and 50 individuals in one population, and save the simulated dataset in the current directory as "example_simulated.vcf.gz"
+#' simK2 <- sim.vcf(x=vcf.path,save.as="example_simulated_K2.vcf.gz",n.ind=50,n.snps=1000,K=2)
+#' 
+#' # Simulate a dataset of 1000 variants and 50 individuals in one population, and save the simulated dataset in the current directory as "example_simulated.vcf.gz"
+#' simK3<- sim.vcf(x=vcf.path,save.as="example_simulated_K3.vcf.gz",n.ind=50,n.snps=1000,K=3)
 
 
 

@@ -18,7 +18,7 @@ Max number of plots = 25.}
   pad = 0.1,
   K = NULL,
   outer.text = list(NULL, NULL, NULL, NULL),
-  maxMat = c(5, 5)
+  maxMat = c(4, 4)
 )
 }
 \arguments{
