@@ -1671,6 +1671,12 @@ sim.vcf <- function(x=NULL,save.as=NULL,RA.probs="equal",n.ind=NULL, n.snps=NULL
 	### Return the simulated dataset as vcfR object
 	vcf.sim
 }
+#' @examples
+#' library(misc.wrappers)
+#' # Define path to input VCF containing 5000 variants and 100 individuals
+#' vcf.path <- file.path(system.file("extdata", package = "misc.wrappers"),"example.vcf.gz")
+#' # Simulate a dataset of 500 variants and 50 individuals, with K=3 populations, and save the simulated dataset in the current directory as "example_simulated.vcf.gz"
+#' simulated.data <- sim.vcf(x=vcf.path,save.as="example_simulated.vcf.gz",n.ind=500,n.snps=50,K=3)
 
 
 
