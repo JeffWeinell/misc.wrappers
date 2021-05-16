@@ -391,13 +391,11 @@ run_DAPC <- function(x, format="VCF", kmax=40, coords=NULL, samplenames=NULL,rep
 #' @examples
 #' library(misc.wrappers)
 #' # Define path to input VCF file containing similated data for 500 SNPs from 50 individuals in three populations.
-#' example_vcf_path <- file.path(system.file("extdata", package = "misc.wrappers"),"example_simulated.vcf.gz")
+#' example_vcf_path <- file.path(system.file("extdata", package = "misc.wrappers"),"example_simulated_K2.vcf.gz")
 #' # Perform DAPC analyses on the simulated dataset for for K=2–10 and 30 replicates of adegenet::find.clusters (explanation below). Save output graphs to a file called "DAPC_example.pdf" in your current directory.
 #' run_DAPC(x=example_vcf_path, kmax=10, reps=30, save.as="DAPC_example.pdf", include.out=c(".pdf"))
 
-
 #' specifically, perform 30 replicates adegenet::find.clusters and plot boxplots of the K vs. BIC;  on the simulated dataset; 
-
 
 #######
 # module load R/4.0
@@ -1587,15 +1585,15 @@ filter.vcf <- function(x,save.as=NULL,nsample=c(NA,NA), specificSites=NULL,speci
 #' If RA.probs="empirical", the frequencies of each Reference:Alternative allele combination is calculated for the input dataset and used for sampling probabilities for the simulated dataset.
 #' @param n.ind Number of individuals to include in simulated dataset. Default NULL, in which case the number of simulated individuals will match the number of individuals in 'x'.
 #' @param n.snps Number of SNPs. If n.snp.nonstruc is NULL and x is non-NULL, n.snp.nonstruc will equal half the number of SNPs in the input dataset.
-#' @param snp.str Fraction of SNPs that are structured. Default 0.5.
+#' @param snp.str Fraction of SNPs that are structured [WITHIN?] populations. Default 0. Increasing more than 0 seems generate at least twice as many simulated populations as specified with K.
 ##' @param n.snp.nonstruc Number of nonstructured SNPs. If n.snp.nonstruc is NULL and x is non-NULL, n.snp.nonstruc will equal half the number of SNPs in the input dataset.
 ##' @param n.snp.struc Number of structured SNPs. If n.snp.nonstruc is NULL and x is non-NULL, 'n.snp.nonstruc' will equal the number of SNPs in the input dataset minus the value of 'n.snp.nonstruc'. Meaningless if K = 1.
 #' @param ploidy Number indicating ploidy of individuals. Probably can only be 1 or 2?
-#' @param K Number of populations. Default 1.
+#' @param K Number of populations (>=2). Default 2.
 #' @param ... Additional arguments passed to the function 'glSim' from 'adegenet' package.
 #' @return An object with class vcfR (see 'vcfR' package for details regarding this class)
 #' @export sim.vcf
-sim.vcf <- function(x=NULL,save.as=NULL,RA.probs="equal",n.ind=NULL, n.snps=NULL, snp.str = 0.5, ploidy=NULL, K=1, ...){
+sim.vcf <- function(x=NULL,save.as=NULL,RA.probs="equal",n.ind=NULL, n.snps=NULL, snp.str = 0, ploidy=NULL, K=2, ...){
 #	args  <- list(...)
 	RA.pairnames <- c("AC","AG","AT","CA","CG","CT","GA","GC","GT","TA","TC","TG")
 	if(!is.null(x)){
@@ -1684,7 +1682,7 @@ sim.vcf <- function(x=NULL,save.as=NULL,RA.probs="equal",n.ind=NULL, n.snps=NULL
 }
 #' @examples
 #' library(misc.wrappers)
-#' # Define path to input VCF containing 5000 variants and 100 individuals
+#' # Define path to example input VCF containing 5000 variants and 100 individuals.
 #' vcf.path <- file.path(system.file("extdata", package = "misc.wrappers"),"example.vcf.gz")
 #'
 #' # Simulate a dataset of 1000 variants and 50 individuals in one population, and save the simulated dataset in the current directory as "example_simulated.vcf.gz"

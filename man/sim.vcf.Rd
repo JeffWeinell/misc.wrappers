@@ -10,9 +10,9 @@ sim.vcf(
   RA.probs = "equal",
   n.ind = NULL,
   n.snps = NULL,
-  snp.str = 0.5,
+  snp.str = 0,
   ploidy = NULL,
-  K = 1,
+  K = 2,
   ...
 )
 }
@@ -29,11 +29,11 @@ If RA.probs="empirical", the frequencies of each Reference:Alternative allele co
 
 \item{n.snps}{Number of SNPs. If n.snp.nonstruc is NULL and x is non-NULL, n.snp.nonstruc will equal half the number of SNPs in the input dataset.}
 
-\item{snp.str}{Fraction of SNPs that are structured. Default 0.5.}
+\item{snp.str}{Fraction of SNPs that are structured \link{WITHIN?} populations. Default 0. Increasing more than 0 seems generate at least twice as many simulated populations as specified with K.}
 
 \item{ploidy}{Number indicating ploidy of individuals. Probably can only be 1 or 2?}
 
-\item{K}{Number of populations. Default 1.}
+\item{K}{Number of populations (>=2). Default 2.}
 
 \item{...}{Additional arguments passed to the function 'glSim' from 'adegenet' package.}
 
