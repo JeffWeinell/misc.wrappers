@@ -270,9 +270,12 @@ run_DAPC <- function(x, format="VCF", kmax=40, coords=NULL, samplenames=NULL,rep
 	if(debug) message("step 4")
 	da.dens.plotsPerK <- sapply(1:length(da.densityPlot),FUN=function(x){max(lengths(da.densityPlot[[x]]))})
 	if(any(da.dens.plotsPerK>0)){
+		#return(da.densityPlot)
 		da.densityPlot2      <- da.densityPlot[which(da.dens.plotsPerK>0)]
 		#return(da.densityPlot2)
 		da.density.arranged  <- dapc.plot.arrange(da.densityPlot2,variable="DF",pos.x.labs=1,pos.y.labs=2,outer.text=list(NULL,NULL,paste0("For each K, the density distribution of each discriminant function for each population cluster"), NULL))
+#		da.density.arranged  <- dapc.plot.arrange2(x=da.densityPlot,variable="DF",outer.text=list(NULL,NULL,"Density plots of DF1 vs. clusters", NULL))
+#		return(da.density.arranged)
 	} else {
 		da.density.arranged  <- NULL
 	}
@@ -282,6 +285,7 @@ run_DAPC <- function(x, format="VCF", kmax=40, coords=NULL, samplenames=NULL,rep
 		pca.densityPlot2 <- pca.densityPlot[which(pca.dens.plotsPerK>0)]
 		#return(pca.densityPlot2)
 		pca.density.arranged <- dapc.plot.arrange(pca.densityPlot2,variable="PC",pos.x.labs=1,pos.y.labs=2,outer.text=list(NULL,NULL,paste0("For each K, the density distribution of each retained principle component for each population cluster"), NULL))
+		#pca.density.arranged  <- dapc.plot.arrange2(x=pca.densityPlot2,variable="PC",outer.text=list(NULL,NULL,"Density plots of PC1 vs. clusters", NULL))
 	} else {
 		pca.density.arranged <- NULL
 	}
@@ -690,6 +694,97 @@ dapc.plot.arrange <- function(x,variable="DF",layout.mat=NULL,pos.x.labs=1,pos.y
 	grobs.arranged
 }
 
+#' @title Arrange DAPC density plots.
+#' 
+#' Function to arrange plots of density for each DF or PC and each K
+#' 
+#' @param x A list of ggplots produced by ggscatter.dapc function
+#' @param variable Either "DF" or "PC"
+#' @param layout.mat Custom layout matrix to use. Default is NULL, in which case the layout will be generated automatically as a function of the number of plots.
+#' @param pos.x.labs Where the default labels x axis labels (i.e., column labels) should be drawn. Default = 1 (below table of plots); alternatively 3 (above plot).
+#' @param pos.y.labs Where the default labels y axis labels (i.e., row labels) should be drawn. Default = 2 (left side); alternatively 3 (right side).
+#' @param row.labels.left Labels to use the left of the first column of plots. Default NULL (no labels).
+#' @param col.labels.top Text labels to use above the first row of plots. Default NULL (no labels).
+#' @param row.labels.right Text labels to to the right of the last column of plots. Default NULL (no labels).
+#' @param col.labels.bottom Text labels to use below the bottom row of plots. Default NULL (no labels).
+#' @param use.diag NULL (the default) or numerical vector with values in 1:4, indicating which sides of the gtable (1=bottom, 2=left, 3=top, 4=right) should have labels applied to the diagonal rather than the table margin plots. Ignored if layout.mat is not square. For example, if use.diag=1, then the values of col.labels.bottom will appear below the plots on the diagonal rather than below the plots of the bottom row.
+#' @param pad Amount of space between plots, in units of line widths (Default 0.1).
+#' @param K Which set of biplots to use. If NULL (the default), the function will attemp to draw all biplots for all K (max 25 plots).
+#' @param outer.text A list with length=4, with each entry either NULL (the default) or character string to use as labels below, left, above, and to the right of the arrangement of plots.
+#' @param maxMat Numerical vector with length 2 that specifies the maximum number of rows and columns of plots, respectively, in the output gtable. Default = c(7,8).
+#' @return A gtable object
+#' @export dapc.plot.arrange2
+dapc.plot.arrange2 <- function(x,variable="DF",layout.mat=NULL,pos.x.labs=1,pos.y.labs=2,row.labels.left=NULL,col.labels.top=NULL,row.labels.right=NULL,col.labels.bottom=NULL,use.diag=NULL,pad=0.1,K=NULL,outer.text=list(NULL,NULL,NULL,NULL),maxMat=c(4,4)){
+	x <- lapply(x,function(i){i[1]})
+	#x3 <- do.call(c,x2)
+	gg.list  <- do.call(c, x)
+	if(any(lengths(gg.list))>0){
+		A <- 2:(length(gg.list)+1)
+		B <- which(lengths(gg.list)>0)
+		Krange  <- A[B]
+		gg.list <- gg.list[B]
+	}
+	grobs.list <- suppressWarnings(lapply(gg.list, FUN=ggplot2::ggplotGrob))
+	if(is.null(layout.mat)){
+		range.list   <- list(c(1),c(2:4),c(5:9),c(10:16),c(17:25))
+		layout.test  <- sapply(1:length(range.list),function(x){length(grobs.list) %in% range.list[[x]]})
+		if(any(layout.test)){
+			layout.index  <- which(layout.test)
+			layout.vector <- rep(NA,layout.index^2)
+			layout.vector[1:length(grobs.list)] <- 1:length(grobs.list)
+			layout.mat    <- matrix(data=layout.vector,ncol=layout.index,byrow=TRUE)
+		}
+		na.rowcheck <- unlist(apply(layout.mat,MARGIN=1,FUN=function(x){all(is.na(x))}))
+		if(any(na.rowcheck)){
+			layout.mat <- layout.mat[which(!na.rowcheck),]
+		}
+	}
+	layout.mat <- as.matrix(layout.mat)
+	kmax       <- length(layout.mat)+1
+	if(pos.x.labs==1){
+		col.labels.bottom  <- paste0("K=",Krange)
+	}
+	if(pos.x.labs==3){
+		col.labels.top  <- paste0("K=",Krange)
+	}
+	if(pos.y.labs==2){
+		row.labels.left <- paste0("K=",Krange)
+	}
+	if(pos.y.labs==4){
+		row.labels.right <- paste0("K=",Krange)
+	}
+	nm   <- nrow(layout.mat)
+	nn   <- ncol(layout.mat)
+	len  <- nm*nn
+	### character matrix of empty strings
+	empty.matrix <- matrix(data="",nrow=nm,ncol=nn)
+	### Index assigned to each plot of the table of plots
+	index.matrix  <- matrix(1:len,ncol=nn,byrow=TRUE)
+	bottom.mat    <- matrix(data=col.labels.bottom,nrow=nm,ncol=nn)
+	top.mat   <- empty.matrix
+	right.mat <- empty.matrix
+	left.mat  <- empty.matrix
+	vals <- c(layout.mat)
+	grobsTable.list <- list(); length(grobsTable.list) <- length(vals)
+	for(i in 1:length(vals)){
+		if(is.na(vals[i])){
+			grob.i          <- grid::rectGrob(gp=grid::gpar(col=NA))
+		} else {
+			grob.i          <- grobs.list[[vals[i]]]
+		}
+		z <- which(index.matrix == i, arr.ind=TRUE)
+		labels.i.list  <- list(bottom.mat[z],left.mat[z],top.mat[z],right.mat[z])
+		grobsTable.list[[i]] <- gridExtra::arrangeGrob(grob.i,bottom=labels.i.list[[1]],left=labels.i.list[[2]],top=labels.i.list[[3]],right=labels.i.list[[4]])
+	}
+	grobs.arranged0 <- gridExtra::arrangeGrob(grobs=grobsTable.list,layout_matrix=index.matrix,padding=unit(pad,"line"),respect=TRUE)
+	vp <- grid::viewport(height=grid::unit(0.9,"npc"),width=grid::unit(0.95,"npc"))
+	if(!is.null(unlist(outer.text))){
+		grobs.arranged <- gridExtra::arrangeGrob(grobs.arranged0,vp=vp,bottom=outer.text[[1]],left=outer.text[[2]],top=outer.text[[3]],right=outer.text[[4]])
+	} else {
+		grobs.arranged <- gridExtra::arrangeGrob(grobs.arranged0,vp=vp)
+	}
+	grobs.arranged
+}
 
 #' @title Arrange list of ggplot biplots
 #' 
@@ -818,7 +913,6 @@ dapc.biplot.arrange <- function(x,layout.mat=NULL,row.labels.left=NULL,col.label
 		left.mat   <- matrix(data=row.labels.left,ncol=1)
 		right.mat  <- matrix(data=row.labels.right,ncol=1)
 	}
-
 	grobsTable.list <- list(); length(grobsTable.list) <- length(vals)
 	for(i in 1:length(vals)){
 		#### Either creating an empty grob or getting a grob from grobs.list
