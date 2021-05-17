@@ -28,7 +28,7 @@ Function to arrange plots of density for each DF or PC and each K}
 
 \item{variable}{Either "DF" or "PC"}
 
-\item{layout.mat}{Custom layout matrix to use. Default is NULL, in which case the layout will be generated automatically as a fucnton of the number of plots.}
+\item{layout.mat}{Custom layout matrix to use. Default is NULL, in which case the layout will be generated automatically as a function of the number of plots.}
 
 \item{pos.x.labs}{Where the default labels x axis labels (i.e., column labels) should be drawn. Default = 1 (below table of plots); alternatively 3 (above plot).}
 
@@ -63,7 +63,7 @@ Function to arrange plots of density for each DF or PC and each K
 \examples{
 library(misc.wrappers)
 # Define path to input VCF file containing similated data for 500 SNPs from 50 individuals in three populations.
-example_vcf_path <- file.path(system.file("extdata", package = "misc.wrappers"),"example_simulated.vcf.gz")
+example_vcf_path <- file.path(system.file("extdata", package = "misc.wrappers"),"example_simulated_K3.vcf.gz")
 # Perform DAPC analyses on the simulated dataset for for K=2–10 and 30 replicates of adegenet::find.clusters (explanation below). Save output graphs to a file called "DAPC_example.pdf" in your current directory.
 run_DAPC(x=example_vcf_path, kmax=10, reps=30, save.as="DAPC_example.pdf", include.out=c(".pdf"))
 specifically, perform 30 replicates adegenet::find.clusters and plot boxplots of the K vs. BIC;  on the simulated dataset; 

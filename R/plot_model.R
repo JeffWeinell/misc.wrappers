@@ -999,6 +999,7 @@ plot_model <- function(tpl.path, est.path, model.title="", popnames=NULL, show.p
 			polygon(x=c(shape.i["x_left"],shape.i["x_right"],shape.i["x_right"],shape.i["x_left"]), y=c(shape.i["y_bottom_left"],shape.i["y_bottom_right"],shape.i["y_top_right"],shape.i["y_top_left"]),col="gray",border="darkgray")
 		}
 	}
+	# ggplot2::ggplot() + ggplot2::scale_x_continuous(name="x") + ggplot2::scale_y_continuous(name="y") + ggplot2::geom_rect(data=test.df,mapping=ggplot2::aes(xmin= x_left,xmax= x_right,ymin= y_bottom_left,ymax= y_top_left))
 	### Add arrows to show migration
 	if(num.mig.matrices > 0){
 		for(i in 1:length(period.sizes.v3)){
