@@ -21,12 +21,9 @@ This function searches the system path and the settings file of the misc.wrapper
 }
 \examples{
 library(misc.wrappers)
-run_fastStructure
-leporinum <- run_fastStructure(vcf="Oxyrhabdium-leporinum_BestSNP.vcf",
-          coords="Oxyrhabdium-leporinum_coords.txt",
-          kmax=1:15,
-          save.as="Oxyrhabdium-leporinum_BestSNP_tess3r_run3.pdf",
-          python.path = "/panfs/pfs.local/software/7/install/anaconda/4.7/envs/py27/bin/python",
-          fastStructure.path = "/panfs/pfs.local/work/bi/bin/fastStructure-master/")
-
+library(misc.wrappers)
+# Define path to input VCF file containing similated data for 500 SNPs from 50 individuals in three populations.
+example_vcf_path <- file.path(system.file("extdata", package = "misc.wrappers"),"example_simulated_K4.vcf.gz")
+# Perform sNMF analyses on the simulated dataset for for K=2–10 and 30 replicates.
+test_fastStructure_K4 <- run_fastStructure(x=example_vcf_path, kmax=10, reps=30, save.as="fastStructure_example_K4.pdf",include.out=c(".pdf"))
 }

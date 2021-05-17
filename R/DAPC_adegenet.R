@@ -1767,10 +1767,12 @@ filter.vcf <- function(x,save.as=NULL,nsample=c(NA,NA), specificSites=NULL,speci
 ##' @param n.snp.struc Number of structured SNPs. If n.snp.nonstruc is NULL and x is non-NULL, 'n.snp.nonstruc' will equal the number of SNPs in the input dataset minus the value of 'n.snp.nonstruc'. Meaningless if K = 1.
 #' @param ploidy Number indicating ploidy of individuals. Probably can only be 1 or 2?
 #' @param K Number of populations (>=2). Default 2.
+#' @param include.missing Logical indicating whether or not missing data should be included in the simulated dataset.
+#' @param fMD NULL or a number in the range (0,1] indicating the fraction of genotypes that should be missing in the simulated dataset. If NULL (the default) and 'include.missing'=TRUE and 'x' non-NULL, the fraction of genotypes missing in the simulated dataset will be approximately equal to the fraction of missing genotypes in the input dataset.
 #' @param ... Additional arguments passed to the function 'glSim' from 'adegenet' package.
 #' @return An object with class vcfR (see 'vcfR' package for details regarding this class)
 #' @export sim.vcf
-sim.vcf <- function(x=NULL,save.as=NULL,RA.probs="equal",n.ind=NULL, n.snps=NULL, snp.str = 0, ploidy=NULL, K=2, ...){
+sim.vcf <- function(x=NULL,save.as=NULL,RA.probs="equal",n.ind=NULL, n.snps=NULL, snp.str = 0, ploidy=NULL, K=2, include.missing=FALSE,fMD = NULL, ...){
 #	args  <- list(...)
 	RA.pairnames <- c("AC","AG","AT","CA","CG","CT","GA","GC","GT","TA","TC","TG")
 	if(!is.null(x)){
@@ -1828,8 +1830,52 @@ sim.vcf <- function(x=NULL,save.as=NULL,RA.probs="equal",n.ind=NULL, n.snps=NULL
 	sim <- adegenet::glSim(n.ind=n.ind,n.snp.nonstruc=n.snp.nonstruc,n.snp.struc=n.snp.struc,ploidy=ploidy,k=K)
 	### Arrange genotype matrix
 	sim.gt0 <- t(as.matrix(sim))
-	mode(sim.gt0) <- "character"
-	sim.gt1 <- gsub("^0$","0/0",sim.gt0)
+	# Check that each site is actually a SNP. Usually rare but sometimes occurs.
+	sitediv0 <- apply(X=sim.gt0,MARGIN=1,FUN=function(x){length(unique(x))>1})
+	# Just set the site equal to some other site.
+	#if(!all(sitediv0)){
+	while(!all(sitediv0)){
+		sites.resample <- which(!sitediv0)
+		sim.gt0[sites.resample,] <- sim.gt0[sample(1:n.snps,size=length(sites.resample)),]
+		sitediv0 <- apply(X=sim.gt0,MARGIN=1,FUN=function(x){length(unique(x))>1})
+	}
+	#}
+	### Introduce missing data
+	if(include.missing){
+		if(is.null(fMD)){
+			gt.simple <- gsub(":.+","",gt[,-c(1)])
+			### Calculate fraction of missing data at each site in the input dataset.
+			sites.md     <- apply(X=gt.simple,MARGIN=1,FUN=function(j){length(grep(pattern="[.]",x=j))/length(j)})
+			### Sample missing data frequencies for sites in the simulated dataset from sites.md
+			sim.sites.fFM <- sample(sites.md,size=n.snps,replace=FALSE)
+			### Number of individuals with genotype missing at each site.
+			sim.sites.nMD <- floor(sim.sites.fFM*n.ind)
+			### Introduce missing data at each site. Temporarily use NA for missing data.
+			# String to use for missing genotypes.
+			mval <- paste(rep(".",ploidy),collapse="/")
+			#sim.gt4 <- mapply(A=sim.gt3,B=sim.sites.nMD,MARGIN=1,FUN=function(a,b){res=a; res[sample(length(a),size=b)] <- mval})
+			#sim.gt3, B=sim.sites.nMD
+###			sim.gt4 <- lapply(X=1:length(sim.sites.nMD),FUN=function(x){res=sim.gt3[x,]; res[sample(n.ind,size=sim.sites.nMD[x])] <- NA;res})
+			sim.gt00 <- do.call(rbind,lapply(X=1:length(sim.sites.nMD),FUN=function(x){res=sim.gt0[x,]; res[sample(n.ind,size=sim.sites.nMD[x])] <- NA;res}))
+			# check which sites have less than two genotypes
+###			sitediv <- vapply(X=sim.gt4,FUN=function(x){length(table(x))},FUN.VALUE=1)
+			sitediv <- apply(X=sim.gt00,MARGIN=1,FUN=function(x){length(unique(x))>1})
+			while(!all(sitediv)){
+				sites.resample <- which(!sitediv)
+				sim.gt00[sites.resample,] <- sim.gt00[sample(1:n.snps,size=length(sites.resample)),]
+				sitediv <- apply(X=sim.gt00,MARGIN=1,FUN=function(x){length(unique(x))>1})
+			}
+		}
+		if(any(is.na(sim.gt00))){
+			sim.gt00[is.na(sim.gt00)] <- mval
+		}
+	} else {
+		### Sample the fraction of missing data for each site from the mean distribution.
+		sim.gt00 <- sim.gt0
+	}
+	##
+	mode(sim.gt00) <- "character"
+	sim.gt1 <- gsub("^0$","0/0",sim.gt00)
 	sim.gt2 <- gsub("^1$","0/1",sim.gt1)
 	sim.gt3 <- gsub("^2$","1/1",sim.gt2)
 	# Add sample names
@@ -1853,6 +1899,7 @@ sim.vcf <- function(x=NULL,save.as=NULL,RA.probs="equal",n.ind=NULL, n.snps=NULL
 		### Use extension ".vcf.gz" even is ".vcf" is specified as the extension.
 		save.as <- gsub(".vcf$",".vcf.gz",save.as)
 		vcfR::write.vcf(x=vcf.sim,file=save.as)
+		vcf.sim <- vcfR::read.vcfR(save.as)
 	}
 	### Return the simulated dataset as vcfR object
 	vcf.sim
@@ -1861,15 +1908,15 @@ sim.vcf <- function(x=NULL,save.as=NULL,RA.probs="equal",n.ind=NULL, n.snps=NULL
 #' library(misc.wrappers)
 #' # Define path to example input VCF containing 5000 variants and 100 individuals.
 #' vcf.path <- file.path(system.file("extdata", package = "misc.wrappers"),"example.vcf.gz")
+#' 
+#' # Simulate a dataset of 1000 variants and 50 individuals in one population, and save the simulated dataset in the current directory as "example_simulated_K2.vcf.gz"
+#' simK2 <- sim.vcf(x=vcf.path,save.as="example_simulated_K2.vcf.gz",n.ind=100,n.snps=1000,K=2)
+#' 
+#' # Simulate a dataset of 1000 variants and 50 individuals in one population, and save the simulated dataset in the current directory as "example_simulated_K3.vcf.gz"
+#' simK3<- sim.vcf(x=vcf.path,save.as="example_simulated_K3.vcf.gz",n.ind=100,n.snps=1000,K=3)
 #'
-#' # Simulate a dataset of 1000 variants and 50 individuals in one population, and save the simulated dataset in the current directory as "example_simulated.vcf.gz"
-#' simK1 <- sim.vcf(x=vcf.path,save.as="example_simulated.vcf.gz",n.ind=50,n.snps=1000,K=1)
+#' # Simulate a dataset of 1000 variants and 50 individuals in one population, and save the simulated dataset in the current directory as "example_simulated_K4.vcf.gz"
+#' simK4<- sim.vcf(x=vcf.path,save.as="example_simulated_K4.vcf.gz",n.ind=100,n.snps=1000,K=4)
 #' 
-#' # Simulate a dataset of 1000 variants and 50 individuals in one population, and save the simulated dataset in the current directory as "example_simulated.vcf.gz"
-#' simK2 <- sim.vcf(x=vcf.path,save.as="example_simulated_K2.vcf.gz",n.ind=50,n.snps=1000,K=2)
-#' 
-#' # Simulate a dataset of 1000 variants and 50 individuals in one population, and save the simulated dataset in the current directory as "example_simulated.vcf.gz"
-#' simK3<- sim.vcf(x=vcf.path,save.as="example_simulated_K3.vcf.gz",n.ind=50,n.snps=1000,K=3)
-
 
 

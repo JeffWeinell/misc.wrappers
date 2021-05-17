@@ -13,6 +13,8 @@ sim.vcf(
   snp.str = 0,
   ploidy = NULL,
   K = 2,
+  include.missing = FALSE,
+  fMD = NULL,
   ...
 )
 }
@@ -34,6 +36,10 @@ If RA.probs="empirical", the frequencies of each Reference:Alternative allele co
 \item{ploidy}{Number indicating ploidy of individuals. Probably can only be 1 or 2?}
 
 \item{K}{Number of populations (>=2). Default 2.}
+
+\item{include.missing}{Logical indicating whether or not missing data should be included in the simulated dataset.}
+
+\item{fMD}{NULL or a number in the range (0,1] indicating the fraction of genotypes that should be missing in the simulated dataset. If NULL (the default) and 'include.missing'=TRUE and 'x' non-NULL, the fraction of genotypes missing in the simulated dataset will be approximately equal to the fraction of missing genotypes in the input dataset.}
 
 \item{...}{Additional arguments passed to the function 'glSim' from 'adegenet' package.}
 

@@ -236,52 +236,11 @@ run_sNMF <- function(x,format="VCF",coords=NULL,samplenames=NULL,kmax=40,reps=10
 	# ggsave(save.as, ml)
 }
 #' @examples
-#'	library(ade4)
-#'	library(adegenet)
-#'	library(vcfR)
-#'	library(ggplot2)
-#'	library(maps)
-#'	library(geosphere)
-#'	library(tess3r)
-#'	library(LEA)
-#'	library(rworldmap)
-#'	library(JeffWeinell/misc.wrappers)
-#'	#source("DAPC_adegenet.R")
-#'	#source("runtess.R")
-#'	#source("run_sNMF.R")
-#'
-#'	dev.new(width=10,height=6)
-#'	leporinum <- run_sNMF(vcf="Oxyrhabdium-leporinum_BestSNP.vcf",
-#'	                      coords="Oxyrhabdium-leporinum_coords.txt",
-#'	                      save.as="Oxyrhabdium-leporinum_BestSNP_sNMF_run3.pdf")
-#'
-#'	modestum  <- run_sNMF(vcf="Oxyrhabdium-modestum_BestSNP.vcf",
-#'	                     coords="Oxyrhabdium-modestum_coords.txt",
-#'	                     save.as="Oxyrhabdium-modestum_BestSNP_sNMF_run1.pdf")
-#'
-#'	cfmodestum  <- run_sNMF(vcf="Oxyrhabdium-cf.modestum_BestSNP.vcf",
-#'	                     coords="Oxyrhabdium-cfmodestum_coords.txt",
-#'	                     save.as="Oxyrhabdium-cfmodestum_BestSNP_sNMF_run1.pdf")
-#'
-#'	cfmodestum_Luzon     <- run_sNMF(vcf="Oxyrhabdium-cf.modestum_Luzon_BestSNP.vcf",
-#'	                        coords="Oxyrhabdium-cfmodestum_Luzon_coords.txt",
-#'	                        save.as="Oxyrhabdium-cf.modestum_Luzon_BestSNP_sNMF_run1.pdf")
-#'
-#'	leporinum_Luzon <- run_sNMF(vcf="Oxyrhabdium-leporinum_Luzon_BestSNP.vcf",
-#'	                           coords="Oxyrhabdium-leporinum_Luzon_coords.txt",
-#'	                           save.as="Oxyrhabdium-leporinum_Luzon_BestSNP_sNMF_run1.pdf")
-#'
-#'	bothmodestum <- run_sNMF(vcf="Oxyrhabdium_both-modestum_BestSNP.vcf",
-#'	                           coords="Oxyrhabdium_bothmodestum_coords.txt",
-#'	                           save.as="Oxyrhabdium_both-modestum_BestSNP_sNMF_run1.pdf")
-#'
-#'	Oxyrhabdium <- run_sNMF(vcf="Oxyrhabdium_AllSpecies_BestSNP.vcf",
-#'	                            coords="Oxyrhabdium_AllSpecies_coords.txt",
-#'	                            save.as="Oxyrhabdium_AllSpecies_BestSNP_sNMF_v1.pdf")
-#'
-#'	Oxyrhabdium_AllSpecies <- run_sNMF(vcf="Oxyrhabdium_AllSpecies_BestSNP.vcf",
-#'	                         coords="Oxyrhabdium_AllSpecies_coords.txt",
-#'	                         save.as="Oxyrhabdium_AllSpecies_BestSNP_sNMF_run1.pdf")
+#' library(misc.wrappers)
+#' # Define path to input VCF file containing similated data for 500 SNPs from 50 individuals in three populations.
+#' example_vcf_path <- file.path(system.file("extdata", package = "misc.wrappers"),"example_simulated_K4.vcf.gz")
+#' # Perform sNMF analyses on the simulated dataset for for K=2–10 and 30 replicates.
+#' test_K4 <- run_sNMF(x=example_vcf_path, kmax=10, reps=30, save.as="sNMF_example.pdf")
 
 
 #' @title Convert VCF object/file to genotypic matrix
