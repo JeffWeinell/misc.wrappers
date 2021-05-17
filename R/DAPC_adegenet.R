@@ -286,6 +286,7 @@ run_DAPC <- function(x, format="VCF", kmax=40, coords=NULL, samplenames=NULL,rep
 		#return(pca.densityPlot2)
 		pca.density.arranged <- dapc.plot.arrange(pca.densityPlot2,variable="PC",pos.x.labs=1,pos.y.labs=2,outer.text=list(NULL,NULL,paste0("For each K, the density distribution of each retained principle component for each population cluster"), NULL))
 		#pca.density.arranged  <- dapc.plot.arrange2(x=pca.densityPlot2,variable="PC",outer.text=list(NULL,NULL,"Density plots of PC1 vs. clusters", NULL))
+		#return(pca.density.arranged)
 	} else {
 		pca.density.arranged <- NULL
 	}
@@ -490,7 +491,7 @@ run_DAPC <- function(x, format="VCF", kmax=40, coords=NULL, samplenames=NULL,rep
 #' @param maxMat Numerical vector with length 2 that specifies the maximum number of rows and columns of plots, respectively, in the output gtable. Default = c(7,8).
 #' @return A gtable object
 #' @export dapc.plot.arrange
-dapc.plot.arrange <- function(x,variable="DF",layout.mat=NULL,pos.x.labs=1,pos.y.labs=2,row.labels.left=NULL,col.labels.top=NULL,row.labels.right=NULL,col.labels.bottom=NULL,use.diag=NULL,pad=0.1,K=NULL,outer.text=list(NULL,NULL,NULL,NULL),maxMat=c(4,4)){
+dapc.plot.arrange <- function(x,variable="DF",layout.mat=NULL,pos.x.labs=1,pos.y.labs=2,row.labels.left=NULL,col.labels.top=NULL,row.labels.right=NULL,col.labels.bottom=NULL,use.diag=NULL,pad=0.1,K=NULL,outer.text=list(NULL,NULL,NULL,NULL),maxMat=c(7,2)){
 	if(length(x)>maxMat[1]){
 		x <- x[1:maxMat[1]]
 	}
@@ -760,21 +761,25 @@ dapc.plot.arrange2 <- function(x,variable="DF",layout.mat=NULL,pos.x.labs=1,pos.
 	empty.matrix <- matrix(data="",nrow=nm,ncol=nn)
 	### Index assigned to each plot of the table of plots
 	index.matrix  <- matrix(1:len,ncol=nn,byrow=TRUE)
-	bottom.mat    <- matrix(data=col.labels.bottom,nrow=nm,ncol=nn)
-	top.mat   <- empty.matrix
-	right.mat <- empty.matrix
-	left.mat  <- empty.matrix
+	#bottom.mat    <- matrix(data=col.labels.bottom,nrow=nm,ncol=nn)
+	#top.mat   <- empty.matrix
+	#right.mat <- empty.matrix
+	#left.mat  <- empty.matrix
 	vals <- c(layout.mat)
 	grobsTable.list <- list(); length(grobsTable.list) <- length(vals)
 	for(i in 1:length(vals)){
 		if(is.na(vals[i])){
 			grob.i          <- grid::rectGrob(gp=grid::gpar(col=NA))
+			grobsTable.list[[i]] <- gridExtra::arrangeGrob(grob.i)
 		} else {
 			grob.i          <- grobs.list[[vals[i]]]
+			grobsTable.list[[i]] <- gridExtra::arrangeGrob(grob.i,bottom=col.labels.bottom[i])
 		}
-		z <- which(index.matrix == i, arr.ind=TRUE)
-		labels.i.list  <- list(bottom.mat[z],left.mat[z],top.mat[z],right.mat[z])
-		grobsTable.list[[i]] <- gridExtra::arrangeGrob(grob.i,bottom=labels.i.list[[1]],left=labels.i.list[[2]],top=labels.i.list[[3]],right=labels.i.list[[4]])
+		#z <- which(index.matrix == i, arr.ind=TRUE)
+		#labels.i.list  <- list(bottom.mat[z],left.mat[z],top.mat[z],right.mat[z])
+		#grobsTable.list[[i]] <- gridExtra::arrangeGrob(grob.i,bottom=labels.i.list[[1]],left=labels.i.list[[2]],top=labels.i.list[[3]],right=labels.i.list[[4]])
+		#grobsTable.list[[i]] <- gridExtra::arrangeGrob(grob.i,bottom=col.labels.bottom[i])
+		#col.labels.bottom
 	}
 	grobs.arranged0 <- gridExtra::arrangeGrob(grobs=grobsTable.list,layout_matrix=index.matrix,padding=unit(pad,"line"),respect=TRUE)
 	vp <- grid::viewport(height=grid::unit(0.9,"npc"),width=grid::unit(0.95,"npc"))
