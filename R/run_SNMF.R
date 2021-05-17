@@ -16,11 +16,13 @@
 #' @return List of plots
 #' @export run_sNMF
 run_sNMF <- function(x,format="VCF",coords=NULL,samplenames=NULL,kmax=40,reps=100,entropy=TRUE,project="new",iter=500,save.as=NULL){
-	if(is.null(save.as)){
-		save.as <- file.path(getwd(),"result_LEA-sNMF.pdf")
-	}
-	if(file.exists(save.as)){
-		stop("Output file already exists. Use a different name for 'save.as' argument.")
+	#if(is.null(save.as)){
+	#	save.as <- file.path(getwd(),"result_LEA-sNMF.pdf")
+	#}
+	if(!is.null(save.as)){
+		if(file.exists(save.as)){
+			stop("Output file already exists. Use a different name for 'save.as' argument.")
+		}
 	}
 	Krange=1:kmax
 	if(format=="VCF" | is(x,"vcfR")){
@@ -100,34 +102,34 @@ run_sNMF <- function(x,format="VCF",coords=NULL,samplenames=NULL,kmax=40,reps=10
 		entropy.is.reduced     <- c(entropy.is.reduced, range.entropy.mat[i,2] < range.entropy.mat[(i-1),1])
 	}
 	# If max BIC for K=2 is better than BIC K=1 and if some K values are not better (all BIC lower) than K-1, then find the first K value in which K+1 is not better.
-	if(any(!entropy.is.reduced) & entropy.is.reduced[1]){
-		Kbest.criteria2 <- which(!entropy.is.reduced)[1]
-	} else {
-		Kbest.criteria2 <- 1
-	}
-	### Criteria 3: Which K value (for K>=2) yields the least variable entropy scores.
-	Entropy.variation <- apply(X=crossentropy.mat,MARGIN=1,FUN=var,na.rm=TRUE)
-	Kbest.criteria3   <- which(Entropy.variation==min(Entropy.variation[-1]))
-	### Criteria 4: t-tests for entropy of each pairwise adjacent K
-	for(i in 2:nrow(crossentropy.mat)){
-		if(Entropy.variation[Kbest.criteria3]==0){
-			Kbest.criteria4 <- NULL
-			break
-		}
-		t.test.i <- t.test(crossentropy.mat[i-1,],crossentropy.mat[i,])
-		pval.i   <- t.test.i$p.value
-		stat.i   <- t.test.i$statistic
-		if(pval.i < 0.05 & stat.i > 0){
-			next
-		} else {
-			if(i==nrow(crossentropy.mat)){
-				Kbest.criteria4 <- NULL
-			} else{
-				Kbest.criteria4 <- (i-1)
-				break
-			}
-		}
-	}
+#	if(any(!entropy.is.reduced) & entropy.is.reduced[1]){
+#		Kbest.criteria2 <- which(!entropy.is.reduced)[1]
+#	} else {
+#		Kbest.criteria2 <- 1
+#	}
+#	### Criteria 3: Which K value (for K>=2) yields the least variable entropy scores.
+#	Entropy.variation <- apply(X=crossentropy.mat,MARGIN=1,FUN=var,na.rm=TRUE)
+#	Kbest.criteria3   <- which(Entropy.variation==min(Entropy.variation[-1]))
+#	### Criteria 4: t-tests for entropy of each pairwise adjacent K
+#	for(i in 2:nrow(crossentropy.mat)){
+#		if(Entropy.variation[Kbest.criteria3]==0){
+#			Kbest.criteria4 <- NULL
+#			break
+#		}
+#		t.test.i <- t.test(crossentropy.mat[i-1,],crossentropy.mat[i,])
+#		pval.i   <- t.test.i$p.value
+#		stat.i   <- t.test.i$statistic
+#		if(pval.i < 0.05 & stat.i > 0){
+#			next
+#		} else {
+#			if(i==nrow(crossentropy.mat)){
+#				Kbest.criteria4 <- NULL
+#			} else{
+#				Kbest.criteria4 <- (i-1)
+#				break
+#			}
+#		}
+#	}
 #	if(bestK>1){
 #		segments(x0=bestK,y0=par("usr")[3],y1=par("usr")[4],lty=2,col="black")
 #	}
@@ -227,13 +229,11 @@ run_sNMF <- function(x,format="VCF",coords=NULL,samplenames=NULL,kmax=40,reps=10
 		lapply(X=result,FUN=print)
 		dev.off()
 	}
-	# result
+	result
 	# result.grob <- lapply(X=result,FUN=grob)
 	# pl <- lapply(X=list(entropyPlot, mapplot),FUN=grob)
 	# ml <- marrangeGrob(pl, nrow=1, ncol=1)
 	# ggsave(save.as, ml)
-
-
 }
 #' @examples
 #'	library(ade4)
