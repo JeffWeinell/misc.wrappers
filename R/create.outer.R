@@ -228,13 +228,13 @@ create.outer <- function(coords,method=1,buffer.adj=0,coords.radius=0.01,max.fra
 #' 
 #' Returns the set of input coordinates that intersect with land. Land is considered to incude all areas covered by a feature in the rnaturalearth::ne_countries 10 meter resolution dataset. Input coordinates are are assumed to be WGS84 (EPSG:4326)
 #' 
-#' @param x Matrix of data frame with coordinates as longitude and latitude columns.
+#' @param x Matrix or data frame with coordinates as longitude and latitude columns.
 #' @param return.as Character string with class to use for object returned. Default "data.frame". Can also be "matrix" or "SP" (SpatialPoints).
 #' @return An object with class equal to the value of 'return.as', which contains the subset of input points that occur on land, or more specifically, not in an ocean.
 #' @export points.on.land
 points.on.land <- function(x,return.as="data.frame"){
-	world.land  <- rnaturalearth::ne_countries(scale=10)
-	crs.string     <- "+init=EPSG:4326"
+	world.land <- rnaturalearth::ne_countries(scale=10)
+	crs.string <- "+init=EPSG:4326"
 	if(is(x,"matrix")){
 		x2 <- as.data.frame(x)
 	} else {
@@ -254,7 +254,7 @@ points.on.land <- function(x,return.as="data.frame"){
 	if(any(landtest)){
 		res <- x2[which(landtest),]
 	} else {
-		stop("No input points occur on land")
+		return(NULL)
 	}
 	if(return.as=="data.frame"){
 		return(res)
@@ -267,23 +267,52 @@ points.on.land <- function(x,return.as="data.frame"){
 	}
 }
 
-
-
-
-#' @title Random land-intersecting-points in random-centered area.
+#' @title Randomly sample points within a random-centered circle.
 #' 
-#' Returns a set of points sampled from a region with a randomly generated center and specified longitudinal and latitudinal diameters. Points are sampled until a specified number of land-intersecting points are returned.
+#' Sample points in an area with specified radius and center sampled within an extent, with the optional condition that returned points must be over land.
 #' 
-#' @param lond Longitudinal diameter of area
-#' @param latd Latitudinal diameter of area
-#' @param size Number of points to return
+#' @param r radius of area to sample within, in decimal degrees.
+#' @param size Number of points to return.
 #' @param return.as Character string with class to use for object returned. Default "data.frame". Can also be "matrix" or "SP" (SpatialPoints).
+#' @param limits Numerical vector of length four defining the limits for the sampling area's center, with longitude (minimum), longitude (maximum), latitude (minimum), latitude (maximum). Default is c(-180,180,-90,90). Points other than the center of the sampling area can fall outside of this limit.
+#' @param over.land Logical indicating whether or not all points in the returned data frame should occur over land. Default TRUE.
 #' @return An object with class equal to the value of 'return.as', which contains the subset of input points that occur on land, or more specifically, not in an ocean.
-#' @export rlandcoords
-rlandcoords <- function(lond,latd,size,return.as="data.frame"){
-	
-	sample.center <- c(sample(seq(-180,to=180,by=0.01),size=1), sample(seq(-90,to=90,by=0.01),size=1))
-
+#' @export rcoords
+rcoords <- function(r,size,return.as="data.frame",limits=c(-180,180,-90,90),over.land=TRUE){
+	result.temp        <- data.frame(NULL)
+	while(nrow(result.temp)  < size){
+		### Clear the data frame if too few points on land during previous attempt
+		result.temp         <- data.frame(NULL)
+		### Sample a point on earth to use as the center of the sampling circle
+		sample.center  <- c(x=sample(seq(limits[1],to=limits[2],by=0.01),size=1), y=sample(seq(limits[3],to=limits[4],by=0.01),size=1))
+		### Create a SpatialPolygons object to sample within
+		sample.area.sp <- sampSurf::spCircle(radius=r,centerPoint=sample.center)[[1]]
+		### Convert the SpatialPolygons object to an SF object
+		sample.area.sf <- sf::st_as_sf(sample.area.sp)
+		### Sample within 'sample.area.sf' four times as many points as requested by 'size' argument.
+		samples.sf.temp  <- sf::st_sample(x= sample.area.sf,size=(size*4))
+		### Hold sampled coordinates as data matrix
+		samples.mat.temp <- sf::st_coordinates(samples.sf.temp)
+		### Hold sampled coordinates as data frame
+		samples.df.temp <- as.data.frame(samples.mat.temp)
+		### Plot samples on map
+		# ggplot2::ggplot(data = world) + ggplot2::geom_sf() + ggplot2::geom_point(data = samples.df.temp, ggplot2::aes(x = X, y = Y), size = 4, shape = 23, fill = "darkred") # + coord_sf(xlim = c(-90, -78), ylim = c(24.5, 40), expand = FALSE)
+		if(over.land){
+			### Get subset of sampled coordinates that fall on land
+			samples.land.temp <- points.on.land(x=samples.mat.temp)
+			samples.temp      <- samples.land.temp
+		} else {
+			samples.temp           <- samples.df.temp
+			colnames(samples.temp) <- c("longitude","latitude")
+		}
+		result.temp <- rbind(result.temp,samples.temp)
+	}
+	result <- result.temp[sample(x=1:nrow(result.temp),size=size),]
+	result
 }
+#' @examples
+#' # Sample 50 points within an area with a 10-degree radius and center located on land somewhere between -50 and 50 degrees latitude.
+#' coords <- rcoords(r=10,size=50,limits=c(-180,180,-50,50))
+
 
 

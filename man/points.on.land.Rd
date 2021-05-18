@@ -9,7 +9,7 @@ Returns the set of input coordinates that intersect with land. Land is considere
 \method{points}{on.land}(x, return.as = "data.frame")
 }
 \arguments{
-\item{x}{Matrix of data frame with coordinates as longitude and latitude columns.}
+\item{x}{Matrix or data frame with coordinates as longitude and latitude columns.}
 
 \item{return.as}{Character string with class to use for object returned. Default "data.frame". Can also be "matrix" or "SP" (SpatialPoints).}
 }
