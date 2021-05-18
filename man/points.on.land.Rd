@@ -22,10 +22,13 @@ Return coordinates over land
 Returns the set of input coordinates that intersect with land. Land is considered to incude all areas covered by a feature in the rnaturalearth::ne_countries 10 meter resolution dataset. Input coordinates are are assumed to be WGS84 (EPSG:4326)
 }
 \examples{
-### Load example dataset with coordinates in a two-column matrix (first column longitude).
-LonLat <- misc.wrappers::grp1.lonlat
-### Get the subset of points that occur on land.
-coords.df <- points.on.land(x=LonLat)
-### Create the outer set of points and generate a figure with points on map.
-createouter_example_method1 <- create.outer(coords= coords.df,method=1,output.path="createouter_exampleOutput_method1_coords.txt",plot.output.path="createouter_exampleOutput_method1_coords.pdf")
+library(misc.wrappers)
+# Sample 50 points from 10-degree radius area with center located on land somewhere between -50 and 50 degrees latitude.
+coords50 <- rcoords(r=10,size=50,limits=c(-180,180,-50,50))
+# Use method 1 to create the outer set of points and generate a figure with points on map. Method 1 may not work well for points on continents vs. island archipelagos.
+coords50_outer1 <- create.outer(coords=coords50, method=1, output.path="coords50_outer1.txt", plot.output.path="coords50_outer1.pdf")
+# Use method 2
+coords50_outer2 <- create.outer(coords=coords50, method=2, output.path="coords50_outer2.txt", plot.output.path="coords50_outer2.pdf")
+# Use method 3
+coords50_outer3 <- create.outer(coords=coords50, method=3, output.path="coords50_outer3.txt", plot.output.path="coords50_outer3.pdf")
 }

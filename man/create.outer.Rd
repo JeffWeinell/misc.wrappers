@@ -8,7 +8,7 @@ This function generates an '\emph{.outer' file needed by EEMS, given the '}.coor
 \usage{
 create.outer(
   coords,
-  method = 1,
+  method = 2,
   buffer.adj = 0,
   coords.radius = 0.01,
   max.fractal.dimension = 1.1,
@@ -23,8 +23,8 @@ create.outer(
 \item{coords}{Two column numeric matrix containing longitude and latitude of the samples in decimal degree format, or a character string with path to the input .coords file used for eems; the input file must be space separated and without a header.}
 
 \item{method}{A number (1, 2, or 3) determining how the output coordinates will be generated.
-If method=1 (the default) generates an alpha hull surrounding geographic regions geographic regions that intersect with input coordinates. This method tends to works best for island arichpelagos, but may be slow if input coordinates include large sampling gaps. In such cases increase the value of alpha.start.
-If method=2 is similar to method 1, except that the output coordinates are only determined from the input coordinates (and buffer setting), rather than from the regions of the base map (political geography from natural earth dataset) that intersect the input coordinates. Either method should be fine for EEMS, but method 1 tends to look nicer.
+If method=1  generates an alpha hull surrounding geographic regions geographic regions that intersect with input coordinates. This method tends to works best for island arichpelagos, but may be slow if input coordinates include large sampling gaps. In such cases increase the value of alpha.start.
+If method=2 (the default) is similar to method 1, except that the output coordinates are only determined from the input coordinates (and buffer setting), rather than from the regions of the base map (political geography from natural earth dataset) that intersect the input coordinates. Either method should be fine for EEMS, but method 1 tends to look nicer for island archipelagos.
 If method=3 is fast and uses the minimum convex polygon of input coodinates as a starting point.}
 
 \item{buffer.adj}{This argument is not yet implemented. A number between 0 and 1 that determines the size of the buffer region surrounding the points supplied by coords.}

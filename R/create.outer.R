@@ -4,8 +4,8 @@
 #' 
 #' @param coords Two column numeric matrix containing longitude and latitude of the samples in decimal degree format, or a character string with path to the input .coords file used for eems; the input file must be space separated and without a header.
 #' @param method A number (1, 2, or 3) determining how the output coordinates will be generated.
-#' If method=1 (the default) generates an alpha hull surrounding geographic regions geographic regions that intersect with input coordinates. This method tends to works best for island arichpelagos, but may be slow if input coordinates include large sampling gaps. In such cases increase the value of alpha.start.
-#' If method=2 is similar to method 1, except that the output coordinates are only determined from the input coordinates (and buffer setting), rather than from the regions of the base map (political geography from natural earth dataset) that intersect the input coordinates. Either method should be fine for EEMS, but method 1 tends to look nicer.
+#' If method=1  generates an alpha hull surrounding geographic regions geographic regions that intersect with input coordinates. This method tends to works best for island arichpelagos, but may be slow if input coordinates include large sampling gaps. In such cases increase the value of alpha.start.
+#' If method=2 (the default) is similar to method 1, except that the output coordinates are only determined from the input coordinates (and buffer setting), rather than from the regions of the base map (political geography from natural earth dataset) that intersect the input coordinates. Either method should be fine for EEMS, but method 1 tends to look nicer for island archipelagos.
 #' If method=3 is fast and uses the minimum convex polygon of input coodinates as a starting point.
 #' @param buffer.adj This argument is not yet implemented. A number between 0 and 1 that determines the size of the buffer region surrounding the points supplied by coords.
 #' @param coords.radius Number specifying the radius in degrees to use around input coordinates when determining spatial intersections (default 0.01). Increasing this value can be useful if coordinates are located offshore of regions outlined in the geography basemap.
@@ -17,8 +17,9 @@
 #' @param plot.output.path Optional character string with path to save plot. Default is NULL, in which case the value is equal to appending '.pdf' to 'output.path'. Ignored if plot.outer is FALSE.
 #' @return A two column numerical matrix containing the longitude and latitude of the output polygon. The matrix written to output.path can be used as the ".outer" polygon used by EEMS. A map is plotted to visualize the results.
 #' @export create.outer
-create.outer <- function(coords,method=1,buffer.adj=0,coords.radius=0.01,max.fractal.dimension=1.1,plot.outer=TRUE,ask.use=FALSE,counter.clockwise=TRUE,output.path=NULL,plot.output.path=NULL){
-	input.coords <- coords
+create.outer <- function(coords,method=2,buffer.adj=0,coords.radius=0.01,max.fractal.dimension=1.1,plot.outer=TRUE,ask.use=FALSE,counter.clockwise=TRUE,output.path=NULL,plot.output.path=NULL){
+	input.coords <- unname(coords)
+	colnames(input.coords) <- c("latitude","longitude")
 	### Check which type of object is being supplied to coords and define coords accordingly
 	if(is(input.coords,"character")){
 		coords   <- data.matrix(read.table(input.coords,header=F))
@@ -27,6 +28,8 @@ create.outer <- function(coords,method=1,buffer.adj=0,coords.radius=0.01,max.fra
 		coords       <- data.matrix(input.coords)
 		mode(coords) <- "numeric"
 	}
+	### Data frame copy of coords
+	coords.df <- data.frame(X=coords[,1],Y=coords[,2])
 	### SpatialPoints object holding coords
 	points.sp <- sp::SpatialPoints(coords)
 	### SpatialPolygons object holding circles with centerpoints at coords
@@ -35,6 +38,8 @@ create.outer <- function(coords,method=1,buffer.adj=0,coords.radius=0.01,max.fra
 	crs.string <- "+init=EPSG:4326"
 	## High resolution global map of political regions.
 	spdf_world_10  <- rnaturalearth::ne_countries(scale=10)
+	## Same high resolution global map of political regions, but held as an SF object.
+	sf_world_10  <- rnaturalearth::ne_countries(scale=10,returnclass="sf")
 	## Character string defining the Coordinate Reference System (CRS) in WKT format
 	# crs.string <- rgdal::showWKT(sp::proj4string(spdf_world_10))
 	# crs.string <- "+init=epsg:4326 +proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0"
@@ -184,8 +189,26 @@ create.outer <- function(coords,method=1,buffer.adj=0,coords.radius=0.01,max.fra
 			### Add map axes
 			maps::map.axes()
 		} else {
+			if(FALSE){
+				xlim <- rangeBuffer(x=outer[,1],f=0.25)
+				ylim <- rangeBuffer(x=outer[,2],f=0.25)
+				## ggplot version of plot. May switch to this soon.
+				gg.baseplot  <- ggplot2::ggplot(data = sf_world_10) + ggplot2::theme_classic() + ggplot2::geom_sf(fill="lightgray") + ggplot2::coord_sf(xlim =xlim, ylim = ylim) + ggplot2::xlab("longitude") + ggplot2::ylab("latitude") + ggplot2::theme(panel.border = ggplot2::element_rect(color = "black", fill=NA, size=1), plot.title=ggplot2::element_text(size=10, hjust = 0.5),legend.title=ggplot2::element_blank())
+				#gg.outerplot <- ggplot2::ggplot(data = sf_world_10) + ggplot2::theme_classic() + ggplot2::geom_sf(fill="lightgray") + ggplot2::geom_point(data = coords.df, ggplot2::aes(x = X, y = Y), size = 3, shape = 20, color = "black") + ggplot2::geom_point(data = outer.df, ggplot2::aes(x = X, y = Y), size = 4, shape = 3, color = "green") + ggplot2::coord_sf(xlim = range(outer[,1]), ylim = range(outer[,2])) + ggplot2::xlab("longitude") + ggplot2::ylab("latitude") + ggplot2::theme(panel.border = ggplot2::element_rect(color = "black", fill=NA, size=1))
+			#	gg.coords.df <- cbind(coords.df,col="black",sz=3,sh=20)
+			#	gg.outer.df  <- cbind(outer.df,col="green",sz=4,sh=3)
+				#####
+				gg.coords.df  <- cbind(coords.df,grp= "input sample points")
+				gg.outer.df   <- cbind(outer.df,grp="outer points")
+				gg.df         <- rbind(gg.outer.df,gg.coords.df)
+				gg.outerplot  <- gg.baseplot + ggplot2::geom_point(data = gg.df, ggplot2::aes(x = X, y = Y, fill=grp,shape=grp,color=grp,size=grp)) + ggplot2::scale_size_manual(values=c(3,3)) + ggplot2::scale_fill_manual(values=c("black","green")) + ggplot2::scale_color_manual(values=c("black","green")) + ggplot2::scale_shape_manual(values=c(20,3)) + ggplot2::ggtitle("misc.wrappers::create.outer(method=3)")
+				# gg.outerplot2 <- gg.outerplot + guides(color = guide_legend(reverse=T), fill = guide_legend(reverse=T),shape=guide_legend(reverse=T),size=guide_legend(reverse=T))
+				#  guide = ggplot2::guide_legend(reverse=TRUE) labels=c("outer points","input sample points")
+			}
 			sp::plot(sp::SpatialPoints(outer),col="white")
-			extent.sp <- sp::SpatialPoints(rbind(outer,coords))
+			#return(rbind(outer,coords))
+			extent.sp <- sp::SpatialPoints(unname(rbind(outer,coords)))
+			#return(extent.sp)
 			sp::plot(spdf_world_10,add=T)
 			sp::plot(sp::SpatialPoints(outer),col="green",add=T)
 			sp::plot(points.sp,add=T,pch=20)
@@ -217,12 +240,15 @@ create.outer <- function(coords,method=1,buffer.adj=0,coords.radius=0.01,max.fra
 	list(outer,outer.poly)
 } 
 #' @examples
-#' ### Load example dataset with coordinates in a two-column matrix (first column longitude).
-#' LonLat <- misc.wrappers::grp1.lonlat
-#' ### Get the subset of points that occur on land.
-#' coords.df <- points.on.land(x=LonLat)
-#' ### Create the outer set of points and generate a figure with points on map.
-#' createouter_example_method1 <- create.outer(coords= coords.df,method=1,output.path="createouter_exampleOutput_method1_coords.txt",plot.output.path="createouter_exampleOutput_method1_coords.pdf")
+#' library(misc.wrappers)
+#' # Sample 50 points from 10-degree radius area with center located on land somewhere between -50 and 50 degrees latitude.
+#' coords50 <- rcoords(r=10,size=50,limits=c(-180,180,-50,50))
+#' # Use method 1 to create the outer set of points and generate a figure with points on map. Method 1 may not work well for points on continents vs. island archipelagos.
+#' coords50_outer1 <- create.outer(coords=coords50, method=1, output.path="coords50_outer1.txt", plot.output.path="coords50_outer1.pdf")
+#' # Use method 2
+#' coords50_outer2 <- create.outer(coords=coords50, method=2, output.path="coords50_outer2.txt", plot.output.path="coords50_outer2.pdf")
+#' # Use method 3
+#' coords50_outer3 <- create.outer(coords=coords50, method=3, output.path="coords50_outer3.txt", plot.output.path="coords50_outer3.pdf")
 
 #' @title Return coordinates over land
 #' 
@@ -311,8 +337,23 @@ rcoords <- function(r,size,return.as="data.frame",limits=c(-180,180,-90,90),over
 	result
 }
 #' @examples
-#' # Sample 50 points within an area with a 10-degree radius and center located on land somewhere between -50 and 50 degrees latitude.
-#' coords <- rcoords(r=10,size=50,limits=c(-180,180,-50,50))
+#' library(misc.wrappers)
+#' # Sample 50 points from 10-degree radius area with center located on land somewhere between -50 and 50 degrees latitude.
+#' coords50 <- rcoords(r=10,size=50,limits=c(-180,180,-50,50))
 
 
-
+#' @title Buffered range
+#' 
+#' Calculate the limits of a buffered range for a numerical vector.
+#' 
+#' @param x Numerical vector
+#' @param f Number greater than zero indicating the amount of expansion. Default 0.1. Zero is the same as range(x).
+#' @return Numerical vector with minimum and maximum limits of the buffered range.
+#' @export rangeBuffer
+rangeBuffer <- function(x,f){
+	Rx <- range(x)
+	Dx <- diff(Rx)
+	Bx <- ((Dx*f)/2)
+	res <- c((Rx[1]-Bx),(Rx[2]+Bx))
+	res
+}
