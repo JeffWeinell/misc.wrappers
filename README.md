@@ -7,12 +7,13 @@ This package includes functions to fascilitate running some popular programs use
 
 function | example input | example output
 ---|---|---
+```plot_model``` | [example.tpl](inst/extdata/example.tpl), [example.est](inst/extdata/example.est) | [example_model.pdf](inst/extdata/example_model.pdf)
 ```run_DAPC``` | | 
 ```run_sNMF``` | | 
 ```runtess``` | | 
 ```run_fastStructure```  |  | 
 ```runeems_snps_setup``` | | 
-```plot_model``` | [example.tpl](inst/extdata/example.tpl), [example.est](inst/extdata/example.est) | [example_model.pdf](inst/extdata/example_model.pdf)
+
 
  <!-- - ```eemsgg2raster```-->
 

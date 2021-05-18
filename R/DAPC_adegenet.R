@@ -265,7 +265,7 @@ run_DAPC <- function(x, format="VCF", kmax=40, coords=NULL, samplenames=NULL,rep
 		da.biPlot[[i]]       <- biplots.da.list.i
 		pca.densityPlot[[i]] <- density.pca.list.i
 		pca.biPlot[[i]]      <- biplots.pca.list.i
-	}
+	} ### END OF LOOP
 	### Plots of DF or PC density for each given K
 	if(debug) message("step 4")
 	da.dens.plotsPerK <- sapply(1:length(da.densityPlot),FUN=function(x){max(lengths(da.densityPlot[[x]]))})
@@ -397,7 +397,10 @@ run_DAPC <- function(x, format="VCF", kmax=40, coords=NULL, samplenames=NULL,rep
 	if(debug) message("step 10.6")
 	results3.gtable     <- lapply(X=results3.grobs.list,FUN=gridExtra::arrangeGrob,vp=vp)
 	if(debug) message("step 10.7")
-	result <- c(results1.gtable,results2,results3.gtable)
+	
+	# result <- c(results1.gtable,results2,results3.gtable)
+	result <- c(results1.gtable,results3.gtable)
+	
 	if(debug) message("step 11")
 	if(".pdf" %in% include.out){
 		pdf(height=6,width=10,file=save.as,onefile=TRUE)
@@ -408,6 +411,17 @@ run_DAPC <- function(x, format="VCF", kmax=40, coords=NULL, samplenames=NULL,rep
 			}
 		}
 		dev.off()
+		### Save the PC and DF density and biplots to a separate PDF, with height and width determined by number of rows and columns of plots.
+		if(FALSE){
+			pdf(height=res2.height,width=res2.width,file=res2.save.as, onefile=TRUE)
+			for(i in 1:length(results2)){
+				grid::grid.draw(results2[[i]])
+				if(i < length(results2)){
+					grid::grid.newpage()
+				}
+			}
+			dev.off()
+		}
 	}
 	result
 }
