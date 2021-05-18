@@ -420,6 +420,9 @@ run_DAPC <- function(x, format="VCF", kmax=40, coords=NULL, samplenames=NULL,rep
 
 #' specifically, perform 30 replicates adegenet::find.clusters and plot boxplots of the K vs. BIC;  on the simulated dataset; 
 
+
+
+
 #######
 # module load R/4.0
 # module load gdal

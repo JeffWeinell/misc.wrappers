@@ -1,0 +1,17 @@
+// Search ranges and rules file
+// ****************************
+[PARAMETERS]
+//#isInteger?(0 = no, 1 = yes) #name #distribution (unif; log) #min  #max
+//all Ns are in number of haploid individuals
+1   N0$      unif  40000   2e+05   output
+1   N1$      unif  5000    25000   output
+1   N2$      unif  5000    25000   output
+1   Tmig1$   unif  1000    3000    output
+1   Tdiv1$   unif  6666    5e+06   output
+1   Tdiv2$   unif  20000   9e+06   output
+0   MIG1$    unif  5e-06   5e-05   output
+
+
+[RULES]
+
+[COMPLEX PARAMETERS]
