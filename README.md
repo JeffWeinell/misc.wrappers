@@ -9,7 +9,7 @@ This package includes functions to fascilitate running some popular programs use
   - ```runtess```
   - ```run_fastStructure```
   - ```runeems_snps_setup```
-  - ```plot_model``` Example input/output files:[.est](""),[.tpl](""), [Output PDF]("")
+  - ```plot_model``` Example input/output files: [example.tpl]("/inst/extdata/example.tpl"), [example.est]("/inst/extdata/example.est"), [example_model.pdf]("/inst/extdata/example_model.pdf")
  <!-- - ```eemsgg2raster```-->
 
 ### Install ```misc.wrappers``` from GitHub using ```devtools```, ```remotes```, or ```BiocManager```.
