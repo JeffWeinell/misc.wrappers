@@ -4,7 +4,7 @@
 \alias{create.outer}
 \title{create.outer function
 
-This function automatically generates the '\emph{.outer' file needed by EEMS, given the '}.coords' file also needed by EEMS.}
+This function generates an '\emph{.outer' file needed by EEMS, given the '}.coords' file also needed by EEMS.}
 \usage{
 create.outer(
   coords,
@@ -23,7 +23,7 @@ create.outer(
 \item{coords}{Two column numeric matrix containing longitude and latitude of the samples in decimal degree format, or a character string with path to the input .coords file used for eems; the input file must be space separated and without a header.}
 
 \item{method}{A number (1, 2, or 3) determining how the output coordinates will be generated.
-If method=1 (the default) produces a potentially more useful result, and uses the alpha hull of geographic regions that intersect with input coordinates. This method may be slow if input coordinates include large sampling gaps. In such cases increases the value of alpha.start.
+If method=1 (the default) generates an alpha hull surrounding geographic regions geographic regions that intersect with input coordinates. This method tends to works best for island arichpelagos, but may be slow if input coordinates include large sampling gaps. In such cases increase the value of alpha.start.
 If method=2 is similar to method 1, except that the output coordinates are only determined from the input coordinates (and buffer setting), rather than from the regions of the base map (political geography from natural earth dataset) that intersect the input coordinates. Either method should be fine for EEMS, but method 1 tends to look nicer.
 If method=3 is fast and uses the minimum convex polygon of input coodinates as a starting point.}
 
@@ -33,15 +33,15 @@ If method=3 is fast and uses the minimum convex polygon of input coodinates as a
 
 \item{max.fractal.dimension}{Value between 1 and 2 contolling the shape complexity of the polygon with the output coordinates. Values near 1 have low complexity (e.g., circles, squares), and shape complexity increases as max.fractal.dimension approaches 2. The default value 1.1 seems to work well for most cases. Ignored if method=3.}
 
-\item{plot.outer}{Logical indicating if the points defining the output ".outer" table should be plotted.}
+\item{plot.outer}{Logical indicating if the points defining the output ".outer" table should be plotted. Default TRUE.}
 
-\item{ask.use}{Logical indicating if, after plotting, the user should be asked if the output should be written to file. Default is FALSE. Ignored if output.path is NULL or if plot.outer is FALSE.}
+\item{ask.use}{Logical indicating if, after plotting, the user should be prompted to ask if the output should be saved. Default is FALSE. Ignored if output.path is NULL or if plot.outer is FALSE.}
 
 \item{counter.clockwise}{Should the output cooordinates be ordered counterclockwise. Default is TRUE and is the required format for EEMS.}
 
 \item{output.path}{Character string with path where to save coordinates. Default is NULL.}
 
-\item{plot.output.path}{Optional character string with path to save plot. Default is NULL. Ignored if plot.outer is FALSE.}
+\item{plot.output.path}{Optional character string with path to save plot. Default is NULL, in which case the value is equal to appending '.pdf' to 'output.path'. Ignored if plot.outer is FALSE.}
 }
 \value{
 A two column numerical matrix containing the longitude and latitude of the output polygon. The matrix written to output.path can be used as the ".outer" polygon used by EEMS. A map is plotted to visualize the results.
@@ -49,5 +49,5 @@ A two column numerical matrix containing the longitude and latitude of the outpu
 \description{
 create.outer function
 
-This function automatically generates the '\emph{.outer' file needed by EEMS, given the '}.coords' file also needed by EEMS.
+This function generates an '\emph{.outer' file needed by EEMS, given the '}.coords' file also needed by EEMS.
 }

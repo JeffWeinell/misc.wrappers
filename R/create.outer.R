@@ -1,20 +1,20 @@
 #' @title create.outer function
 #' 
-#' This function automatically generates the '*.outer' file needed by EEMS, given the '*.coords' file also needed by EEMS.
+#' This function generates an '*.outer' file needed by EEMS, given the '*.coords' file also needed by EEMS.
 #' 
 #' @param coords Two column numeric matrix containing longitude and latitude of the samples in decimal degree format, or a character string with path to the input .coords file used for eems; the input file must be space separated and without a header.
 #' @param method A number (1, 2, or 3) determining how the output coordinates will be generated.
-#' If method=1 (the default) produces a potentially more useful result, and uses the alpha hull of geographic regions that intersect with input coordinates. This method may be slow if input coordinates include large sampling gaps. In such cases increases the value of alpha.start.
+#' If method=1 (the default) generates an alpha hull surrounding geographic regions geographic regions that intersect with input coordinates. This method tends to works best for island arichpelagos, but may be slow if input coordinates include large sampling gaps. In such cases increase the value of alpha.start.
 #' If method=2 is similar to method 1, except that the output coordinates are only determined from the input coordinates (and buffer setting), rather than from the regions of the base map (political geography from natural earth dataset) that intersect the input coordinates. Either method should be fine for EEMS, but method 1 tends to look nicer.
 #' If method=3 is fast and uses the minimum convex polygon of input coodinates as a starting point.
 #' @param buffer.adj This argument is not yet implemented. A number between 0 and 1 that determines the size of the buffer region surrounding the points supplied by coords.
 #' @param coords.radius Number specifying the radius in degrees to use around input coordinates when determining spatial intersections (default 0.01). Increasing this value can be useful if coordinates are located offshore of regions outlined in the geography basemap.
 #' @param max.fractal.dimension Value between 1 and 2 contolling the shape complexity of the polygon with the output coordinates. Values near 1 have low complexity (e.g., circles, squares), and shape complexity increases as max.fractal.dimension approaches 2. The default value 1.1 seems to work well for most cases. Ignored if method=3.
-#' @param plot.outer Logical indicating if the points defining the output ".outer" table should be plotted.
-#' @param ask.use Logical indicating if, after plotting, the user should be asked if the output should be written to file. Default is FALSE. Ignored if output.path is NULL or if plot.outer is FALSE.
+#' @param plot.outer Logical indicating if the points defining the output ".outer" table should be plotted. Default TRUE.
+#' @param ask.use Logical indicating if, after plotting, the user should be prompted to ask if the output should be saved. Default is FALSE. Ignored if output.path is NULL or if plot.outer is FALSE.
 #' @param counter.clockwise Should the output cooordinates be ordered counterclockwise. Default is TRUE and is the required format for EEMS.
 #' @param output.path Character string with path where to save coordinates. Default is NULL.
-#' @param plot.output.path Optional character string with path to save plot. Default is NULL. Ignored if plot.outer is FALSE.
+#' @param plot.output.path Optional character string with path to save plot. Default is NULL, in which case the value is equal to appending '.pdf' to 'output.path'. Ignored if plot.outer is FALSE.
 #' @return A two column numerical matrix containing the longitude and latitude of the output polygon. The matrix written to output.path can be used as the ".outer" polygon used by EEMS. A map is plotted to visualize the results.
 #' @export create.outer
 create.outer <- function(coords,method=1,buffer.adj=0,coords.radius=0.01,max.fractal.dimension=1.1,plot.outer=TRUE,ask.use=FALSE,counter.clockwise=TRUE,output.path=NULL,plot.output.path=NULL){
@@ -27,21 +27,22 @@ create.outer <- function(coords,method=1,buffer.adj=0,coords.radius=0.01,max.fra
 		coords       <- data.matrix(input.coords)
 		mode(coords) <- "numeric"
 	}
+	### SpatialPoints object holding coords
+	points.sp <- sp::SpatialPoints(coords)
+	### SpatialPolygons object holding circles with centerpoints at coords
+	circles.poly <- coords2sp.poly(coords.mat=coords,r=coords.radius)
+	### coordinate reference system to use for all spatial objects.
+	crs.string <- "+init=EPSG:4326"
 	## High resolution global map of political regions.
-	spdf_world_10             <- rnaturalearth::ne_countries(scale=10)
+	spdf_world_10  <- rnaturalearth::ne_countries(scale=10)
 	## Character string defining the Coordinate Reference System (CRS) in WKT format
 	# crs.string <- rgdal::showWKT(sp::proj4string(spdf_world_10))
 	# crs.string <- "+init=epsg:4326 +proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0"
-	crs.string <- "+init=EPSG:4326"
 	# wkt.string <- rgdal::showWKT(crs.string)
 	### Define CRS using wkt format
-	suppressWarnings(raster::crs(spdf_world_10)   <- crs.string)
-	### SpatialPoints object holding coords
-	points.sp <- sp::SpatialPoints(coords)
-	suppressWarnings(raster::crs(points.sp) <- crs.string)
-	### SpatialPolygons object holding circles with centerpoints at coords
-	circles.poly <- coords2sp.poly(coords.mat=coords,r=coords.radius)
-	suppressWarnings(raster::crs(circles.poly) <- crs.string)
+	suppressWarnings(raster::crs(spdf_world_10) <- raster::crs(points.sp) <- raster::crs(circles.poly) <- crs.string)
+	#suppressWarnings(raster::crs(points.sp) <- crs.string)
+	#suppressWarnings(raster::crs(circles.poly) <- crs.string)
 	### Spatial data frame for the map features that intersect with the input coords
 	unique.features.at.circles <- do.call(rbind,unique(sp::over(circles.poly, spdf_world_10,returnList=T)))
 	### spdf row indices for the unique regions in unique.features.at.circles
@@ -214,8 +215,75 @@ create.outer <- function(coords,method=1,buffer.adj=0,coords.radius=0.01,max.fra
 	}
 	### return a list including a matrix of the coordinates in the output file and a SpatialPolygons object of the output coordinates
 	list(outer,outer.poly)
+} 
+#' @examples
+#' ### Load example dataset with coordinates in a two-column matrix (first column longitude).
+#' LonLat <- misc.wrappers::grp1.lonlat
+#' ### Get the subset of points that occur on land.
+#' coords.df <- points.on.land(x=LonLat)
+#' ### Create the outer set of points and generate a figure with points on map.
+#' createouter_example_method1 <- create.outer(coords= coords.df,method=1,output.path="createouter_exampleOutput_method1_coords.txt",plot.output.path="createouter_exampleOutput_method1_coords.pdf")
+
+#' @title Return coordinates over land
+#' 
+#' Returns the set of input coordinates that intersect with land. Land is considered to incude all areas covered by a feature in the rnaturalearth::ne_countries 10 meter resolution dataset. Input coordinates are are assumed to be WGS84 (EPSG:4326)
+#' 
+#' @param x Matrix of data frame with coordinates as longitude and latitude columns.
+#' @param return.as Character string with class to use for object returned. Default "data.frame". Can also be "matrix" or "SP" (SpatialPoints).
+#' @return An object with class equal to the value of 'return.as', which contains the subset of input points that occur on land, or more specifically, not in an ocean.
+#' @export points.on.land
+points.on.land <- function(x,return.as="data.frame"){
+	world.land  <- rnaturalearth::ne_countries(scale=10)
+	crs.string     <- "+init=EPSG:4326"
+	if(is(x,"matrix")){
+		x2 <- as.data.frame(x)
+	} else {
+		if(is(x,"data.frame")){
+			x2 <- x
+		} else {
+			stop("'x' must be a matrix or data.frame containing columns with longitude and latitude")
+		}
+	}
+	colnames(x2) <- c("longitude","latitude")
+	mode(x2[,"longitude"]) <- "numeric"
+	mode(x2[,"latitude"]) <- "numeric"
+	xsp <- sp::SpatialPoints(x2)
+	suppressWarnings(raster::crs(world.land) <- raster::crs(xsp) <- crs.string)
+	matches.df <- sp::over(xsp, world.land)
+	landtest   <- apply(matches.df,MARGIN=1,FUN=function(m){!all(is.na(m))})
+	if(any(landtest)){
+		res <- x2[which(landtest),]
+	} else {
+		stop("No input points occur on land")
+	}
+	if(return.as=="data.frame"){
+		return(res)
+	}
+	if(return.as=="matrix"){
+		return(data.matrix(res))
+	}
+	if(return.as=="SP"){
+		return(xsp[which(landtest)])
+	}
 }
 
 
+
+
+#' @title Random land-intersecting-points in random-centered area.
+#' 
+#' Returns a set of points sampled from a region with a randomly generated center and specified longitudinal and latitudinal diameters. Points are sampled until a specified number of land-intersecting points are returned.
+#' 
+#' @param lond Longitudinal diameter of area
+#' @param latd Latitudinal diameter of area
+#' @param size Number of points to return
+#' @param return.as Character string with class to use for object returned. Default "data.frame". Can also be "matrix" or "SP" (SpatialPoints).
+#' @return An object with class equal to the value of 'return.as', which contains the subset of input points that occur on land, or more specifically, not in an ocean.
+#' @export rlandcoords
+rlandcoords <- function(lond,latd,size,return.as="data.frame"){
+	
+	sample.center <- c(sample(seq(-180,to=180,by=0.01),size=1), sample(seq(-90,to=90,by=0.01),size=1))
+
+}
 
 

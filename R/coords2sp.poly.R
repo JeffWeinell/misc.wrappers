@@ -9,6 +9,7 @@
 coords2sp.poly <- function(coords.mat,r=0.01){
 	colnames(coords.mat) <- c("x","y")
 	circles.list <- apply(X=coords.mat,MARGIN=1,FUN=function(x){sampSurf::spCircle(radius=r,centerPoint=x)[[1]]})
-	res          <- do.call(raster::bind,circles.list)
+	# res        <- do.call(raster::bind,circles.list)
+	res          <- raster::bind(circles.list)
 	res
 }
