@@ -4,12 +4,6 @@
 
 ### Package Description
 This package includes functions to fascilitate running some popular programs used for assessing population structure, demographic modelling, and genetic/genomic and phylogenetic/genomic programs, and to summarize results in useful ways. The main functions are:
-  - ```run_DAPC```
-  - ```run_sNMF```
-  - ```runtess```
-  - ```run_fastStructure```
-  - ```runeems_snps_setup```
-  - ```plot_model``` Example input/output files: [example.tpl](inst/extdata/example.tpl), [example.est](inst/extdata/example.est), [example_model.pdf](inst/extdata/example_model.pdf)
 
 function | example input | example output
 ---|---|---
