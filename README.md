@@ -10,6 +10,16 @@ This package includes functions to fascilitate running some popular programs use
   - ```run_fastStructure```
   - ```runeems_snps_setup```
   - ```plot_model``` Example input/output files: [example.tpl](inst/extdata/example.tpl), [example.est](inst/extdata/example.est), [example_model.pdf](inst/extdata/example_model.pdf)
+
+function | example input | example output
+---|---|---
+```run_DAPC``` | | 
+```run_sNMF``` | | 
+```runtess``` | | 
+```run_fastStructure```  |  | 
+```runeems_snps_setup``` | | 
+```plot_model``` | [example.tpl](inst/extdata/example.tpl), [example.est](inst/extdata/example.est) | [example_model.pdf](inst/extdata/example_model.pdf)
+
  <!-- - ```eemsgg2raster```-->
 
 ### Install ```misc.wrappers``` from GitHub using ```devtools```, ```remotes```, or ```BiocManager```.
