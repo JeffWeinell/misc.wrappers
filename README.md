@@ -2,7 +2,7 @@
  **Under Developement**
 
 ### Package Description
-This package includes functions to fascilitate running some popular programs used for assessing population structure, demographic modelling, and genetic/genomic and phylogenetic/genomic programs, and to summarize results in useful ways. The main functions are shown in the table below along with example input and output files; function arguments (not shown in table) also control analysis parameter settings — see examples of function usage (to be added soon).
+This package includes functions to fascilitate running some popular programs used for assessing population structure, demographic modelling, and genetic/genomic and phylogenetic/genomic programs, and to summarize results in useful ways. The main functions are shown in the table below along with example input and output files. The values used for function arguments, not shown in table, also control analyses and should be set mindfully - see examples (will add soon) of function usage.
 
 function | example input files | example output files
 ---|---|---
