@@ -8,7 +8,7 @@ This package includes functions to fascilitate running some popular programs use
 function | example input | example output
 ---|---|---
 ```plot_model``` | [example.tpl](inst/extdata/example.tpl), [example.est](inst/extdata/example.est) | [example_model.pdf](inst/extdata/example_model.pdf)
-```create.outer``` | [coords.txt](inst/extdata/createouter_exampleInput_coords.txt) | **method 1**: [outer.text](inst/extdata/createouter_exampleOutput_method1_outer.text), [outer.pdf](inst/extdata/createouter_exampleOutput_method1_outer.pdf); **method 2**: [outer.text](inst/extdata/createouter_exampleOutput_method2_outer.text), [outer.pdf](inst/extdata/createouter_exampleOutput_method2_outer.pdf); **method 3**: [outer.text](inst/extdata/createouter_exampleOutput_method3_outer.text), [outer.pdf](inst/extdata/createouter_exampleOutput_method3_outer.pdf)
+```create.outer``` | [coords.txt](inst/extdata/createouter_exampleInput_coords.txt) | **method 1**: [outer.txt](inst/extdata/createouter_exampleOutput_method1_outer.text), [outer.pdf](inst/extdata/createouter_exampleOutput_method1_outer.pdf); **method 2**: [outer.txt](inst/extdata/createouter_exampleOutput_method2_outer.text), [outer.pdf](inst/extdata/createouter_exampleOutput_method2_outer.pdf); **method 3**: [outer.txt](inst/extdata/createouter_exampleOutput_method3_outer.text), [outer.pdf](inst/extdata/createouter_exampleOutput_method3_outer.pdf)
 ```run_DAPC``` | | 
 ```run_sNMF``` | | 
 ```runtess``` | | 
