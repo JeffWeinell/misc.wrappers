@@ -9,7 +9,7 @@ function | example input files | example output files
 ```plot_model``` | [model10_K3.tpl](inst/extdata/example.tpl), [model10_K3.est](inst/extdata/example.est) | [model10_K3.pdf](inst/extdata/example_model.pdf)
 ```create.outer``` | [coords.txt](inst/extdata/createouter_exampleInput_coords.txt) | 'method'=1: [outer.txt](inst/extdata/createouter_exampleOutput_method1_outer.text), [outer.pdf](inst/extdata/createouter_exampleOutput_method1_outer.pdf)<br /> 'method'=2: [outer.txt](inst/extdata/createouter_exampleOutput_method2_outer.text), [outer.pdf](inst/extdata/createouter_exampleOutput_method2_outer.pdf)<br /> 'method'=3: [outer.txt](inst/extdata/createouter_exampleOutput_method3_outer.text), [outer.pdf](inst/extdata/createouter_exampleOutput_method3_outer.pdf)
 ```run_DAPC``` | [simulated_K4.vcf.gz](inst/extdata/simulated_K4.vcf.gz), *coords.txt* (optional) | 
-```run_sNMF``` | [simulated_K4.vcf.gz](inst/extdata/simulated_K4.vcf.gz), *coords.txt* (optional)| 
+```run_sNMF``` | [simulated_K4.vcf.gz](inst/extdata/simulated_K4.vcf.gz), *coords.txt* (optional)| 'coords'=NULL: [simK4_coordsNULL.pdf](inst/extdata/simK4_coordsNULL.pdf)<br/>'coords'="*/coords.txt": *simK4_withCoords.pdf* [coming soon]
 ```run_fastStructure```  | [simulated_K4.vcf.gz](inst/extdata/simulated_K4.vcf.gz), *coords.txt* (optional) | 
 ```runtess``` | [simulated_K4.vcf.gz](inst/extdata/simulated_K4.vcf.gz), *coords.txt*| 
 ```runeems_snps_setup``` | [simulated_K4.vcf.gz](inst/extdata/simulated_K4.vcf.gz), *coords.txt* | 
@@ -57,7 +57,12 @@ config_miscwrappers(exe.paths=c("*/PATH/TO/python","*/fastStructure-master/struc
 ### ```run_DAPC``` Run DAPC from SNP data in a VCF file and plot results
 ```
 library(misc.wrappers)
-run_DAPC(vcf="/PATH/TO/SNPs/VCF.vcf",coords="/PATH/TO/LonLat.txt",out="/PATH/FOR/RESULTS.pdf")
+# Define path to a VCF file that contains simulated SNP data, or, set the path to a file your own data.
+vcf_path <- file.path(system.file("extdata", package = "misc.wrappers"),"simulated_K4.vcf.gz")
+# Run DAPC analyses and save the results to files in your current directory.
+simDAPC <- run_DAPC(vcf="/PATH/TO/SNPs/VCF.vcf",coords="/PATH/TO/LonLat.txt",out="/PATH/FOR/RESULTS.pdf")
+# Mostly the same as before, but include a file with coordinates of the samples in the VCF.
+# example will be added soon # 
 ```
 
 ### ```run_sNMF``` Run sNMF/LEA from SNP data in a VCF file and plot results
