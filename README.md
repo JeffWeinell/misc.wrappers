@@ -3,17 +3,17 @@
 **Under Developement**
 
 ### Package Description
-This package includes functions to fascilitate running some popular programs used for assessing population structure, demographic modelling, and genetic/genomic and phylogenetic/genomic programs, and to summarize results in useful ways. The main functions are:
+This package includes functions to fascilitate running some popular programs used for assessing population structure, demographic modelling, and genetic/genomic and phylogenetic/genomic programs, and to summarize results in useful ways. The main functions are shown in the table below along with example input and output files.
 
 function | example input | example output
 ---|---|---
 ```plot_model``` | [example.tpl](inst/extdata/example.tpl), [example.est](inst/extdata/example.est) | [example_model.pdf](inst/extdata/example_model.pdf)
 ```create.outer``` | [coords.txt](inst/extdata/createouter_exampleInput_coords.txt) | **method 1**: [outer.txt](inst/extdata/createouter_exampleOutput_method1_outer.text), [outer.pdf](inst/extdata/createouter_exampleOutput_method1_outer.pdf); **method 2**: [outer.txt](inst/extdata/createouter_exampleOutput_method2_outer.text), [outer.pdf](inst/extdata/createouter_exampleOutput_method2_outer.pdf); **method 3**: [outer.txt](inst/extdata/createouter_exampleOutput_method3_outer.text), [outer.pdf](inst/extdata/createouter_exampleOutput_method3_outer.pdf)
-```run_DAPC``` | | 
-```run_sNMF``` | | 
-```runtess``` | | 
-```run_fastStructure```  |  | 
-```runeems_snps_setup``` | | 
+```run_DAPC``` | [simulated_K4.vcf.gz](inst/extdata/simulated_K4.vcf.gz), *coords.txt* (optional) | 
+```run_sNMF``` | [simulated_K4.vcf.gz](inst/extdata/simulated_K4.vcf.gz), *coords.txt* (optional)| 
+```run_fastStructure```  | [simulated_K4.vcf.gz](inst/extdata/simulated_K4.vcf.gz), *coords.txt* (optional) | 
+```runtess``` | [simulated_K4.vcf.gz](inst/extdata/simulated_K4.vcf.gz), *coords.txt*| 
+```runeems_snps_setup``` | [simulated_K4.vcf.gz](inst/extdata/simulated_K4.vcf.gz), *coords.txt* | 
 
 
  <!-- - ```eemsgg2raster```-->

@@ -13,7 +13,7 @@
 #'    /output.dirpath/data/data.outer
 #'    /output.dirpath/mcmc    ### This will contain as many mcmc subdirectories as the value of nchains.
 #'    /output.dirpath/params  ### This will contain as many parameter files as the value of nchains.
-#' @param data An object of class genind or vcfR, or a character string with path to a diffs of vcf file
+#' @param data An object of class genind or vcfR, or a character string with path to a diffs or VCF file.
 #' @param coord Character string with path to coordinates file, which has two columns with longitude and latitude coordinates (decimal degree format) of individuals in the genind object. Columns should be space separated.
 #' @param outer Either NULL (the default) or a character string with path to the '*.outer' file, which has two columns with longitude and latitude coordinates (decimal degree format) defining the perimeter of a polygon covering the region to model with EEMS. See EEMS documentation.
 #' If NULL, this function will generate a "*.outer" file automatically; the user will be prompted to accept the auto-generated *.outer file prior to running eems.
