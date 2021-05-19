@@ -159,7 +159,7 @@ run_fastStructure <- function(x,format="VCF",coords=NULL,samplenames=NULL,kmax=4
 	}
 	margL.df      <- data.frame(marginalLikelihood=unname(unlist(c(margL.mat))),Kval=rep(Krange,reps))
 	margL.df$Kval <- factor(margL.df$Kval, levels=c(1:nrow(margL.df)))
-	margLPlot     <- ggplot2::ggplot(margL.df, ggplot2::aes(x=Kval, y=marginalLikelihood)) + ggplot2::geom_boxplot(fill='lightgray', outlier.colour="black", outlier.shape=16,outlier.size=2, notch=FALSE) + ggplot2::theme_classic() + ggplot2::labs(title= paste0("marginal likelihood (",reps," replicates) vs. number of ancestral populations (K)"), x="Number of ancestral populations", y = "marginalLikelihood") + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) + ggplot2::geom_vline(xintercept=bestK, linetype=2, color="black", size=0.25)
+	margLPlot     <- ggplot2::ggplot(margL.df, ggplot2::aes(x=Kval, y=marginalLikelihood)) + ggplot2::geom_boxplot(fill='lightgray', outlier.colour="black", outlier.shape=16,outlier.size=2, notch=FALSE) + ggplot2::theme_classic() + ggplot2::labs(title= paste0("marginal likelihood (",reps," replicates) vs. number of ancestral populations (K)"), x="Number of ancestral populations", y = "marginalLikelihood") + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) # + ggplot2::geom_vline(xintercept=bestK, linetype=2, color="black", size=0.25)
 	
 	#### Load the Q matrices
 	qpaths          <- list.files(outdir.temp,pattern="^.+\\.meanQ$",full.names=TRUE)
@@ -295,10 +295,8 @@ run_fastStructure <- function(x,format="VCF",coords=NULL,samplenames=NULL,kmax=4
 }
 #' @examples
 #' library(misc.wrappers)
-
-#' library(misc.wrappers)
 #' # Define path to input VCF file containing similated data for 500 SNPs from 50 individuals in three populations.
-#' example_vcf_path <- file.path(system.file("extdata", package = "misc.wrappers"),"example_simulated_K4.vcf.gz")
+#' example_vcf_path <- file.path(system.file("extdata", package = "misc.wrappers"),"simulated_K4.vcf.gz")
 #' # Perform sNMF analyses on the simulated dataset for for K=2–10 and 30 replicates.
 #' test_fastStructure_K4 <- run_fastStructure(x=example_vcf_path, kmax=10, reps=30, save.as="fastStructure_example_K4.pdf",include.out=c(".pdf"))
 

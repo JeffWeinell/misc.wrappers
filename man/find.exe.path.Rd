@@ -21,9 +21,8 @@ This function searches the system path and the settings file of the misc.wrapper
 }
 \examples{
 library(misc.wrappers)
-library(misc.wrappers)
 # Define path to input VCF file containing similated data for 500 SNPs from 50 individuals in three populations.
-example_vcf_path <- file.path(system.file("extdata", package = "misc.wrappers"),"example_simulated_K4.vcf.gz")
+example_vcf_path <- file.path(system.file("extdata", package = "misc.wrappers"),"simulated_K4.vcf.gz")
 # Perform sNMF analyses on the simulated dataset for for K=2–10 and 30 replicates.
 test_fastStructure_K4 <- run_fastStructure(x=example_vcf_path, kmax=10, reps=30, save.as="fastStructure_example_K4.pdf",include.out=c(".pdf"))
 }

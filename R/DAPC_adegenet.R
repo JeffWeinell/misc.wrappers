@@ -1912,7 +1912,7 @@ sim.vcf <- function(x=NULL, save.as=NULL, RA.probs=NULL, n.ind=NULL, n.snps=NULL
 	n.snp.nonstruc <- n.snps-n.snp.struc
 	### Perform simulation
 #	simK2 <- adegenet::glSim(n.ind=n.ind,n.snp.nonstruc=n.snp.nonstruc,ploidy=ploidy,K=K,args)
-	sim <- adegenet::glSim(n.ind=n.ind, n.snp.nonstruc=n.snp.nonstruc, n.snp.struc=n.snp.struc, ploidy=ploidy, k=K, LD=LD, block.minsize = block.minsize, block.maxsize = block.maxsize, sort.pop=TRUE)
+	sim <- adegenet::glSim(n.ind=n.ind, n.snp.nonstruc=n.snp.nonstruc, n.snp.struc=n.snp.struc, ploidy=ploidy, k=K, LD=LD, block.minsize = block.minsize, block.maxsize = block.maxsize, sort.pop=TRUE,...)
 	### Ancestral population assignments of simulated samples
 	anc.pops <- gsub(".", "", as.character(sim@other$ancestral.pops), fixed=T)
 	### Genotype matrix of simulated dataset
