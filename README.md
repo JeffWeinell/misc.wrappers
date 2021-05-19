@@ -17,7 +17,7 @@ function | example input | example output
 
  <!-- - ```eemsgg2raster```-->
 
-### Install ```misc.wrappers``` from GitHub using ```devtools```, ```remotes```, or ```BiocManager```.
+### Install ```misc.wrappers``` from GitHub using ```devtools```, ```remotes```, or ```BiocManager```
 ```
 # with devtools:
 library(devtools)
