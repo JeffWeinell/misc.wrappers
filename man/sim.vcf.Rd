@@ -7,7 +7,7 @@
 sim.vcf(
   x = NULL,
   save.as = NULL,
-  RA.probs = "equal",
+  RA.probs = NULL,
   n.ind = NULL,
   n.snps = NULL,
   snp.str = 0,
@@ -15,6 +15,11 @@ sim.vcf(
   K = 2,
   include.missing = FALSE,
   fMD = NULL,
+  pMDi = NULL,
+  LD = FALSE,
+  block.minsize = 10,
+  block.maxsize = NULL,
+  use.maxLDx = FALSE,
   ...
 )
 }
@@ -23,8 +28,9 @@ sim.vcf(
 
 \item{save.as}{Null or a character string where the output VCF containing the simulated dataset should be saved.}
 
-\item{RA.probs}{Either one of the character strings "equal" or "empirical", or a numerical vector with length 12 that sums to 1; each value is probability that a SNP has reference allele = i, alternative allele = j, for all [i,j]{A,C,G,T}. If elements of the vector are unnamed, assumed names will be c("AC","AG","AT","CA","CG","CT","GA","GC","GT","TA","TC","TG"), with the first character specifying the reference allele and the second the alternative allele.
-The default value of RA.probs is 'equal', which is equivalent to RA.probs=sapply(c("AC","AG","AT","CA","CG","CT","GA","GC","GT","TA","TC","TG"),assign,(1/12)).
+\item{RA.probs}{Either NULL (the default), one of the character strings "equal" or "empirical", or a numerical vector with probability of each combination of reference and alternative allele. Numerical vectors must have length 12 and sum to 1; if elements of the vector are unnamed, assumed names will be c("AC","AG","AT","CA","CG","CT","GA","GC","GT","TA","TC","TG"), with the first character specifying the reference allele and the second the alternative allele.
+If RA.probs is NULL it is coerced to 'empirical' if 'x' is non-NULL, or coerced to 'equal' if 'x' is NULL.
+Setting RA.probs to 'equal' is equivalent to the vector produced by sapply(c("AC","AG","AT","CA","CG","CT","GA","GC","GT","TA","TC","TG"),assign,(1/12)).
 If RA.probs="empirical", the frequencies of each Reference:Alternative allele combination is calculated for the input dataset and used for sampling probabilities for the simulated dataset.}
 
 \item{n.ind}{Number of individuals to include in simulated dataset. Default NULL, in which case the number of simulated individuals will match the number of individuals in 'x'.}
@@ -41,7 +47,17 @@ If RA.probs="empirical", the frequencies of each Reference:Alternative allele co
 
 \item{fMD}{NULL or a number in the range (0,1] indicating the fraction of genotypes that should be missing in the simulated dataset. If NULL (the default) and 'include.missing'=TRUE and 'x' non-NULL, the fraction of genotypes missing in the simulated dataset will be approximately equal to the fraction of missing genotypes in the input dataset.}
 
-\item{...}{Additional arguments passed to the function 'glSim' from 'adegenet' package.}
+\item{pMDi}{NULL (the default) or a numerical vector with the proportion of missing data that should be attributed to each simulated individual. If NULL, ignored unless 'x' is non-NULL and 'include.missing'=TRUE, in which case pMDi values will be sampled from missing data proportions of the input VCF, producing similar missing data structure for input and simulated datasets.}
+
+\item{LD}{NULL or a logical (TRUE or FALSE) indicating whether or not snps should be simulated under linkage disequilibrium. Default FALSE. If LD='NULL' (will be the default in future versions) and 'x' is non-NULL, LD is coerced to FALSE if all sites (positions) of the input dataset are unlinked (on different blocks/chromosomes), otherwise LD is coerced to TRUE.}
+
+\item{block.minsize}{Number with minimum. Ignored if 'LD' is FALSE or coerced to FALSE. Default 10.}
+
+\item{block.maxsize}{Number indicating the maximum size of linkage blocks. Ignored if 'LD' is FALSE or coerced to FALSE, or if 'use.maxLDx' is TRUE and 'x' is non-NULL, in which case the max block size is equal to the max position of any snps in a linkage block). Default 1000.}
+
+\item{use.maxLDx}{Logical indicating whether or not the maximum linkage block size should be set as the max position of any snp within a linkage block of the input data. Default FALSE, which means that max linkage block size should be the value of 'block.maxsize'.}
+
+\item{...}{Additional arguments passed to the function 'glSim' from 'adegenet' package. These include arguments 'grp.size', 'pop.freq', 'alpha', 'parallel', and 'theta'. Not yet implemented.}
 
 \item{n.snp.nonstruc}{Number of nonstructured SNPs. If n.snp.nonstruc is NULL and x is non-NULL, n.snp.nonstruc will equal half the number of SNPs in the input dataset.}
 
@@ -53,5 +69,5 @@ An object with class vcfR (see 'vcfR' package for details regarding this class)
 \description{
 Create a simulated SNP dataset from either an input VCF file, an object of class vcfR, or by specifying characteristics of the simulated dataset using the function arguments.
 Most of the work is done by a call to the function 'glSim' from the 'adegenet' package.
-Currently, including missing data in simulated datasets is not possible.
+Note: At present I do not recommend setting LD=TRUE (or LD=NULL if the input VCF includes linked SNPs), because CHROM and POS columns of the output VCF will not reflect the presence of linkage. Check back for updates.
 }

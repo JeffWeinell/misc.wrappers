@@ -1770,12 +1770,13 @@ filter.vcf <- function(x,save.as=NULL,nsample=c(NA,NA), specificSites=NULL,speci
 #' 
 #' Create a simulated SNP dataset from either an input VCF file, an object of class vcfR, or by specifying characteristics of the simulated dataset using the function arguments.
 #' Most of the work is done by a call to the function 'glSim' from the 'adegenet' package.
-#' Currently, including missing data in simulated datasets is not possible.
+#' Note: At present I do not recommend setting LD=TRUE (or LD=NULL if the input VCF includes linked SNPs), because CHROM and POS columns of the output VCF will not reflect the presence of linkage. Check back for updates.
 #' 
 #' @param x Path to input VCF or a vcfR object. Default NULL. Used to extract probabilities that a site has a particular pair of Reference and Alternative nucleotides. If NULL 'probs' must be supplied.
 #' @param save.as Null or a character string where the output VCF containing the simulated dataset should be saved.
-#' @param RA.probs Either one of the character strings "equal" or "empirical", or a numerical vector with length 12 that sums to 1; each value is probability that a SNP has reference allele = i, alternative allele = j, for all [i,j]{A,C,G,T}. If elements of the vector are unnamed, assumed names will be c("AC","AG","AT","CA","CG","CT","GA","GC","GT","TA","TC","TG"), with the first character specifying the reference allele and the second the alternative allele.
-#' The default value of RA.probs is 'equal', which is equivalent to RA.probs=sapply(c("AC","AG","AT","CA","CG","CT","GA","GC","GT","TA","TC","TG"),assign,(1/12)).
+#' @param RA.probs Either NULL (the default), one of the character strings "equal" or "empirical", or a numerical vector with probability of each combination of reference and alternative allele. Numerical vectors must have length 12 and sum to 1; if elements of the vector are unnamed, assumed names will be c("AC","AG","AT","CA","CG","CT","GA","GC","GT","TA","TC","TG"), with the first character specifying the reference allele and the second the alternative allele.
+#' If RA.probs is NULL it is coerced to 'empirical' if 'x' is non-NULL, or coerced to 'equal' if 'x' is NULL.
+#' Setting RA.probs to 'equal' is equivalent to the vector produced by sapply(c("AC","AG","AT","CA","CG","CT","GA","GC","GT","TA","TC","TG"),assign,(1/12)).
 #' If RA.probs="empirical", the frequencies of each Reference:Alternative allele combination is calculated for the input dataset and used for sampling probabilities for the simulated dataset.
 #' @param n.ind Number of individuals to include in simulated dataset. Default NULL, in which case the number of simulated individuals will match the number of individuals in 'x'.
 #' @param n.snps Number of SNPs. If n.snp.nonstruc is NULL and x is non-NULL, n.snp.nonstruc will equal half the number of SNPs in the input dataset.
@@ -1786,23 +1787,99 @@ filter.vcf <- function(x,save.as=NULL,nsample=c(NA,NA), specificSites=NULL,speci
 #' @param K Number of populations (>=2). Default 2.
 #' @param include.missing Logical indicating whether or not missing data should be included in the simulated dataset.
 #' @param fMD NULL or a number in the range (0,1] indicating the fraction of genotypes that should be missing in the simulated dataset. If NULL (the default) and 'include.missing'=TRUE and 'x' non-NULL, the fraction of genotypes missing in the simulated dataset will be approximately equal to the fraction of missing genotypes in the input dataset.
-#' @param ... Additional arguments passed to the function 'glSim' from 'adegenet' package.
+#' @param pMDi NULL (the default) or a numerical vector with the proportion of missing data that should be attributed to each simulated individual. If NULL, ignored unless 'x' is non-NULL and 'include.missing'=TRUE, in which case pMDi values will be sampled from missing data proportions of the input VCF, producing similar missing data structure for input and simulated datasets.
+#' @param LD NULL or a logical (TRUE or FALSE) indicating whether or not snps should be simulated under linkage disequilibrium. Default FALSE. If LD='NULL' (will be the default in future versions) and 'x' is non-NULL, LD is coerced to FALSE if all sites (positions) of the input dataset are unlinked (on different blocks/chromosomes), otherwise LD is coerced to TRUE.
+#' @param block.minsize Number with minimum. Ignored if 'LD' is FALSE or coerced to FALSE. Default 10.
+#' @param block.maxsize Number indicating the maximum size of linkage blocks. Ignored if 'LD' is FALSE or coerced to FALSE, or if 'use.maxLDx' is TRUE and 'x' is non-NULL, in which case the max block size is equal to the max position of any snps in a linkage block). Default 1000.
+#' @param use.maxLDx Logical indicating whether or not the maximum linkage block size should be set as the max position of any snp within a linkage block of the input data. Default FALSE, which means that max linkage block size should be the value of 'block.maxsize'.
+#' @param ... Additional arguments passed to the function 'glSim' from 'adegenet' package. These include arguments 'grp.size', 'pop.freq', 'alpha', 'parallel', and 'theta'. Not yet implemented.
 #' @return An object with class vcfR (see 'vcfR' package for details regarding this class)
 #' @export sim.vcf
-sim.vcf <- function(x=NULL,save.as=NULL,RA.probs="equal",n.ind=NULL, n.snps=NULL, snp.str = 0, ploidy=NULL, K=2, include.missing=FALSE,fMD = NULL, ...){
+sim.vcf <- function(x=NULL, save.as=NULL, RA.probs=NULL, n.ind=NULL, n.snps=NULL, snp.str = 0, ploidy=NULL, K=2, include.missing=FALSE, fMD=NULL, pMDi=NULL, LD=FALSE, block.minsize=10, block.maxsize=NULL, use.maxLDx=FALSE, ...){
+#	x=NULL; save.as=NULL; RA.probs=NULL; n.ind=NULL; n.snps=NULL; snp.str = 0; ploidy=NULL; K=2; include.missing=FALSE; fMD=NULL; LD=NULL; block.minsize=10; block.maxsize=NULL; use.maxLDx=FALSE
 #	args  <- list(...)
 	RA.pairnames <- c("AC","AG","AT","CA","CG","CT","GA","GC","GT","TA","TC","TG")
 	if(!is.null(x)){
 		vcf   <- vcfR::read.vcfR(x,verbose=F,checkFile=F)
+		# genotype matrix
 		gt    <- vcf@gt
+		### genotype matrix without format column or extra (non-genotype) information.
+		gt.simple <- gsub(":.+","",gt[,-c(1)])
+		# fixed matrix
 		fx    <- vcf@fix
+		# metadata strings
 		met   <- vcf@meta
+		# character strings with reference and alternative allele for each site
 		RA    <- paste0(fx[,"REF"],fx[,"ALT"])
+		# number of each combination of reference and alternative alleles
 		fRA   <- table(RA)
+		# Proportion of sites with each combination of reference and alternative alleles
 		pRA   <- fRA/sum(fRA) ### Use this for drawing samples from names(RA)
+		# chromosome (linkage block) ID at each site
+		chr   <- fx[,"CHROM"]
+		# unique set of chromosome (linkage block) IDs
+		uchr  <- unique(chr)
+		# position of each variant within its linkage block
+		pos   <- fx[,"POS"]
+		# maximum position value of any variant within any linkage block.
+		maxLDx <- max(pos)
+		if(is.null(n.ind)){
+			n.ind <- (ncol(gt)-1)
+		}
+		if(is.null(n.snps)){
+			n.snps <- nrow(gt)
+		}
+		if(is.null(ploidy)){
+			testsite <- unname(gsub(":.+","",gt[1,2]))
+			ploidy   <- lengths(strsplit(testsite,split="[/,|]"))
+		}
+		if(ploidy>1){
+			testsplit1 <-  lengths(strsplit(testsite,split="[/]"))
+			testsplit2 <- lengths(strsplit(testsite,split="[|]"))
+			input.separator <- c("/","|")[which(c(testsplit1,testsplit2)==ploidy)]
+			# String indicating missing genotypes in input dataset.
+			xmval <- paste(rep(".",ploidy),collapse=input.separator)
+		} else {
+			xmval <- "."
+		}
+		# The total number of missing genotypes across all individuals and variants
+		tnMD <- length(grep(xmval,gt.simple,fixed=TRUE))
+		# If any missing data exists, calculate number and probability of missing genotypes for each individual
+		if(tnMD>0){
+			indv.nMD <- apply(X=gt.simple,MARGIN=2,FUN=function(xn){length(grep(xmval,xn,fixed=TRUE))})
+			# The probability that a genotype selected randomly from the input VCF belongs to a particular individual conditioned on the genotype being missing.
+			indv.pMD <- indv.nMD/tnMD
+			# x variable of density distribution of indv.pMD; may be used to generate sim.indv.pMD for assigning missing data to simulated individuals.
+			indv.dMD <- density(indv.pMD)$x
+		} else {
+			indv.pMD <- rep(0,n.ind)
+		}
+		
+		# whether or not any snps in the input dataset are on different linkage blocks.
+		if(length(chr) == length(uchr)){
+			LDx <- FALSE
+			if(is.null(LD)){
+				LD <- FALSE
+			}
+		} else {
+			LDx <- TRUE
+			if(is.null(LD)){
+				LD <- TRUE
+			}
+			if(use.maxLDx){
+				block.maxsize <- maxLDx
+			}
+		}
 	} else {
-		if(length(c(RA.probs,n.ind,n.snp.nonstruc,ploidy)) !=3){
+		if(length(c(n.ind,n.snp.nonstruc,ploidy)) !=3){
 			stop("'n.ind','n.snp.nonstruc', and 'ploidy' must be non-NULL if 'x' is NULL")
+		}
+	}
+	if(is.null(RA.probs)){
+		if(is.null(x)){
+			RA.probs <- "equal"
+		} else {
+			RA.probs <- "empirical"
 		}
 	}
 	if(is(RA.probs[1],"character")){
@@ -1830,50 +1907,52 @@ sim.vcf <- function(x=NULL,save.as=NULL,RA.probs="equal",n.ind=NULL, n.snps=NULL
 			stop("invalid RA.probs")
 		}
 	}
-	if(is.null(n.ind)){
-		n.ind <- (ncol(gt)-1)
-	}
-	if(is.null(n.snps)){
-		n.snps <- nrow(gt)
-	}
-	if(is.null(ploidy)){
-		testsite <- unname(gsub(":.+","",gt[1,2]))
-		ploidy   <- lengths(strsplit(testsite,split="[/,|]"))
-	}
+	
 	n.snp.struc    <- round(n.snps*snp.str)
 	n.snp.nonstruc <- n.snps-n.snp.struc
 	### Perform simulation
 #	simK2 <- adegenet::glSim(n.ind=n.ind,n.snp.nonstruc=n.snp.nonstruc,ploidy=ploidy,K=K,args)
-	sim <- adegenet::glSim(n.ind=n.ind,n.snp.nonstruc=n.snp.nonstruc,n.snp.struc=n.snp.struc,ploidy=ploidy,k=K)
-	### Arrange genotype matrix
+	sim <- adegenet::glSim(n.ind=n.ind, n.snp.nonstruc=n.snp.nonstruc, n.snp.struc=n.snp.struc, ploidy=ploidy, k=K, LD=LD, block.minsize = block.minsize, block.maxsize = block.maxsize, sort.pop=TRUE)
+	### Ancestral population assignments of simulated samples
+	anc.pops <- gsub(".", "", as.character(sim@other$ancestral.pops), fixed=T)
+	### Genotype matrix of simulated dataset
 	sim.gt0 <- t(as.matrix(sim))
-	# Check that each site is actually a SNP. Usually rare but sometimes occurs.
-	sitediv0 <- apply(X=sim.gt0,MARGIN=1,FUN=function(x){length(unique(x))>1})
-	# Just set the site equal to some other site.
-	#if(!all(sitediv0)){
+	# Check that each site is actually a SNP. Rare for invariant sites to be generated by glSim, but it occurs at a very low frequency.
+	sitediv0 <- apply(X=sim.gt0, MARGIN=1, FUN=function(x){length(unique(x))>1})
+	# Randomly set each invariant site equal to some other site.
 	while(!all(sitediv0)){
 		sites.resample <- which(!sitediv0)
 		sim.gt0[sites.resample,] <- sim.gt0[sample(1:n.snps,size=length(sites.resample)),]
-		sitediv0 <- apply(X=sim.gt0,MARGIN=1,FUN=function(x){length(unique(x))>1})
+		sitediv0 <- apply(X=sim.gt0, MARGIN=1, FUN=function(x){length(unique(x))>1})
 	}
-	#}
 	### Introduce missing data
 	if(include.missing){
 		if(is.null(fMD)){
-			gt.simple <- gsub(":.+","",gt[,-c(1)])
 			### Calculate fraction of missing data at each site in the input dataset.
 			sites.md     <- apply(X=gt.simple,MARGIN=1,FUN=function(j){length(grep(pattern="[.]",x=j))/length(j)})
-			### Sample missing data frequencies for sites in the simulated dataset from sites.md
+			### Sample values from sites.md to use for sites in the simulated dataset.
 			sim.sites.fFM <- sample(sites.md,size=n.snps,replace=FALSE)
-			### Number of individuals with genotype missing at each site.
+			### For each simulated site, the number of individuals that should have genotype missing
 			sim.sites.nMD <- floor(sim.sites.fFM*n.ind)
-			### Introduce missing data at each site. Temporarily use NA for missing data.
-			# String to use for missing genotypes.
+			# String to use for missing genotypes. Will temporarily use NA for missing data and then convert NAs to this string.
 			mval <- paste(rep(".",ploidy),collapse="/")
 			#sim.gt4 <- mapply(A=sim.gt3,B=sim.sites.nMD,MARGIN=1,FUN=function(a,b){res=a; res[sample(length(a),size=b)] <- mval})
 			#sim.gt3, B=sim.sites.nMD
 ###			sim.gt4 <- lapply(X=1:length(sim.sites.nMD),FUN=function(x){res=sim.gt3[x,]; res[sample(n.ind,size=sim.sites.nMD[x])] <- NA;res})
-			sim.gt00 <- do.call(rbind,lapply(X=1:length(sim.sites.nMD),FUN=function(x){res=sim.gt0[x,]; res[sample(n.ind,size=sim.sites.nMD[x])] <- NA;res}))
+			### Distribute missing data across individuals in a similar way as in the input dataset
+			if(is.null(pMDi)){
+				if(!is.null(indv.pMD)){
+					### Probability weights
+					pMDiw <- sample(indv.pMD,size=n.ind,replace=T)
+					### Probabilities
+					pMDi  <- unname(c(pMDiw/sum(pMDiw)))
+					
+				} else {
+					pMDi <- (1/n.ind)
+				}
+			}
+			### Introduce missing data at each site.
+			sim.gt00 <- do.call(rbind,lapply(X=1:length(sim.sites.nMD),FUN=function(x){res=sim.gt0[x,]; res[sample(n.ind,size=sim.sites.nMD[x],replace=FALSE,prob=pMDi)] <- NA;res}))
 			# check which sites have less than two genotypes
 ###			sitediv <- vapply(X=sim.gt4,FUN=function(x){length(table(x))},FUN.VALUE=1)
 			sitediv <- apply(X=sim.gt00,MARGIN=1,FUN=function(x){length(unique(x))>1})
@@ -1895,8 +1974,10 @@ sim.vcf <- function(x=NULL,save.as=NULL,RA.probs="equal",n.ind=NULL, n.snps=NULL
 	sim.gt1 <- gsub("^0$","0/0",sim.gt00)
 	sim.gt2 <- gsub("^1$","0/1",sim.gt1)
 	sim.gt3 <- gsub("^2$","1/1",sim.gt2)
+	# Names to use for simulated individuals
+	samplenames <- paste0("Sample",c(1:ncol(sim.gt3)),".",anc.pops)
 	# Add sample names
-	colnames(sim.gt3) <- paste0("Sample",c(1:ncol(sim.gt3)))
+	colnames(sim.gt3) <- samplenames
 	### Change sim.gt3 to the penultimate gt version
 	sim.gt <- cbind("FORMAT"=rep("GT",nrow(sim.gt3)),sim.gt3)
 	### Arrange fixed matrix for simulated dataset
@@ -1919,6 +2000,7 @@ sim.vcf <- function(x=NULL,save.as=NULL,RA.probs="equal",n.ind=NULL, n.snps=NULL
 		vcf.sim <- vcfR::read.vcfR(save.as)
 	}
 	### Return the simulated dataset as vcfR object
+	# If save.as is null, then the object returned will always report "zero missing data", although missing data may exists. Writing and rereading the VCF removes this vcfR bug. May need to use NA in gt matrix of vcfR.
 	vcf.sim
 }
 #' @examples

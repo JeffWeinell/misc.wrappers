@@ -8,11 +8,11 @@ function | example input files | example output files
 ---|---|---
 ```plot_model``` | [model10_K3.tpl](inst/extdata/example.tpl), [model10_K3.est](inst/extdata/example.est) | [model10_K3.pdf](inst/extdata/example_model.pdf)
 ```create.outer``` | [coords.txt](inst/extdata/createouter_exampleInput_coords.txt) | 'method'=1: [outer.txt](inst/extdata/createouter_exampleOutput_method1_outer.text), [outer.pdf](inst/extdata/createouter_exampleOutput_method1_outer.pdf)<br /> 'method'=2: [outer.txt](inst/extdata/createouter_exampleOutput_method2_outer.text), [outer.pdf](inst/extdata/createouter_exampleOutput_method2_outer.pdf)<br /> 'method'=3: [outer.txt](inst/extdata/createouter_exampleOutput_method3_outer.text), [outer.pdf](inst/extdata/createouter_exampleOutput_method3_outer.pdf)
-```run_DAPC``` | [simulated_K4.vcf.gz](inst/extdata/simulated_K4.vcf.gz), *coords.txt* (optional) | 
-```run_sNMF``` | [simulated_K4.vcf.gz](inst/extdata/simulated_K4.vcf.gz), *coords.txt* (optional)| 'coords'=NULL: [simK4_coordsNULL.pdf](inst/extdata/simK4_coordsNULL.pdf)<br/>'coords'="*/coords.txt": *simK4_withCoords.pdf* [coming soon]
-```run_fastStructure```  | [simulated_K4.vcf.gz](inst/extdata/simulated_K4.vcf.gz), *coords.txt* (optional) | 
-```runtess``` | [simulated_K4.vcf.gz](inst/extdata/simulated_K4.vcf.gz), *coords.txt*| 
-```runeems_snps_setup``` | [simulated_K4.vcf.gz](inst/extdata/simulated_K4.vcf.gz), *coords.txt* | 
+```run_DAPC``` | [simulated_K4.vcf.gz](inst/extdata/simulated_K4.vcf.gz),<br/> *coords.txt* (optional) | 
+```run_sNMF``` | [simulated_K4.vcf.gz](inst/extdata/simulated_K4.vcf.gz),<br/> *coords.txt* (optional)| 'coords'=NULL: [simK4_coordsNULL.pdf](inst/extdata/simK4_coordsNULL.pdf)<br/>'coords'="*/coords.txt": *simK4_withCoords.pdf* [coming soon]
+```run_fastStructure```  | [simulated_K4.vcf.gz](inst/extdata/simulated_K4.vcf.gz),<br/> *coords.txt* (optional) | 
+```runtess``` | [simulated_K4.vcf.gz](inst/extdata/simulated_K4.vcf.gz),<br/> *coords.txt*| 
+```runeems_snps_setup``` | [simulated_K4.vcf.gz](inst/extdata/simulated_K4.vcf.gz),<br/> *coords.txt* | 
 
 
  <!-- - ```eemsgg2raster```-->

@@ -333,15 +333,18 @@ points.on.land <- function(x,return.as="data.frame"){
 #' @title Randomly sample points within a random-centered circle.
 #' 
 #' Sample points in an area with specified radius and center sampled within an extent, with the optional condition that returned points must be over land.
+#' Note: Currently, multiple, adjacent sampling areas not implemented.
 #' 
-#' @param r radius of area to sample within, in decimal degrees.
-#' @param size Number of points to return.
+#' @param r radius of area to sample within, in decimal degrees, or a numerical vector with radii of adjacent sampling areas if n.adj > 1.
+#' @param size Number of points to return, or a numerical vector with number of points to return from each adjacent polygon if n.adj=1.
 #' @param return.as Character string with class to use for object returned. Default "data.frame". Can also be "matrix" or "SP" (SpatialPoints).
 #' @param limits Numerical vector of length four defining the limits for the sampling area's center, with longitude (minimum), longitude (maximum), latitude (minimum), latitude (maximum). Default is c(-180,180,-90,90). Points other than the center of the sampling area can fall outside of this limit.
 #' @param over.land Logical indicating whether or not all points in the returned data frame should occur over land. Default TRUE.
+#' @param n.adj Not yet implemented. Number with how many adjacent, nonoverlapping areas to use for the 
+#' @param d.adj Not yet implemented. Number controlling the distance between the centers of a pair of areas, as a function of the pair's radii. Default 1.
 #' @return An object with class equal to the value of 'return.as', which contains the subset of input points that occur on land, or more specifically, not in an ocean.
 #' @export rcoords
-rcoords <- function(r,size,return.as="data.frame",limits=c(-180,180,-90,90),over.land=TRUE){
+rcoords <- function(r,size,return.as="data.frame",limits=c(-180,180,-90,90),over.land=TRUE,n.adj){
 	result.temp        <- data.frame(NULL)
 	while(nrow(result.temp)  < size){
 		### Clear the data frame if too few points on land during previous attempt
