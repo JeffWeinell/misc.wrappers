@@ -2,9 +2,9 @@
  **Under Developement**
 
 ### Package Description
-This package includes functions to fascilitate running some popular programs used for assessing population structure, demographic modelling, and genetic/genomic and phylogenetic/genomic programs, and to summarize results in useful ways. The main functions are shown in the table below along with example input and output files.
+This package includes functions to fascilitate running some popular programs used for assessing population structure, demographic modelling, and genetic/genomic and phylogenetic/genomic programs, and to summarize results in useful ways. The main functions are shown in the table below along with example input and output files; function arguments (not shown in table) also control analysis parameter settings — see examples of function usage (to be added soon).
 
-function | example input | example output
+function | example input files | example output files
 ---|---|---
 ```plot_model``` | [model10_K3.tpl](inst/extdata/example.tpl), [model10_K3.est](inst/extdata/example.est) | [model10_K3.pdf](inst/extdata/example_model.pdf)
 ```create.outer``` | [coords.txt](inst/extdata/createouter_exampleInput_coords.txt) | 'method'=1: [outer.txt](inst/extdata/createouter_exampleOutput_method1_outer.text), [outer.pdf](inst/extdata/createouter_exampleOutput_method1_outer.pdf)<br /> 'method'=2: [outer.txt](inst/extdata/createouter_exampleOutput_method2_outer.text), [outer.pdf](inst/extdata/createouter_exampleOutput_method2_outer.pdf)<br /> 'method'=3: [outer.txt](inst/extdata/createouter_exampleOutput_method3_outer.text), [outer.pdf](inst/extdata/createouter_exampleOutput_method3_outer.pdf)
