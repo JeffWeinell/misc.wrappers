@@ -1,6 +1,5 @@
 # misc.wrappers
- Collection of wrappers for popular PopGen programs, plus some novel tools.
-**Under Developement**
+ **Under Developement**
 
 ### Package Description
 This package includes functions to fascilitate running some popular programs used for assessing population structure, demographic modelling, and genetic/genomic and phylogenetic/genomic programs, and to summarize results in useful ways. The main functions are shown in the table below along with example input and output files.
