@@ -18,6 +18,7 @@
 #' @return A two column numerical matrix containing the longitude and latitude of the output polygon. The matrix written to output.path can be used as the ".outer" polygon used by EEMS. A map is plotted to visualize the results.
 #' @export create.outer
 create.outer <- function(coords,method=2,buffer.adj=0,coords.radius=0.01,max.fractal.dimension=1.1,plot.outer=TRUE,ask.use=FALSE,counter.clockwise=TRUE,output.path=NULL,plot.output.path=NULL){
+	usegg <- TRUE
 	input.coords <- unname(coords)
 	colnames(input.coords) <- c("latitude","longitude")
 	### Check which type of object is being supplied to coords and define coords accordingly
@@ -158,6 +159,7 @@ create.outer <- function(coords,method=2,buffer.adj=0,coords.radius=0.01,max.fra
 	if(counter.clockwise){
 		outer <- cbind(rev(outer[,1]),rev(outer[,2]))
 	}
+	outer.df <- data.frame(X=outer[,1],Y=outer[,2])
 	### Show the relationship between the outer coordinates, the input coordinates, and geographic regions
 	if(plot.outer){
 		### Turns off current graphics devices before plotting. This seems to help prevent the new plots from inheriting graphical parameters from the current device.
@@ -169,52 +171,85 @@ create.outer <- function(coords,method=2,buffer.adj=0,coords.radius=0.01,max.fra
 			pdf(plot.output.path)
 		}
 		if(method %in% c(1,2)){
-			### Plot the outer coordinates in white to define the extent
-			sp::plot(sp::SpatialPoints(outer),col="white")
-			#plot(submaps.with.points.sp,add=T,col="gray90")
-			sp::plot(spdf_world_10,add=T)
-			if(method==1){
-			### Add a layer containing the regions of the basemap that include at least one point (regions in gray)
-				sp::plot(spdf_unique.features.at.circles,add=T,col="gray90")
-				sp::plot(sp_unique.polygons.without.circles,add=T,col="white")
+			### ggplot version for Methods 1/2
+			if(usegg){
+				#gg.baseplot  <- ggplot2::ggplot(data = sf_world_10) + ggplot2::theme_classic() + ggplot2::geom_sf(fill="white",color="black") + ggplot2::coord_sf(xlim =xlim, ylim = ylim) + ggplot2::xlab("longitude") + ggplot2::ylab("latitude") + ggplot2::theme(panel.border = ggplot2::element_rect(color = "black", fill=NA, size=1), plot.title=ggplot2::element_text(size=10, hjust = 0.5),legend.title=ggplot2::element_blank())
+				gg.baseplot  <- ggplot2::ggplot(data = sf_world_10) + ggplot2::theme_classic() + ggplot2::geom_sf(fill="gray90",color="black") + ggplot2::xlab("longitude") + ggplot2::ylab("latitude") + ggplot2::theme(panel.border = ggplot2::element_rect(color = "black", fill=NA, size=1), plot.title=ggplot2::element_text(size=10, hjust = 0.5),legend.title=ggplot2::element_blank())
+				if(method==1){
+					xlim <- rangeBuffer(x=outer[,1],f=0.15)
+					ylim <- rangeBuffer(x=outer[,2],f=0.15)
+					## Convert spatial polygons to SF object
+					sf_unique.features.at.circles      <- sf::st_as_sf(spdf_unique.features.at.circles)
+					#sf_unique.polygons.without.circles <- sf::st_as_sf(sp_unique.polygons.without.circles)
+					### Add a layer containing the regions of the basemap that include at least one point (regions in gray)
+					# May be a problem with inheritance of coordinate systems...
+					gg.baseplot2 <- gg.baseplot + ggplot2::geom_sf(data=sf_unique.features.at.circles,color="black",fill="gray90") + ggplot2::coord_sf(xlim =xlim, ylim = ylim, expand=FALSE)
+				} else {
+					xlim <- rangeBuffer(x=outer[,1],f=0.25)
+					ylim <- rangeBuffer(x=outer[,2],f=0.25)
+					gg.baseplot2 <- gg.baseplot + ggplot2::coord_sf(xlim =xlim, ylim = ylim)
+				}
+				### Data frames holding input coordinates, outer coordinates, and both the input and outer coordinates.
+				gg.coords.df  <- cbind(coords.df,grp= "input sample points",col="black",shp=20,strk=1,sz=3,order=1)
+				gg.outer.df   <- cbind(outer.df,grp="outer points",col="green",shp=3,strk=1.25,sz=3,order=2)
+				gg.df         <- rbind(gg.outer.df,gg.coords.df)
+				gg.df         <- rbind(gg.coords.df,gg.outer.df)
+				titletext     <- paste0("misc.wrappers::create.outer(method=",method,")")
+				#gg.outerplot  <- gg.baseplot2 + ggplot2::geom_point(data = gg.df, ggplot2::aes(x = X, y = Y, fill=grp,shape=grp,color=grp,size=grp,stroke=grp)) + ggplot2::scale_discrete_manual(aesthetics = "stroke", values = c(1,1.25)) + ggplot2::scale_size_manual(values=c(3,3)) + ggplot2::scale_fill_manual(values=c("black","green")) + ggplot2::scale_color_manual(values=c("black","green")) + ggplot2::scale_shape_manual(values=c(20,3)) + ggplot2::ggtitle(titletext)
+				gg.outerplot  <- gg.baseplot2 + ggplot2::geom_point(data = gg.df, ggplot2::aes(x=X, y=Y, fill=grp, shape=grp, color=grp, size=grp, stroke=grp,alpha=grp)) + ggplot2::scale_discrete_manual(aesthetics = "stroke", values = c(`input sample points`=1,`outer points`=1.25)) + ggplot2::scale_alpha_manual(values=c(`input sample points`=1,`outer points`=0.7)) + ggplot2::scale_size_manual(values=c(`input sample points`=3,`outer points`=3)) + ggplot2::scale_fill_manual(values=c(`input sample points`="black",`outer points`="green")) + ggplot2::scale_color_manual(values=c(`input sample points`="black",`outer points`="green")) + ggplot2::scale_shape_manual(values=c(`input sample points`=20,`outer points`=3)) + ggplot2::ggtitle(titletext)
+				### Reverses the order of the items in the legend without affecting the map.
+				# gg.outerplot2 <- gg.outerplot + guides(color = guide_legend(reverse=T), fill = guide_legend(reverse=T), shape=guide_legend(reverse=T), size=guide_legend(reverse=T), stroke=guide_legend(reverse=T))
+				print(gg.outerplot)
 			}
-			### Add green crosshairs for output coordinates (the outer file for eems)
-			sp::plot(sp::SpatialPoints(outer),col="green",add=T)
-			### Add black circles for locations of the input coordinates
-			sp::plot(points.sp,add=T,pch=20)
-			### Add text/legend to show what the green crosshairs are
-			mtext("+ = habitat (.*outer) coordinates",col="green",adj=0,line=2.5,cex=0.8)
-			mtext(paste0("fractal dimension of habitat shape: ",round(fractal.dimension,digits=3)),adj=0,line=1.5,cex=0.8)
-			mtext(paste0("input settings: method = ",method,", max.fractal.dimension = ",max.fractal.dimension,", buffer.adj = ",buffer.adj),adj=0,line=0.5,cex=0.8)
-			### Add map axes
-			maps::map.axes()
+			### base plot version for Methods 1/2
+			if(!usegg){
+				### Plot the outer coordinates in white to define the extent
+				sp::plot(sp::SpatialPoints(outer),col="white")
+				#plot(submaps.with.points.sp,add=T,col="gray90")
+				sp::plot(spdf_world_10,add=T)
+				if(method==1){
+				### Add a layer containing the regions of the basemap that include at least one point (regions in gray)
+					sp::plot(spdf_unique.features.at.circles,add=T,col="gray90")
+					sp::plot(sp_unique.polygons.without.circles,add=T,col="white")
+				}
+				### Add green crosshairs for output coordinates (the outer file for eems)
+				sp::plot(sp::SpatialPoints(outer),col="green",add=T)
+				### Add black circles for locations of the input coordinates
+				sp::plot(points.sp,add=T,pch=20)
+				### Add text/legend to show what the green crosshairs are
+				mtext("+ = habitat (.*outer) coordinates",col="green",adj=0,line=2.5,cex=0.8)
+				mtext(paste0("fractal dimension of habitat shape: ",round(fractal.dimension,digits=3)),adj=0,line=1.5,cex=0.8)
+				mtext(paste0("input settings: method = ",method,", max.fractal.dimension = ",max.fractal.dimension,", buffer.adj = ",buffer.adj),adj=0,line=0.5,cex=0.8)
+				### Add map axes
+				maps::map.axes()
+			}
 		} else {
-			if(FALSE){
-				xlim <- rangeBuffer(x=outer[,1],f=0.25)
-				ylim <- rangeBuffer(x=outer[,2],f=0.25)
-				## ggplot version of plot. May switch to this soon.
-				gg.baseplot  <- ggplot2::ggplot(data = sf_world_10) + ggplot2::theme_classic() + ggplot2::geom_sf(fill="lightgray") + ggplot2::coord_sf(xlim =xlim, ylim = ylim) + ggplot2::xlab("longitude") + ggplot2::ylab("latitude") + ggplot2::theme(panel.border = ggplot2::element_rect(color = "black", fill=NA, size=1), plot.title=ggplot2::element_text(size=10, hjust = 0.5),legend.title=ggplot2::element_blank())
-				#gg.outerplot <- ggplot2::ggplot(data = sf_world_10) + ggplot2::theme_classic() + ggplot2::geom_sf(fill="lightgray") + ggplot2::geom_point(data = coords.df, ggplot2::aes(x = X, y = Y), size = 3, shape = 20, color = "black") + ggplot2::geom_point(data = outer.df, ggplot2::aes(x = X, y = Y), size = 4, shape = 3, color = "green") + ggplot2::coord_sf(xlim = range(outer[,1]), ylim = range(outer[,2])) + ggplot2::xlab("longitude") + ggplot2::ylab("latitude") + ggplot2::theme(panel.border = ggplot2::element_rect(color = "black", fill=NA, size=1))
-			#	gg.coords.df <- cbind(coords.df,col="black",sz=3,sh=20)
-			#	gg.outer.df  <- cbind(outer.df,col="green",sz=4,sh=3)
-				#####
+			### ggplot version for Method 3
+			if(usegg){
+				xlim <- rangeBuffer(x=outer[,1],f=0.4)
+				ylim <- rangeBuffer(x=outer[,2],f=0.4)
+				gg.baseplot  <- ggplot2::ggplot(data = sf_world_10) + ggplot2::theme_classic() + ggplot2::geom_sf(fill="gray90",color="black") + ggplot2::coord_sf(xlim =xlim, ylim = ylim) + ggplot2::xlab("longitude") + ggplot2::ylab("latitude") + ggplot2::theme(panel.border = ggplot2::element_rect(color = "black", fill=NA, size=1), plot.title=ggplot2::element_text(size=10, hjust = 0.5),legend.title=ggplot2::element_blank())
 				gg.coords.df  <- cbind(coords.df,grp= "input sample points")
 				gg.outer.df   <- cbind(outer.df,grp="outer points")
+			#	gg.df         <- rbind(gg.outer.df,gg.coords.df)
 				gg.df         <- rbind(gg.outer.df,gg.coords.df)
-				gg.outerplot  <- gg.baseplot + ggplot2::geom_point(data = gg.df, ggplot2::aes(x = X, y = Y, fill=grp,shape=grp,color=grp,size=grp)) + ggplot2::scale_size_manual(values=c(3,3)) + ggplot2::scale_fill_manual(values=c("black","green")) + ggplot2::scale_color_manual(values=c("black","green")) + ggplot2::scale_shape_manual(values=c(20,3)) + ggplot2::ggtitle("misc.wrappers::create.outer(method=3)")
+				gg.outerplot  <- gg.baseplot + ggplot2::geom_point(data = gg.df, ggplot2::aes(x = X, y = Y, fill=grp,shape=grp,color=grp,size=grp,stroke=grp,alpha=grp)) + ggplot2::scale_size_manual(values=c(`input sample points`=3,`outer points`=3)) + ggplot2::scale_alpha_manual(values=c(`input sample points`=1,`outer points`=0.7)) + ggplot2::scale_discrete_manual(aesthetics = "stroke", values = c(`input sample points`=1,`outer points`=1.25)) + ggplot2::scale_fill_manual(values=c(`input sample points`="black",`outer points`="green")) + ggplot2::scale_color_manual(values=c(`input sample points`="black",`outer points`="green")) + ggplot2::scale_shape_manual(values=c(`input sample points`=20,`outer points`=3)) + ggplot2::ggtitle("misc.wrappers::create.outer(method=3)")
 				# gg.outerplot2 <- gg.outerplot + guides(color = guide_legend(reverse=T), fill = guide_legend(reverse=T),shape=guide_legend(reverse=T),size=guide_legend(reverse=T))
-				#  guide = ggplot2::guide_legend(reverse=TRUE) labels=c("outer points","input sample points")
+				print(gg.outerplot)
 			}
-			sp::plot(sp::SpatialPoints(outer),col="white")
-			#return(rbind(outer,coords))
-			extent.sp <- sp::SpatialPoints(unname(rbind(outer,coords)))
-			#return(extent.sp)
-			sp::plot(spdf_world_10,add=T)
-			sp::plot(sp::SpatialPoints(outer),col="green",add=T)
-			sp::plot(points.sp,add=T,pch=20)
-			mtext("+ outer (coordinates written to output.path)",col="green",adj=0.1,line=1.5,cex=0.8)
-			mtext(paste0("input settings: method = ",method),adj=0,line=0.5,cex=0.8)
-			maps::map.axes()
+			### base plot version for Method 3
+			if(!usegg){
+				sp::plot(sp::SpatialPoints(outer),col="white")
+				#return(rbind(outer,coords))
+				extent.sp <- sp::SpatialPoints(unname(rbind(outer,coords)))
+				#return(extent.sp)
+				sp::plot(spdf_world_10,add=T)
+				sp::plot(sp::SpatialPoints(outer),col="green",add=T)
+				sp::plot(points.sp,add=T,pch=20)
+				mtext("+ outer (coordinates written to output.path)",col="green",adj=0.1,line=1.5,cex=0.8)
+				mtext(paste0("input settings: method = ",method),adj=0,line=0.5,cex=0.8)
+				maps::map.axes()
+			}
 		}
 		if(!is.null(plot.output.path)){
 			dev.off()
@@ -236,8 +271,10 @@ create.outer <- function(coords,method=2,buffer.adj=0,coords.radius=0.01,max.fra
 			write.table(outer,output.path,row.names=F,col.names=F,sep=" ",quote=F)
 		}
 	}
+	#return(gg.outerplot)
 	### return a list including a matrix of the coordinates in the output file and a SpatialPolygons object of the output coordinates
-	list(outer,outer.poly)
+	#list(outer,outer.poly)
+	list(outer,gg.outerplot)
 } 
 #' @examples
 #' library(misc.wrappers)
