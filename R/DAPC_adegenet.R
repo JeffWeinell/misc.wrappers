@@ -126,26 +126,10 @@ run_DAPC <- function(x, format="VCF", kmax=40, coords=NULL, samplenames=NULL,rep
 	best.npca.df$K    <- factor(best.npca.df$K)
 	grp.plot2         <- ggplot2::ggplot(data=best.npca.df, ggplot2::aes(x=K,y=best.npca)) + ggplot2::geom_bar(stat="identity",fill="lightgray") + ggplot2::labs(title= "alpha optimized # of PCs vs. number of clusters", x="Number of clusters", y = "Alpha optimized number of principle components to retain") + ggplot2::theme_classic() + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5))
 
-	#### Creating lists to be filled furing the loop
-#	dapc.pcabest.list <- list(); length(dapc.pcabest.list) <- max.clusters-1
-#	admixturePlot  <- list(); length(admixturePlot)        <- max.clusters-1
-#	scatterPlot    <- list(); length(scatterPlot)          <- max.clusters-1
-#	da.densityPlot    <- list(); length(da.densityPlot)    <- max.clusters-1
-#	da.biPlot         <- list(); length(da.biPlot)         <- max.clusters-1
-#	pca.densityPlot    <- list(); length(pca.densityPlot)  <- max.clusters-1
-#	pca.biPlot         <- list(); length(pca.biPlot)       <- max.clusters-1
-#	da.psets <- list(); length(da.psets)       <- max.clusters-1
-#	assignmentPlot <- list(); length(assignmentPlot)       <- max.clusters-1
-#	posterior.list <- list(); length(posterior.list)       <- max.clusters-1
-#	mapplot        <- list(); length(mapplot)              <- max.clusters-1
-#	#q.df           <- NULL
-#	q.df           <- list(); length(q.df)         <- max.clusters-1
-#	dapc.df        <- list(); length(dapc.df)      <- max.clusters-1
-
+	#### Creating lists to be filled
 	empty.set <- list(); length(empty.set) <- max.clusters-1
 	dapc.pcabest.list <- admixturePlot <- da.densityPlot <- da.biPlot <- pca.densityPlot <- pca.biPlot <- da.psets <- da.layout.mat<- pca.psets <- pca.layout.mat <- assignmentPlot <- posterior.list <- mapplot <- q.df <- dapc.df <- empty.set
 	
-	###### Trying to replace the big for loop with a small one followed by lapply
 	dapc.list <- empty.set
 	for(K in 2:max.clusters){
 		i=K-1
@@ -174,11 +158,17 @@ run_DAPC <- function(x, format="VCF", kmax=40, coords=NULL, samplenames=NULL,rep
 	## Density plots
 	#######
 	## List with two data frames with combinations of K and DF, or K and PC, respectively, for which density can be plotted.
-	plottable  <- plottable.dapc(dapc.list)
+	plottable   <- plottable.dapc(dapc.list)
 	K.plottable <- as.numeric(rownames(plottable$DF))
 	#layout.da <- plottable$DF
 	#layout.da[plottable$DF]  <- which(plottable$DF)
 	#layout.da[!plottable$DF] <- NA
+	### Creating plottable matrices for biplots
+	# if(any(Ks.n.da>2)){
+	# 	pairs <- lapply(X=apply(X=plottable$DF[apply(plottable$DF,MARGIN=1,FUN=function(x){length(which(x))>2}),], MARGIN=1, FUN=which),FUN=pset,min.length=2,max.length=2)
+	#}
+	
+
 	#layout.pc <- plottable$PC
 	#layout.pc[plottable$PC]  <- which(plottable$PC)
 	#layout.pc[!plottable$PC] <- NA
@@ -247,6 +237,151 @@ run_DAPC <- function(x, format="VCF", kmax=40, coords=NULL, samplenames=NULL,rep
 	pdf(file=paste0(tools::file_path_sans_ext(save.as),"_desnsityPlots_PC.pdf"), height=(nrow(indexmat.pc)*3),width=(ncol(indexmat.pc)*3))
 	grid::grid.draw(pc.arranged)
 	dev.off()
+
+
+	#######
+	## Bi-component plots
+	#######
+	if(any(Ks.n.da>2)){
+		#distmats.da <- lapply(apply(plottable$DF[apply(plottable$DF,MARGIN=1,FUN=function(x){length(which(x))>2}),],MARGIN=1,FUN=which), FUN=function(y){dist(y)})
+		distmats.da <- lapply(X=Ks.n.da[which(Ks.n.da>1)], FUN=function(x){dist(table(paste0("DF",c(1:x))))})
+		distlabs.da <- lapply(distmats.da,FUN=function(x){gtools::mixedsort(attributes(x)$Labels)})
+		#damats0  <- lapply(apply(plottable$DF[apply(plottable$DF,MARGIN=1,FUN=function(x){length(which(x))>2}),],MARGIN=1,FUN=which), FUN=function(y){lower.tri(dist(y))})
+		damats0  <- lapply(distmats.da, FUN=lower.tri)
+		davals   <- lapply(damats0,FUN=function(x){1:length(which(x))})
+		damats1  <- damats0
+		for(i in 1:length(damats1)){
+			damats1[[i]][damats0[[i]]]  <- davals[[i]]
+			damats1[[i]][!damats0[[i]]] <- NA
+			damats1[[i]] <- damats1[[i]] # [-c(1),-c(ncol(damats1[[i]]))]
+			rownames(damats1[[i]]) <- distlabs.da[[i]] # [-1]
+			colnames(damats1[[i]]) <- distlabs.da[[i]] # [-c(lengths(distlabs.da)[i])]
+		}
+		damats2 <- damats1
+		for(i in 1:length(damats2)){
+			damats2[[i]][!is.na(damats2[[i]])] <- paste0("bp",damats2[[i]][!is.na(damats2[[i]])],".da")
+			damats2[[i]] <- t(damats2[[i]])
+		}
+	}
+	if(any(Ks.n.pca>2)){
+		#distmats.pc <- lapply(apply(plottable$PC[apply(plottable$PC,MARGIN=1,FUN=function(x){length(which(x))>2}),],MARGIN=1,FUN=which), FUN=function(y){dist(y)})
+		distmats.pc <- lapply(X=Ks.n.pca[which(Ks.n.pca>1)], FUN=function(x){dist(table(paste0("DF",c(1:x))))})
+		distlabs.pc <- lapply(distmats.pc,FUN=function(x){gtools::mixedsort(attributes(x)$Labels)})
+		#pcmats0  <- lapply(apply(plottable$PC[apply(plottable$PC,MARGIN=1,FUN=function(x){length(which(x))>2}),],MARGIN=1,FUN=which), FUN=function(y){lower.tri(dist(y))})
+		pcmats0  <- lapply(distmats.pc,lower.tri)
+		pcvals   <- lapply(pcmats0,FUN=function(x){1:length(which(x))})
+		pcmats1  <- pcmats0
+		for(i in 1:length(pcmats1)){
+			pcmats1[[i]][pcmats0[[i]]]  <- pcvals[[i]]
+			pcmats1[[i]][!pcmats0[[i]]] <- NA
+			pcmats1[[i]] <- pcmats1[[i]]   # [-c(1),-c(ncol(pcmats1[[i]]))]
+			rownames(pcmats1[[i]]) <- distlabs.pc[[i]]  #[-1]
+			colnames(pcmats1[[i]]) <- distlabs.pc[[i]]  # [-c(lengths(distlabs.pc)[i])]
+		}
+		pcmats2 <- pcmats1
+		for(i in 1:length(pcmats2)){
+			pcmats2[[i]][!is.na(pcmats2[[i]])] <- paste0("bp",pcmats2[[i]][!is.na(pcmats2[[i]])],".pc")
+		}
+	}
+	dapc.mats <- pcmats2
+	### The value of dapc.mats mostly portrays the desired plotting layout.
+	for(i in 1:length(dapc.mats)){
+		dapc.mats[[i]][which(is.na(pcmats2[[i]]))[1:length(c(damats2[[i]][!lower.tri(damats2[[i]])]))]] <- c(damats2[[i]][!lower.tri(damats2[[i]])])
+		colnames(dapc.mats[[i]]) <- 1:ncol(dapc.mats[[i]])
+	}
+
+	## Row m of matrix in da.psets2 contains the dimensions to of the mth da biplot to generate.
+	da.psets <- lapply(X=1:length(Ks.n.da),FUN=function(x){ do.call(rbind, pset(x=1:Ks.n.da[x], min.length=2, max.length=2))})
+	da.psets2 <- lapply(which(lengths(da.psets)>0), FUN=function(x){da.psets[[x]][order(c(da.psets[[x]][,1]),c( da.psets[[x]][,2])),]})
+	names(da.psets2) <- which(lengths(da.psets)>0)+1
+
+	### Row m of matrix in pca.psets2 contains the dimensions to of the mth pca biplot to generate.
+	pca.psets <- lapply(X=1:length(Ks.n.pca),FUN=function(x){ do.call(rbind, pset(x=1:Ks.n.pca[x], min.length=2, max.length=2))})
+	pca.psets2 <- lapply(which(lengths(pca.psets)>0), FUN=function(x){pca.psets[[x]][order(c(pca.psets[[x]][,1]),c( pca.psets[[x]][,2])),]})
+	names(pca.psets2) <- which(lengths(pca.psets)>0)+1
+
+
+	#### Generate DF biplots.
+	df.biplots.list <- list(); length(df.biplots.list) <- length(da.psets2)
+	for(i in 1:length(da.psets2)){
+		K <- as.numeric(names(da.psets2))[i]
+		df.biplots.list[[i]] <- lapply(X=1:nrow(da.psets2[[i]]), FUN=function(x){ggplot2::ggplotGrob(ggscatter.dapc(dapc.list[[(K-1)]], vartype="df", xax=da.psets2[[i]][x,1], yax=da.psets2[[i]][x,2], col=myCols, legend=F, show.title=F, hideperimeter=T,cellipse=0))})
+		# Names matching those used in 'dapc.mats'
+		names(df.biplots.list[[i]]) <- c(t(damats2[[i]]))[!is.na(c(t(damats2[[i]])))]
+	}
+	
+	#### Generate PC biplots.
+	pc.biplots.list <- list(); length(pc.biplots.list) <- length(pca.psets2)
+	for(i in 1:length(pca.psets2)){
+		K <- as.numeric(names(pca.psets2))[i]
+		pc.biplots.list[[i]] <- lapply(X=1:nrow(pca.psets2[[i]]), FUN=function(x){ggplot2::ggplotGrob(ggscatter.dapc(dapc.list[[(K-1)]], vartype="pc", xax=pca.psets2[[i]][x,1], yax=pca.psets2[[i]][x,2], col=myCols, legend=F, show.title=F, hideperimeter=T,cellipse=0))})
+		names(pc.biplots.list[[i]]) <- c(pcmats2[[i]])[!is.na(c(pcmats2[[i]]))]
+	}
+
+
+
+	ctr <- 0
+	for(j in 1:ncol(plottable$DF)){
+		for(i in 1:nrow(plottable$DF) ){
+			ctr <- ctr+1
+			if(!plottable$DF[i,j]){
+			#	next
+				plot.ij  <- grid::rectGrob(gp=grid::gpar(col=NA))
+				
+			} else {
+			#	ctr <- ctr+1
+				plot.ij  <- ggplot2::ggplotGrob(ggscatter.dapc(dapc.list[[(K.plottable[i]-1)]], vartype="df", xax=j, yax=j, col=myCols, legend=F, show.title=F, hideperimeter=T))
+			}
+			df.plots.list[[ctr]]        <- plot.ij
+			names(df.plots.list)[[ctr]] <- paste0("K",K.plottable[i],".DF",j)
+		}
+	}
+	
+	da.arranged0   <- lapply(X=1:length(df.plots.list),FUN=function(x){gridExtra::arrangeGrob(df.plots.list[[x]],left=left.mat.da[indexmat.da[x]],right=right.mat.da[indexmat.da[x]],bottom=bottom.mat.da[indexmat.da[x]],top=top.mat.da[indexmat.da[x]])})
+	da.arranged    <- gridExtra::arrangeGrob(grobs=da.arranged0,layout_matrix=indexmat.da,respect=TRUE)
+	vp             <- grid::viewport(height=grid::unit(0.9,"npc"),width=grid::unit(0.9,"npc"))
+	pdf(file=paste0(tools::file_path_sans_ext(save.as),"_desnsityPlots_DF.pdf"), height=(nrow(indexmat.da)*3),width=(ncol(indexmat.da)*3))
+	grid::grid.draw(da.arranged)
+	dev.off()
+	#### Generate PC density plots.
+	pc.plots.list <- list(); length(pc.plots.list) <- length(plottable$PC)
+	ctr <- 0
+	for(j in 1:ncol(plottable$PC)){
+		for(i in 1:nrow(plottable$PC) ){
+			ctr <- ctr+1
+			if(!plottable$PC[i,j]){
+			#	next
+				plot.ij  <- grid::rectGrob(gp=grid::gpar(col=NA))
+				
+			} else {
+			#	ctr <- ctr+1
+				plot.ij  <- ggplot2::ggplotGrob(ggscatter.dapc(dapc.list[[(K.plottable[i]-1)]], vartype="pc", xax=j, yax=j, col=myCols, legend=F, show.title=F, hideperimeter=T))
+			}
+			pc.plots.list[[ctr]]        <- plot.ij
+			names(pc.plots.list)[[ctr]] <- paste0("K",K.plottable[i],".PC",j)
+		}
+	}
+	pc.arranged0   <- lapply(X=1:length(pc.plots.list),FUN=function(x){gridExtra::arrangeGrob(pc.plots.list[[x]],left=left.mat.pca[indexmat.pc[x]],right=right.mat.pca[indexmat.pc[x]],bottom=bottom.mat.pca[indexmat.pc[x]],top=top.mat.pca[indexmat.pc[x]])})
+	pc.arranged    <- gridExtra::arrangeGrob(grobs=pc.arranged0,layout_matrix=indexmat.pc,respect=TRUE)
+	vp             <- grid::viewport(height=grid::unit(0.9,"npc"),width=grid::unit(0.9,"npc"))
+	pdf(file=paste0(tools::file_path_sans_ext(save.as),"_desnsityPlots_PC.pdf"), height=(nrow(indexmat.pc)*3),width=(ncol(indexmat.pc)*3))
+	grid::grid.draw(pc.arranged)
+	dev.off()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 	if(debug) message("step 3")
 	density.stop<-FALSE
