@@ -524,7 +524,7 @@ run_DAPC <- function(x, format="VCF", kmax=40, coords=NULL, samplenames=NULL,rep
 #' @examples
 #' library(misc.wrappers)
 #' # Define path to input VCF file containing similated data for 500 SNPs from 50 individuals in three populations.
-#' example_vcf_path <- file.path(system.file("extdata", package = "misc.wrappers"),"example_simulated_K3.vcf.gz")
+#' example_vcf_path <- file.path(system.file("extdata", package = "misc.wrappers"),"simulated_K4.vcf.gz")
 #' # Perform DAPC analyses on the simulated dataset for for K=2–10 and 30 replicates of adegenet::find.clusters (explanation below). Save output graphs to a file called "DAPC_example.pdf" in your current directory.
 #' run_DAPC(x=example_vcf_path, kmax=10, reps=30, save.as="DAPC_example.pdf", include.out=c(".pdf"))
 
