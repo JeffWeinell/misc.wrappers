@@ -361,17 +361,17 @@ run_DAPC <- function(x, format="VCF", kmax=40, coords=NULL, samplenames=NULL,rep
 	}
 
 	#pc.biplots.list[[3]]["bp1.pc"][[1]]
-
-
 	#pc.arranged0[[i]]   <- lapply(X=1:length(dapc.mats3[[i]]),FUN=function(x){gridExtra::arrangeGrob(dapc.mats3[[i]][],left=left.mat.pca[indexmat.pc[x]],right=right.mat.pca[indexmat.pc[x]],bottom=bottom.mat.pca[indexmat.pc[x]],top=top.mat.pca[indexmat.pc[x]])})
 	#pc.arranged    <- gridExtra::arrangeGrob(grobs=pc.arranged0,layout_matrix=indexmat.pc,respect=TRUE)
-	#vp             <- grid::viewport(height=grid::unit(0.9,"npc"),width=grid::unit(0.9,"npc"))
-	#pdf(file=paste0(tools::file_path_sans_ext(save.as),"_desnsityPlots_PC.pdf"), height=(nrow(indexmat.pc)*3),width=(ncol(indexmat.pc)*3))
-	#grid::grid.draw(pc.arranged)
-	#dev.off()
-
-
-
+	vp             <- grid::viewport(height=grid::unit(0.95,"npc"),width=grid::unit(0.95,"npc"))
+	pdf(file=paste0(tools::file_path_sans_ext(save.as),"_BiPlots.pdf"), height=(max(sapply(dapc.mats3,nrow))*3),width=(max(sapply(dapc.mats3,ncol))*3))
+	for(i in 1:length(dapc.mats3)){
+		grid::grid.draw(bi.arranged[[i]])
+		if(i < length(dapc.mats3)){
+			grid::grid.newpage()
+		}
+	}
+	dev.off()
 
 	if(debug) message("step 3")
 	density.stop<-FALSE
