@@ -180,7 +180,7 @@ run_fastStructure <- function(x,format="VCF",coords=NULL,samplenames=NULL,kmax=4
 	admixturePlot  <- list(); length(admixturePlot)   <- length(Krange.plot)
 	assignmentPlot <- list(); length(assignmentPlot)  <- length(Krange.plot)
 	if(!is.null(coords)){
-		mapplot        <- list(); length(mapplot)         <- length(Krange.plot)
+		mapplot        <- list(); length(mapplot)     <- length(Krange.plot)
 		x.min <- min((coords[,1]-0.5))
 		x.max <- max((coords[,1]+0.5))
 		y.min <- min((coords[,2]-0.5))

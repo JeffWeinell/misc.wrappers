@@ -144,12 +144,115 @@ run_DAPC <- function(x, format="VCF", kmax=40, coords=NULL, samplenames=NULL,rep
 
 	empty.set <- list(); length(empty.set) <- max.clusters-1
 	dapc.pcabest.list <- admixturePlot <- da.densityPlot <- da.biPlot <- pca.densityPlot <- pca.biPlot <- da.psets <- da.layout.mat<- pca.psets <- pca.layout.mat <- assignmentPlot <- posterior.list <- mapplot <- q.df <- dapc.df <- empty.set
+	
+	###### Trying to replace the big for loop with a small one followed by lapply
+	dapc.list <- empty.set
+	for(K in 2:max.clusters){
+		i=K-1
+		dapc.list[[(i)]] <- adegenet::dapc(genind, grp.mat[,i],n.pca=best.npca[i],n.da=5)
+	}
+	names(dapc.list) <- paste0("K",c(2:max.clusters))
+	grp.assignments.mat <- do.call(cbind,lapply(dapc.list,FUN=function(x){c(x$assign)}))
+	rownames(grp.assignments.mat) <- samplenames
+	colnames(grp.assignments.mat) <- paste0("K",c(2:max.clusters))
+	grp.minsizes <- apply(grp.assignments.mat,MARGIN=2,FUN=function(x){min(table(x))})
+	### The values of K for which density plots can be made because every cluster has at least two individuals
+	if(any((grp.minsizes > 1))){
+		Ks.showdensity <- unname(which((grp.minsizes > 1))+1)
+	}
+	posterior.list <- lapply(dapc.list,function(x){x$posterior})
+	# Number of discriminant functions retained at each value of K
+	Ks.n.da        <- sapply(dapc.list,function(x){x$n.da})
+	# Number of principle components retained at each value of K
+	Ks.n.pca       <- sapply(dapc.list,function(x){x$n.pca})
+	# Data frame holding assignment probability of each individual in each cluster at each K.
+	q.df           <- do.call(rbind,lapply(X=1:length(dapc.list),FUN=function(x){data.frame(indv=rep(rownames(posterior.list[[x]]),ncol(posterior.list[[x]])), pop=rep(colnames(posterior.list[[x]]),each=nrow(posterior.list[[x]])), assignment=c(posterior.list[[x]]),K=(x+1))}))
+
+	#######
+	## Density plots
+	#######
+	## List with two data frames with combinations of K and DF, or K and PC, respectively, for which density can be plotted.
+	plottable  <- plottable.dapc(dapc.list)
+	K.plottable <- as.numeric(rownames(plottable$DF))
+	#layout.da <- plottable$DF
+	#layout.da[plottable$DF]  <- which(plottable$DF)
+	#layout.da[!plottable$DF] <- NA
+	#layout.pc <- plottable$PC
+	#layout.pc[plottable$PC]  <- which(plottable$PC)
+	#layout.pc[!plottable$PC] <- NA
+	#indexmat.da <- matrix(1:length(plottable$DF),ncol=ncol(plottable$DF))
+	#indexmat.pc <- matrix(1:length(plottable$PC),ncol=ncol(plottable$PC))
+	## plots should be added by column, from bottom to top of the gtable.
+	indexmat.da <- apply(matrix(1:length(plottable$DF),ncol=ncol(plottable$DF)),2,rev)
+	indexmat.pc <- apply(matrix(1:length(plottable$PC),ncol=ncol(plottable$PC)),2,rev)
+
+	### Matrices to hold row and colnames of the da and pca gtables that will be produced below.
+	emptymat.da  <- matrix(data=rep("",length(plottable$DF)),ncol=ncol(plottable$DF))
+	emptymat.pca <- matrix(data=rep("",length(plottable$PC)),ncol=ncol(plottable$PC))
+	left.mat.da  <- bottom.mat.da  <- right.mat.da  <- top.mat.da  <-emptymat.da
+	left.mat.pca <- bottom.mat.pca <- right.mat.pca <- top.mat.pca <-emptymat.pca
+	left.mat.da[,1]  <- left.mat.pca[,1] <- rev(paste0("K",K.plottable))
+	right.mat.da[,ncol(plottable$DF)] <- right.mat.pca[,ncol(plottable$PC)] <- rev(paste0("K",K.plottable))
+	bottom.mat.da[nrow(plottable$DF),]  <- colnames(plottable$DF)
+	bottom.mat.pca[nrow(plottable$PC),] <- colnames(plottable$PC)
+	top.mat.da[1,]  <- colnames(plottable$DF)
+	top.mat.pca[1,] <- colnames(plottable$PC)
+	#### Generate DF density plots.
+	df.plots.list <- list(); length(df.plots.list) <- length(plottable$DF)
+	ctr <- 0
+	for(j in 1:ncol(plottable$DF)){
+		for(i in 1:nrow(plottable$DF) ){
+			ctr <- ctr+1
+			if(!plottable$DF[i,j]){
+			#	next
+				plot.ij  <- grid::rectGrob(gp=grid::gpar(col=NA))
+				
+			} else {
+			#	ctr <- ctr+1
+				plot.ij  <- ggplot2::ggplotGrob(ggscatter.dapc(dapc.list[[(K.plottable[i]-1)]], vartype="df", xax=j, yax=j, col=myCols, legend=F, show.title=F, hideperimeter=T))
+			}
+			df.plots.list[[ctr]]        <- plot.ij
+			names(df.plots.list)[[ctr]] <- paste0("K",K.plottable[i],".DF",j)
+		}
+	}
+	da.arranged0   <- lapply(X=1:length(df.plots.list),FUN=function(x){gridExtra::arrangeGrob(df.plots.list[[x]],left=left.mat.da[indexmat.da[x]],right=right.mat.da[indexmat.da[x]],bottom=bottom.mat.da[indexmat.da[x]],top=top.mat.da[indexmat.da[x]])})
+	da.arranged    <- gridExtra::arrangeGrob(grobs=da.arranged0,layout_matrix=indexmat.da,respect=TRUE)
+	vp             <- grid::viewport(height=grid::unit(0.9,"npc"),width=grid::unit(0.9,"npc"))
+	pdf(file=paste0(tools::file_path_sans_ext(save.as),"_desnsityPlots_DF.pdf"), height=(nrow(indexmat.da)*3),width=(ncol(indexmat.da)*3))
+	grid::grid.draw(da.arranged)
+	dev.off()
+	#### Generate PC density plots.
+	pc.plots.list <- list(); length(pc.plots.list) <- length(plottable$PC)
+	ctr <- 0
+	for(j in 1:ncol(plottable$PC)){
+		for(i in 1:nrow(plottable$PC) ){
+			ctr <- ctr+1
+			if(!plottable$PC[i,j]){
+			#	next
+				plot.ij  <- grid::rectGrob(gp=grid::gpar(col=NA))
+				
+			} else {
+			#	ctr <- ctr+1
+				plot.ij  <- ggplot2::ggplotGrob(ggscatter.dapc(dapc.list[[(K.plottable[i]-1)]], vartype="pc", xax=j, yax=j, col=myCols, legend=F, show.title=F, hideperimeter=T))
+			}
+			pc.plots.list[[ctr]]        <- plot.ij
+			names(pc.plots.list)[[ctr]] <- paste0("K",K.plottable[i],".PC",j)
+		}
+	}
+	pc.arranged0   <- lapply(X=1:length(pc.plots.list),FUN=function(x){gridExtra::arrangeGrob(pc.plots.list[[x]],left=left.mat.pca[indexmat.pc[x]],right=right.mat.pca[indexmat.pc[x]],bottom=bottom.mat.pca[indexmat.pc[x]],top=top.mat.pca[indexmat.pc[x]])})
+	pc.arranged    <- gridExtra::arrangeGrob(grobs=pc.arranged0,layout_matrix=indexmat.pc,respect=TRUE)
+	vp             <- grid::viewport(height=grid::unit(0.9,"npc"),width=grid::unit(0.9,"npc"))
+	pdf(file=paste0(tools::file_path_sans_ext(save.as),"_desnsityPlots_PC.pdf"), height=(nrow(indexmat.pc)*3),width=(ncol(indexmat.pc)*3))
+	grid::grid.draw(pc.arranged)
+	dev.off()
+
 	if(debug) message("step 3")
 	density.stop<-FALSE
 	for(K in 2:max.clusters){
 		if(debug) message(paste0("K=",K," step 3.1"))
 		i=(K-1)
-		dapc.pcabest.K      <- adegenet::dapc(genind, grp.mat[,i],n.pca=best.npca[i],n.da=5)
+		#dapc.pcabest.K      <- adegenet::dapc(genind, grp.mat[,i],n.pca=best.npca[i],n.da=5)
+		dapc.pcabest.K      <- dapc.list[[i]]
 		### Fewest number of individuals assigned to any cluster.
 		minsize.grp <- min(table(as.numeric(dapc.pcabest.K$assign)))
 		# switch density.stop to TRUE the first time minsize.grp is 1
@@ -161,12 +264,14 @@ run_DAPC <- function(x, format="VCF", kmax=40, coords=NULL, samplenames=NULL,rep
 		#} else {
 		#	ellipse.size <- 1.5
 		#}
-		dapc.pcabest.list[[i]] <- dapc.pcabest.K
-		posterior           <- dapc.pcabest.K$posterior
-		q.matrix            <- posterior
-		posterior.list[[i]] <- posterior
-		posterior.df        <- data.frame(indv=rep(rownames(posterior),ncol(posterior)), pop=rep(colnames(posterior),each=nrow(posterior)), assignment=c(posterior),K=K)
-		q.df[[i]]           <- posterior.df
+#		dapc.pcabest.list[[i]] <- dapc.pcabest.K
+#		posterior           <- dapc.pcabest.K$posterior
+#		q.matrix            <- posterior
+#		posterior           <- posterior.list[[i]]
+#		posterior.df        <- data.frame(indv=rep(rownames(posterior),ncol(posterior)), pop=rep(colnames(posterior),each=nrow(posterior)), assignment=c(posterior),K=K)
+		q.matrix            <- posterior.list[[i]]
+		posterior.df        <- q.df[[i]]
+#		q.df[[i]]           <- posterior.df
 		##### ggplot scatterplots of discriminant functions
 		###
 	#	scatterPlot.i       <- ggscatter.dapc(dapc.pcabest.K,col=myCols,legend=F,cstar=1,cpoint=4,label=T)
@@ -182,6 +287,7 @@ run_DAPC <- function(x, format="VCF", kmax=40, coords=NULL, samplenames=NULL,rep
 			density.da.list.i <- list(NULL)
 		}
 		if(debug) message(cat("\r",paste0("K=",K," step 3.3")))
+
 		### biplots of discriminant functions
 		if(dapc.pcabest.K$n.da>1){
 			da.pairs.i        <- pset(x=1:dapc.pcabest.K$n.da,min.length=2,max.length=2)
@@ -267,66 +373,68 @@ run_DAPC <- function(x, format="VCF", kmax=40, coords=NULL, samplenames=NULL,rep
 		pca.biPlot[[i]]      <- biplots.pca.list.i
 	} ### END OF LOOP
 	### Plots of DF or PC density for each given K
-	if(debug) message("step 4")
-	da.dens.plotsPerK <- sapply(1:length(da.densityPlot),FUN=function(x){max(lengths(da.densityPlot[[x]]))})
-	if(any(da.dens.plotsPerK>0)){
-		#return(da.densityPlot)
-		da.densityPlot2      <- da.densityPlot[which(da.dens.plotsPerK>0)]
-		#return(da.densityPlot2)
-		da.density.arranged  <- dapc.plot.arrange(da.densityPlot2,variable="DF",pos.x.labs=1,pos.y.labs=2,outer.text=list(NULL,NULL,paste0("For each K, the density distribution of each discriminant function for each population cluster"), NULL))
-#		da.density.arranged  <- dapc.plot.arrange2(x=da.densityPlot,variable="DF",outer.text=list(NULL,NULL,"Density plots of DF1 vs. clusters", NULL))
-#		return(da.density.arranged)
-	} else {
-		da.density.arranged  <- NULL
-	}
-	if(debug) message("step 5")
-	pca.dens.plotsPerK <- sapply(1:length(pca.densityPlot),FUN=function(x){max(lengths(pca.densityPlot[[x]]))})
-	if(any(pca.dens.plotsPerK>0)){
-		pca.densityPlot2 <- pca.densityPlot[which(pca.dens.plotsPerK>0)]
-		#return(pca.densityPlot2)
-		pca.density.arranged <- dapc.plot.arrange(pca.densityPlot2,variable="PC",pos.x.labs=1,pos.y.labs=2,outer.text=list(NULL,NULL,paste0("For each K, the density distribution of each retained principle component for each population cluster"), NULL))
-		#pca.density.arranged  <- dapc.plot.arrange2(x=pca.densityPlot2,variable="PC",outer.text=list(NULL,NULL,"Density plots of PC1 vs. clusters", NULL))
-		#return(pca.density.arranged)
-	} else {
-		pca.density.arranged <- NULL
-	}
-	# rangeK.da.density  <- 2:(length(lengths(da.densityPlot))+1)
-	# n.da.density       <- max(lengths(da.densityPlot),na.rm=TRUE)
-	# rangeK.pca.density <- 2:(length(lengths(pca.densityPlot))+1)
-	# n.pca.density      <- max(lengths(pca.densityPlot),na.rm=TRUE)
-
-# dapc.biplot.arrange(pca.densityPlot,K=NULL,layout.mat=NULL,use.diag=NULL,col.labels.bottom=names.bottom.da[[which(rangeK.da==z)]],row.labels.left=names.left.da[[which(rangeK.da==z)]],outer.text=list(NULL,NULL,paste0("K=",z,"; Biplots of discriminant functions"),NULL))
-	if(debug) message("step 6")
-	# return(da.biPlot)
-	# return(da.layout.mat)
-	# return(list(da.biPlot,da.layout.mat,da.psets))
-	### Plots of DF vs DF or PC vs PC for each pairwise combination, for given K
-#	if(any(lengths(da.biPlot)>0)){
-#		rangeK.da <- c(2:kmax)[which(lengths(da.biPlot)>0)]
-#		n.da               <- sapply(X=da.psets[rangeK.da-1],FUN=max,na.rm=TRUE)
-#		names.bottom.da    <- lapply(X=1:length(n.da),FUN=function(x){paste0("DF",1:(n.da[[x]]-1))})
-#		names.left.da      <- lapply(X=1:length(n.da),FUN=function(x){rev(paste0("DF",2:(n.da[[x]])))})
-#		da.biplot.arranged <- lapply(rangeK.da, FUN=function(k){dapc.biplot.arrange(x=da.biPlot,K=k,layout.mat=da.layout.mat[[k-1]],use.diag=NULL,col.labels.bottom=names.bottom.da[[which(rangeK.da==k)]],row.labels.left=names.left.da[[which(rangeK.da==k)]],outer.text=list(NULL,NULL,paste0("K=",k,"; Biplots of discriminant functions"),NULL))})
-#	} else {
-		da.biplot.arranged <- NULL
-#	}
-	if(debug) message("step 7")
-#	if(any(lengths(pca.biPlot)>0)){
-#		rangeK.pca <- c(2:kmax)[which(lengths(pca.biPlot)>0)]
-#		#n.pca      <- sapply(X=pca.layout.mat[rangeK.pca-1],FUN=max,na.rm=TRUE)
-#		n.pca               <- sapply(X=pca.psets[rangeK.pca-1],FUN=max,na.rm=TRUE)
-#		names(n.pca)        <- paste0("K",rangeK.pca)
-#		names.bottom.pca    <- lapply(X=1:length(n.pca),FUN=function(x){paste0("PC",1:(n.pca[[x]]-1))})
-#		names.left.pca      <- lapply(X=1:length(n.pca),FUN=function(x){rev(paste0("PC",2:(n.pca[[x]])))})
-#		#return(list(rangeK.pca,pca.biPlot,pca.layout.mat,names.bottom.pca,names.left.pca))
-#		pca.biplot.arranged <- lapply(rangeK.pca, FUN=function(k){dapc.biplot.arrange(x=pca.biPlot,K=k,layout.mat=pca.layout.mat[[k-1]],use.diag=NULL,col.labels.bottom=names.bottom.pca[[which(rangeK.pca==k)]],row.labels.left=names.left.pca[[which(rangeK.pca==k)]],outer.text=list(NULL,NULL,paste0("K=",k,"; Biplots of retained principle components"),NULL))})
-#		#pca.biPlot.arranged      <- dapc.biplot.arrange(pca.biPlot)
-#	} else {
-		pca.biplot.arranged <- NULL
-#	}
-	if(debug) message("step 8")
-	dapc.componentPlots <- c(list(pca.density.arranged,da.density.arranged),pca.biplot.arranged,da.biplot.arranged)
 	
+	if(FALSE){
+		if(debug) message("step 4")
+		### Numerical vector with values 0 or a multiple of 9; divide this by 9 to get number of discriminant functions for each value of K.
+		da.dens.plotsPerK <- sapply(1:length(da.densityPlot),FUN=function(x){max(lengths(da.densityPlot[[x]]))})
+		if(any(da.dens.plotsPerK>0)){
+			#return(da.densityPlot)
+			da.densityPlot2      <- da.densityPlot[which(da.dens.plotsPerK>0)]
+			#return(da.densityPlot2)
+			da.density.arranged  <- dapc.plot.arrange(da.densityPlot2,variable="DF",pos.x.labs=1,pos.y.labs=2,outer.text=list(NULL,NULL,paste0("For each K, the density distribution of each discriminant function for each population cluster"), NULL))
+		#	da.density.arranged  <- dapc.plot.arrange2(x=da.densityPlot,variable="DF",outer.text=list(NULL,NULL,"Density plots of DF1 vs. clusters", NULL))
+		#	return(da.density.arranged)
+		} else {
+			da.density.arranged  <- NULL
+		}
+		if(debug) message("step 5")
+		pca.dens.plotsPerK <- sapply(1:length(pca.densityPlot),FUN=function(x){max(lengths(pca.densityPlot[[x]]))})
+		if(any(pca.dens.plotsPerK>0)){
+			pca.densityPlot2 <- pca.densityPlot[which(pca.dens.plotsPerK>0)]
+			#return(pca.densityPlot2)
+			pca.density.arranged <- dapc.plot.arrange(pca.densityPlot2,variable="PC",pos.x.labs=1,pos.y.labs=2,outer.text=list(NULL,NULL,paste0("For each K, the density distribution of each retained principle component for each population cluster"), NULL))
+			#pca.density.arranged  <- dapc.plot.arrange2(x=pca.densityPlot2,variable="PC",outer.text=list(NULL,NULL,"Density plots of PC1 vs. clusters", NULL))
+			#return(pca.density.arranged)
+		} else {
+			pca.density.arranged <- NULL
+		}
+		# rangeK.da.density  <- 2:(length(lengths(da.densityPlot))+1)
+		# n.da.density       <- max(lengths(da.densityPlot),na.rm=TRUE)
+		# rangeK.pca.density <- 2:(length(lengths(pca.densityPlot))+1)
+		# n.pca.density      <- max(lengths(pca.densityPlot),na.rm=TRUE)
+		# dapc.biplot.arrange(pca.densityPlot,K=NULL,layout.mat=NULL,use.diag=NULL,col.labels.bottom=names.bottom.da[[which(rangeK.da==z)]],row.labels.left=names.left.da[[which(rangeK.da==z)]],outer.text=list(NULL,NULL,paste0("K=",z,"; Biplots of discriminant functions"),NULL))
+		if(debug) message("step 6")
+		# return(da.biPlot)
+		# return(da.layout.mat)
+		# return(list(da.biPlot,da.layout.mat,da.psets))
+		### Plots of DF vs DF or PC vs PC for each pairwise combination, for given K
+		if(any(lengths(da.biPlot)>0)){
+			rangeK.da <- c(2:kmax)[which(lengths(da.biPlot)>0)]
+			n.da               <- sapply(X=da.psets[rangeK.da-1],FUN=max,na.rm=TRUE)
+			names.bottom.da    <- lapply(X=1:length(n.da),FUN=function(x){paste0("DF",1:(n.da[[x]]-1))})
+			names.left.da      <- lapply(X=1:length(n.da),FUN=function(x){rev(paste0("DF",2:(n.da[[x]])))})
+			da.biplot.arranged <- lapply(rangeK.da, FUN=function(k){dapc.biplot.arrange(x=da.biPlot,K=k,layout.mat=da.layout.mat[[k-1]],use.diag=NULL,col.labels.bottom=names.bottom.da[[which(rangeK.da==k)]],row.labels.left=names.left.da[[which(rangeK.da==k)]],outer.text=list(NULL,NULL,paste0("K=",k,"; Biplots of discriminant functions"),NULL))})
+		} else {
+			da.biplot.arranged <- NULL
+		}
+		if(debug) message("step 7")
+		if(any(lengths(pca.biPlot)>0)){
+			rangeK.pca <- c(2:kmax)[which(lengths(pca.biPlot)>0)]
+			#n.pca      <- sapply(X=pca.layout.mat[rangeK.pca-1],FUN=max,na.rm=TRUE)
+			n.pca               <- sapply(X=pca.psets[rangeK.pca-1],FUN=max,na.rm=TRUE)
+			names(n.pca)        <- paste0("K",rangeK.pca)
+			names.bottom.pca    <- lapply(X=1:length(n.pca),FUN=function(x){paste0("PC",1:(n.pca[[x]]-1))})
+			names.left.pca      <- lapply(X=1:length(n.pca),FUN=function(x){rev(paste0("PC",2:(n.pca[[x]])))})
+			#return(list(rangeK.pca,pca.biPlot,pca.layout.mat,names.bottom.pca,names.left.pca))
+			pca.biplot.arranged <- lapply(rangeK.pca, FUN=function(k){dapc.biplot.arrange(x=pca.biPlot,K=k,layout.mat=pca.layout.mat[[k-1]],use.diag=NULL,col.labels.bottom=names.bottom.pca[[which(rangeK.pca==k)]],row.labels.left=names.left.pca[[which(rangeK.pca==k)]],outer.text=list(NULL,NULL,paste0("K=",k,"; Biplots of retained principle components"),NULL))})
+			#pca.biPlot.arranged      <- dapc.biplot.arrange(pca.biPlot)
+		} else {
+			pca.biplot.arranged <- NULL
+		}
+		if(debug) message("step 8")
+		dapc.componentPlots <- c(list(pca.density.arranged,da.density.arranged),pca.biplot.arranged,da.biplot.arranged)
+	}
 	### Subset of da density and biplots, for the most important DFs of each K.
 #	scatterPlot.grobsList <- lapply(X=scatterPlot,FUN=ggplot2::ggplotGrob)
 #	scatterPlot.arranged  <- lapply(1:length(scatterPlot.grobsList),FUN=function(x){gridExtra::arrangeGrob(scatterPlot.grobsList[[x]],top=paste0("K=",(x+1)))})
@@ -360,6 +468,7 @@ run_DAPC <- function(x, format="VCF", kmax=40, coords=NULL, samplenames=NULL,rep
 	#### arrange the list of grobs into a gtable
 	#da.density.arranged    <- gridExtra::arrangeGrob(grobs=da.density.grobs,layout_matrix=layout.mat)
 	if(debug) message("step 9")
+	#
 	q.df    <- do.call(rbind,q.df)
 	#dapc.df <- do.call(rbind,dapc.df)
 	if(".Qlog" %in% include.out){
@@ -376,54 +485,41 @@ run_DAPC <- function(x, format="VCF", kmax=40, coords=NULL, samplenames=NULL,rep
 	#	rownames(posterior.bestK) <- samplenames
 	#}
 	#dev.off()
-	### Defining the viewport size
-	vp <- grid::viewport(height=grid::unit(0.95,"npc"),width=grid::unit(0.95,"npc"))
 	if(debug) message("step 10.0")
-	results1            <- list(BICPlot,grp.plot2)
-	if(debug) message("step 10.1")
-	results1.grobs.list <- lapply(results1, FUN=ggplot2::ggplotGrob)
-	if(debug) message("step 10.2")
-	results1.gtable     <- lapply(X=results1.grobs.list,FUN=gridExtra::arrangeGrob,vp=vp)
-	if(debug) message("step 10.3")
-	results2 <- dapc.componentPlots
-	if(debug) message("step 10.4")
+	### Defining the viewport size and creating lists of plots
+	vp                  <- grid::viewport(height=grid::unit(0.95,"npc"),width=grid::unit(0.95,"npc"))
+	#resultsA.grobs.list <- lapply(list(BICPlot, grp.plot2), FUN=ggplot2::ggplotGrob)
+	resultsA            <- lapply(X=lapply(list(BICPlot, grp.plot2), FUN=ggplot2::ggplotGrob), FUN=gridExtra::arrangeGrob, vp=vp)
 	if(!is.null(coords)){
-		results3 <- c(admixturePlot,assignmentPlot,mapplot)
+		resultsB <- lapply(X=lapply(c(admixturePlot, assignmentPlot,mapplot), FUN=ggplot2::ggplotGrob), FUN=gridExtra::arrangeGrob,vp=vp)
 	} else {
-		results3 <- c(admixturePlot,assignmentPlot)
+		resultsB <- lapply(X=lapply(c(admixturePlot, assignmentPlot), FUN=ggplot2::ggplotGrob), FUN=gridExtra::arrangeGrob,vp=vp)
 	}
-	if(debug) message("step 10.5")
-	results3.grobs.list <- lapply(results3, FUN=ggplot2::ggplotGrob)
-	if(debug) message("step 10.6")
-	results3.gtable     <- lapply(X=results3.grobs.list,FUN=gridExtra::arrangeGrob,vp=vp)
-	if(debug) message("step 10.7")
-	
-	# result <- c(results1.gtable,results2,results3.gtable)
-	result <- c(results1.gtable,results3.gtable)
-	
+	results1   <- c(resultsA, resultsB)
 	if(debug) message("step 11")
 	if(".pdf" %in% include.out){
 		pdf(height=6,width=10,file=save.as,onefile=TRUE)
-		for(i in 1:length(result)){
-			grid::grid.draw(result[[i]])
-			if(i < length(result)){
+		for(i in 1:length(results1)){
+			grid::grid.draw(results1[[i]])
+			if(i < length(results1)){
 				grid::grid.newpage()
 			}
 		}
 		dev.off()
 		### Save the PC and DF density and biplots to a separate PDF, with height and width determined by number of rows and columns of plots.
 		if(FALSE){
+			res2.save.as <- paste0(tools::file_path_sans_ext(save.as),"_plots2.pdf")
 			pdf(height=res2.height,width=res2.width,file=res2.save.as, onefile=TRUE)
-			for(i in 1:length(results2)){
-				grid::grid.draw(results2[[i]])
-				if(i < length(results2)){
+			for(i in 1:length(dapc.componentPlots)){
+				grid::grid.draw(dapc.componentPlots[[i]])
+				if(i < length(dapc.componentPlots)){
 					grid::grid.newpage()
 				}
 			}
 			dev.off()
 		}
 	}
-	result
+	results1
 }
 #' @examples
 #' library(misc.wrappers)
@@ -2003,19 +2099,55 @@ sim.vcf <- function(x=NULL, save.as=NULL, RA.probs=NULL, n.ind=NULL, n.snps=NULL
 	# If save.as is null, then the object returned will always report "zero missing data", although missing data may exists. Writing and rereading the VCF removes this vcfR bug. May need to use NA in gt matrix of vcfR.
 	vcf.sim
 }
-#' @examples
-#' library(misc.wrappers)
-#' # Define path to example input VCF containing 5000 variants and 100 individuals.
-#' vcf.path <- file.path(system.file("extdata", package = "misc.wrappers"),"example.vcf.gz")
+##' @examples
+##' library(misc.wrappers)
+##' # Define path to example input VCF containing 5000 variants and 100 individuals.
+##' vcf.path <- file.path(system.file("extdata", package = "misc.wrappers"),"example.vcf.gz")
+##' 
+##' # Simulate a dataset of 1000 variants and 50 individuals in one population, and save the simulated dataset in the current directory as "example_simulated_K2.vcf.gz"
+##' simK2 <- sim.vcf(x=vcf.path,save.as="example_simulated_K2.vcf.gz",n.ind=100,n.snps=1000,K=2)
+##' 
+##' # Simulate a dataset of 1000 variants and 50 individuals in one population, and save the simulated dataset in the current directory as "example_simulated_K3.vcf.gz"
+##' simK3<- sim.vcf(x=vcf.path,save.as="example_simulated_K3.vcf.gz",n.ind=100,n.snps=1000,K=3)
+##' 
+##' # Simulate a dataset of 1000 variants and 50 individuals in one population, and save the simulated dataset in the current directory as "example_simulated_K4.vcf.gz"
+##' simK4 <- sim.vcf(x=vcf.path,save.as="example_simulated_K4.vcf.gz",n.ind=100,n.snps=1000,K=4)
+
+#' @title Components plottable
 #' 
-#' # Simulate a dataset of 1000 variants and 50 individuals in one population, and save the simulated dataset in the current directory as "example_simulated_K2.vcf.gz"
-#' simK2 <- sim.vcf(x=vcf.path,save.as="example_simulated_K2.vcf.gz",n.ind=100,n.snps=1000,K=2)
+#' Creates a list with two logical data frames, the first with K vs. DF, and the second with K vs. PC, with TRUE values indicating that it is possible to make a density plot for K=rowname(m) vs. DF=colname(n).
 #' 
-#' # Simulate a dataset of 1000 variants and 50 individuals in one population, and save the simulated dataset in the current directory as "example_simulated_K3.vcf.gz"
-#' simK3<- sim.vcf(x=vcf.path,save.as="example_simulated_K3.vcf.gz",n.ind=100,n.snps=1000,K=3)
-#'
-#' # Simulate a dataset of 1000 variants and 50 individuals in one population, and save the simulated dataset in the current directory as "example_simulated_K4.vcf.gz"
-#' simK4<- sim.vcf(x=vcf.path,save.as="example_simulated_K4.vcf.gz",n.ind=100,n.snps=1000,K=4)
-#' 
+#' @param x list of DAPC objects
+#' @return Returns a list with two data frames, each with rownames indicating K for which density can be plotted (because smallest cluster size has > 1 individual). Columns show names of discriminat functions (first data frame) or principle components (second data frame). Values are TRUE or FALSE.
+#' The function is useful for creating layout matrices for plotting all possible density plots.
+#' @export plottable.dapc
+plottable.dapc <- function(x){
+	grps.mat           <- do.call(cbind,lapply(x,FUN=function(j){c(j$assign)}))
+	colnames(grps.mat) <- paste0("K", (1:length(x))+1)
+	grp.minsizes       <- apply(grps.mat, MARGIN=2,FUN=function(x){min(table(x))})
+	if(any((grp.minsizes > 1))){
+		Ks.plottable <- unname(which((grp.minsizes > 1))+1)
+	} else {
+		return(NULL)
+	}
+	result <- list(); length(result) <- 2
+	for(i in 1:2){
+		if(i==1){
+			Ks.n <- sapply(x,function(x){x$n.da})
+			stat <- "DF"
+		}
+		if(i==2){
+			Ks.n <- sapply(x,function(x){x$n.pc})
+			stat="PC"
+		}
+		Ks.df2plot              <- lapply(X=Ks.plottable,FUN=function(x){A=(1:Ks.n[(x-1)]); names(A)=paste0(stat,(1:Ks.n[(x-1)])); as.data.frame(t(A))})
+		Ks.df2plot.df           <- as.data.frame(data.table::rbindlist(Ks.df2plot,fill=TRUE))
+#		rownames(Ks.df2plot.df) <- paste0("K",Ks.plottable)
+		rownames(Ks.df2plot.df) <- Ks.plottable
+		result[[i]] <- !is.na(Ks.df2plot.df)
+	}
+	names(result) <- c("DF","PC")
+	result
+}
 
 
