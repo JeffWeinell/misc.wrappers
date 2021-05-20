@@ -315,22 +315,17 @@ run_DAPC <- function(x, format="VCF", kmax=40, coords=NULL, samplenames=NULL,rep
 		pc.biplots.list[[i]] <- lapply(X=1:nrow(pca.psets2[[i]]), FUN=function(x){ggplot2::ggplotGrob(ggscatter.dapc(dapc.list[[(K-1)]], vartype="pc", xax=pca.psets2[[i]][x,1], yax=pca.psets2[[i]][x,2], col=myCols, legend=F, show.title=F, hideperimeter=T,cellipse=0))})
 		names(pc.biplots.list[[i]]) <- c(pcmats2[[i]])[!is.na(c(pcmats2[[i]]))]
 	}
-	
 	### Removes rows and columns that are completely filled with NAs
 	dapc.mats2 <- dapc.mats
 	for(i in 1:length(dapc.mats2)){
 		dapc.mats2[[i]] <- unname(dapc.mats[[i]][!apply(dapc.mats[[i]],MARGIN=1,FUN=function(x){all(is.na(x))}),!apply(dapc.mats[[i]],MARGIN=2,FUN=function(x){all(is.na(x))})])
 	}
-
 	### Reverse the order of rows so that axis labels (DF and PC components) start at lower left.
 	dapc.mats3 <- lapply(dapc.mats2,apply,2,rev)
-
 	### Index matrix
 	index.bi <- lapply(1:length(dapc.mats3),FUN=function(x){ apply(matrix(data=c(1:length(dapc.mats3[[x]])) ,ncol=ncol(dapc.mats3[[x]])),2,rev)  })
-
 	### Emptry matrices
 	empty.bi <- lapply(1:length(dapc.mats3),FUN=function(x){matrix(data=rep("",length(dapc.mats3[[x]])),ncol=ncol(dapc.mats3[[x]]))})
-
 	### Arrange the biplots into a gtable for each K
 	Ks.n.da.bi  <- Ks.n.da[which(Ks.n.da>1)]
 	Ks.n.pca.bi <- Ks.n.pca[which(Ks.n.pca>1)]
@@ -351,13 +346,19 @@ run_DAPC <- function(x, format="VCF", kmax=40, coords=NULL, samplenames=NULL,rep
 			if(is.na(plot.name)){
 				plot.ij <- grid::rectGrob(gp=grid::gpar(col=NA))
 			} else {
-				plot.ij <- pc.biplots.list[[i]][plot.name][[1]]
+				if(plot.name %in% names(pc.biplots.list[[i]])){
+					plot.ij <- pc.biplots.list[[i]][plot.name][[1]]
+				} else {
+					if(plot.name %in% names(df.biplots.list[[i]])){
+						plot.ij <- df.biplots.list[[i]][plot.name][[1]]
+					}
+				}
 			}
 			bi.arranged0[[i]][[j]] <- gridExtra::arrangeGrob(plot.ij,left=left.mat.bi[[i]][which(index.bi[[i]]==j)],right=right.mat.bi[[i]][which(index.bi[[i]]==j)],bottom=bottom.mat.bi[[i]][which(index.bi[[i]]==j)],top=top.mat.bi[[i]][which(index.bi[[i]]==j)])
 		}
-		bi.arranged[[i]] <- gridExtra::arrangeGrob(grobs=bi.arranged0[[i]],layout_matrix=index.bi,respect=TRUE)
+		bi.arranged[[i]] <- gridExtra::arrangeGrob(grobs=bi.arranged0[[i]],layout_matrix=index.bi[[i]],respect=TRUE)
+		#test <- gridExtra::arrangeGrob(grobs=bi.arranged0[[i]],layout_matrix=index.bi,respect=TRUE)
 	}
-	
 
 	#pc.biplots.list[[3]]["bp1.pc"][[1]]
 
