@@ -291,7 +291,7 @@ create.outer <- function(coords,method=2,buffer.adj=0,coords.radius=0.01,max.fra
 #' 
 #' Returns the set of input coordinates that intersect with land. Land is considered to incude all areas covered by a feature in the rnaturalearth::ne_countries 10 meter resolution dataset. Input coordinates are are assumed to be WGS84 (EPSG:4326)
 #' 
-#' @param x Matrix or data frame with coordinates as longitude and latitude columns.
+#' @param x Matrix or data frame with longitude and latitude [decimal degree] in the first two columns, respectively.
 #' @param return.as Character string with class to use for object returned. Default "data.frame". Can also be "matrix" or "SP" (SpatialPoints).
 #' @return An object with class equal to the value of 'return.as', which contains the subset of input points that occur on land, or more specifically, not in an ocean.
 #' @export points.on.land
@@ -307,10 +307,11 @@ points.on.land <- function(x,return.as="data.frame"){
 			stop("'x' must be a matrix or data.frame containing columns with longitude and latitude")
 		}
 	}
-	colnames(x2) <- c("longitude","latitude")
-	mode(x2[,"longitude"]) <- "numeric"
-	mode(x2[,"latitude"]) <- "numeric"
-	xsp <- sp::SpatialPoints(x2)
+	x3 <- x2[,1:2]
+	colnames(x3) <- c("longitude","latitude")
+	mode(x3[,"longitude"]) <- "numeric"
+	mode(x3[,"latitude"]) <- "numeric"
+	xsp <- sp::SpatialPoints(x3)
 	suppressWarnings(raster::crs(world.land) <- raster::crs(xsp) <- crs.string)
 	matches.df <- sp::over(xsp, world.land)
 	landtest   <- apply(matches.df,MARGIN=1,FUN=function(m){!all(is.na(m))})
@@ -330,51 +331,140 @@ points.on.land <- function(x,return.as="data.frame"){
 	}
 }
 
-#' @title Randomly sample points within a random-centered circle.
+#' @title Sample points in a random-centered area or tethered group of areas.
 #' 
-#' Sample points in an area with specified radius and center sampled within an extent, with the optional condition that returned points must be over land.
-#' Note: Currently, multiple, adjacent sampling areas not implemented.
+#' This function provides a way to randomly generate one or more groups of points, such that groups are non-overlapping, and options for controlling proximity, group sizes, and optional requirement that points occur over land.
+#' At present areas are circles projected onto a euclidean plane.
 #' 
-#' @param r radius of area to sample within, in decimal degrees, or a numerical vector with radii of adjacent sampling areas if n.adj > 1.
+#' @param r Number specifying the radius of group areas, in decimal degrees, or a numerical vector with min and max values of uniform sampling distribution from which radii of areas will be drawn.
 #' @param size Number of points to return, or a numerical vector with number of points to return from each adjacent polygon if n.adj=1.
 #' @param return.as Character string with class to use for object returned. Default "data.frame". Can also be "matrix" or "SP" (SpatialPoints).
 #' @param limits Numerical vector of length four defining the limits for the sampling area's center, with longitude (minimum), longitude (maximum), latitude (minimum), latitude (maximum). Default is c(-180,180,-90,90). Points other than the center of the sampling area can fall outside of this limit.
 #' @param over.land Logical indicating whether or not all points in the returned data frame should occur over land. Default TRUE.
-#' @param n.adj Not yet implemented. Number with how many adjacent, nonoverlapping areas to use for the 
-#' @param d.adj Not yet implemented. Number controlling the distance between the centers of a pair of areas, as a function of the pair's radii. Default 1.
-#' @return An object with class equal to the value of 'return.as', which contains the subset of input points that occur on land, or more specifically, not in an ocean.
+#' @param n.grp Not yet implemented. Number with how many adjacent, nonoverlapping areas to use for the 
+#' @param d.grp Number controlling the distance between the centers of a pair of areas, as a function of the pair's radii. Default 1, which would allow sample regions to nearly coincide. Future option may allow for a pairwise distance matrix.
+#' @param plot Whether or not the points should be plotted on a low-resolution land map. The map is used is the rnaturalearth countries map, 110 meter resolution.
+#' @return An object with class equal to the value of 'return.as' and containing the set of points that meet the specified sampling requirements. If return.as='matrix' or 'data.frame', the columns are 'X' (for longitude), 'Y' (for latitude), and 'group' (all 1 if 'n.grp'=1).
 #' @export rcoords
-rcoords <- function(r,size,return.as="data.frame",limits=c(-180,180,-90,90),over.land=TRUE,n.adj){
-	result.temp        <- data.frame(NULL)
-	while(nrow(result.temp)  < size){
+rcoords <- function(r, size, return.as="data.frame", limits=c(-180,180,-90,90), over.land=TRUE, n.grp=1, d.grp=1,plot=FALSE){
+	#result.temp        <- data.frame(NULL)
+	PASS=FALSE
+	miter <- 100
+	ctr   <- 0
+	# Find group centers over land
+	#if(over.land){
+	#	intial <- data.frame(NULL)
+	#	while(nrow(intial) < size){
+	#		intial <- data.frame(NULL)
+	#		### Sample a point on earth to use as the center of the sampling circle
+	#		sample.center  <- c(x=sample(seq(limits[1],to=limits[2],by=0.01),size=1), y=sample(seq(limits[3],to=limits[4],by=0.01),size=1))
+	#		
+	#	}
+	#}
+	while(!PASS){
+		ctr <- ctr + 1
+		if(ctr > miter){
+			stop(paste("after",miter,"attemps, failed to find points that pass conditions. ctr=",ctr,"ctr2=",ctr2))
+		}
 		### Clear the data frame if too few points on land during previous attempt
-		result.temp         <- data.frame(NULL)
-		### Sample a point on earth to use as the center of the sampling circle
-		sample.center  <- c(x=sample(seq(limits[1],to=limits[2],by=0.01),size=1), y=sample(seq(limits[3],to=limits[4],by=0.01),size=1))
+		#result.temp         <- data.frame(NULL)
+		initial <- FALSE
+		### Find group centers that pass conditions
+		ctr2 <- 0
+		while(!initial){
+			ctr2 <- ctr2 + 1
+			if(ctr2 > miter){
+				stop(paste("failed to initialize after",miter,"attemps. ctr=",ctr,"ctr2=",ctr2))
+			}
+			sample.center  <- c(x=sample(seq(limits[1],to=limits[2],by=0.01),size=1), y=sample(seq(limits[3],to=limits[4],by=0.01),size=1))
+			if(n.grp>1){
+				d.grps <- (max(r)*(2*d.grp)):(max(r)*(3*d.grp))
+				group.centers <- rx2y2(p1=sample.center,d=d.grps,n=n.grp)
+			} else {
+				group.centers <- sample.center
+			}
+			if(over.land){
+				if(length(points.on.land(x=group.centers)[,1]) < n.grp){
+					next
+				}
+			}
+			initial <- TRUE
+		}
+#		### Sample a point on earth to use as the center of the sampling circle (if n.grp=1), or group center if n.grp>1
+#		sample.center  <- c(x=sample(seq(limits[1],to=limits[2],by=0.01),size=1), y=sample(seq(limits[3],to=limits[4],by=0.01),size=1))
+#		if(n.grp>1){
+#			d.grps <- (max(r)*2):(max(r)*3)
+#			group.centers <- rx2y2(p1=sample.center,d=d.grps,n=n.grp)
+#		} else {
+#			group.centers <- sample.center
+#		}
+#		if(over.land){
+#			if(length(points.on.land(x=group.centers)) < n.grp){
+#				next
+#			}
+#		}
+		### I may change this such that sum of group sizes is a parameter, and another parameter will determine relative sizes of groups from which absolute group sizes will be calculated.
+		grp.sizes <- sample(seq(min(size),to=max(size),length.out= max(2,diff(range(size)))), n.grp, replace=TRUE)
 		### Create a SpatialPolygons object to sample within
-		sample.area.sp <- sampSurf::spCircle(radius=r,centerPoint=sample.center)[[1]]
-		### Convert the SpatialPolygons object to an SF object
-		sample.area.sf <- sf::st_as_sf(sample.area.sp)
-		### Sample within 'sample.area.sf' four times as many points as requested by 'size' argument.
-		samples.sf.temp  <- sf::st_sample(x= sample.area.sf,size=(size*4))
-		### Hold sampled coordinates as data matrix
-		samples.mat.temp <- sf::st_coordinates(samples.sf.temp)
-		### Hold sampled coordinates as data frame
-		samples.df.temp <- as.data.frame(samples.mat.temp)
-		### Plot samples on map
-		# ggplot2::ggplot(data = world) + ggplot2::geom_sf() + ggplot2::geom_point(data = samples.df.temp, ggplot2::aes(x = X, y = Y), size = 4, shape = 23, fill = "darkred") # + coord_sf(xlim = c(-90, -78), ylim = c(24.5, 40), expand = FALSE)
+		sample.area.sp <- lapply(1:n.grp, FUN=function(x){sampSurf::spCircle(radius=r,centerPoint=c(x=group.centers[x,1],y=group.centers[x,2]))[[1]]})
+		### Convert each SpatialPolygons object to an SF object
+	#	sample.area.sf <- sf::st_as_sf(sample.area.sp)
+		sample.area.sf <- lapply(X=1:n.grp,FUN=function(x){sf::st_as_sf(sample.area.sp[[x]])})
+		### Sample within each area. If points must be over land, sample four times as many points as requested by 'size' argument.
+		if(over.land){
+			samples.sf.temp  <- lapply(X=1:n.grp,FUN=function(x){sf::st_sample(x=sample.area.sf[[x]], size= (grp.sizes[x]*4))})
+		} else {
+			samples.sf.temp  <- lapply(X=1:n.grp,FUN=function(x) {sf::st_sample(x= sample.area.sf[[x]],size=grp.sizes[x])})
+		}
+		### Alternative sampling process
+	#	samples2.sf.temp  <- sf::st_sample(x= sample.area.sf,kappa=10,mu=(size*4),scale=0.2,type="Thomas")      # spatstat.core::rThomas(kappa=10,scale=0.2, mu=(size*4),win=sample.area.sf)
+		### Hold sampled coordinates as a list of data matrices
+		samples.mat.temp <- lapply(X=1:n.grp,FUN=function(x){sf::st_coordinates(samples.sf.temp[[x]])})
+		### Hold sampled coordinates as a list of data frames, and include a column in each data frame to indicate group assignment
+		samples.df.temp <- lapply(X=1:n.grp,FUN=function(x){data.frame(X=samples.mat.temp[[x]][,1],Y=samples.mat.temp[[x]][,2],group=x)})
+		### Plot samples on map (for debugging)
+		# world.land <- rnaturalearth::ne_countries(scale=110,returnclass="sf")
+		# ggplot2::ggplot(data = world.land) + ggplot2::geom_sf() + ggplot2::theme_classic() + ggplot2::geom_point(data = samples.df.temp, ggplot2::aes(x = X, y = Y), size = 2, shape = 21, fill = "darkred") # + coord_sf(xlim = c(-90, -78), ylim = c(24.5, 40), expand = FALSE)
 		if(over.land){
 			### Get subset of sampled coordinates that fall on land
-			samples.land.temp <- points.on.land(x=samples.mat.temp)
-			samples.temp      <- samples.land.temp
+			#samples.temp <- lapply(X=1:n.grp,FUN=function(x){points.on.land(x=samples.mat.temp[[x]])})
+			samples.temp <- lapply(X=1:n.grp,FUN=function(x){points.on.land(x=samples.df.temp[[x]])})
+			#samples.land.temp <- points.on.land(x=samples.df.temp)
 		} else {
 			samples.temp           <- samples.df.temp
-			colnames(samples.temp) <- c("longitude","latitude")
+			# colnames(samples.temp) <- c("longitude","latitude")
 		}
-		result.temp <- rbind(result.temp,samples.temp)
+		n.grp.pass  <- sapply(samples.temp,nrow)
+		#sapply(n.grp.pass,funct)
+		if(all(n.grp.pass >= grp.sizes)){
+			PASS=TRUE
+		} else {
+			PASS=FALSE
+		}
+		# result.temp <- rbind(result.temp,samples.temp)
 	}
-	result <- result.temp[sample(x=1:nrow(result.temp),size=size),]
+	result0 <- lapply(1:n.grp,FUN=function(x){samples.temp[[x]][sample(x=1:nrow(samples.temp[[x]]), size=grp.sizes[x], replace=FALSE),]}) # samples.temp[[x]]
+	result  <- do.call(rbind,result0)
+	mode(result[,"group"]) <- "character"
+	if(plot){
+		world.land  <- rnaturalearth::ne_countries(scale=110,returnclass="sf")
+		result.df2plot   <- result
+		exf  <- 1.5
+		xlim <- rangeBuffer(result.df2plot[,1],exf*1.5)
+		ylim <- rangeBuffer(result.df2plot[,2],exf)
+		result.plot <- ggplot2::ggplot(data = world.land) + ggplot2::geom_sf() + ggplot2::theme_classic() + ggplot2::geom_point(data = result.df2plot, ggplot2::aes(x = X, y = Y, fill=group), size = 2, shape = 21) + ggplot2::coord_sf(xlim = xlim, ylim = ylim ) + ggplot2::theme(panel.border = ggplot2::element_rect(color = "black", fill=NA, size=1))
+		print(result.plot)
+	}
+	#result <- result.temp[sample(x=1:nrow(result.temp),size=size),]
+	if(return.as=="matrix"){
+		result <- data.matrix(result)
+	}
+	if(return.as=="SP"){
+		result <- list(sp::SpatialPoints(result),sample.area.sp)
+		#result <- sp::SpatialPoints(result)
+	}
 	result
+
 }
 #' @examples
 #' library(misc.wrappers)
@@ -397,3 +487,25 @@ rangeBuffer <- function(x,f){
 	res <- c((Rx[1]-Bx),(Rx[2]+Bx))
 	res
 }
+
+#' @title Random point conditioned on distance
+#' 
+#' Return x and y coordinates of random points conditional on a distance or range of distances from input point.
+#' 
+#' @param p1 Numerical vector with decimal longitude and latitude of first point.
+#' @param d Number specifying the distance (in decimal degrees) between the new point and the point with coordinates 'x1y1', or, a numerical vector, in which case the distance from x1y1 will be randomly drawn from values in the range of d.
+#' @param n Number of points to return. Default 1.
+#' @return Numerical vector with longitude and latitude of new point.
+#' @export rx2y2
+rx2y2 <- function(p1,d,n=1){
+	# direction (angle) of new point(s) relative to p1
+	rtheta <- sample(seq(from=0,to=(2*pi),length.out=(n*100)),size=n,replace=FALSE)
+	# distance(s) from p1
+	rd     <- sample(seq(from=min(d),to=max(d),length.out=(n*100)),size=n,replace=FALSE)
+	xn <- (rd*cos(rtheta)) + p1[1]
+	yn <- (rd*sin(rtheta)) + p1[2]
+	data.frame(x=xn,y=yn)
+}
+# rx2y2(x1y1=centerpoint,d=d.grp)
+
+

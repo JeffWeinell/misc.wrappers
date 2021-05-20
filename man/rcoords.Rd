@@ -2,10 +2,10 @@
 % Please edit documentation in R/create.outer.R
 \name{rcoords}
 \alias{rcoords}
-\title{Randomly sample points within a random-centered circle.
+\title{Sample points in a random-centered area or tethered group of areas.
 
-Sample points in an area with specified radius and center sampled within an extent, with the optional condition that returned points must be over land.
-Note: Currently, multiple, adjacent sampling areas not implemented.}
+This function provides a way to randomly generate one or more groups of points, such that groups are non-overlapping, and options for controlling proximity, group sizes, and optional requirement that points occur over land.
+At present areas are circles projected onto a euclidean plane.}
 \usage{
 rcoords(
   r,
@@ -13,11 +13,13 @@ rcoords(
   return.as = "data.frame",
   limits = c(-180, 180, -90, 90),
   over.land = TRUE,
-  n.adj
+  n.grp = 1,
+  d.grp = 1,
+  plot = FALSE
 )
 }
 \arguments{
-\item{r}{radius of area to sample within, in decimal degrees, or a numerical vector with radii of adjacent sampling areas if n.adj > 1.}
+\item{r}{Number specifying the radius of group areas, in decimal degrees, or a numerical vector with min and max values of uniform sampling distribution from which radii of areas will be drawn.}
 
 \item{size}{Number of points to return, or a numerical vector with number of points to return from each adjacent polygon if n.adj=1.}
 
@@ -27,16 +29,18 @@ rcoords(
 
 \item{over.land}{Logical indicating whether or not all points in the returned data frame should occur over land. Default TRUE.}
 
-\item{n.adj}{Not yet implemented. Number with how many adjacent, nonoverlapping areas to use for the}
+\item{n.grp}{Not yet implemented. Number with how many adjacent, nonoverlapping areas to use for the}
 
-\item{d.adj}{Not yet implemented. Number controlling the distance between the centers of a pair of areas, as a function of the pair's radii. Default 1.}
+\item{d.grp}{Number controlling the distance between the centers of a pair of areas, as a function of the pair's radii. Default 1, which would allow sample regions to nearly coincide. Future option may allow for a pairwise distance matrix.}
+
+\item{plot}{Whether or not the points should be plotted on a low-resolution land map. The map is used is the rnaturalearth countries map, 110 meter resolution.}
 }
 \value{
-An object with class equal to the value of 'return.as', which contains the subset of input points that occur on land, or more specifically, not in an ocean.
+An object with class equal to the value of 'return.as' and containing the set of points that meet the specified sampling requirements. If return.as='matrix' or 'data.frame', the columns are 'X' (for longitude), 'Y' (for latitude), and 'group' (all 1 if 'n.grp'=1).
 }
 \description{
-Randomly sample points within a random-centered circle.
+Sample points in a random-centered area or tethered group of areas.
 
-Sample points in an area with specified radius and center sampled within an extent, with the optional condition that returned points must be over land.
-Note: Currently, multiple, adjacent sampling areas not implemented.
+This function provides a way to randomly generate one or more groups of points, such that groups are non-overlapping, and options for controlling proximity, group sizes, and optional requirement that points occur over land.
+At present areas are circles projected onto a euclidean plane.
 }
