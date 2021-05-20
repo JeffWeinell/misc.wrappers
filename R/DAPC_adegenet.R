@@ -300,7 +300,6 @@ run_DAPC <- function(x, format="VCF", kmax=40, coords=NULL, samplenames=NULL,rep
 	pca.psets2 <- lapply(which(lengths(pca.psets)>0), FUN=function(x){pca.psets[[x]][order(c(pca.psets[[x]][,1]),c( pca.psets[[x]][,2])),]})
 	names(pca.psets2) <- which(lengths(pca.psets)>0)+1
 
-
 	#### Generate DF biplots.
 	df.biplots.list <- list(); length(df.biplots.list) <- length(da.psets2)
 	for(i in 1:length(da.psets2)){
@@ -309,7 +308,6 @@ run_DAPC <- function(x, format="VCF", kmax=40, coords=NULL, samplenames=NULL,rep
 		# Names matching those used in 'dapc.mats'
 		names(df.biplots.list[[i]]) <- c(t(damats2[[i]]))[!is.na(c(t(damats2[[i]])))]
 	}
-	
 	#### Generate PC biplots.
 	pc.biplots.list <- list(); length(pc.biplots.list) <- length(pca.psets2)
 	for(i in 1:length(pca.psets2)){
@@ -317,68 +315,59 @@ run_DAPC <- function(x, format="VCF", kmax=40, coords=NULL, samplenames=NULL,rep
 		pc.biplots.list[[i]] <- lapply(X=1:nrow(pca.psets2[[i]]), FUN=function(x){ggplot2::ggplotGrob(ggscatter.dapc(dapc.list[[(K-1)]], vartype="pc", xax=pca.psets2[[i]][x,1], yax=pca.psets2[[i]][x,2], col=myCols, legend=F, show.title=F, hideperimeter=T,cellipse=0))})
 		names(pc.biplots.list[[i]]) <- c(pcmats2[[i]])[!is.na(c(pcmats2[[i]]))]
 	}
+	
+	### Removes rows and columns that are completely filled with NAs
+	dapc.mats2 <- dapc.mats
+	for(i in 1:length(dapc.mats2)){
+		dapc.mats2[[i]] <- unname(dapc.mats[[i]][!apply(dapc.mats[[i]],MARGIN=1,FUN=function(x){all(is.na(x))}),!apply(dapc.mats[[i]],MARGIN=2,FUN=function(x){all(is.na(x))})])
+	}
 
+	### Reverse the order of rows so that axis labels (DF and PC components) start at lower left.
+	dapc.mats3 <- lapply(dapc.mats2,apply,2,rev)
 
+	### Index matrix
+	index.bi <- lapply(1:length(dapc.mats3),FUN=function(x){ apply(matrix(data=c(1:length(dapc.mats3[[x]])) ,ncol=ncol(dapc.mats3[[x]])),2,rev)  })
 
-	ctr <- 0
-	for(j in 1:ncol(plottable$DF)){
-		for(i in 1:nrow(plottable$DF) ){
-			ctr <- ctr+1
-			if(!plottable$DF[i,j]){
-			#	next
-				plot.ij  <- grid::rectGrob(gp=grid::gpar(col=NA))
-				
+	### Emptry matrices
+	empty.bi <- lapply(1:length(dapc.mats3),FUN=function(x){matrix(data=rep("",length(dapc.mats3[[x]])),ncol=ncol(dapc.mats3[[x]]))})
+
+	### Arrange the biplots into a gtable for each K
+	Ks.n.da.bi  <- Ks.n.da[which(Ks.n.da>1)]
+	Ks.n.pca.bi <- Ks.n.pca[which(Ks.n.pca>1)]
+	# initializing lists of matrices that will hold the names along axes
+	left.mat.bi <- right.mat.bi <- bottom.mat.bi <- top.mat.bi <- empty.bi
+	for(i in 1:length(dapc.mats3)){
+		left.mat.bi[[i]][,1]   <- rev(c("",paste0("PC",2:Ks.n.pca.bi[i])))
+		right.mat.bi[[i]][,ncol(right.mat.bi[[i]])]  <- rev(c(paste0("DF", 1:(Ks.n.da.bi[i]-1)),rep("",(nrow(right.mat.bi[[i]])-(Ks.n.da.bi[i]-1)))))
+		bottom.mat.bi[[i]][nrow(bottom.mat.bi[[i]]),] <- c(rep("",(ncol(bottom.mat.bi[[i]])- (Ks.n.da.bi[i]-1) )),paste0("DF",2:(Ks.n.da.bi[i])))
+		top.mat.bi[[i]][1,]  <- c(paste0("PC", (1:(Ks.n.pca.bi[i]-1))), rep("",(ncol(top.mat.bi[[i]])-(Ks.n.pca.bi[i]-1))))
+	}
+	bi.arranged0 <- list(); length(bi.arranged0) <- length(dapc.mats3)
+	bi.arranged  <- list(); length(bi.arranged) <- length(dapc.mats3)
+	### In this loop, i= table of plots for a specific K, and j=the index number in the matrix 'index.bi'.
+	for(i in 1:length(dapc.mats3)){
+		for(j in 1:length(dapc.mats3[[i]])){
+			plot.name <- dapc.mats3[[i]][which(index.bi[[i]]==j)]
+			if(is.na(plot.name)){
+				plot.ij <- grid::rectGrob(gp=grid::gpar(col=NA))
 			} else {
-			#	ctr <- ctr+1
-				plot.ij  <- ggplot2::ggplotGrob(ggscatter.dapc(dapc.list[[(K.plottable[i]-1)]], vartype="df", xax=j, yax=j, col=myCols, legend=F, show.title=F, hideperimeter=T))
+				plot.ij <- pc.biplots.list[[i]][plot.name][[1]]
 			}
-			df.plots.list[[ctr]]        <- plot.ij
-			names(df.plots.list)[[ctr]] <- paste0("K",K.plottable[i],".DF",j)
+			bi.arranged0[[i]][[j]] <- gridExtra::arrangeGrob(plot.ij,left=left.mat.bi[[i]][which(index.bi[[i]]==j)],right=right.mat.bi[[i]][which(index.bi[[i]]==j)],bottom=bottom.mat.bi[[i]][which(index.bi[[i]]==j)],top=top.mat.bi[[i]][which(index.bi[[i]]==j)])
 		}
+		bi.arranged[[i]] <- gridExtra::arrangeGrob(grobs=bi.arranged0[[i]],layout_matrix=index.bi,respect=TRUE)
 	}
 	
-	da.arranged0   <- lapply(X=1:length(df.plots.list),FUN=function(x){gridExtra::arrangeGrob(df.plots.list[[x]],left=left.mat.da[indexmat.da[x]],right=right.mat.da[indexmat.da[x]],bottom=bottom.mat.da[indexmat.da[x]],top=top.mat.da[indexmat.da[x]])})
-	da.arranged    <- gridExtra::arrangeGrob(grobs=da.arranged0,layout_matrix=indexmat.da,respect=TRUE)
-	vp             <- grid::viewport(height=grid::unit(0.9,"npc"),width=grid::unit(0.9,"npc"))
-	pdf(file=paste0(tools::file_path_sans_ext(save.as),"_desnsityPlots_DF.pdf"), height=(nrow(indexmat.da)*3),width=(ncol(indexmat.da)*3))
-	grid::grid.draw(da.arranged)
-	dev.off()
-	#### Generate PC density plots.
-	pc.plots.list <- list(); length(pc.plots.list) <- length(plottable$PC)
-	ctr <- 0
-	for(j in 1:ncol(plottable$PC)){
-		for(i in 1:nrow(plottable$PC) ){
-			ctr <- ctr+1
-			if(!plottable$PC[i,j]){
-			#	next
-				plot.ij  <- grid::rectGrob(gp=grid::gpar(col=NA))
-				
-			} else {
-			#	ctr <- ctr+1
-				plot.ij  <- ggplot2::ggplotGrob(ggscatter.dapc(dapc.list[[(K.plottable[i]-1)]], vartype="pc", xax=j, yax=j, col=myCols, legend=F, show.title=F, hideperimeter=T))
-			}
-			pc.plots.list[[ctr]]        <- plot.ij
-			names(pc.plots.list)[[ctr]] <- paste0("K",K.plottable[i],".PC",j)
-		}
-	}
-	pc.arranged0   <- lapply(X=1:length(pc.plots.list),FUN=function(x){gridExtra::arrangeGrob(pc.plots.list[[x]],left=left.mat.pca[indexmat.pc[x]],right=right.mat.pca[indexmat.pc[x]],bottom=bottom.mat.pca[indexmat.pc[x]],top=top.mat.pca[indexmat.pc[x]])})
-	pc.arranged    <- gridExtra::arrangeGrob(grobs=pc.arranged0,layout_matrix=indexmat.pc,respect=TRUE)
-	vp             <- grid::viewport(height=grid::unit(0.9,"npc"),width=grid::unit(0.9,"npc"))
-	pdf(file=paste0(tools::file_path_sans_ext(save.as),"_desnsityPlots_PC.pdf"), height=(nrow(indexmat.pc)*3),width=(ncol(indexmat.pc)*3))
-	grid::grid.draw(pc.arranged)
-	dev.off()
+
+	#pc.biplots.list[[3]]["bp1.pc"][[1]]
 
 
-
-
-
-
-
-
-
-
-
-
+	#pc.arranged0[[i]]   <- lapply(X=1:length(dapc.mats3[[i]]),FUN=function(x){gridExtra::arrangeGrob(dapc.mats3[[i]][],left=left.mat.pca[indexmat.pc[x]],right=right.mat.pca[indexmat.pc[x]],bottom=bottom.mat.pca[indexmat.pc[x]],top=top.mat.pca[indexmat.pc[x]])})
+	#pc.arranged    <- gridExtra::arrangeGrob(grobs=pc.arranged0,layout_matrix=indexmat.pc,respect=TRUE)
+	#vp             <- grid::viewport(height=grid::unit(0.9,"npc"),width=grid::unit(0.9,"npc"))
+	#pdf(file=paste0(tools::file_path_sans_ext(save.as),"_desnsityPlots_PC.pdf"), height=(nrow(indexmat.pc)*3),width=(ncol(indexmat.pc)*3))
+	#grid::grid.draw(pc.arranged)
+	#dev.off()
 
 
 
