@@ -14,6 +14,7 @@ rcoords(
   limits = c(-180, 180, -90, 90),
   over.land = TRUE,
   n.grp = 1,
+  interactions = NULL,
   d.grp = 1,
   plot = FALSE
 )
@@ -27,9 +28,11 @@ rcoords(
 
 \item{limits}{Numerical vector of length four defining the limits for the sampling area's center, with longitude (minimum), longitude (maximum), latitude (minimum), latitude (maximum). Default is c(-180,180,-90,90). Points other than the center of the sampling area can fall outside of this limit.}
 
-\item{over.land}{Logical indicating whether or not all points in the returned data frame should occur over land. Default TRUE.}
+\item{over.land}{Logical indicating whether or not all points in the returned data frame should occur over land. Default TRUE. Note that this condition is only applied to the samples themselves and not the sampling area.}
 
-\item{n.grp}{Not yet implemented. Number with how many adjacent, nonoverlapping areas to use for the}
+\item{n.grp}{Number of spatial sampling groups.}
+
+\item{interactions}{Numeric vector with the maximum and minimum amount of overlap required between adjacent groups, calculated as (intersect area)/(sum area) for each pair of groups; or NULL, the default, in which case the all types of group interactions are possible.}
 
 \item{d.grp}{Number controlling the distance between the centers of a pair of areas, as a function of the pair's radii. Default 1, which would allow sample regions to nearly coincide. Future option may allow for a pairwise distance matrix.}
 

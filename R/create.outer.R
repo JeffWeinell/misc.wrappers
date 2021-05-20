@@ -340,13 +340,14 @@ points.on.land <- function(x,return.as="data.frame"){
 #' @param size Number of points to return, or a numerical vector with number of points to return from each adjacent polygon if n.adj=1.
 #' @param return.as Character string with class to use for object returned. Default "data.frame". Can also be "matrix" or "SP" (SpatialPoints).
 #' @param limits Numerical vector of length four defining the limits for the sampling area's center, with longitude (minimum), longitude (maximum), latitude (minimum), latitude (maximum). Default is c(-180,180,-90,90). Points other than the center of the sampling area can fall outside of this limit.
-#' @param over.land Logical indicating whether or not all points in the returned data frame should occur over land. Default TRUE.
-#' @param n.grp Not yet implemented. Number with how many adjacent, nonoverlapping areas to use for the 
+#' @param over.land Logical indicating whether or not all points in the returned data frame should occur over land. Default TRUE. Note that this condition is only applied to the samples themselves and not the sampling area.
+#' @param n.grp Number of spatial sampling groups.
+#' @param interactions Numeric vector with the maximum and minimum amount of overlap required between adjacent groups, calculated as (intersect area)/(sum area) for each pair of groups; or NULL, the default, in which case the all types of group interactions are possible.
 #' @param d.grp Number controlling the distance between the centers of a pair of areas, as a function of the pair's radii. Default 1, which would allow sample regions to nearly coincide. Future option may allow for a pairwise distance matrix.
 #' @param plot Whether or not the points should be plotted on a low-resolution land map. The map is used is the rnaturalearth countries map, 110 meter resolution.
 #' @return An object with class equal to the value of 'return.as' and containing the set of points that meet the specified sampling requirements. If return.as='matrix' or 'data.frame', the columns are 'X' (for longitude), 'Y' (for latitude), and 'group' (all 1 if 'n.grp'=1).
 #' @export rcoords
-rcoords <- function(r, size, return.as="data.frame", limits=c(-180,180,-90,90), over.land=TRUE, n.grp=1, d.grp=1,plot=FALSE){
+rcoords <- function(r, size, return.as="data.frame", limits=c(-180,180,-90,90), over.land=TRUE, n.grp=1, interactions=NULL, d.grp=1,plot=FALSE){
 	#result.temp        <- data.frame(NULL)
 	PASS=FALSE
 	miter <- 100
@@ -407,6 +408,37 @@ rcoords <- function(r, size, return.as="data.frame", limits=c(-180,180,-90,90), 
 		grp.sizes <- sample(seq(min(size),to=max(size),length.out= max(2,diff(range(size)))), n.grp, replace=TRUE)
 		### Create a SpatialPolygons object to sample within
 		sample.area.sp <- lapply(1:n.grp, FUN=function(x){sampSurf::spCircle(radius=r,centerPoint=c(x=group.centers[x,1],y=group.centers[x,2]))[[1]]})
+		### Check if groups meet conditions set by 'interactions' argument.
+		if(FALSE){
+			if(!is.null(interactions) & n.grp>1){
+				if(all(interactions != c(0,1))){
+					# Much less complex list holding the sample sampling polygons
+					polygons.list <- lapply(X=1:n.grp, function(x){attributes(attributes(sample.area.sp[[x]])$"polygons"[[1]])[[1]][[1]]})
+					# All possible pairwise group comparisons
+					grp.pairs <- do.call(rbind,pset(1:n.grp,2,2))
+					# Calculate intersect area yet and sum areas for each pair of groups. (Doesnt work yet).
+					grp.int.area <- grp.sum.area <- grp.ratio <- c()
+					for(i in 1:nrow(grp.pairs)){
+						polygon.pair <- polygons.list[c(grp.pairs[i,1],grp.pairs[i,2])]
+						pairsum.temp <- sum(c(attributes(polygon.pair[[1]])$area, attributes(polygon.pair[[2]])$area))
+						#grp.int <- raster::intersect(sample.area.sp[[grp.pairs[i,1]]], sample.area.sp[[grp.pairs[i,2]]])
+						grp.int <- rgeos::gIntersection(spgeom1=sample.area.sp[[grp.pairs[i,1]]],spgeom2=sample.area.sp[[grp.pairs[i,2]]]) # returns NULL if polygons do not intersect; returns SpatialPolygons object if they do intersect
+						if(is.null(grp.int)){
+							int.area.temp <- 0
+						} else {
+							int.area.temp <- attributes(attributes(attributes(grp.int)$"polygons"[[1]])[[1]][[1]])$area
+						}
+						ratio.temp <- int.area.temp/pairsum.temp
+						#grp.int <- raster::intersect(spgeom1=sample.area.sp[[1]],spgeom2=sample.area.sp[[2]])
+						grp.int.area <- c(grp.int.area,int.area.temp)
+						grp.sum.area <- c(grp.sum.area,pairsum.temp)
+						grp.ratio    <- c(grp.ratio,ratio.temp)
+					}
+					area.df <- data.frame(group.i=grp.pairs[,1],group.j=grp.pairs[,2],area.intersection=grp.int.area,area.sumpair=grp.sum.area,area.intersection.sum.ratio=grp.ratio)
+					
+				}
+			}
+		}
 		### Convert each SpatialPolygons object to an SF object
 	#	sample.area.sf <- sf::st_as_sf(sample.area.sp)
 		sample.area.sf <- lapply(X=1:n.grp,FUN=function(x){sf::st_as_sf(sample.area.sp[[x]])})
@@ -460,7 +492,8 @@ rcoords <- function(r, size, return.as="data.frame", limits=c(-180,180,-90,90), 
 		result <- data.matrix(result)
 	}
 	if(return.as=="SP"){
-		result <- list(sp::SpatialPoints(result),sample.area.sp)
+		result.df <- result
+		result <- list(sp::SpatialPoints(result[,c(1,2)]),sample.area.sp,result.df)
 		#result <- sp::SpatialPoints(result)
 	}
 	result
