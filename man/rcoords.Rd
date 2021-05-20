@@ -16,7 +16,7 @@ rcoords(
   n.grp = 1,
   interactions = NULL,
   d.grp = 1,
-  plot = FALSE
+  show.plot = FALSE
 )
 }
 \arguments{
@@ -36,7 +36,7 @@ rcoords(
 
 \item{d.grp}{Number controlling the distance between the centers of a pair of areas, as a function of the pair's radii. Default 1, which would allow sample regions to nearly coincide. Future option may allow for a pairwise distance matrix.}
 
-\item{plot}{Whether or not the points should be plotted on a low-resolution land map. The map is used is the rnaturalearth countries map, 110 meter resolution.}
+\item{show.plot}{Whether or not the points should be plotted on a low-resolution land map. The map is used is the rnaturalearth countries map, 110 meter resolution.}
 }
 \value{
 An object with class equal to the value of 'return.as' and containing the set of points that meet the specified sampling requirements. If return.as='matrix' or 'data.frame', the columns are 'X' (for longitude), 'Y' (for latitude), and 'group' (all 1 if 'n.grp'=1).

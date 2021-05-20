@@ -344,10 +344,10 @@ points.on.land <- function(x,return.as="data.frame"){
 #' @param n.grp Number of spatial sampling groups.
 #' @param interactions Numeric vector with the maximum and minimum amount of overlap required between adjacent groups, calculated as (intersect area)/(sum area) for each pair of groups; or NULL, the default, in which case the all types of group interactions are possible.
 #' @param d.grp Number controlling the distance between the centers of a pair of areas, as a function of the pair's radii. Default 1, which would allow sample regions to nearly coincide. Future option may allow for a pairwise distance matrix.
-#' @param plot Whether or not the points should be plotted on a low-resolution land map. The map is used is the rnaturalearth countries map, 110 meter resolution.
+#' @param show.plot Whether or not the points should be plotted on a low-resolution land map. The map is used is the rnaturalearth countries map, 110 meter resolution.
 #' @return An object with class equal to the value of 'return.as' and containing the set of points that meet the specified sampling requirements. If return.as='matrix' or 'data.frame', the columns are 'X' (for longitude), 'Y' (for latitude), and 'group' (all 1 if 'n.grp'=1).
 #' @export rcoords
-rcoords <- function(r, size, return.as="data.frame", limits=c(-180,180,-90,90), over.land=TRUE, n.grp=1, interactions=NULL, d.grp=1,plot=FALSE){
+rcoords <- function(r, size, return.as="data.frame", limits=c(-180,180,-90,90), over.land=TRUE, n.grp=1, interactions=NULL, d.grp=1,show.plot=FALSE){
 	#result.temp        <- data.frame(NULL)
 	PASS=FALSE
 	miter <- 100
@@ -480,14 +480,20 @@ rcoords <- function(r, size, return.as="data.frame", limits=c(-180,180,-90,90), 
 	result0 <- lapply(1:n.grp,FUN=function(x){samples.temp[[x]][sample(x=1:nrow(samples.temp[[x]]), size=grp.sizes[x], replace=FALSE),]}) # samples.temp[[x]]
 	result  <- do.call(rbind,result0)
 	mode(result[,"group"]) <- "character"
-	if(plot){
+	if(show.plot){
 		world.land  <- rnaturalearth::ne_countries(scale=110,returnclass="sf")
 		result.df2plot   <- result
 		exf  <- 1.5
 		xlim <- rangeBuffer(result.df2plot[,1],exf*1.5)
 		ylim <- rangeBuffer(result.df2plot[,2],exf)
-		result.plot <- ggplot2::ggplot(data = world.land) + ggplot2::geom_sf() + ggplot2::theme_classic() + ggplot2::geom_point(data = result.df2plot, ggplot2::aes(x = X, y = Y, fill=group), size = 2, shape = 21) + ggplot2::coord_sf(xlim = xlim, ylim = ylim ) + ggplot2::theme(panel.border = ggplot2::element_rect(color = "black", fill=NA, size=1))
-		print(result.plot)
+		#zoom.plot   <- ggplot2::ggplot(data = world.land) + ggplot2::geom_sf() + ggplot2::theme_classic() + ggplot2::geom_point(data = result.df2plot, ggplot2::aes(x = X, y = Y, fill=group), size = 2, shape = 21) + ggplot2::coord_sf(xlim = xlim, ylim = ylim ) + ggplot2::theme(panel.border = ggplot2::element_rect(color = "black", fill=NA, size=1))
+		zoom.plot   <- ggplot2::ggplot(data = world.land) + ggplot2::geom_sf() + ggplot2::theme_classic() + ggplot2::geom_point(data = result.df2plot, ggplot2::aes(x = X, y = Y, fill=group), size = 2, shape = 21) + ggplot2::coord_sf(xlim =range(result.df2plot[,1]),ylim = range(result.df2plot[,2])) + ggplot2::theme(panel.border = ggplot2::element_rect(color = "black", fill=NA, size=1))
+		global.plot <- ggplot2::ggplot(data = world.land) + ggplot2::geom_sf() + ggplot2::theme_classic() + ggplot2::geom_point(data = result.df2plot, ggplot2::aes(x = X, y = Y, fill=group), size = 2, shape = 21) + ggplot2::theme(panel.border = ggplot2::element_rect(color = "black", fill=NA, size=1))
+		#print(zoom.plot)
+		grid::grid.newpage(bothmaps)
+		grobs.list <- list(ggplot2::ggplotGrob(global.plot),ggplot2::ggplotGrob(zoom.plot))
+		bothmaps <- gridExtra::arrangeGrob(grobs=grobs.list,layout=matrix(c(1,2),ncol=1))
+		grid::grid.draw(bothmaps)
 	}
 	#result <- result.temp[sample(x=1:nrow(result.temp),size=size),]
 	if(return.as=="matrix"){
