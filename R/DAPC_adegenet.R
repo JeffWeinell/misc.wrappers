@@ -14,7 +14,7 @@
 #' @return A list of plots.
 #' @export run_DAPC
 run_DAPC <- function(x, format="VCF", kmax=40, coords=NULL, samplenames=NULL,reps=100,probs.out=NULL,save.as=NULL,include.out=c(".pdf",".Qlog",".BIClog")){
-	debug <- FALSE
+	debug <- TRUE
 	if(is.null(save.as)){
 		save.as <- file.path(getwd(),"result_DAPC.pdf")
 	}
@@ -167,7 +167,9 @@ run_DAPC <- function(x, format="VCF", kmax=40, coords=NULL, samplenames=NULL,rep
 	Ks.n.pca       <- sapply(dapc.list,function(x){x$n.pca})
 	# Data frame holding assignment probability of each individual in each cluster at each K.
 	q.df           <- do.call(rbind,lapply(X=1:length(dapc.list),FUN=function(x){data.frame(indv=rep(rownames(posterior.list[[x]]),ncol(posterior.list[[x]])), pop=rep(colnames(posterior.list[[x]]),each=nrow(posterior.list[[x]])), assignment=c(posterior.list[[x]]),K=(x+1))}))
-
+	if(".Qlog" %in% include.out){
+		write.table(x=q.df,file=paste0(tools::file_path_sans_ext(save.as),".Qlog"),row.names=FALSE,col.names=TRUE,quote=FALSE,sep="\t")
+	}
 	#######
 	## Density plots
 	#######
@@ -270,24 +272,23 @@ run_DAPC <- function(x, format="VCF", kmax=40, coords=NULL, samplenames=NULL,rep
 #		posterior           <- posterior.list[[i]]
 #		posterior.df        <- data.frame(indv=rep(rownames(posterior),ncol(posterior)), pop=rep(colnames(posterior),each=nrow(posterior)), assignment=c(posterior),K=K)
 		q.matrix            <- posterior.list[[i]]
-		posterior.df        <- q.df[[i]]
+		posterior.df        <- q.df[q.df$K==K,]
 #		q.df[[i]]           <- posterior.df
 		##### ggplot scatterplots of discriminant functions
 		###
 	#	scatterPlot.i       <- ggscatter.dapc(dapc.pcabest.K,col=myCols,legend=F,cstar=1,cpoint=4,label=T)
 	#	scatterPlot[[i]]    <- scatterPlot.i
-		if(debug) message(cat("\r",paste0("K=",K," step 3.2")))
+		#if(debug) message(cat("\r",paste0("K=",K," step 3.2")))
 		### density plots of discriminant functions
-		if(!density.stop){
-			density.da.list.i <- list(); length(density.da.list.i) <- dapc.pcabest.K$n.da
-			for(z in 1:dapc.pcabest.K$n.da){
-				density.da.list.i[[z]] <- ggscatter.dapc(dapc.pcabest.K,xax=z,yax=z,col=myCols,legend=F,show.title=F,hideperimeter=T)
-			}
-		} else {
-			density.da.list.i <- list(NULL)
-		}
+		#if(!density.stop){
+		#	density.da.list.i <- list(); length(density.da.list.i) <- dapc.pcabest.K$n.da
+		#	for(z in 1:dapc.pcabest.K$n.da){
+		#		density.da.list.i[[z]] <- ggscatter.dapc(dapc.pcabest.K,xax=z,yax=z,col=myCols,legend=F,show.title=F,hideperimeter=T)
+		#	}
+		#} else {
+		#	density.da.list.i <- list(NULL)
+		#}
 		if(debug) message(cat("\r",paste0("K=",K," step 3.3")))
-
 		### biplots of discriminant functions
 		if(dapc.pcabest.K$n.da>1){
 			da.pairs.i        <- pset(x=1:dapc.pcabest.K$n.da,min.length=2,max.length=2)
@@ -312,16 +313,16 @@ run_DAPC <- function(x, format="VCF", kmax=40, coords=NULL, samplenames=NULL,rep
 			da.psets[[i]]      <- NULL
 			da.layout.mat[[i]] <- NULL
 		}
-		if(debug) message(cat("\r",paste0("K=",K," step 3.4")))
+		#if(debug) message(cat("\r",paste0("K=",K," step 3.4")))
 		##### ggplot density plots of principle components
-		if(!density.stop){
-			density.pca.list.i <- list(); length(density.pca.list.i) <- dapc.pcabest.K$n.pca
-			for(z in 1:dapc.pcabest.K$n.pca){
-				density.pca.list.i[[z]] <- ggscatter.dapc(dapc.pcabest.K,vartype="pc",xax=z,yax=z,col=myCols,legend=F,show.title=F,hideperimeter=T)
-			}
-		} else {
-			density.pca.list.i <- list(NULL)
-		}
+		#if(!density.stop){
+		#	density.pca.list.i <- list(); length(density.pca.list.i) <- dapc.pcabest.K$n.pca
+		#	for(z in 1:dapc.pcabest.K$n.pca){
+		#		density.pca.list.i[[z]] <- ggscatter.dapc(dapc.pcabest.K,vartype="pc",xax=z,yax=z,col=myCols,legend=F,show.title=F,hideperimeter=T)
+		#	}
+		#} else {
+		#	density.pca.list.i <- list(NULL)
+		#}
 		if(debug) message(cat("\r",paste0("K=",K," step 3.5")))
 		### ggplot biplots of principle components
 		if(dapc.pcabest.K$n.pca>1){
@@ -367,47 +368,15 @@ run_DAPC <- function(x, format="VCF", kmax=40, coords=NULL, samplenames=NULL,rep
 			mapplot[[i]]    <- mapplot.i + ggplot2::theme_classic() + ggplot2::labs(title=paste0("Ancestry coefficients; K=",K), x="latitude", y="longitude") + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) + current.gg.sf + ggplot2::geom_point(data = coords, ggplot2::aes(x = Lon, y = Lat), size = 1, shape = 21, fill = "black")
 		}
 		if(debug) message(cat("\r",paste0("K=",K," step 3.9")))
-		da.densityPlot[[i]]  <- density.da.list.i
+		#da.densityPlot[[i]]  <- density.da.list.i
 		da.biPlot[[i]]       <- biplots.da.list.i
-		pca.densityPlot[[i]] <- density.pca.list.i
+		#pca.densityPlot[[i]] <- density.pca.list.i
 		pca.biPlot[[i]]      <- biplots.pca.list.i
 	} ### END OF LOOP
 	### Plots of DF or PC density for each given K
 	
 	if(FALSE){
-		if(debug) message("step 4")
-		### Numerical vector with values 0 or a multiple of 9; divide this by 9 to get number of discriminant functions for each value of K.
-		da.dens.plotsPerK <- sapply(1:length(da.densityPlot),FUN=function(x){max(lengths(da.densityPlot[[x]]))})
-		if(any(da.dens.plotsPerK>0)){
-			#return(da.densityPlot)
-			da.densityPlot2      <- da.densityPlot[which(da.dens.plotsPerK>0)]
-			#return(da.densityPlot2)
-			da.density.arranged  <- dapc.plot.arrange(da.densityPlot2,variable="DF",pos.x.labs=1,pos.y.labs=2,outer.text=list(NULL,NULL,paste0("For each K, the density distribution of each discriminant function for each population cluster"), NULL))
-		#	da.density.arranged  <- dapc.plot.arrange2(x=da.densityPlot,variable="DF",outer.text=list(NULL,NULL,"Density plots of DF1 vs. clusters", NULL))
-		#	return(da.density.arranged)
-		} else {
-			da.density.arranged  <- NULL
-		}
-		if(debug) message("step 5")
-		pca.dens.plotsPerK <- sapply(1:length(pca.densityPlot),FUN=function(x){max(lengths(pca.densityPlot[[x]]))})
-		if(any(pca.dens.plotsPerK>0)){
-			pca.densityPlot2 <- pca.densityPlot[which(pca.dens.plotsPerK>0)]
-			#return(pca.densityPlot2)
-			pca.density.arranged <- dapc.plot.arrange(pca.densityPlot2,variable="PC",pos.x.labs=1,pos.y.labs=2,outer.text=list(NULL,NULL,paste0("For each K, the density distribution of each retained principle component for each population cluster"), NULL))
-			#pca.density.arranged  <- dapc.plot.arrange2(x=pca.densityPlot2,variable="PC",outer.text=list(NULL,NULL,"Density plots of PC1 vs. clusters", NULL))
-			#return(pca.density.arranged)
-		} else {
-			pca.density.arranged <- NULL
-		}
-		# rangeK.da.density  <- 2:(length(lengths(da.densityPlot))+1)
-		# n.da.density       <- max(lengths(da.densityPlot),na.rm=TRUE)
-		# rangeK.pca.density <- 2:(length(lengths(pca.densityPlot))+1)
-		# n.pca.density      <- max(lengths(pca.densityPlot),na.rm=TRUE)
-		# dapc.biplot.arrange(pca.densityPlot,K=NULL,layout.mat=NULL,use.diag=NULL,col.labels.bottom=names.bottom.da[[which(rangeK.da==z)]],row.labels.left=names.left.da[[which(rangeK.da==z)]],outer.text=list(NULL,NULL,paste0("K=",z,"; Biplots of discriminant functions"),NULL))
 		if(debug) message("step 6")
-		# return(da.biPlot)
-		# return(da.layout.mat)
-		# return(list(da.biPlot,da.layout.mat,da.psets))
 		### Plots of DF vs DF or PC vs PC for each pairwise combination, for given K
 		if(any(lengths(da.biPlot)>0)){
 			rangeK.da <- c(2:kmax)[which(lengths(da.biPlot)>0)]
@@ -433,7 +402,7 @@ run_DAPC <- function(x, format="VCF", kmax=40, coords=NULL, samplenames=NULL,rep
 			pca.biplot.arranged <- NULL
 		}
 		if(debug) message("step 8")
-		dapc.componentPlots <- c(list(pca.density.arranged,da.density.arranged),pca.biplot.arranged,da.biplot.arranged)
+		dapc.componentPlots <- c(pca.biplot.arranged,da.biplot.arranged)
 	}
 	### Subset of da density and biplots, for the most important DFs of each K.
 #	scatterPlot.grobsList <- lapply(X=scatterPlot,FUN=ggplot2::ggplotGrob)
@@ -467,13 +436,10 @@ run_DAPC <- function(x, format="VCF", kmax=40, coords=NULL, samplenames=NULL,rep
 	#da.density.grobs       <- lapply(da.densityPlot,FUN=ggplot2::ggplotGrob)
 	#### arrange the list of grobs into a gtable
 	#da.density.arranged    <- gridExtra::arrangeGrob(grobs=da.density.grobs,layout_matrix=layout.mat)
-	if(debug) message("step 9")
+	#if(debug) message("step 9")
 	#
-	q.df    <- do.call(rbind,q.df)
+	#q.df    <- do.call(rbind,q.df)
 	#dapc.df <- do.call(rbind,dapc.df)
-	if(".Qlog" %in% include.out){
-		write.table(x=q.df,file=paste0(tools::file_path_sans_ext(save.as),".Qlog"),row.names=FALSE,col.names=TRUE,quote=FALSE,sep="\t")
-	}
 	#if(bestK>1){
 	#	posterior.bestK <- posterior.list[[bestK-1]]
 	#	colnames(posterior.bestK) <- paste0("K",colnames(posterior.bestK))
@@ -527,62 +493,7 @@ run_DAPC <- function(x, format="VCF", kmax=40, coords=NULL, samplenames=NULL,rep
 #' example_vcf_path <- file.path(system.file("extdata", package = "misc.wrappers"),"simulated_K4.vcf.gz")
 #' # Perform DAPC analyses on the simulated dataset for for K=2–10 and 30 replicates of adegenet::find.clusters (explanation below). Save output graphs to a file called "DAPC_example.pdf" in your current directory.
 #' run_DAPC(x=example_vcf_path, kmax=10, reps=30, save.as="DAPC_example.pdf", include.out=c(".pdf"))
-
 #' specifically, perform 30 replicates adegenet::find.clusters and plot boxplots of the K vs. BIC;  on the simulated dataset; 
-
-
-
-
-#######
-# module load R/4.0
-# module load gdal
-# source("rundelimitR_functions.R")
-# source("DAPC_adegenet.R")
-# library(ade4)
-# library(adegenet)
-# library(vcfR)
-# library(ggplot2)
-#' 
-#' dev.new(height=10,width=6)
-#' Ahaetulla_Luzon <- run_DAPC(vcf="Ahaetulla-prasina_Luzon_1snpPerLocus.vcf",
-#'                             probs.out="Ahaetulla-prasina_Luzon_BestSNP_DAPC_BestK_Membership_run2.txt",
-#'                             save.out="Ahaetulla-prasina_Luzon_DAPC_v2.pdf")
-
-#' Calamaria_allpops <- run_DAPC(vcf="Calamaria-gervaisii_snps.vcf",
-#'                             probs.out="Calamaria-gervaisii_allpops_BestSNP_DAPC_BestK_Membership_run2.txt",
-#'                             save.as="Calamaria-gervaisii_allpops_DAPC.pdf")
-
-#' dev.new(height=6,width=10)
-#' cfmodestum_Luzon <- run_DAPC(vcf="Oxyrhabdium-cf.modestum_Luzon_BestSNP.vcf",
-#'                             probs.out="Oxyrhabdium-cf.modestum_Luzon_BestSNP_DAPC_BestK_Membership_run2.txt",
-#'                             coords="tess3r/Oxyrhabdium-cfmodestum_Luzon_coords.txt",
-#'                             save.as="Oxyrhabdium-cfmodestum_Luzon_BestSNP_DAPC_run2.pdf")
-
-#' leporinum_Luzon <- run_DAPC(vcf="Oxyrhabdium-leporinum_Luzon_BestSNP.vcf".
-#'                             probs.out="Oxyrhabdium-leporinum_Luzon_BestSNP_DAPC_BestK_Membership_run2.txt",
-#'                             coords="Oxyrhabdium-leporinum_Luzon_coords.txt",
-#'                             save.as="Oxyrhabdium-leporinum_Luzon_BestSNP_DAPC.pdf")
-
-#' leporinum  <- run_DAPC(vcf="Oxyrhabdium-leporinum_BestSNP.vcf",
-#'                             probs.out="Oxyrhabdium-leporinum_BestSNP_DAPC_BestK_Membership_run2.txt",
-#'                             coords="Oxyrhabdium-leporinum_coords.txt",
-#'                             save.as="Oxyrhabdium-leporinum_BestSNP_DAPC_run2.pdf")
-
-#' modestum   <- run_DAPC(vcf="Oxyrhabdium-modestum_BestSNP.vcf",
-#'                             probs.out="Oxyrhabdium-modestum_BestSNP_DAPC_BestK_Membership.txt_run2",
-#'                             coords="Oxyrhabdium-modestum_coords.txt",
-#'                             save.as="Oxyrhabdium-modestum_BestSNP_DAPC_run2.pdf")
-
-#' cfmodestum <- run_DAPC(vcf="Oxyrhabdium-cf.modestum_BestSNP.vcf",
-#'                             probs.out="Oxyrhabdium-cf.modestum_BestSNP_DAPC_BestK_Membership_run2.txt",
-#'                             coords="Oxyrhabdium-cfmodestum_coords.txt",
-#'                             save.as="Oxyrhabdium-cf.modestum_BestSNP_DAPC_run2.pdf")
-
-#'Oxyrhabdium <- run_DAPC(vcf="Oxyrhabdium_AllSpecies_BestSNP.vcf",
-#'                            probs.out="Oxyrhabdium_AllSpecies_BestSNP_DAPC_BestK_Membership_run2.txt",
-#'                            coords="Oxyrhabdium_AllSpecies_coords.txt",
-#'                            save.as="Oxyrhabdium_AllSpecies_BestSNP_DAPC_v3.pdf")
-
 
 #' @title Arrange DAPC density plots.
 #' 
