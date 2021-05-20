@@ -409,33 +409,35 @@ rcoords <- function(r, size, return.as="data.frame", limits=c(-180,180,-90,90), 
 		### Create a SpatialPolygons object to sample within
 		sample.area.sp <- lapply(1:n.grp, FUN=function(x){sampSurf::spCircle(radius=r,centerPoint=c(x=group.centers[x,1],y=group.centers[x,2]))[[1]]})
 		### Check if groups meet conditions set by 'interactions' argument.
-		if(FALSE){
-			if(!is.null(interactions) & n.grp>1){
-				if(all(interactions != c(0,1))){
-					# Much less complex list holding the sample sampling polygons
-					polygons.list <- lapply(X=1:n.grp, function(x){attributes(attributes(sample.area.sp[[x]])$"polygons"[[1]])[[1]][[1]]})
-					# All possible pairwise group comparisons
-					grp.pairs <- do.call(rbind,pset(1:n.grp,2,2))
-					# Calculate intersect area yet and sum areas for each pair of groups. (Doesnt work yet).
-					grp.int.area <- grp.sum.area <- grp.ratio <- c()
-					for(i in 1:nrow(grp.pairs)){
-						polygon.pair <- polygons.list[c(grp.pairs[i,1],grp.pairs[i,2])]
-						pairsum.temp <- sum(c(attributes(polygon.pair[[1]])$area, attributes(polygon.pair[[2]])$area))
-						#grp.int <- raster::intersect(sample.area.sp[[grp.pairs[i,1]]], sample.area.sp[[grp.pairs[i,2]]])
-						grp.int <- rgeos::gIntersection(spgeom1=sample.area.sp[[grp.pairs[i,1]]],spgeom2=sample.area.sp[[grp.pairs[i,2]]]) # returns NULL if polygons do not intersect; returns SpatialPolygons object if they do intersect
-						if(is.null(grp.int)){
-							int.area.temp <- 0
-						} else {
-							int.area.temp <- attributes(attributes(attributes(grp.int)$"polygons"[[1]])[[1]][[1]])$area
-						}
-						ratio.temp <- int.area.temp/pairsum.temp
-						#grp.int <- raster::intersect(spgeom1=sample.area.sp[[1]],spgeom2=sample.area.sp[[2]])
-						grp.int.area <- c(grp.int.area,int.area.temp)
-						grp.sum.area <- c(grp.sum.area,pairsum.temp)
-						grp.ratio    <- c(grp.ratio,ratio.temp)
+		if(!is.null(interactions) & n.grp>1){
+			if(!(interactions[1]==0 & interactions[2]==1)){
+				# Much less complex list holding the sample sampling polygons
+				polygons.list <- lapply(X=1:n.grp, function(x){attributes(attributes(sample.area.sp[[x]])$"polygons"[[1]])[[1]][[1]]})
+				# All possible pairwise group comparisons
+				grp.pairs <- do.call(rbind,pset(1:n.grp,2,2))
+				# Calculate intersect area yet and sum areas for each pair of groups. (Doesnt work yet).
+				grp.int.area <- grp.sum.area <- grp.ratio <- c()
+				for(i in 1:nrow(grp.pairs)){
+					polygon.pair <- polygons.list[c(grp.pairs[i,1],grp.pairs[i,2])]
+					pairsum.temp <- sum(c(attributes(polygon.pair[[1]])$area, attributes(polygon.pair[[2]])$area))
+					#grp.int <- raster::intersect(sample.area.sp[[grp.pairs[i,1]]], sample.area.sp[[grp.pairs[i,2]]])
+					grp.int <- rgeos::gIntersection(spgeom1=sample.area.sp[[grp.pairs[i,1]]],spgeom2=sample.area.sp[[grp.pairs[i,2]]]) # returns NULL if polygons do not intersect; returns SpatialPolygons object if they do intersect
+					if(is.null(grp.int)){
+						int.area.temp <- 0
+					} else {
+						int.area.temp <- attributes(attributes(attributes(grp.int)$"polygons"[[1]])[[1]][[1]])$area
 					}
-					area.df <- data.frame(group.i=grp.pairs[,1],group.j=grp.pairs[,2],area.intersection=grp.int.area,area.sumpair=grp.sum.area,area.intersection.sum.ratio=grp.ratio)
-					
+					ratio.temp <- int.area.temp/pairsum.temp
+					#grp.int <- raster::intersect(spgeom1=sample.area.sp[[1]],spgeom2=sample.area.sp[[2]])
+					grp.int.area <- c(grp.int.area,int.area.temp)
+					grp.sum.area <- c(grp.sum.area,pairsum.temp)
+					grp.ratio    <- c(grp.ratio,ratio.temp)
+				}
+				area.df <- data.frame(group.i=grp.pairs[,1],group.j=grp.pairs[,2],area.intersection=grp.int.area,area.sumpair=grp.sum.area,area.intersection.sum.ratio=grp.ratio)
+				# Check that the required conditions for interactions are met
+				if(!all(area.df$area.intersection.sum.ratio >= interactions[1] & area.df$area.intersection.sum.ratio <= interactions[2])){
+					# If conditions not met, try again from scratch. In future versions it would be useful to slide the polygons along their center axes to make minor adjustments.
+					next
 				}
 			}
 		}
