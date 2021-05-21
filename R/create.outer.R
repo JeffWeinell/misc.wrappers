@@ -347,11 +347,12 @@ points.on.land <- function(x,return.as="data.frame"){
 #' @param interactions Numeric vector with the maximum and minimum amount of overlap between pairs of groups, calculated as (intersect area)/(mean group areas non-intersected). The default c(0,1) allows for all possible scenarios. Examples: c(0,0) specifies that groups must be allopatric; c(1,1) requires complete overlap of groups, which is not realistic given the stochasticity determining region sizes; c(0.5,1) requires that at least half-overlaps between groups; c(0.2,0.25) specifies a small contact zone.
 ##' @param d.grp Number controlling the distance between the centers of a pair of areas, as a function of the pair's radii. Default 1, which would allow sample regions to nearly coincide. Future option may allow for a pairwise distance matrix.
 #' @param expf Number that affects dispersion relative to regionsize. Higher numbers increase dispersion. Default 8.
+#' @param grp.scaler Number > 0 that scales geographical areas of all groups
 #' @param return.as Character string with class to use for object returned. Default "data.frame". Can also be "matrix" or "SP" (SpatialPoints).
 #' @param show.plot Whether or not the points should be plotted on a low-resolution land map. The map is used is the rnaturalearth countries map, 110 meter resolution.
 #' @return An object with class equal to the value of 'return.as' and containing the set of points that meet the specified sampling requirements. If return.as='matrix' or 'data.frame', the columns are 'X' (for longitude), 'Y' (for latitude), and 'group' (all 1 if 'n.grp'=1).
 #' @export rcoords
-rcoords <- function(regionsize, samplesize, n.grp=1, grp.n.weights=rep(1,n.grp), grp.area.weights=rep(1,n.grp), wnd=c(-180,180,-90,90), over.land=TRUE, interactions=c(0,1), expf=8, show.plot=FALSE, return.as="data.frame"){
+rcoords <- function(regionsize, samplesize, n.grp=1, grp.n.weights=rep(1,n.grp), grp.area.weights=rep(1,n.grp), wnd=c(-180,180,-90,90), over.land=TRUE, interactions=c(0,1), expf=8, show.plot=FALSE, return.as="data.frame",grp.scaler=1){
 	initial.list <- list(regionsize,grp.area.weights,grp.areas0)
 	#result.temp        <- data.frame(NULL)
 	PASS=FALSE
@@ -382,47 +383,49 @@ rcoords <- function(regionsize, samplesize, n.grp=1, grp.n.weights=rep(1,n.grp),
 			if(ctr2 > miter){
 				stop(paste("failed to initialize after",miter,"attemps. ctr=",ctr,"ctr2=",ctr2))
 			}
-			sample.center  <- c(x=sample(seq(wnd[1],to=wnd[2],by=0.01),size=1), y=sample(seq(wnd[3],to=wnd[4],by=0.01),size=1))
-			if(n.grp>1){
-				# Sampling distances ('d.grps') from group centers to the sample.center. These values are the main determinant of how groups are geographically arranged.
-				# Value that may generate more space between groups.
-			#	expf    <- 4
-				d.grpsA <- rnorm(n=n.grp, mean=(regionsize/(n.grp*expf)), sd= expf)
-				d.grpsB <- runif(n=n.grp, min=(regionsize/(n.grp*10)), max=(regionsize/(n.grp*5)))
-				d.grps  <- apply(rbind(d.grpsA, d.grpsB), MARGIN=2, max)
-				group.centers <- rx2y2(p1=sample.center,d=d.grps,n=n.grp)
-				# Geographic sizes of each group.
-				grp.areas0   <- regionsize*(grp.area.weights/(sum(grp.area.weights)))
-				grp.areas    <- sapply(X=1:n.grp,FUN=function(x){rnorm(n=1,mean=grp.areas0[x],sd=0.5)})
-				# d.grps <- (max(r)*(2*d.grp)):(max(r)*(3*d.grp))
-			} else {
-				group.centers <- sample.center
-				grp.areas     <- rnorm(n=1,mean=regionsize,sd=1)
+			# rectangular SpatialPolygons object with extent formed by 'wnd' argument.
+			wnd.sp <- as(raster::extent(wnd), "SpatialPolygons")
+			# Random point within wnd.sp to determine subregion within which group centers will occur
+			center.sp <- sp::spsample(wnd.sp,n=1,type="random")
+			# Length two vector with "x" and "y" entries from sample.center, to pass to spCircle
+			center.xy <- c(sp::coordinates(center.sp)); names(center.xy) <- c("x","y")
+			# Create a circular polygon centered at sample center; in this case 
+			# sample.area.sp <- sampSurf::spCircle(radius=sqrt((regionsize/pi)),centerPoint=center.xy)[[1]]
+			regionsize2 <- (10^regionsize)
+			if(n.grp==1){
+				regionsize2 <- regionsize2*grp.scaler*0.5
 			}
-			# Check that all group centers occur over land.
+			sample.area.sp <- sampSurf::spCircle(radius=sqrt((regionsize2/pi)),centerPoint=center.xy)[[1]]
+			# Check if entire sample.area.sp is within window defined by 'wnd' argument
+			area.wnd.diff <- rgeos::gDifference(spgeom1=sample.area.sp,spgeom2=wnd.sp)
+			# If area.wnd.diff is not NULL, then part of 'sample.area.sp' falls outside of the sampling window.
+			if(!is.null(area.wnd.diff)){
+				next
+			}
+			if(n.grp>1){
+				# Sample group sampling-center locations from within sample.area.sp
+				grp.pts <- sp::spsample(sample.area.sp,n=n.grp,type="random")
+				# coordinates extracted from grp.pts
+				grp.pts.mat <- sp::coordinates(grp.pts)
+				colnames(grp.pts.mat) <- c("x","y")
+				grp.areas <- (regionsize2*(grp.area.weights/(sum(grp.area.weights)))*grp.scaler*0.5)
+				# create polygons centered at grp.pts, from which each groups points will be drawn. First need to determine group sizes...
+				grp.areas.sp <- lapply(X=1:n.grp, FUN=function(x){sampSurf::spCircle(radius=sqrt((grp.areas/pi))[x],centerPoint=c(grp.pts.mat[x,]))[[1]]})
+				# Distance between group centers. Not sure if this is necessary.
+				# geodist(grp.pts.mat,measure="geodesic")
+				# check that each group centers occur over land, if over.land is true
+			} else {
+				grp.pts.mat  <- matrix(center.xy,nrow=1,dimnames=list(c(NULL),c("x","y")))
+				grp.areas.sp <- sample.area.sp
+			}
 			if(over.land){
-				if(length(points.on.land(x=group.centers)[,1]) < n.grp){
+				if(length(points.on.land(x=grp.pts.mat)[,1]) < n.grp){
+				#if(length(points.on.land(x=sp::coordinates(grp.pts))[,1]) < n.grp){
 					next
 				}
 			}
 			initial <- TRUE
 		}
-		# 
-		#
-		# return(grp.areas)
-#		### Sample a point on earth to use as the center of the sampling circle (if n.grp=1), or group center if n.grp>1
-#		sample.center  <- c(x=sample(seq(limits[1],to=limits[2],by=0.01),size=1), y=sample(seq(limits[3],to=limits[4],by=0.01),size=1))
-#		if(n.grp>1){
-#			d.grps <- (max(r)*2):(max(r)*3)
-#			group.centers <- rx2y2(p1=sample.center,d=d.grps,n=n.grp)
-#		} else {
-#			group.centers <- sample.center
-#		}
-#		if(over.land){
-#			if(length(points.on.land(x=group.centers)) < n.grp){
-#				next
-#			}
-#		}
 		### For each group, the number of samples that will be drawn (or saved, if over.land=TRUE) from the group's sample region.
 		if(n.grp==1){
 			grp.sizes <- samplesize
@@ -430,12 +433,12 @@ rcoords <- function(regionsize, samplesize, n.grp=1, grp.n.weights=rep(1,n.grp),
 			grp.sizes  <- c(table(sample(x=n.grp,size=samplesize,prob=grp.n.weights,replace=TRUE)))
 		}
 		### Creates a SpatialPolygons object (sampling region) for each group
-		sample.area.sp <- lapply(1:n.grp, FUN=function(x){sampSurf::spCircle(radius= sqrt((grp.areas/pi))[x] , centerPoint=c(x=group.centers[x,1],y=group.centers[x,2]))[[1]]})
+		#sample.area.sp <- lapply(1:n.grp, FUN=function(x){sampSurf::spCircle(radius= sqrt((grp.areas/pi))[x] , centerPoint=c(x=group.centers[x,1],y=group.centers[x,2]))[[1]]})
 		### Check if groups meet conditions set by 'interactions' argument.
 		if(!is.null(interactions) & n.grp>1){
 			if(!(interactions[1]==0 & interactions[2]==1)){
 				# Much less complex list holding the sample sampling polygons
-				polygons.list <- lapply(X=1:n.grp, function(x){attributes(attributes(sample.area.sp[[x]])$"polygons"[[1]])[[1]][[1]]})
+				polygons.list <- lapply(X=1:n.grp, function(x){attributes(attributes(grp.areas.sp[[x]])$"polygons"[[1]])[[1]][[1]]})
 				# All possible pairwise group comparisons
 				grp.pairs <- do.call(rbind,pset(1:n.grp,2,2))
 				# Calculate intersect area yet and sum areas for each pair of groups. (Doesnt work yet).
@@ -444,7 +447,7 @@ rcoords <- function(regionsize, samplesize, n.grp=1, grp.n.weights=rep(1,n.grp),
 					polygon.pair <- polygons.list[c(grp.pairs[i,1],grp.pairs[i,2])]
 					pairsum.temp <- sum(c(attributes(polygon.pair[[1]])$area, attributes(polygon.pair[[2]])$area))
 					#grp.int <- raster::intersect(sample.area.sp[[grp.pairs[i,1]]], sample.area.sp[[grp.pairs[i,2]]])
-					grp.int <- rgeos::gIntersection(spgeom1=sample.area.sp[[grp.pairs[i,1]]],spgeom2=sample.area.sp[[grp.pairs[i,2]]]) # returns NULL if polygons do not intersect; returns SpatialPolygons object if they do intersect
+					grp.int <- rgeos::gIntersection(spgeom1=grp.areas.sp[[grp.pairs[i,1]]],spgeom2=grp.areas.sp[[grp.pairs[i,2]]]) # returns NULL if polygons do not intersect; returns SpatialPolygons object if they do intersect
 					if(is.null(grp.int)){
 						int.area.temp <- 0
 					} else {
@@ -464,20 +467,32 @@ rcoords <- function(regionsize, samplesize, n.grp=1, grp.n.weights=rep(1,n.grp),
 				}
 			}
 		}
-		### Convert each SpatialPolygons object to an SF object
-	#	sample.area.sf <- sf::st_as_sf(sample.area.sp)
-		sample.area.sf <- lapply(X=1:n.grp,FUN=function(x){sf::st_as_sf(sample.area.sp[[x]])})
-		### Sample within each area. If points must be over land, sample four times as many points as requested by 'size' argument.
+		
+		### Method using st_sample from SF package. Probably not as useful as the spsample from SP.
+		if(FALSE){
+			### Convert each SpatialPolygons object to an SF object
+	#		sample.area.sf <- sf::st_as_sf(sample.area.sp)
+			grp.areas.sf <- lapply(X=1:n.grp,FUN=function(x){sf::st_as_sf(grp.areas.sp[[x]])})
+			### Sample within each area. If points must be over land, sample four times as many points as requested by 'size' argument.
+			if(over.land){
+				nsamp <- (grp.sizes*4)
+				samples.sf.temp  <- lapply(X=1:n.grp,FUN=function(x){sf::st_sample(x=grp.areas.sf[[x]], size= nsamp[x])})
+			} else {
+				samples.sf.temp  <- lapply(X=1:n.grp,FUN=function(x) {sf::st_sample(x= grp.areas.sf[[x]],size=grp.sizes[x])})
+			}
+			### Hold sampled coordinates as a list of data matrices
+			samples.mat.temp <- lapply(X=1:n.grp,FUN=function(x){sf::st_coordinates(samples.sf.temp[[x]])})
+		}
+
+		### Method using spsample from SP package.
 		if(over.land){
 			nsamp <- (grp.sizes*4)
-			samples.sf.temp  <- lapply(X=1:n.grp,FUN=function(x){sf::st_sample(x=sample.area.sf[[x]], size= nsamp[x])})
+			samples.sp.temp  <- lapply(X=1:n.grp,FUN=function(x){sp::spsample(x=grp.areas.sp[[x]], n= nsamp[x], type="random")})
 		} else {
-			samples.sf.temp  <- lapply(X=1:n.grp,FUN=function(x) {sf::st_sample(x= sample.area.sf[[x]],size=grp.sizes[x])})
+			samples.sp.temp  <- lapply(X=1:n.grp,FUN=function(x) {sp::spsample(x= grp.areas.sp[[x]],n=grp.sizes[x], type="random")})
 		}
-		### Alternative sampling process
-	#	samples2.sf.temp  <- sf::st_sample(x= sample.area.sf,kappa=10,mu=(size*4),scale=0.2,type="Thomas")      # spatstat.core::rThomas(kappa=10,scale=0.2, mu=(size*4),win=sample.area.sf)
-		### Hold sampled coordinates as a list of data matrices
-		samples.mat.temp <- lapply(X=1:n.grp,FUN=function(x){sf::st_coordinates(samples.sf.temp[[x]])})
+		samples.mat.temp <- lapply(X=1:n.grp,FUN=function(x){sp::coordinates(samples.sp.temp[[x]])})
+
 		### Hold sampled coordinates as a list of data frames, and include a column in each data frame to indicate group assignment
 		samples.df.temp <- lapply(X=1:n.grp,FUN=function(x){data.frame(X=samples.mat.temp[[x]][,1],Y=samples.mat.temp[[x]][,2],group=x)})
 		### Plot samples on map (for debugging)
@@ -507,16 +522,25 @@ rcoords <- function(regionsize, samplesize, n.grp=1, grp.n.weights=rep(1,n.grp),
 	if(show.plot){
 		world.land  <- rnaturalearth::ne_countries(scale=110,returnclass="sf")
 		result.df2plot   <- result
-		exf  <- 1.5
-		xlim <- rangeBuffer(result.df2plot[,1],exf*1.5)
-		ylim <- rangeBuffer(result.df2plot[,2],exf)
+		
+		xdist <- geodist::geodist(result.df2plot[order(result.df2plot[,1]),][c(1,nrow(result.df2plot)),1:2],measure="geodesic",sequential=T)
+		ydist <- geodist::geodist(result.df2plot[order(result.df2plot[,2]),][c(1,nrow(result.df2plot)),1:2],measure="geodesic",sequential=T)
+		plot.margin <- which(c(xdist,ydist)==max(c(xdist,ydist)))
+		
+		#exf  <- 1.5
+		#xlim <- rangeBuffer(result.df2plot[,1],exf*1.5)
+		#ylim <- rangeBuffer(result.df2plot[,2],exf)
 		#zoom.plot   <- ggplot2::ggplot(data = world.land) + ggplot2::geom_sf() + ggplot2::theme_classic() + ggplot2::geom_point(data = result.df2plot, ggplot2::aes(x = X, y = Y, fill=group), size = 2, shape = 21) + ggplot2::coord_sf(xlim = xlim, ylim = ylim ) + ggplot2::theme(panel.border = ggplot2::element_rect(color = "black", fill=NA, size=1))
-		zoom.plot   <- ggplot2::ggplot(data = world.land) + ggplot2::geom_sf() + ggplot2::theme_classic() + ggplot2::geom_point(data = result.df2plot, ggplot2::aes(x = X, y = Y, fill=group), size = 2, shape = 21) + ggplot2::coord_sf(xlim =range(result.df2plot[,1]),ylim = range(result.df2plot[,2])) + ggplot2::theme(panel.border = ggplot2::element_rect(color = "black", fill=NA, size=1))
-		global.plot <- ggplot2::ggplot(data = world.land) + ggplot2::geom_sf() + ggplot2::theme_classic() + ggplot2::geom_point(data = result.df2plot, ggplot2::aes(x = X, y = Y, fill=group), size = 2, shape = 21) + ggplot2::theme(panel.border = ggplot2::element_rect(color = "black", fill=NA, size=1))
+		zoom.plot   <- ggplot2::ggplot(data = world.land) + ggplot2::geom_sf() + ggplot2::theme_classic() + ggplot2::geom_point(data = result.df2plot, ggplot2::aes(x = X, y = Y, fill=group), size = 2, shape = 21) + ggplot2::coord_sf(xlim =range(result.df2plot[,1]),ylim = range(result.df2plot[,2])) + ggplot2::theme(panel.border = ggplot2::element_rect(color = "black", fill=NA, size=1)) + ggplot2::theme(legend.position = "none") + ggplot2::xlab("longitude") + ggplot2::ylab("latitude")
+		global.plot <- ggplot2::ggplot(data = world.land) + ggplot2::geom_sf() + ggplot2::theme_classic() + ggplot2::geom_point(data = result.df2plot, ggplot2::aes(x = X, y = Y, fill=group), size = 2, shape = 21) + ggplot2::theme(panel.border = ggplot2::element_rect(color = "black", fill=NA, size=1)) + ggplot2::theme(axis.title.y = ggplot2::element_blank(), axis.title.x = ggplot2::element_blank())
 		#print(zoom.plot)
-		grid::grid.newpage()
 		grobs.list <- list(ggplot2::ggplotGrob(global.plot),ggplot2::ggplotGrob(zoom.plot))
-		bothmaps <- gridExtra::arrangeGrob(grobs=grobs.list,layout=matrix(c(1,2),ncol=1))
+		if(plot.margin==2){
+			bothmaps   <- gridExtra::arrangeGrob(grobs=grobs.list,layout_matrix=matrix(c(1,1,2),ncol=3))
+		} else {
+			bothmaps   <- gridExtra::arrangeGrob(grobs=grobs.list,layout_matrix=matrix(c(1,2),ncol=1))
+		}
+		grid::grid.newpage()
 		grid::grid.draw(bothmaps)
 	}
 	#result <- result.temp[sample(x=1:nrow(result.temp),size=size),]

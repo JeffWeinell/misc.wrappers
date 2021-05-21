@@ -18,7 +18,8 @@ rcoords(
   interactions = c(0, 1),
   expf = 8,
   show.plot = FALSE,
-  return.as = "data.frame"
+  return.as = "data.frame",
+  grp.scaler = 1
 )
 }
 \arguments{
@@ -43,6 +44,8 @@ rcoords(
 \item{show.plot}{Whether or not the points should be plotted on a low-resolution land map. The map is used is the rnaturalearth countries map, 110 meter resolution.}
 
 \item{return.as}{Character string with class to use for object returned. Default "data.frame". Can also be "matrix" or "SP" (SpatialPoints).}
+
+\item{grp.scaler}{Number > 0 that scales geographical areas of all groups}
 
 \item{r}{Number specifying the radius of group areas, in decimal degrees, or a numerical vector with min and max values of uniform sampling distribution from which radii of areas will be drawn.}
 
