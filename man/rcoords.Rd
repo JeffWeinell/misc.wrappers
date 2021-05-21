@@ -8,35 +8,45 @@ This function provides a way to randomly generate one or more groups of points, 
 At present areas are circles projected onto a euclidean plane.}
 \usage{
 rcoords(
-  r,
-  size,
-  return.as = "data.frame",
-  limits = c(-180, 180, -90, 90),
-  over.land = TRUE,
+  regionsize,
+  samplesize,
   n.grp = 1,
-  interactions = NULL,
-  d.grp = 1,
-  show.plot = FALSE
+  grp.n.weights = rep(1, n.grp),
+  grp.area.weights = rep(1, n.grp),
+  wnd = c(-180, 180, -90, 90),
+  over.land = TRUE,
+  interactions = c(0, 1),
+  expf = 8,
+  show.plot = FALSE,
+  return.as = "data.frame"
 )
 }
 \arguments{
-\item{r}{Number specifying the radius of group areas, in decimal degrees, or a numerical vector with min and max values of uniform sampling distribution from which radii of areas will be drawn.}
+\item{regionsize}{Number specifying the approximate longitudinal diameter spanning all sampling regions. I have not verified the accuracy, but larger values generally yield larger extent across all samples.}
 
-\item{size}{Number of points to return, or a numerical vector with number of points to return from each adjacent polygon if n.adj=1.}
-
-\item{return.as}{Character string with class to use for object returned. Default "data.frame". Can also be "matrix" or "SP" (SpatialPoints).}
-
-\item{limits}{Numerical vector of length four defining the limits for the sampling area's center, with longitude (minimum), longitude (maximum), latitude (minimum), latitude (maximum). Default is c(-180,180,-90,90). Points other than the center of the sampling area can fall outside of this limit.}
-
-\item{over.land}{Logical indicating whether or not all points in the returned data frame should occur over land. Default TRUE. Note that this condition is only applied to the samples themselves and not the sampling area.}
+\item{samplesize}{Total number of points to return, across all groups.}
 
 \item{n.grp}{Number of spatial sampling groups.}
 
-\item{interactions}{Numeric vector with the maximum and minimum amount of overlap required between adjacent groups, calculated as (intersect area)/(sum area) for each pair of groups; or NULL, the default, in which case the all types of group interactions are possible.}
+\item{grp.n.weights}{Probability weights for determing sample sizes of groups. Default weights are uniformly distributed.}
 
-\item{d.grp}{Number controlling the distance between the centers of a pair of areas, as a function of the pair's radii. Default 1, which would allow sample regions to nearly coincide. Future option may allow for a pairwise distance matrix.}
+\item{grp.area.weights}{Probability weights for determing group region sizes. Default weights are uniformly distributed.}
+
+\item{wnd}{Numerical vector specifying longitudinal and latitude limits for possible sampling. Default is to include all of Earth c(-180,180,-90,90).}
+
+\item{over.land}{Logical indicating whether or not all returned points must occur over land. Default TRUE. Note that this condition is only applied to samples returned as output. Therefore, 'samplesize' is really a 'sample until' rule. This is faster than performing clipping operations on proposed sample polygons to conform to geography.}
+
+\item{interactions}{Numeric vector with the maximum and minimum amount of overlap between pairs of groups, calculated as (intersect area)/(mean group areas non-intersected). The default c(0,1) allows for all possible scenarios. Examples: c(0,0) specifies that groups must be allopatric; c(1,1) requires complete overlap of groups, which is not realistic given the stochasticity determining region sizes; c(0.5,1) requires that at least half-overlaps between groups; c(0.2,0.25) specifies a small contact zone.}
+
+\item{expf}{Number that affects dispersion relative to regionsize. Higher numbers increase dispersion. Default 8.}
 
 \item{show.plot}{Whether or not the points should be plotted on a low-resolution land map. The map is used is the rnaturalearth countries map, 110 meter resolution.}
+
+\item{return.as}{Character string with class to use for object returned. Default "data.frame". Can also be "matrix" or "SP" (SpatialPoints).}
+
+\item{r}{Number specifying the radius of group areas, in decimal degrees, or a numerical vector with min and max values of uniform sampling distribution from which radii of areas will be drawn.}
+
+\item{d.grp}{Number controlling the distance between the centers of a pair of areas, as a function of the pair's radii. Default 1, which would allow sample regions to nearly coincide. Future option may allow for a pairwise distance matrix.}
 }
 \value{
 An object with class equal to the value of 'return.as' and containing the set of points that meet the specified sampling requirements. If return.as='matrix' or 'data.frame', the columns are 'X' (for longitude), 'Y' (for latitude), and 'group' (all 1 if 'n.grp'=1).

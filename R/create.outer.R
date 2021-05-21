@@ -336,18 +336,23 @@ points.on.land <- function(x,return.as="data.frame"){
 #' This function provides a way to randomly generate one or more groups of points, such that groups are non-overlapping, and options for controlling proximity, group sizes, and optional requirement that points occur over land.
 #' At present areas are circles projected onto a euclidean plane.
 #' 
-#' @param r Number specifying the radius of group areas, in decimal degrees, or a numerical vector with min and max values of uniform sampling distribution from which radii of areas will be drawn.
-#' @param size Number of points to return, or a numerical vector with number of points to return from each adjacent polygon if n.adj=1.
-#' @param return.as Character string with class to use for object returned. Default "data.frame". Can also be "matrix" or "SP" (SpatialPoints).
-#' @param limits Numerical vector of length four defining the limits for the sampling area's center, with longitude (minimum), longitude (maximum), latitude (minimum), latitude (maximum). Default is c(-180,180,-90,90). Points other than the center of the sampling area can fall outside of this limit.
-#' @param over.land Logical indicating whether or not all points in the returned data frame should occur over land. Default TRUE. Note that this condition is only applied to the samples themselves and not the sampling area.
+##' @param r Number specifying the radius of group areas, in decimal degrees, or a numerical vector with min and max values of uniform sampling distribution from which radii of areas will be drawn.
+#' @param regionsize Number specifying the approximate longitudinal diameter spanning all sampling regions. I have not verified the accuracy, but larger values generally yield larger extent across all samples.
+#' @param samplesize Total number of points to return, across all groups.
+#' @param grp.n.weights Probability weights for determing sample sizes of groups. Default weights are uniformly distributed.
+#' @param grp.area.weights Probability weights for determing group region sizes. Default weights are uniformly distributed.
+#' @param wnd Numerical vector specifying longitudinal and latitude limits for possible sampling. Default is to include all of Earth c(-180,180,-90,90).
+#' @param over.land Logical indicating whether or not all returned points must occur over land. Default TRUE. Note that this condition is only applied to samples returned as output. Therefore, 'samplesize' is really a 'sample until' rule. This is faster than performing clipping operations on proposed sample polygons to conform to geography.
 #' @param n.grp Number of spatial sampling groups.
-#' @param interactions Numeric vector with the maximum and minimum amount of overlap required between adjacent groups, calculated as (intersect area)/(sum area) for each pair of groups; or NULL, the default, in which case the all types of group interactions are possible.
-#' @param d.grp Number controlling the distance between the centers of a pair of areas, as a function of the pair's radii. Default 1, which would allow sample regions to nearly coincide. Future option may allow for a pairwise distance matrix.
+#' @param interactions Numeric vector with the maximum and minimum amount of overlap between pairs of groups, calculated as (intersect area)/(mean group areas non-intersected). The default c(0,1) allows for all possible scenarios. Examples: c(0,0) specifies that groups must be allopatric; c(1,1) requires complete overlap of groups, which is not realistic given the stochasticity determining region sizes; c(0.5,1) requires that at least half-overlaps between groups; c(0.2,0.25) specifies a small contact zone.
+##' @param d.grp Number controlling the distance between the centers of a pair of areas, as a function of the pair's radii. Default 1, which would allow sample regions to nearly coincide. Future option may allow for a pairwise distance matrix.
+#' @param expf Number that affects dispersion relative to regionsize. Higher numbers increase dispersion. Default 8.
+#' @param return.as Character string with class to use for object returned. Default "data.frame". Can also be "matrix" or "SP" (SpatialPoints).
 #' @param show.plot Whether or not the points should be plotted on a low-resolution land map. The map is used is the rnaturalearth countries map, 110 meter resolution.
 #' @return An object with class equal to the value of 'return.as' and containing the set of points that meet the specified sampling requirements. If return.as='matrix' or 'data.frame', the columns are 'X' (for longitude), 'Y' (for latitude), and 'group' (all 1 if 'n.grp'=1).
 #' @export rcoords
-rcoords <- function(r, size, return.as="data.frame", limits=c(-180,180,-90,90), over.land=TRUE, n.grp=1, interactions=NULL, d.grp=1,show.plot=FALSE){
+rcoords <- function(regionsize, samplesize, n.grp=1, grp.n.weights=rep(1,n.grp), grp.area.weights=rep(1,n.grp), wnd=c(-180,180,-90,90), over.land=TRUE, interactions=c(0,1), expf=8, show.plot=FALSE, return.as="data.frame"){
+	initial.list <- list(regionsize,grp.area.weights,grp.areas0)
 	#result.temp        <- data.frame(NULL)
 	PASS=FALSE
 	miter <- 100
@@ -377,13 +382,24 @@ rcoords <- function(r, size, return.as="data.frame", limits=c(-180,180,-90,90), 
 			if(ctr2 > miter){
 				stop(paste("failed to initialize after",miter,"attemps. ctr=",ctr,"ctr2=",ctr2))
 			}
-			sample.center  <- c(x=sample(seq(limits[1],to=limits[2],by=0.01),size=1), y=sample(seq(limits[3],to=limits[4],by=0.01),size=1))
+			sample.center  <- c(x=sample(seq(wnd[1],to=wnd[2],by=0.01),size=1), y=sample(seq(wnd[3],to=wnd[4],by=0.01),size=1))
 			if(n.grp>1){
-				d.grps <- (max(r)*(2*d.grp)):(max(r)*(3*d.grp))
+				# Sampling distances ('d.grps') from group centers to the sample.center. These values are the main determinant of how groups are geographically arranged.
+				# Value that may generate more space between groups.
+			#	expf    <- 4
+				d.grpsA <- rnorm(n=n.grp, mean=(regionsize/(n.grp*expf)), sd= expf)
+				d.grpsB <- runif(n=n.grp, min=(regionsize/(n.grp*10)), max=(regionsize/(n.grp*5)))
+				d.grps  <- apply(rbind(d.grpsA, d.grpsB), MARGIN=2, max)
 				group.centers <- rx2y2(p1=sample.center,d=d.grps,n=n.grp)
+				# Geographic sizes of each group.
+				grp.areas0   <- regionsize*(grp.area.weights/(sum(grp.area.weights)))
+				grp.areas    <- sapply(X=1:n.grp,FUN=function(x){rnorm(n=1,mean=grp.areas0[x],sd=0.5)})
+				# d.grps <- (max(r)*(2*d.grp)):(max(r)*(3*d.grp))
 			} else {
 				group.centers <- sample.center
+				grp.areas     <- rnorm(n=1,mean=regionsize,sd=1)
 			}
+			# Check that all group centers occur over land.
 			if(over.land){
 				if(length(points.on.land(x=group.centers)[,1]) < n.grp){
 					next
@@ -391,6 +407,9 @@ rcoords <- function(r, size, return.as="data.frame", limits=c(-180,180,-90,90), 
 			}
 			initial <- TRUE
 		}
+		# 
+		#
+		# return(grp.areas)
 #		### Sample a point on earth to use as the center of the sampling circle (if n.grp=1), or group center if n.grp>1
 #		sample.center  <- c(x=sample(seq(limits[1],to=limits[2],by=0.01),size=1), y=sample(seq(limits[3],to=limits[4],by=0.01),size=1))
 #		if(n.grp>1){
@@ -404,10 +423,14 @@ rcoords <- function(r, size, return.as="data.frame", limits=c(-180,180,-90,90), 
 #				next
 #			}
 #		}
-		### I may change this such that sum of group sizes is a parameter, and another parameter will determine relative sizes of groups from which absolute group sizes will be calculated.
-		grp.sizes <- sample(seq(min(size),to=max(size),length.out= max(2,diff(range(size)))), n.grp, replace=TRUE)
-		### Create a SpatialPolygons object to sample within
-		sample.area.sp <- lapply(1:n.grp, FUN=function(x){sampSurf::spCircle(radius=r,centerPoint=c(x=group.centers[x,1],y=group.centers[x,2]))[[1]]})
+		### For each group, the number of samples that will be drawn (or saved, if over.land=TRUE) from the group's sample region.
+		if(n.grp==1){
+			grp.sizes <- samplesize
+		} else {
+			grp.sizes  <- c(table(sample(x=n.grp,size=samplesize,prob=grp.n.weights,replace=TRUE)))
+		}
+		### Creates a SpatialPolygons object (sampling region) for each group
+		sample.area.sp <- lapply(1:n.grp, FUN=function(x){sampSurf::spCircle(radius= sqrt((grp.areas/pi))[x] , centerPoint=c(x=group.centers[x,1],y=group.centers[x,2]))[[1]]})
 		### Check if groups meet conditions set by 'interactions' argument.
 		if(!is.null(interactions) & n.grp>1){
 			if(!(interactions[1]==0 & interactions[2]==1)){
@@ -427,7 +450,7 @@ rcoords <- function(r, size, return.as="data.frame", limits=c(-180,180,-90,90), 
 					} else {
 						int.area.temp <- attributes(attributes(attributes(grp.int)$"polygons"[[1]])[[1]][[1]])$area
 					}
-					ratio.temp <- int.area.temp/pairsum.temp
+					ratio.temp <- (int.area.temp/pairsum.temp)
 					#grp.int <- raster::intersect(spgeom1=sample.area.sp[[1]],spgeom2=sample.area.sp[[2]])
 					grp.int.area <- c(grp.int.area,int.area.temp)
 					grp.sum.area <- c(grp.sum.area,pairsum.temp)
@@ -446,7 +469,8 @@ rcoords <- function(r, size, return.as="data.frame", limits=c(-180,180,-90,90), 
 		sample.area.sf <- lapply(X=1:n.grp,FUN=function(x){sf::st_as_sf(sample.area.sp[[x]])})
 		### Sample within each area. If points must be over land, sample four times as many points as requested by 'size' argument.
 		if(over.land){
-			samples.sf.temp  <- lapply(X=1:n.grp,FUN=function(x){sf::st_sample(x=sample.area.sf[[x]], size= (grp.sizes[x]*4))})
+			nsamp <- (grp.sizes*4)
+			samples.sf.temp  <- lapply(X=1:n.grp,FUN=function(x){sf::st_sample(x=sample.area.sf[[x]], size= nsamp[x])})
 		} else {
 			samples.sf.temp  <- lapply(X=1:n.grp,FUN=function(x) {sf::st_sample(x= sample.area.sf[[x]],size=grp.sizes[x])})
 		}
@@ -490,7 +514,7 @@ rcoords <- function(r, size, return.as="data.frame", limits=c(-180,180,-90,90), 
 		zoom.plot   <- ggplot2::ggplot(data = world.land) + ggplot2::geom_sf() + ggplot2::theme_classic() + ggplot2::geom_point(data = result.df2plot, ggplot2::aes(x = X, y = Y, fill=group), size = 2, shape = 21) + ggplot2::coord_sf(xlim =range(result.df2plot[,1]),ylim = range(result.df2plot[,2])) + ggplot2::theme(panel.border = ggplot2::element_rect(color = "black", fill=NA, size=1))
 		global.plot <- ggplot2::ggplot(data = world.land) + ggplot2::geom_sf() + ggplot2::theme_classic() + ggplot2::geom_point(data = result.df2plot, ggplot2::aes(x = X, y = Y, fill=group), size = 2, shape = 21) + ggplot2::theme(panel.border = ggplot2::element_rect(color = "black", fill=NA, size=1))
 		#print(zoom.plot)
-		grid::grid.newpage(bothmaps)
+		grid::grid.newpage()
 		grobs.list <- list(ggplot2::ggplotGrob(global.plot),ggplot2::ggplotGrob(zoom.plot))
 		bothmaps <- gridExtra::arrangeGrob(grobs=grobs.list,layout=matrix(c(1,2),ncol=1))
 		grid::grid.draw(bothmaps)
@@ -501,17 +525,18 @@ rcoords <- function(r, size, return.as="data.frame", limits=c(-180,180,-90,90), 
 	}
 	if(return.as=="SP"){
 		result.df <- result
-		result <- list(sp::SpatialPoints(result[,c(1,2)]),sample.area.sp,result.df)
+		result <- list(sp::SpatialPoints(result[,c(1,2)]),sample.area.sp,result.df,zoom.plot,global.plot)
 		#result <- sp::SpatialPoints(result)
 	}
 	result
-
 }
 #' @examples
 #' library(misc.wrappers)
 #' # Sample 50 points from 10-degree radius area with center located on land somewhere between -50 and 50 degrees latitude.
 #' coords50 <- rcoords(r=10,size=50,limits=c(-180,180,-50,50))
-
+#' 
+#' # Sample 100 points each from two allopatric groups (populations), both with centers somewhere on land between -50 and 50 latitude and centers are between 5 and 20 degrees from each other. 
+#' coords50.K2.allopatric <- rcoords(r=5,size=c(50,100),limits=c(-180,180,-50,50),n.grp=2,interactions=c(0,0))
 
 #' @title Buffered range
 #' 
