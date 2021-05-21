@@ -28,4 +28,8 @@ coords50 <- rcoords(r=10,size=50,limits=c(-180,180,-50,50))
 
 # Sample 100 points each from two allopatric groups (populations), both with centers somewhere on land between -50 and 50 latitude and centers are between 5 and 20 degrees from each other. 
 coords50.K2.allopatric <- rcoords(r=5,size=c(50,100),limits=c(-180,180,-50,50),n.grp=2,interactions=c(0,0))
+
+# Use default settings to generate 100 points over land for one group
+coords100 <- rcoords(show.plot=T)
+
 }

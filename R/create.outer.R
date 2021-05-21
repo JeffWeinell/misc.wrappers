@@ -337,14 +337,14 @@ points.on.land <- function(x,return.as="data.frame"){
 #' At present areas are circles projected onto a euclidean plane.
 #' 
 ##' @param r Number specifying the radius of group areas, in decimal degrees, or a numerical vector with min and max values of uniform sampling distribution from which radii of areas will be drawn.
-#' @param regionsize Number specifying the approximate longitudinal diameter spanning all sampling regions. I have not verified the accuracy, but larger values generally yield larger extent across all samples.
-#' @param samplesize Total number of points to return, across all groups.
-#' @param grp.n.weights Probability weights for determing sample sizes of groups. Default weights are uniformly distributed.
-#' @param grp.area.weights Probability weights for determing group region sizes. Default weights are uniformly distributed.
-#' @param wnd Numerical vector specifying longitudinal and latitude limits for possible sampling. Default is to include all of Earth c(-180,180,-90,90).
+#' @param regionsize Number between 0 and 1 specifying the fraction of the possible sampling area (the window region set by 'wnd' argument) in which points may be distributed. Default 0.25. When 'wnd' is default (entire Earth), regionsize is default (0.25), and ('over.land' condition is FALSE), then minimum convex hull of all sampled points is expected to cover 1/4 of Earth.
+#' @param samplesize Total number of points to sample. Default 100.
+#' @param n.grp Number of groups to sample (default 1). Each group is defined by its own spatial polygon from which samples are drawn. The center of each group's sampling polygon falls within a polygon with size = ('regionsize' * area of 'wnd').
+#' @param grp.n.weights Probability weights for group sample sizes of groups. Default is equal weights. The sum of points sampled for each group = 'samplesize' argument.
+#' @param grp.area.weights Probability weights determing group region sizes. Default is equal weights.
+#' @param wnd Numerical vector specifying the bounding box (longitude and latitude ranges) for the region where sampling is allowed. Default is to include all of Earth c(-180,180,-90,90). 
 #' @param over.land Logical indicating whether or not all returned points must occur over land. Default TRUE. Note that this condition is only applied to samples returned as output. Therefore, 'samplesize' is really a 'sample until' rule. This is faster than performing clipping operations on proposed sample polygons to conform to geography.
-#' @param n.grp Number of spatial sampling groups.
-#' @param interactions Numeric vector with the maximum and minimum amount of overlap between pairs of groups, calculated as (intersect area)/(mean group areas non-intersected). The default c(0,1) allows for all possible scenarios. Examples: c(0,0) specifies that groups must be allopatric; c(1,1) requires complete overlap of groups, which is not realistic given the stochasticity determining region sizes; c(0.5,1) requires that at least half-overlaps between groups; c(0.2,0.25) specifies a small contact zone.
+#' @param interactions Numeric vector with the minimum and maximum amount of overlap between each pair of groups (aka populations), calculated as (intersect area)/(minimum of non-intersected area for each group). Default c(0,1) allows for all possible scenarios. Examples: c(0,0) specifies that groups must be allopatric; c(1,1) requires complete overlap of groups, which is not realistic given the stochasticity determining region sizes; c(0.5,1) requires that at least half-overlaps between groups; c(0.2,0.25) specifies a small contact zone.
 ##' @param d.grp Number controlling the distance between the centers of a pair of areas, as a function of the pair's radii. Default 1, which would allow sample regions to nearly coincide. Future option may allow for a pairwise distance matrix.
 #' @param expf Number that affects dispersion relative to regionsize. Higher numbers increase dispersion. Default 8.
 #' @param grp.scaler Number > 0 that scales geographical areas of all groups
@@ -352,8 +352,10 @@ points.on.land <- function(x,return.as="data.frame"){
 #' @param show.plot Whether or not the points should be plotted on a low-resolution land map. The map is used is the rnaturalearth countries map, 110 meter resolution.
 #' @return An object with class equal to the value of 'return.as' and containing the set of points that meet the specified sampling requirements. If return.as='matrix' or 'data.frame', the columns are 'X' (for longitude), 'Y' (for latitude), and 'group' (all 1 if 'n.grp'=1).
 #' @export rcoords
-rcoords <- function(regionsize, samplesize, n.grp=1, grp.n.weights=rep(1,n.grp), grp.area.weights=rep(1,n.grp), wnd=c(-180,180,-90,90), over.land=TRUE, interactions=c(0,1), expf=8, show.plot=FALSE, return.as="data.frame",grp.scaler=1){
-	initial.list <- list(regionsize,grp.area.weights,grp.areas0)
+rcoords <- function(regionsize=0.25, samplesize=100, n.grp=1, grp.n.weights=rep(1,n.grp), grp.area.weights=rep(1,n.grp), wnd= c(-180, 180,-90, 90), over.land=TRUE, interactions=c(0,1), expf=8, show.plot=FALSE, return.as="data.frame",grp.scaler=1){
+	# Defaults:
+	# regionsize=0.25; samplesize=100; n.grp=1; grp.n.weights=rep(1,n.grp); grp.area.weights=rep(1,n.grp); wnd= c(-180, 180,-90, 90); over.land=TRUE; interactions=c(0,1); expf=8; show.plot=FALSE;  return.as="data.frame"; grp.scaler=1
+	
 	#result.temp        <- data.frame(NULL)
 	PASS=FALSE
 	miter <- 100
@@ -368,6 +370,26 @@ rcoords <- function(regionsize, samplesize, n.grp=1, grp.n.weights=rep(1,n.grp),
 	#		
 	#	}
 	#}
+	
+	# rectangular SpatialPolygons object with extent formed by 'wnd' argument.
+	wnd.sp <- as(raster::extent(wnd), "SpatialPolygons")
+	# area of the region bounded by 'wnd', in decimal degrees
+	wnd.sp2 <- wnd.sp
+	sp::proj4string(wnd.sp2) <- sp::CRS("+proj=longlat +datum=WGS84")
+	wnd.area <- attributes(attributes(wnd.sp2)$polygons[[1]])$area
+	# area of region spanning all group sampling areas, in decimal degrees
+	regionsize.dd <- (regionsize*wnd.area)
+
+
+	if(FALSE){
+		# area of the region defined by 'wnd'; when 'wnd' includes entire earth, seems to be underestimated by about 20% (measure=geodesic or haversine), 
+		pts.corners <- bbox2points(rbind(x=c(min=-180, max=180),y=c(min=-90,max=90)))
+		sp::Polygon(pts.corners)
+		ydist.km    <- geodist::geodist(x=t(pts.corners)[,1], y=t(pts.corners)[,2],measure="geodesic")/1000
+		xdist.km    <- geodist::geodist(x=t(pts.corners)[,3], y=t(pts.corners)[,4],measure="geodesic")/1000
+		area.km2    <- (ydist.km*xdist.km)
+	}
+	
 	while(!PASS){
 		ctr <- ctr + 1
 		if(ctr > miter){
@@ -383,32 +405,31 @@ rcoords <- function(regionsize, samplesize, n.grp=1, grp.n.weights=rep(1,n.grp),
 			if(ctr2 > miter){
 				stop(paste("failed to initialize after",miter,"attemps. ctr=",ctr,"ctr2=",ctr2))
 			}
-			# rectangular SpatialPolygons object with extent formed by 'wnd' argument.
-			wnd.sp <- as(raster::extent(wnd), "SpatialPolygons")
 			# Random point within wnd.sp to determine subregion within which group centers will occur
 			center.sp <- sp::spsample(wnd.sp,n=1,type="random")
 			# Length two vector with "x" and "y" entries from sample.center, to pass to spCircle
 			center.xy <- c(sp::coordinates(center.sp)); names(center.xy) <- c("x","y")
 			# Create a circular polygon centered at sample center; in this case 
 			# sample.area.sp <- sampSurf::spCircle(radius=sqrt((regionsize/pi)),centerPoint=center.xy)[[1]]
-			regionsize2 <- (10^regionsize)
-			if(n.grp==1){
-				regionsize2 <- regionsize2*grp.scaler*0.5
-			}
-			sample.area.sp <- sampSurf::spCircle(radius=sqrt((regionsize2/pi)),centerPoint=center.xy)[[1]]
+			# regionsize2 <- (10^regionsize)
+			# regionsize2 <- regionsize.dd
+			#if(n.grp==1){
+			regionsize.dd <- (regionsize.dd*grp.scaler*0.5)
+			#}
+			sample.area.sp <- sampSurf::spCircle(radius=sqrt((regionsize.dd/pi)),centerPoint=center.xy)[[1]]
 			# Check if entire sample.area.sp is within window defined by 'wnd' argument
-			area.wnd.diff <- rgeos::gDifference(spgeom1=sample.area.sp,spgeom2=wnd.sp)
-			# If area.wnd.diff is not NULL, then part of 'sample.area.sp' falls outside of the sampling window.
-			if(!is.null(area.wnd.diff)){
-				next
-			}
+	#		area.wnd.diff <- rgeos::gDifference(spgeom1=sample.area.sp,spgeom2=wnd.sp)
+	#		# If area.wnd.diff is not NULL, then part of 'sample.area.sp' falls outside of the sampling window.
+	#		if(!is.null(area.wnd.diff)){
+	#			next
+	#		}
 			if(n.grp>1){
 				# Sample group sampling-center locations from within sample.area.sp
 				grp.pts <- sp::spsample(sample.area.sp,n=n.grp,type="random")
 				# coordinates extracted from grp.pts
 				grp.pts.mat <- sp::coordinates(grp.pts)
 				colnames(grp.pts.mat) <- c("x","y")
-				grp.areas <- (regionsize2*(grp.area.weights/(sum(grp.area.weights)))*grp.scaler*0.5)
+				grp.areas <- (regionsize.dd*(grp.area.weights/(sum(grp.area.weights)))*grp.scaler*0.5)
 				# create polygons centered at grp.pts, from which each groups points will be drawn. First need to determine group sizes...
 				grp.areas.sp <- lapply(X=1:n.grp, FUN=function(x){sampSurf::spCircle(radius=sqrt((grp.areas/pi))[x],centerPoint=c(grp.pts.mat[x,]))[[1]]})
 				# Distance between group centers. Not sure if this is necessary.
@@ -416,7 +437,7 @@ rcoords <- function(regionsize, samplesize, n.grp=1, grp.n.weights=rep(1,n.grp),
 				# check that each group centers occur over land, if over.land is true
 			} else {
 				grp.pts.mat  <- matrix(center.xy,nrow=1,dimnames=list(c(NULL),c("x","y")))
-				grp.areas.sp <- sample.area.sp
+				grp.areas.sp <- list(sample.area.sp)
 			}
 			if(over.land){
 				if(length(points.on.land(x=grp.pts.mat)[,1]) < n.grp){
@@ -445,15 +466,42 @@ rcoords <- function(regionsize, samplesize, n.grp=1, grp.n.weights=rep(1,n.grp),
 				grp.int.area <- grp.sum.area <- grp.ratio <- c()
 				for(i in 1:nrow(grp.pairs)){
 					polygon.pair <- polygons.list[c(grp.pairs[i,1],grp.pairs[i,2])]
-					pairsum.temp <- sum(c(attributes(polygon.pair[[1]])$area, attributes(polygon.pair[[2]])$area))
+					grp1.area.temp <- attributes(polygon.pair[[1]])$area
+					grp2.area.temp <- attributes(polygon.pair[[2]])$area
+					pairsum.temp <- sum(c(grp1.area.temp, grp2.area.temp))
 					#grp.int <- raster::intersect(sample.area.sp[[grp.pairs[i,1]]], sample.area.sp[[grp.pairs[i,2]]])
-					grp.int <- rgeos::gIntersection(spgeom1=grp.areas.sp[[grp.pairs[i,1]]],spgeom2=grp.areas.sp[[grp.pairs[i,2]]]) # returns NULL if polygons do not intersect; returns SpatialPolygons object if they do intersect
+					# returns NULL if polygons do not intersect; returns SpatialPolygons object if they do intersect
+					grp.int  <- rgeos::gIntersection(spgeom1=grp.areas.sp[[grp.pairs[i,1]]],spgeom2=grp.areas.sp[[grp.pairs[i,2]]])
+					#Nonintersecting portions of areas 1 and 2 (faster than getting diff of each in the other and then adding)
+					grp.diff <- rgeos::gSymdifference(spgeom1=grp.areas.sp[[grp.pairs[i,1]]],spgeom2=grp.areas.sp[[grp.pairs[i,2]]])
+					# returns a spatial polygons object with the non-intersecting portions of the group pair polygons each as their own polygons. If no overlap the returned polygons are the same the input polygons.
+					#grp.diff1 <- rgeos::gDifference(spgeom1=grp.areas.sp[[grp.pairs[i,1]]],spgeom2=grp.areas.sp[[grp.pairs[i,2]]])
+					#grp.diff2 <- rgeos::gDifference(spgeom1=grp.areas.sp[[grp.pairs[i,2]]],spgeom2=grp.areas.sp[[grp.pairs[i,1]]])
 					if(is.null(grp.int)){
 						int.area.temp <- 0
 					} else {
 						int.area.temp <- attributes(attributes(attributes(grp.int)$"polygons"[[1]])[[1]][[1]])$area
 					}
-					ratio.temp <- (int.area.temp/pairsum.temp)
+					# Area of the region of group 1 that does not intersect group 2 (for this pair of groups).
+					#if(is.null(grp.diff1)){
+					#	diff1.area.temp <- 0
+					#} else {
+					#	diff1.area.temp <- attributes(attributes(attributes(grp.diff1)$"polygons"[[1]])[[1]][[1]])$area
+					#}
+					#if(is.null(grp.diff2)){
+					#	diff2.area.temp <- 0
+					#} else {
+					#	diff2.area.temp <- attributes(attributes(attributes(grp.diff2)$"polygons"[[1]])[[1]][[1]])$area
+					#}
+					if(is.null(grp.diff)){
+						diff.area.temp <- 0
+					} else {
+						diff1.area.temp <- attributes(attributes(attributes(grp.diff)$"polygons"[[1]])[[1]][[1]])$area
+						diff2.area.temp <- attributes(attributes(attributes(grp.diff)$"polygons"[[1]])[[1]][[2]])$area
+						diff.area.temp <- diff1.area.temp + diff2.area.temp
+					}
+					ratio.temp <- int.area.temp/diff.area.temp
+					#ratio.temp <- (int.area.temp/pairsum.temp)
 					#grp.int <- raster::intersect(spgeom1=sample.area.sp[[1]],spgeom2=sample.area.sp[[2]])
 					grp.int.area <- c(grp.int.area,int.area.temp)
 					grp.sum.area <- c(grp.sum.area,pairsum.temp)
@@ -483,7 +531,6 @@ rcoords <- function(regionsize, samplesize, n.grp=1, grp.n.weights=rep(1,n.grp),
 			### Hold sampled coordinates as a list of data matrices
 			samples.mat.temp <- lapply(X=1:n.grp,FUN=function(x){sf::st_coordinates(samples.sf.temp[[x]])})
 		}
-
 		### Method using spsample from SP package.
 		if(over.land){
 			nsamp <- (grp.sizes*4)
@@ -493,10 +540,18 @@ rcoords <- function(regionsize, samplesize, n.grp=1, grp.n.weights=rep(1,n.grp),
 		}
 		samples.mat.temp <- lapply(X=1:n.grp,FUN=function(x){sp::coordinates(samples.sp.temp[[x]])})
 
+		#### At this step, need to filter the points that fall outside of 'wnd'
+		####### PAUSED HERE ##########
+		if(FALSE){
+			if(any(over(samples.sp.temp[[1]],wnd.sp)==1)){
+				samples.mat.temp <- samples.mat.temp[which(over(samples.sp.temp[[1]],wnd.sp)==1)]
+			}
+		}
 		### Hold sampled coordinates as a list of data frames, and include a column in each data frame to indicate group assignment
 		samples.df.temp <- lapply(X=1:n.grp,FUN=function(x){data.frame(X=samples.mat.temp[[x]][,1],Y=samples.mat.temp[[x]][,2],group=x)})
-		### Plot samples on map (for debugging)
-		# world.land <- rnaturalearth::ne_countries(scale=110,returnclass="sf")
+		
+
+		
 		# ggplot2::ggplot(data = world.land) + ggplot2::geom_sf() + ggplot2::theme_classic() + ggplot2::geom_point(data = samples.df.temp, ggplot2::aes(x = X, y = Y), size = 2, shape = 21, fill = "darkred") # + coord_sf(xlim = c(-90, -78), ylim = c(24.5, 40), expand = FALSE)
 		if(over.land){
 			### Get subset of sampled coordinates that fall on land
@@ -519,20 +574,34 @@ rcoords <- function(regionsize, samplesize, n.grp=1, grp.n.weights=rep(1,n.grp),
 	result0 <- lapply(1:n.grp,FUN=function(x){samples.temp[[x]][sample(x=1:nrow(samples.temp[[x]]), size=grp.sizes[x], replace=FALSE),]}) # samples.temp[[x]]
 	result  <- do.call(rbind,result0)
 	mode(result[,"group"]) <- "character"
+	result.sp <- sp::SpatialPoints(result[,c(1,2)])
 	if(show.plot){
-		world.land  <- rnaturalearth::ne_countries(scale=110,returnclass="sf")
+		world.land    <- rnaturalearth::ne_countries(scale=110,returnclass="sf")
+		world.land10  <- rnaturalearth::ne_countries(scale=10,returnclass="sf")
 		result.df2plot   <- result
 		
 		xdist <- geodist::geodist(result.df2plot[order(result.df2plot[,1]),][c(1,nrow(result.df2plot)),1:2],measure="geodesic",sequential=T)
 		ydist <- geodist::geodist(result.df2plot[order(result.df2plot[,2]),][c(1,nrow(result.df2plot)),1:2],measure="geodesic",sequential=T)
 		plot.margin <- which(c(xdist,ydist)==max(c(xdist,ydist)))
-		
+		zoommaparea.km <- (xdist/1000)*(ydist/1000)
+		if(zoommaparea.km <10e6){
+			zoom.map <- world.land10
+		} else {
+			zoom.map <- world.land
+		}
+		#####
+		spbb   <- sp::bbox(result.sp)
+		spbb2  <- apply(spbb,MARGIN=1,FUN=rangeBuffer,f=0.1)
+		dfbb   <- data.frame(x1=spbb[1,1], x2=spbb[1,2], y1=spbb[2,1], y2=spbb[2,2])
+		#dfbb   <- as.data.frame(t( as.matrix(ggmap::make_bbox(lon= spbb[,1],lat= spbb[,2]))))
+		ggrect <- ggplot2::geom_rect(data=dfbb, mapping=ggplot2::aes(xmin=x1, xmax=x2, ymin=y1, ymax=y2),fill="black",color="black",alpha=0.1)
+		#ggrect <- ggplot2::geom_rect(data=dfbb, mapping=ggplot2::aes(xmin=left, xmax=right, ymin=bottom, ymax=top),color="black",alpha=0)
 		#exf  <- 1.5
 		#xlim <- rangeBuffer(result.df2plot[,1],exf*1.5)
 		#ylim <- rangeBuffer(result.df2plot[,2],exf)
 		#zoom.plot   <- ggplot2::ggplot(data = world.land) + ggplot2::geom_sf() + ggplot2::theme_classic() + ggplot2::geom_point(data = result.df2plot, ggplot2::aes(x = X, y = Y, fill=group), size = 2, shape = 21) + ggplot2::coord_sf(xlim = xlim, ylim = ylim ) + ggplot2::theme(panel.border = ggplot2::element_rect(color = "black", fill=NA, size=1))
-		zoom.plot   <- ggplot2::ggplot(data = world.land) + ggplot2::geom_sf() + ggplot2::theme_classic() + ggplot2::geom_point(data = result.df2plot, ggplot2::aes(x = X, y = Y, fill=group), size = 2, shape = 21) + ggplot2::coord_sf(xlim =range(result.df2plot[,1]),ylim = range(result.df2plot[,2])) + ggplot2::theme(panel.border = ggplot2::element_rect(color = "black", fill=NA, size=1)) + ggplot2::theme(legend.position = "none") + ggplot2::xlab("longitude") + ggplot2::ylab("latitude")
-		global.plot <- ggplot2::ggplot(data = world.land) + ggplot2::geom_sf() + ggplot2::theme_classic() + ggplot2::geom_point(data = result.df2plot, ggplot2::aes(x = X, y = Y, fill=group), size = 2, shape = 21) + ggplot2::theme(panel.border = ggplot2::element_rect(color = "black", fill=NA, size=1)) + ggplot2::theme(axis.title.y = ggplot2::element_blank(), axis.title.x = ggplot2::element_blank())
+		zoom.plot   <- ggplot2::ggplot(data = zoom.map) + ggplot2::geom_sf() + ggplot2::theme_classic() + ggplot2::geom_point(data = result.df2plot, ggplot2::aes(x = X, y = Y, fill=group), size = 2, shape = 21) + ggplot2::coord_sf(xlim =range(result.df2plot[,1]),ylim = range(result.df2plot[,2])) + ggplot2::theme(panel.border = ggplot2::element_rect(color = "black", fill=NA, size=1)) + ggplot2::theme(legend.position = "none") + ggplot2::xlab("longitude") + ggplot2::ylab("latitude")
+		global.plot <- ggplot2::ggplot(data = world.land) + ggplot2::geom_sf() + ggplot2::theme_classic() + ggplot2::geom_point(data = result.df2plot, ggplot2::aes(x = X, y = Y, fill=group), size = 2, shape = 21) + ggplot2::theme(panel.border = ggplot2::element_rect(color = "black", fill=NA, size=1)) + ggplot2::theme(axis.title.y = ggplot2::element_blank(), axis.title.x = ggplot2::element_blank()) + ggrect
 		#print(zoom.plot)
 		grobs.list <- list(ggplot2::ggplotGrob(global.plot),ggplot2::ggplotGrob(zoom.plot))
 		if(plot.margin==2){
@@ -549,7 +618,7 @@ rcoords <- function(regionsize, samplesize, n.grp=1, grp.n.weights=rep(1,n.grp),
 	}
 	if(return.as=="SP"){
 		result.df <- result
-		result <- list(sp::SpatialPoints(result[,c(1,2)]),sample.area.sp,result.df,zoom.plot,global.plot)
+		result <- list(result.sp,sample.area.sp,result.df,zoom.plot,global.plot,bothmaps)
 		#result <- sp::SpatialPoints(result)
 	}
 	result
@@ -561,6 +630,10 @@ rcoords <- function(regionsize, samplesize, n.grp=1, grp.n.weights=rep(1,n.grp),
 #' 
 #' # Sample 100 points each from two allopatric groups (populations), both with centers somewhere on land between -50 and 50 latitude and centers are between 5 and 20 degrees from each other. 
 #' coords50.K2.allopatric <- rcoords(r=5,size=c(50,100),limits=c(-180,180,-50,50),n.grp=2,interactions=c(0,0))
+#'
+#' # Use default settings to generate 100 points over land for one group
+#' coords100 <- rcoords(show.plot=T)
+#' 
 
 #' @title Buffered range
 #' 
@@ -596,6 +669,35 @@ rx2y2 <- function(p1,d,n=1){
 	yn <- (rd*sin(rtheta)) + p1[2]
 	data.frame(x=xn,y=yn)
 }
-# rx2y2(x1y1=centerpoint,d=d.grp)
+
+
+#' @title corner coordinates of area described by bounding box
+#' 
+#' Returns a 2x4 matrix with coordinates x,y of the four corner points for a region with an extent determined by the input bounding box.
+#' 
+#' @param bb 2x2 numerical matrix (bounding box matrix) with x,y rows and and min, max columns
+#' @return 2x4 matrix with coordinates x y of points at the corners the region with extent defined by 'bb'
+#' @export bbox2points
+bbox2points <- function(bb){
+	res0 <- do.call(rbind,list(bb[,1],bb[,2] ,diag(bb), diag(apply(bb,1,rev))))
+	# returns points clockwise from lower left
+	res0[order(order(res0[,1]),order(res0[,2],decreasing=T)),]
+}
+
+
+# For an input function 'infunc', the function 'assignformals2global' gets the argument names and default values of 'infunc', and assigns the values of those arguments to objects of the same name in the global environment. Useful when debugging functions.
+# Doesnt really work as a function because the objects have class 'call'
+#assignformals2global <- function(infunc){
+#	# infunc <- rcoords
+#	forms <- formals(infunc)
+#	for(i in 1:length(forms)){
+#		assign(names(forms)[i],forms[[i]],envir=globalenv(),inherits=TRUE)
+#	}
+#}
+
+
+
+
+
 
 

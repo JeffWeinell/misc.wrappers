@@ -8,8 +8,8 @@ This function provides a way to randomly generate one or more groups of points, 
 At present areas are circles projected onto a euclidean plane.}
 \usage{
 rcoords(
-  regionsize,
-  samplesize,
+  regionsize = 0.25,
+  samplesize = 100,
   n.grp = 1,
   grp.n.weights = rep(1, n.grp),
   grp.area.weights = rep(1, n.grp),
@@ -23,21 +23,21 @@ rcoords(
 )
 }
 \arguments{
-\item{regionsize}{Number specifying the approximate longitudinal diameter spanning all sampling regions. I have not verified the accuracy, but larger values generally yield larger extent across all samples.}
+\item{regionsize}{Number between 0 and 1 specifying the fraction of the possible sampling area (the window region set by 'wnd' argument) in which points may be distributed. Default 0.25. When 'wnd' is default (entire Earth), regionsize is default (0.25), and ('over.land' condition is FALSE), then minimum convex hull of all sampled points is expected to cover 1/4 of Earth.}
 
-\item{samplesize}{Total number of points to return, across all groups.}
+\item{samplesize}{Total number of points to sample. Default 100.}
 
-\item{n.grp}{Number of spatial sampling groups.}
+\item{n.grp}{Number of groups to sample (default 1). Each group is defined by its own spatial polygon from which samples are drawn. The center of each group's sampling polygon falls within a polygon with size = ('regionsize' * area of 'wnd').}
 
-\item{grp.n.weights}{Probability weights for determing sample sizes of groups. Default weights are uniformly distributed.}
+\item{grp.n.weights}{Probability weights for group sample sizes of groups. Default is equal weights. The sum of points sampled for each group = 'samplesize' argument.}
 
-\item{grp.area.weights}{Probability weights for determing group region sizes. Default weights are uniformly distributed.}
+\item{grp.area.weights}{Probability weights determing group region sizes. Default is equal weights.}
 
-\item{wnd}{Numerical vector specifying longitudinal and latitude limits for possible sampling. Default is to include all of Earth c(-180,180,-90,90).}
+\item{wnd}{Numerical vector specifying the bounding box (longitude and latitude ranges) for the region where sampling is allowed. Default is to include all of Earth c(-180,180,-90,90).}
 
 \item{over.land}{Logical indicating whether or not all returned points must occur over land. Default TRUE. Note that this condition is only applied to samples returned as output. Therefore, 'samplesize' is really a 'sample until' rule. This is faster than performing clipping operations on proposed sample polygons to conform to geography.}
 
-\item{interactions}{Numeric vector with the maximum and minimum amount of overlap between pairs of groups, calculated as (intersect area)/(mean group areas non-intersected). The default c(0,1) allows for all possible scenarios. Examples: c(0,0) specifies that groups must be allopatric; c(1,1) requires complete overlap of groups, which is not realistic given the stochasticity determining region sizes; c(0.5,1) requires that at least half-overlaps between groups; c(0.2,0.25) specifies a small contact zone.}
+\item{interactions}{Numeric vector with the minimum and maximum amount of overlap between each pair of groups (aka populations), calculated as (intersect area)/(minimum of non-intersected area for each group). Default c(0,1) allows for all possible scenarios. Examples: c(0,0) specifies that groups must be allopatric; c(1,1) requires complete overlap of groups, which is not realistic given the stochasticity determining region sizes; c(0.5,1) requires that at least half-overlaps between groups; c(0.2,0.25) specifies a small contact zone.}
 
 \item{expf}{Number that affects dispersion relative to regionsize. Higher numbers increase dispersion. Default 8.}
 
