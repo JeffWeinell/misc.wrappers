@@ -353,8 +353,8 @@ points.on.land <- function(x,return.as="data.frame"){
 #' @return An object with class equal to the value of 'return.as' and containing the set of points that meet the specified sampling requirements. If return.as='matrix' or 'data.frame', the columns are 'X' (for longitude), 'Y' (for latitude), and 'group' (all 1 if 'n.grp'=1).
 #' @export rcoords
 rcoords <- function(regionsize=0.25, samplesize=100, n.grp=1, grp.n.weights=rep(1,n.grp), grp.area.weights=rep(1,n.grp), wnd= c(-180, 180,-90, 90), over.land=TRUE, interactions=c(0,1), expf=8, show.plot=FALSE, return.as="data.frame",grp.scaler=1){
-	# Defaults:
-	# regionsize=0.25; samplesize=100; n.grp=1; grp.n.weights=rep(1,n.grp); grp.area.weights=rep(1,n.grp); wnd= c(-180, 180,-90, 90); over.land=TRUE; interactions=c(0,1); expf=8; show.plot=FALSE;  return.as="data.frame"; grp.scaler=1
+	# 
+	# Defaults: n.grp=2; samplesize=100; regionsize=0.25; grp.n.weights=rep(1,n.grp); grp.area.weights=rep(1,n.grp); wnd= c(-180, 180,-90, 90); over.land=TRUE; interactions=c(0,1); expf=8; show.plot=FALSE;  return.as="data.frame"; grp.scaler=1
 	
 	#result.temp        <- data.frame(NULL)
 	PASS=FALSE
@@ -539,30 +539,35 @@ rcoords <- function(regionsize=0.25, samplesize=100, n.grp=1, grp.n.weights=rep(
 			samples.sp.temp  <- lapply(X=1:n.grp,FUN=function(x) {sp::spsample(x= grp.areas.sp[[x]],n=grp.sizes[x], type="random")})
 		}
 		samples.mat.temp <- lapply(X=1:n.grp,FUN=function(x){sp::coordinates(samples.sp.temp[[x]])})
-
-		#### At this step, need to filter the points that fall outside of 'wnd'
-		####### PAUSED HERE ##########
-		if(FALSE){
-			if(any(over(samples.sp.temp[[1]],wnd.sp)==1)){
-				samples.mat.temp <- samples.mat.temp[which(over(samples.sp.temp[[1]],wnd.sp)==1)]
-			}
-		}
 		### Hold sampled coordinates as a list of data frames, and include a column in each data frame to indicate group assignment
-		samples.df.temp <- lapply(X=1:n.grp,FUN=function(x){data.frame(X=samples.mat.temp[[x]][,1],Y=samples.mat.temp[[x]][,2],group=x)})
+		samples.df.temp <- do.call(rbind,lapply(X=1:n.grp,FUN=function(x){data.frame(X=samples.mat.temp[[x]][,1],Y=samples.mat.temp[[x]][,2],group=x)}))
 		
+		# Filtering samples outside of 'wnd'; 1=sample is within wnd; NA=sample is outside of wnd
+		samples.in.wnd <- unlist(lapply(1:n.grp,function(x) over(samples.sp.temp[[x]],wnd.sp)))
+		if(any(samples.in.wnd)==1){
+			samples.df.temp <- samples.df.temp[which(samples.in.wnd==1),]
+		}
+		
+		### Hold sampled coordinates as a list of data frames, and include a column in each data frame to indicate group assignment
+#		samples.df.temp <- lapply(X=1:n.grp,FUN=function(x){data.frame(X=samples.mat.temp[[x]][,1],Y=samples.mat.temp[[x]][,2],group=x)})
+		####### PAUSED HERE ##########
 
 		
 		# ggplot2::ggplot(data = world.land) + ggplot2::geom_sf() + ggplot2::theme_classic() + ggplot2::geom_point(data = samples.df.temp, ggplot2::aes(x = X, y = Y), size = 2, shape = 21, fill = "darkred") # + coord_sf(xlim = c(-90, -78), ylim = c(24.5, 40), expand = FALSE)
 		if(over.land){
 			### Get subset of sampled coordinates that fall on land
 			#samples.temp <- lapply(X=1:n.grp,FUN=function(x){points.on.land(x=samples.mat.temp[[x]])})
-			samples.temp <- lapply(X=1:n.grp,FUN=function(x){points.on.land(x=samples.df.temp[[x]])})
+			# filtering samples that are not on land
+			samples.temp <- points.on.land(samples.df.temp)
+		#	samples.temp <- lapply(X=1:n.grp,FUN=function(x){points.on.land(x=samples.df.temp[[x]])})
 			#samples.land.temp <- points.on.land(x=samples.df.temp)
 		} else {
 			samples.temp           <- samples.df.temp
 			# colnames(samples.temp) <- c("longitude","latitude")
 		}
-		n.grp.pass  <- sapply(samples.temp,nrow)
+		# Number of points sampled for each group after filtering points
+		n.grp.pass  <- table(samples.temp[,"group"])
+		#n.grp.pass  <- sapply(samples.temp,nrow)
 		#sapply(n.grp.pass,funct)
 		if(all(n.grp.pass >= grp.sizes)){
 			PASS=TRUE
@@ -571,9 +576,14 @@ rcoords <- function(regionsize=0.25, samplesize=100, n.grp=1, grp.n.weights=rep(
 		}
 		# result.temp <- rbind(result.temp,samples.temp)
 	}
-	result0 <- lapply(1:n.grp,FUN=function(x){samples.temp[[x]][sample(x=1:nrow(samples.temp[[x]]), size=grp.sizes[x], replace=FALSE),]}) # samples.temp[[x]]
-	result  <- do.call(rbind,result0)
+	# For each group, keep corresponding 'grp.sizes' number of samples
+	result <- samples.temp[unlist(lapply(1:n.grp,function(x) grep(x,samples.temp[,"group"])[1:grp.sizes[x]])),]
+	
+	#result0 <- lapply(1:n.grp,FUN=function(x){ samples.temp[[x]][sample(x=1:nrow(samples.temp[[x]]), size=grp.sizes[x], replace=FALSE),]}) # samples.temp[[x]]
+	#result  <- do.call(rbind,result0)
+	# Make "group" column a character variable
 	mode(result[,"group"]) <- "character"
+	# Convert data frame to spatial points object.
 	result.sp <- sp::SpatialPoints(result[,c(1,2)])
 	if(show.plot){
 		world.land    <- rnaturalearth::ne_countries(scale=110,returnclass="sf")
