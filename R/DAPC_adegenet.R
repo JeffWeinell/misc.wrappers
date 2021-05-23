@@ -1925,10 +1925,14 @@ filter.vcf <- function(x,save.as=NULL,nsample=c(NA,NA), specificSites=NULL,speci
 #' @param block.maxsize Number indicating the maximum size of linkage blocks. Ignored if 'LD' is FALSE or coerced to FALSE, or if 'use.maxLDx' is TRUE and 'x' is non-NULL, in which case the max block size is equal to the max position of any snps in a linkage block). Default 1000.
 #' @param use.maxLDx Logical indicating whether or not the maximum linkage block size should be set as the max position of any snp within a linkage block of the input data. Default FALSE, which means that max linkage block size should be the value of 'block.maxsize'.
 #' @param sim.coords Logical indicating if a simulated coordinates (sample localities) should be produced for each simulated individual. Default FALSE.
-#' @param ... Additional arguments passed to 'adegenet::glSim' to control SNPs simulation, or to 'misc.wrappers::rcoords' to further control the simulation of geographic localities when 'sim.coords' is TRUE. Possible 'glSim' arguments include 'grp.size', 'pop.freq', 'alpha', 'parallel', and 'theta' (see ?adegenet::glSim for details). Arguments that can be passed to 'rcoords' include wnd', 'over.land', and 'interactions'; see ?misc.wrappers::rcoords).
+#' @param regionsize Number between 0 and 1 specifying the fraction of the possible sampling area (the window region set by 'wnd' argument) in which points may be distributed. Default 0.25. When 'wnd' is default (entire Earth), regionsize is default (0.25), and ('over.land' condition is FALSE), then minimum convex hull of all sampled points is expected to cover 1/4 of Earth.
+#' @param wnd Either a character string or vector describing one or more regions of Earth, or a length four numerical vector specifying the bounding box (longitude and latitude ranges) for the region where sampling is allowed. Default is to include all of Earth c(-180,180,-90,90). 
+#' @param interactions Numeric vector with the minimum and maximum amount of overlap between each pair of groups (aka populations), calculated as (intersect area)/(minimum of non-intersected area for each group). Default c(0,1) allows for all possible scenarios. Examples: c(0,0) specifies that groups must be allopatric; c(1,1) requires complete overlap of groups, which is not realistic given the stochasticity determining region sizes; c(0.5,1) requires that at least half-overlaps between groups; c(0.2,0.25) specifies a small contact zone.
+#' @param over.land, and 'interactions'
+#' @param ... Additional arguments passed to 'adegenet::glSim' to control SNPs simulation, or to 'misc.wrappers::rcoords' to further control the simulation of geographic localities when 'sim.coords' is TRUE. Possible 'glSim' arguments include 'grp.size', 'pop.freq', 'alpha', 'parallel', and 'theta' (see ?adegenet::glSim for details).
 #' @return An object with class vcfR (see 'vcfR' package for details regarding this class)
 #' @export sim.vcf
-sim.vcf <- function(x=NULL, save.as=NULL, RA.probs=NULL, n.ind=NULL, n.snps=NULL, snp.str = 0, ploidy=NULL, K=2, include.missing=FALSE, fMD=NULL, pMDi=NULL, LD=FALSE, block.minsize=10, block.maxsize=NULL, use.maxLDx=FALSE, sim.coords=FALSE , ...){
+sim.vcf <- function(x=NULL, save.as=NULL, RA.probs=NULL, n.ind=NULL, n.snps=NULL, snp.str = 0, ploidy=NULL, K=2, include.missing=FALSE, fMD=NULL, pMDi=NULL, LD=FALSE, block.minsize=10, block.maxsize=NULL, use.maxLDx=FALSE, sim.coords=FALSE , regionsize=0.7, wnd=c(-180,180,-90,90), interactions=c(0,1), over.land=TRUE, ...){
 #	x=NULL; save.as=NULL; RA.probs=NULL; n.ind=NULL; n.snps=NULL; snp.str = 0; ploidy=NULL; K=2; include.missing=FALSE; fMD=NULL; LD=NULL; block.minsize=10; block.maxsize=NULL; use.maxLDx=FALSE
 	additional.args  <- list(...)
 	RA.pairnames <- c("AC","AG","AT","CA","CG","CT","GA","GC","GT","TA","TC","TG")
@@ -2138,7 +2142,7 @@ sim.vcf <- function(x=NULL, save.as=NULL, RA.probs=NULL, n.ind=NULL, n.snps=NULL
 		#n.per.pop    <- table(as.numeric(gsub("pop","",anc.pops)))
 		n.per.pop    <- table(anc.pops)
 		#simcoords <- rcoords(regionsize=0.7,samplesize=n.per.pop,n.grp=K,show.plot=F,wnd=c(-180,180,-60,60),interactions=c(0,0),return.as="DF_plot")
-		simcoords <- evalfun("rcoords",regionsize=0.7,samplesize=n.per.pop,n.grp=K,wnd=c(-180,180,-60,60), interactions=c(0,0), show.plot=TRUE)
+		simcoords <- evalfun("rcoords", regionsize=regionsize, samplesize=n.per.pop, n.grp=K, wnd=wnd, over.land=over.land, interactions=interactions, show.plot=TRUE)
 		#return(simcoords)
 		if(is(simcoords,"list")){
 			simcoords.df <- simcoords$coords.df
