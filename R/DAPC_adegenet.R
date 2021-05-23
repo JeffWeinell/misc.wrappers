@@ -2138,21 +2138,30 @@ sim.vcf <- function(x=NULL, save.as=NULL, RA.probs=NULL, n.ind=NULL, n.snps=NULL
 		#n.per.pop    <- table(as.numeric(gsub("pop","",anc.pops)))
 		n.per.pop    <- table(anc.pops)
 		#simcoords <- rcoords(regionsize=0.7,samplesize=n.per.pop,n.grp=K,show.plot=F,wnd=c(-180,180,-60,60),interactions=c(0,0),return.as="DF_plot")
-		simcoords <- evalfun("rcoords",regionsize=0.7,samplesize=n.per.pop,n.grp=K,show.plot=F,wnd=c(-180,180,-60,60),interactions=c(0,0))
-		simcoords.df <- simcoords$coords.df
+		simcoords <- evalfun("rcoords",regionsize=0.7,samplesize=n.per.pop,n.grp=K,wnd=c(-180,180,-60,60), interactions=c(0,0), show.plot=TRUE)
+		#return(simcoords)
+		if(is(simcoords,"list")){
+			simcoords.df <- simcoords$coords.df
+		} else {
+			if(is(simcoords,"data.frame")){
+				simcoords.df <- simcoords
+			}
+		}
 		rownames(simcoords.df) <- samplenames
 		colnames(simcoords.df) <- c("longitude","latitude","group")
 		#save.as3 <- paste0(tools::file_path_sans_ext(save.as),"_simulated_coords.txt")
 		save.as3 <- file.path(dirname(save.as),paste0(gsub("[.vcf].+","",basename(save.as)),"_simulated_coords.txt"))
 		write.table(x=simcoords.df,file=save.as3, row.names=TRUE,col.names=TRUE,sep="\t",quote=FALSE)
-		gg.map <- simcoords$map.ggplot
-		#save.as4 <- paste0(tools::file_path_sans_ext(save.as),"_simulated_coords_map.pdf")
-		save.as4 <- file.path(dirname(save.as),paste0(gsub("[.vcf].+","",basename(save.as)),"_simulated_coords_map.pdf"))
-		#save.as4 <- file.path(dirname(save.as),"_simulated_coords_map.pdf")
-		pdf(file=save.as4,width=8,height=6,onefile=TRUE)
-			grid::grid.newpage()
-			grid::grid.draw(bothmaps)
-		dev.off()
+		if(is(simcoords,"list")){
+			if("map.ggplot" %in% names(simcoords)){
+				gg.map <- simcoords$map.ggplot
+				save.as4 <- file.path(dirname(save.as),paste0(gsub("[.vcf].+","",basename(save.as)),"_simulated_coords_map.pdf"))
+				pdf(file=save.as4,width=8,height=6,onefile=TRUE)
+					grid::grid.newpage()
+					grid::grid.draw(gg.map)
+				dev.off()
+			}
+		}
 		# Add coordinates as metadata lines?
 	}
 
@@ -2168,7 +2177,11 @@ sim.vcf <- function(x=NULL, save.as=NULL, RA.probs=NULL, n.ind=NULL, n.snps=NULL
 	### Return the simulated dataset as vcfR object
 	# If save.as is null, then the object returned will always report "zero missing data", although missing data may exists. Writing and rereading the VCF removes this vcfR bug. May need to use NA in gt matrix of vcfR.
 	if(sim.coords){
-		 return(list(simulated.vcf=vcf.sim,simulated.LonLat=simcoords.df,gg.map=bothmaps))
+		if(exists("bothmaps")){
+			return(list(simulated.vcf=vcf.sim,simulated.LonLat=simcoords.df,gg.map=bothmaps))
+		} else {
+			return(list(simulated.vcf=vcf.sim,simulated.LonLat=simcoords.df))
+		}
 	} else {
 		return(vcf.sim)
 	}

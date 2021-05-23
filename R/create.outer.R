@@ -462,7 +462,7 @@ rcoords <- function(regionsize=0.25, samplesize=100, n.grp=1, grp.n.weights=NULL
 			#if(n.grp==1){
 			#regionsize.dd <- (regionsize.dd*grp.scaler*0.5)
 			#}
-			sample.area.sp <- sampSurf::spCircle(radius=sqrt((regionsize.dd/pi)),centerPoint=center.xy)[[1]]
+			sample.area.sp <- sampSurf::spCircle(radius=sqrt((regionsize.dd/pi)), centerPoint=center.xy)[[1]]
 			#sample.area.sp.area <- attributes(attributes(attributes(sample.area.sp)$polygons[[1]])[[1]][[1]])$area
 			# Check if entire sample.area.sp is within window defined by 'wnd' argument
 	#		area.wnd.diff <- rgeos::gDifference(spgeom1=sample.area.sp,spgeom2=wnd.sp)
@@ -659,7 +659,7 @@ rcoords <- function(regionsize=0.25, samplesize=100, n.grp=1, grp.n.weights=NULL
 	absolute.areas <- c(windowarea=wnd.area,regionsize.dd0=regionsize.dd0,regionsize.dd=regionsize.dd,min.convex.hull.result=mcp.sp.area)
 	relative.areas <- round((absolute.areas/wnd.area),digits=4)
 	areas.df       <- data.frame(absolute =absolute.areas, relative.to.wnd=relative.areas)
-
+	#return(show.plot)
 	if(show.plot){
 		world.land     <- rnaturalearth::ne_countries(scale=110, returnclass="sf")
 		world.land10   <- rnaturalearth::ne_countries(scale=10, returnclass="sf")
@@ -681,6 +681,16 @@ rcoords <- function(regionsize=0.25, samplesize=100, n.grp=1, grp.n.weights=NULL
 		zoom.plot   <- ggplot2::ggplot(data = zoom.map) + ggplot2::geom_sf() + ggplot2::theme_classic() + ggplot2::geom_point(data = result.df2plot, ggplot2::aes(x = X, y = Y, fill=group), size = 2, shape = 21) + ggplot2::coord_sf(xlim =range(result.df2plot[,1]),ylim = range(result.df2plot[,2])) + ggplot2::theme(panel.border = ggplot2::element_rect(color = "black", fill=NA, size=1)) + ggplot2::theme(legend.position = "none") + ggplot2::xlab("longitude") + ggplot2::ylab("latitude")
 		global.plot <- ggplot2::ggplot(data = world.land) + ggplot2::geom_sf() + ggplot2::theme_classic() + ggplot2::geom_point(data = result.df2plot, ggplot2::aes(x = X, y = Y, fill=group), size = 2, shape = 21) + ggplot2::theme(panel.border = ggplot2::element_rect(color = "black", fill=NA, size=1)) + ggplot2::theme(axis.title.y = ggplot2::element_blank(), axis.title.x = ggplot2::element_blank()) + ggrect
 		###### Thus far failed attempt to reproject points and basemap using a different CRS
+		grobs.list <- list(ggplot2::ggplotGrob(global.plot),ggplot2::ggplotGrob(zoom.plot))
+		if(plot.margin==2){
+			bothmaps   <- gridExtra::arrangeGrob(grobs=grobs.list, layout_matrix=matrix(c(1,1,2),ncol=3))
+		} else {
+			bothmaps   <- gridExtra::arrangeGrob(grobs=grobs.list, layout_matrix=matrix(c(1,2),ncol=1))
+		}
+		#if(show.plot){
+		grid::grid.newpage()
+		grid::grid.draw(bothmaps)
+		#}
 		if(FALSE){
 			# 'result' data frame converted to SpatialPointsDataFrame
 			# result.spdf <- sp::SpatialPointsDataFrame(coords=result[,c(1,2)],data=data.frame(group=result[,3]))
@@ -698,31 +708,29 @@ rcoords <- function(regionsize=0.25, samplesize=100, n.grp=1, grp.n.weights=NULL
 			### Adding the reprojected points to the ggplot
 			gg.map <- gg.world110_proj +  ggplot2::geom_point(data = result_proj, ggplot2::aes(x = X, y = Y, fill=group), size = 2, shape = 21) # + ggplot2::coord_sf(crs= sf::st_crs(crs.name), datum = sf::st_crs(crs.name) )
 		}
-		
-		grobs.list <- list(ggplot2::ggplotGrob(global.plot),ggplot2::ggplotGrob(zoom.plot))
-		if(plot.margin==2){
-			bothmaps   <- gridExtra::arrangeGrob(grobs=grobs.list, layout_matrix=matrix(c(1,1,2),ncol=3))
-		} else {
-			bothmaps   <- gridExtra::arrangeGrob(grobs=grobs.list, layout_matrix=matrix(c(1,2),ncol=1))
-		}
-		grid::grid.newpage()
-		grid::grid.draw(bothmaps)
+	} else {
+		bothmaps <- NULL
 	}
 	#result <- result.temp[sample(x=1:nrow(result.temp),size=size),]
-	return(list(coords.df=result.df,map.ggplot=bothmaps))
-	if(return.as=="matrix"){
-		result <- data.matrix(result)
+	result.df <- result
+	if(show.plot){
+		return(list(coords.df=result.df,map.ggplot=bothmaps))
+	} else {
+		return(result.df)
 	}
-	if(return.as=="SP"){
-		result.df <- result
-		result <- list(result.sp=result.sp,sample.area.sp=sample.area.sp,result.df=result.df,zoom.gg=zoom.plot,global.gg=global.plot,bothmaps.gg=bothmaps,mcp.hull=mcp.sp,areas.df=areas.df,group.center.distances= grp.center.dists,grp.scaler.info=c(grp.scaler.start,grp.scaler),counters=c(ctr,ctr2))
-		#result <- sp::SpatialPoints(result)
-	}
-	if(return.as=="DF_plot"){
-		result.df <- result
-		result <- list(coords.df=result.df,map.ggplot=bothmaps)
-	}
-	result
+	#if(return.as=="matrix"){
+	#	result <- data.matrix(result)
+	#}
+	#if(return.as=="SP"){
+	#	result.df <- result
+	#	result <- list(result.sp=result.sp,sample.area.sp=sample.area.sp,result.df=result.df,zoom.gg=zoom.plot,global.gg=global.plot,bothmaps.gg=bothmaps,mcp.hull=mcp.sp,areas.df=areas.df,group.center.distances= grp.center.dists,grp.scaler.info=c(grp.scaler.start,grp.scaler),counters=c(ctr,ctr2))
+	#	#result <- sp::SpatialPoints(result)
+	#}
+	#if(return.as=="DF_plot"){
+	#	result.df <- result
+	#	result <- list(coords.df=result.df,map.ggplot=bothmaps)
+	#}
+	#result
 }
 #' @examples
 #' library(misc.wrappers)
