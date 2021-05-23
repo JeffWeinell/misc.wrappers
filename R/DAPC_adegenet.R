@@ -2128,16 +2128,16 @@ sim.vcf <- function(x=NULL, save.as=NULL, RA.probs=NULL, n.ind=NULL, n.snps=NULL
 	vcf.sim <- new("vcfR", meta=sim.meta,fix=sim.fx,gt=sim.gt)
 	if(!is.null(save.as)){
 		### Use extension ".vcf.gz" even is ".vcf" is specified as the extension.
-		save.as <- gsub(".vcf$",".vcf.gz",save.as)
-		vcfR::write.vcf(x=vcf.sim,file=save.as)
-		vcf.sim <- vcfR::read.vcfR(save.as)
+		save.as2 <- gsub(".vcf$",".vcf.gz",save.as)
+		vcfR::write.vcf(x=vcf.sim,file=save.as2)
+		vcf.sim <- vcfR::read.vcfR(save.as2)
 	}
-	if(FALSE){
 	if(!is.null(sim.coords)){
-		simcoords.df0 <- rcoords(regionsize=0.7,samplesize=(n.ind*50),n.grp=K,show.plot=F,wnd=c(-180,180,-60,60),interactions=c(0,0))
-		table(as.numeric(anc.pops)) > 
-		unique(simcoords.df0$group)
-	}
+		simcoords.df <- rcoords(regionsize=0.7,samplesize=c(table(as.numeric(anc.pops))),n.grp=K,show.plot=F,wnd=c(-180,180,-60,60),interactions=c(0,0))
+		rownames(simcoords.df) <- samplenames
+		colnames(simcoords.df) <- c("longitude","latitude","group")
+		save.as3 <- paste0(file_path_sans_ext(save.as),"_simulated_coords.txt")
+		write.table(x=simcoords.df,file=save.as3, row.names=TRUE,col.names=TRUE,sep="/t",quote=FALSE)
 	}
 	### Return the simulated dataset as vcfR object
 	# If save.as is null, then the object returned will always report "zero missing data", although missing data may exists. Writing and rereading the VCF removes this vcfR bug. May need to use NA in gt matrix of vcfR.
