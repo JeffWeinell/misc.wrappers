@@ -1,563 +1,427 @@
-gt2 <- do.call(rbind,apply(X=gt1,MARGIN=1,FUN=function(x){paste0(x[1:10],collapse="")}))
-class(gt2)
-gt2
-gt2 <- as.list(do.call(rbind,apply(X=gt1,MARGIN=1,FUN=function(x){paste0(x[1:10],collapse="")})))
-gt2 <- as.list(apply(X=gt1,MARGIN=1,FUN=function(x){paste0(x[1:10],collapse="")}))
-gt2[1:2]
-gt2 <- do.call(rbind,as.list(apply(X=gt1,MARGIN=1,FUN=function(x){paste0(x[1:10],collapse="")})))
-gt2
-sequential
-sequential=TRUE
-if(sequential){#
-		gt2 <- do.call(rbind,as.list(apply(X=gt1,MARGIN=1,FUN=function(x){paste0(x,collapse="")})))#
-	}
-nchar(gt2[1,])
-gt3 <- rbind(rownames(gt1),gt2)
-gt3 <- cbind(rownames(gt1),gt2)
-substring(gt3[1,],first=1,last=10)
-gt3 <- cbind(rownames(gt1),gt2)
-gt4 <- do.call(rbind,as.list(apply(X=gt3,MARGIN=1,FUN=function(x){paste0(x,collapse="")})))
-substring(gt4[1,],first=1,last=10)
-substring(gt4[1,],first=1,last=50)
-gt4 <- unname(do.call(rbind,as.list(apply(X=gt3,MARGIN=1,FUN=function(x){paste0(x,collapse="")}))))
-substring(gt4[1,],first=1,last=50)
-substring(gt4[2,],first=1,last=50)
-nsites      <- nrow(gt)
-nsites
-nsites/width
-width=300
-nsites/width
-ceiling(nsites/width)
-ceiling(nsites/width)*width
-((ceiling(nsites/width)*width)-nsites)
-ranges.out <- matrix(data=c(1:nsites,rep(NA,((ceiling(nsites/width)*width)-nsites))),ncol=width)
-ranges.out[1,]
-ranges.out <- matrix(data=c(1:nsites,rep(NA,((ceiling(nsites/width)*width)-nsites))),ncol=width,byrow=TRUE)
-ranges.out[1,]
-ranges.out[2,]
-ranges     <- apply(ranges.out,MARGIN=1,range,na.rm=TRUE)
-ranges[1]
-range(ranges.out[2,],na.rm=TRUE)
-ranges     <- apply(X=ranges.out,MARGIN=1,FUN=range,na.rm=TRUE)
-dim(ranges)
-ranges[1,]
-ranges[,1]
-ranges     <- apply(X=ranges.out,MARGIN=1,FUN=as.list(range),na.rm=TRUE)
-ranges     <- apply(X=ranges.out,MARGIN=1,FUN=function(x){as.list(range(x,na.rm=TRUE))})
-ranges[1]
-ranges     <- apply(X=ranges.out,MARGIN=1,FUN=function(x){range(x,na.rm=TRUE)})
-dim(ranges)
-ranges     <- as.list(apply(X=ranges.out,MARGIN=1,FUN=function(x){range(x,na.rm=TRUE)}))
-dim(ranges)
-length(ranges)
-ranges     <- lapply(X=1:nrow(ranges.out),FUN=function(x){range(ranges.out[x,],na.rm=TRUE)})
-ranges[1]
-ranges     <- do.call(rbind,lapply(X=1:nrow(ranges.out),FUN=function(x){range(ranges.out[x,],na.rm=TRUE)}))
-ranges[1:5,]
-nrow(ranges)
-dim(gt1)
-test <- lapply(X=1:nrow(ranges),FUN=function(r){do.call(rbind,as.list(apply(X=gt1[ranges[r,1],ranges[r,2]],MARGIN=1,FUN=function(x){paste0(x,collapse="")}))) })
-c(ranges[1,1]:ranges[1,2]])
-ranges[1,1]
-ranges[1,2]
-ranges[1,1]:ranges[1,2]
-gt1[,c(ranges[1,1]:ranges[1,2])]
-test <- lapply(X=1:nrow(ranges),FUN=function(r){do.call(rbind,as.list(apply(X=gt1[,c(ranges[r,1]:ranges[r,2])], MARGIN=1,FUN=function(x){paste0(x,collapse="")}))) })
-length(test)
-dim(test[[1]])
-test[[1]]
-gt3 <- lapply(X=1:length(gt2),FUN=function(x){cbind(rownames(gt1),gt2[[x]])})
-substring(gt3[[1]][1,],1,50)
-gt4 <- lapply(X=gt3,FUN=function(j){unname(do.call(rbind,as.list(apply(X=j,MARGIN=1,FUN=function(x){paste0(x,collapse="")}))))})
-substring(gt4[[1]][1,],1,50)
-substring(gt4[[2]][1,],1,50)
-substring(gt4[[1]][1:5,],1,50)
-nsites      <- nrow(gt)#
-	nindv       <- length(samplenames)
-nsites
-nindv
-paste(nindv,nsites)
-vcf2phy <- function(x,save.as,missing="-",sequential=TRUE,width=300,padding=5){#
-	if(file.exists(save.as)){#
-		stop("Output file already exists. Use a different name for 'save.as' argument.")#
-	}#
-	if(is(x,"vcfR")){#
-		vcf.obj <- vcf <- x#
-	} else {#
-		vcf <- x#
-		vcf.obj <- vcfR::read.vcfR(vcf,verbose=F,checkFile=F)#
-	}#
-	gt    <- vcf.obj@gt#
-	fx    <- vcf.obj@fix#
-	met   <- vcf.obj@meta#
-	RA    <- cbind(fx[,"REF"],fx[,"ALT"])#
-	letter.het  <- apply(X=RA,MARGIN=1,FUN=function(x){toupper(seqinr::bma(x))})#
-	RHA <- cbind(R=fx[,"REF"],H=letter.het,A=fx[,"ALT"])#
-	ra  <- paste0(fx[,"REF"],fx[,"ALT"])#
-	rat <- table(ra)#
-	gt0 <- t(gt[,-1])#
-	for(i in 1:length(rat)){#
-		ra.temp   <- names(rat)[i]#
-		RA.temp   <- unlist(strsplit(ra.temp,split=""))#
-		h.temp    <- toupper(seqinr::bma(RA.temp))#
-		RHA.temp  <- c(RA.temp[1],h.temp,RA.temp[2])#
-		cols.temp <- which(ra==ra.temp)#
-		gt0[,cols.temp] <- gsub("0[/,|]0",RHA.temp[1],gt0[,cols.temp])#
-		gt0[,cols.temp] <- gsub("0[/,|]1",RHA.temp[2],gt0[,cols.temp])#
-		gt0[,cols.temp] <- gsub("1[/,|]1",RHA.temp[3],gt0[,cols.temp])#
-	}#
-	gt1 <- gt0#
-	gt1[is.na(gt1)] <- missing#
-	gt0[,cols.temp] <- gsub("1[/,|]1",RHA.temp[3],gt0[,cols.temp])#
-	samplenames <- colnames(gt)[-1]#
-	nsites      <- nrow(gt)#
-	nindv       <- length(samplenames)#
-	npadcol <- (max(nchar(samplenames))-nchar(samplenames))+padding#
-	padcol  <- do.call(rbind,lapply(X=npadcol,FUN=function(x){paste0(rep(" ",x),collapse="")}))#
-	rownames(gt1) <- paste0(samplenames,padcol)#
-	if(sequential){#
-		gt2 <- do.call(rbind,as.list(apply(X=gt1,MARGIN=1,FUN=function(x){paste0(x,collapse="")})))#
-		gt3 <- cbind(rownames(gt1),gt2)#
-		gt4 <- unname(do.call(rbind,as.list(apply(X=gt3,MARGIN=1,FUN=function(x){paste0(x,collapse="")}))))#
-		writeLines(text=c(paste(nindv,nsites),gt4),con=save.as)#
-	} else {#
-		#stop("interleaved not yet implemented")#
-		#start.temp <- 0#
-		#gt2 <- list()#
-		#start.temp <- 1#
-		#for()#
-		ranges.out <- matrix(data=c(1:nsites,rep(NA,((ceiling(nsites/width)*width)-nsites))),ncol=width,byrow=TRUE)#
-		ranges     <- do.call(rbind,lapply(X=1:nrow(ranges.out),FUN=function(x){range(ranges.out[x,],na.rm=TRUE)}))#
-		# A list with matrices to write#
-		gt2 <- lapply(X=1:nrow(ranges),FUN=function(r){do.call(rbind,as.list(apply(X=gt1[,c(ranges[r,1]:ranges[r,2])], MARGIN=1,FUN=function(x){paste0(x,collapse="")})))})#
-		gt3 <- lapply(X=1:length(gt2),FUN=function(x){cbind(rownames(gt1),gt2[[x]])})#
-		gt4 <- lapply(X=gt3,FUN=function(j){unname(do.call(rbind,as.list(apply(X=j,MARGIN=1,FUN=function(x){paste0(x,collapse="")}))))})#
-		for(i in 1:length(gt4)){#
-			if(i==1){#
-				writeLines(text=c(paste(nindv,nsites),gt4[[i]]),con=save.as,append=FALSE)#
-			} else {#
-				writeLines(text=c("",gt4[[i]]),con=save.as,append=TRUE)#
-			}#
-		}#
-	}#
-#	loci        <- c(fx[,"CHROM"])#
-#	loci.unique <- unique(loci)#
-	# list of numerical vectors indicating range of sites for each locus (start and end)#
-#	ranges.list     <- lapply(X=1:length(loci.unique),FUN=function(x){range(which(loci == loci.unique[x]))})#
-	# two-column matrix with range (start and end) of each locus#
-#	ranges.mat      <- do.call(rbind,ranges.list)#
-#	partition.lines <- paste0("DNA, part",1:nrow(ranges.mat)," = ",ranges.mat[,1],"-",ranges.mat[,2])#
-#	writeLines(text=partition.lines,con=save.as)#
-#	save.as#
+paste0(names(formals(testfunB),unname(c(formals(testfunB))))
+)
+paste0(names(formals(testfunB)),unname(c(formals(testfunB))))
+paste(paste0(names(formals(testfunB)),unname(c(formals(testfunB)))),collapse=",")
+paste(paste0(names(formals(testfunB)),"=",unname(c(formals(testfunB)))),collapse=",")
+paste(paste0(names(formals(testfunB)),"=",unname(c(formals(testfunB)))),collapse=",")
+setdiff(paste0(names(formals(testfunB)),unname(c(formals(testfunB)))),"...")
+paste(setdiff(paste0(names(formals(testfunB)),"=",unname(c(formals(testfunB)))),"..."),collapse=",")
+paste(setdiff(paste0(names(formals(testfunB)),"=",unname(c(formals(testfunB)))),"...="),collapse=",")
+form.expr=paste(setdiff(paste0(names(formals(testfunB)),"=",unname(c(formals(testfunB)))),"...="),collapse=",")
+?expr
+form.expr
+paste0("testfunB(",form.expr=paste(setdiff(paste0(names(formals(testfunB)),"=",unname(c(formals(testfunB)))),"...="),collapse=","),")")
+paste0("testfunB(",paste(setdiff(paste0(names(formals(testfunB)),"=",unname(c(formals(testfunB)))),"...="),collapse=","),")")
+form.expr=paste0("testfunB(",paste(setdiff(paste0(names(formals(testfunB)),"=",unname(c(formals(testfunB)))),"...="),collapse=","),")")
+form.expr
+eval(form.expr)
+eval(expr=form.expr)
+?eval
+sys.call(form.expr)
+call(form.expr)
+call(testfunB,"argB1=10,argB2=10")
+call("testfunB","argB1=10,argB2=10")
+call("testfunB",cat("argB1=10,argB2=10"))
+call("testfunB",return("argB1=10,argB2=10"))
+call("testfunB",eval("argB1=10,argB2=10"))
+call("testfunB",expr("argB1=10,argB2=10"))
+call("testfunB",parse(test="argB1=10,argB2=10"))
+call("testfunB",parse("argB1=10,argB2=10"))
+call("testfunB",parse(text="argB1=10,argB2=10"))
+form.expr=paste0("testfunB(",paste(setdiff(paste0(names(formals(testfunB)),"=",unname(c(formals(testfunB)))),"...="),collapse=","),")")
+form.expr
+parse(text= form.expr)
+eval(parse(text= form.expr))
+testfunB <- function(argB1=10,argB2=10,...){#
+	return(formals())#
+	return(argB1/argB2)#
 }
-test <- vcf2phy(x="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/DAPC/Oxyrhabdium_AllSpecies_BestSNP.vcf",save.as="/Users/alyssaleinweber/Documents/test_sequential.phy")
-missing="-";sequential=TRUE;width=300;padding=5
-x="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/DAPC/Oxyrhabdium_AllSpecies_BestSNP.vcf";save.as="/Users/alyssaleinweber/Documents/test.phy"
-if(is(x,"vcfR")){#
-		vcf.obj <- vcf <- x#
-	} else {#
-		vcf <- x#
-		vcf.obj <- vcfR::read.vcfR(vcf,verbose=F,checkFile=F)#
-	}#
-	gt    <- vcf.obj@gt#
-	fx    <- vcf.obj@fix#
-	met   <- vcf.obj@meta#
-	RA    <- cbind(fx[,"REF"],fx[,"ALT"])
-ra  <- paste0(fx[,"REF"],fx[,"ALT"])#
-	rat <- table(ra)#
-	gt0 <- t(gt[,-1])
-gt0[1,1]
-gt0 <- gsub(":.+","",t(gt[,-1]))
-gt0[1,1]
-for(i in 1:length(rat)){#
-		ra.temp   <- names(rat)[i]#
-		RA.temp   <- unlist(strsplit(ra.temp,split=""))#
-		h.temp    <- toupper(seqinr::bma(RA.temp))#
-		RHA.temp  <- c(RA.temp[1],h.temp,RA.temp[2])#
-		cols.temp <- which(ra==ra.temp)#
-		gt0[,cols.temp] <- gsub("0[/,|]0",RHA.temp[1],gt0[,cols.temp])#
-		gt0[,cols.temp] <- gsub("0[/,|]1",RHA.temp[2],gt0[,cols.temp])#
-		gt0[,cols.temp] <- gsub("1[/,|]1",RHA.temp[3],gt0[,cols.temp])#
-	}
-gt1 <- gt0
-gt1[1,1]
-i=1
-ra.temp   <- names(rat)[i]#
-		RA.temp   <- unlist(strsplit(ra.temp,split=""))
-ra.temp
-RA.temp
-h.temp    <- toupper(seqinr::bma(RA.temp))
-h.temp
-RHA.temp  <- c(RA.temp[1],h.temp,RA.temp[2])
-RHA.temp
-cols.temp <- which(ra==ra.temp)
-cols.temp[1]
-length(cols.temp)
-dim(gt0)
-test <- gsub("0[/,|]0",RHA.temp[1],gt0[,cols.temp])
-test[1,1]
-sub.temp1 <- gsub("0[/,|]0",RHA.temp[1],sub.temp)
-sub.temp  <- gt0[,cols.temp]
-sub.temp[1:5,1:5]
-sub.temp1 <- gsub("0[/,|]0",RHA.temp[1],sub.temp)
-sub.temp2 <- gsub("0[/,|]1",RHA.temp[2],sub.temp1)
-sub.temp3 <- gsub("1[/,|]1",RHA.temp[3],sub.temp2)
-sub.temp3[1:5,1:5]
-gt0 <- gsub(":.+","",t(gt[,-1]))#
-	for(i in 1:length(rat)){#
-		ra.temp   <- names(rat)[i]#
-		RA.temp   <- unlist(strsplit(ra.temp,split=""))#
-		h.temp    <- toupper(seqinr::bma(RA.temp))#
-		RHA.temp  <- c(RA.temp[1],h.temp,RA.temp[2])#
-		cols.temp <- which(ra==ra.temp)#
-		sub.temp  <- gt0[,cols.temp]#
-		sub.temp1 <- gsub("0[/,|]0",RHA.temp[1],sub.temp)#
-		sub.temp2 <- gsub("0[/,|]1",RHA.temp[2],sub.temp1)#
-		sub.temp3 <- gsub("1[/,|]1",RHA.temp[3],sub.temp2)#
-		gt0[,cols.temp] <- sub.temp3#
-		#gt0[,cols.temp] <- gsub("0[/,|]0",RHA.temp[1],gt0[,cols.temp])#
-		#gt0[,cols.temp] <- gsub("0[/,|]1",RHA.temp[2],gt0[,cols.temp])#
-		#gt0[,cols.temp] <- gsub("1[/,|]1",RHA.temp[3],gt0[,cols.temp])#
-	}
-gt0[1:5,1:5]
-test <- gsub("[./.,.|.]",missing,gt0)
-test[1:5,1:5]
-test <- gsub("[./.,.|.]",missing,gt0,fixed=TRUE)
-test[1:5,1:5]
-test <- gsub("['./.','.|.']",missing,gt0,fixed=TRUE)
-test[1:5,1:5]
-gt0 <- gsub("./.",missing,gt0,fixed=TRUE)
-gt0 <- gsub(".|.",missing,gt0,fixed=TRUE)
-gt0[1:5,1:5]
-gt1[is.na(gt1)] <- missing
-gt1[1:5,1:5]
-gt1 <- gt0
-gt1[is.na(gt1)] <- missing
-gt1[1:5,,1:5]
-gt1[1:5,1:5]
-vcf2phy <- function(x,save.as,missing="-",sequential=TRUE,width=300,padding=5){#
-#	if(file.exists(save.as)){#
-#		stop("Output file already exists. Use a different name for 'save.as' argument.")#
-#	}#
-	if(is(x,"vcfR")){#
-		vcf.obj <- vcf <- x#
-	} else {#
-		vcf <- x#
-		vcf.obj <- vcfR::read.vcfR(vcf,verbose=F,checkFile=F)#
-	}#
-	gt    <- vcf.obj@gt#
-	fx    <- vcf.obj@fix#
-	met   <- vcf.obj@meta#
-	RA    <- cbind(fx[,"REF"],fx[,"ALT"])#
-#	letter.het  <- apply(X=RA,MARGIN=1,FUN=function(x){toupper(seqinr::bma(x))})#
-#	RHA <- cbind(R=fx[,"REF"],H=letter.het,A=fx[,"ALT"])#
-	ra  <- paste0(fx[,"REF"],fx[,"ALT"])#
-	rat <- table(ra)#
-	gt0 <- gsub(":.+","",t(gt[,-1]))#
-	for(i in 1:length(rat)){#
-		ra.temp   <- names(rat)[i]#
-		RA.temp   <- unlist(strsplit(ra.temp,split=""))#
-		h.temp    <- toupper(seqinr::bma(RA.temp))#
-		RHA.temp  <- c(RA.temp[1],h.temp,RA.temp[2])#
-		cols.temp <- which(ra==ra.temp)#
-		sub.temp  <- gt0[,cols.temp]#
-		sub.temp1 <- gsub("0[/,|]0",RHA.temp[1],sub.temp)#
-		sub.temp2 <- gsub("0[/,|]1",RHA.temp[2],sub.temp1)#
-		sub.temp3 <- gsub("1[/,|]1",RHA.temp[3],sub.temp2)#
-		gt0[,cols.temp] <- sub.temp3#
-		#gt0[,cols.temp] <- gsub("0[/,|]0",RHA.temp[1],gt0[,cols.temp])#
-		#gt0[,cols.temp] <- gsub("0[/,|]1",RHA.temp[2],gt0[,cols.temp])#
-		#gt0[,cols.temp] <- gsub("1[/,|]1",RHA.temp[3],gt0[,cols.temp])#
-	}#
-	gt1 <- gsub("./.",missing,gt0,fixed=TRUE)#
-	gt1 <- gsub(".|.",missing,gt1,fixed=TRUE)#
-	gt1[is.na(gt1)] <- missing#
-	#gt0[,cols.temp] <- gsub("1[/,|]1",RHA.temp[3],gt0[,cols.temp])#
-	samplenames <- colnames(gt)[-1]#
-	nsites      <- nrow(gt)#
-	nindv       <- length(samplenames)#
-	npadcol <- (max(nchar(samplenames))-nchar(samplenames))+padding#
-	padcol  <- do.call(rbind,lapply(X=npadcol,FUN=function(x){paste0(rep(" ",x),collapse="")}))#
-	rownames(gt1) <- paste0(samplenames,padcol)#
-	if(sequential){#
-		gt2 <- do.call(rbind,as.list(apply(X=gt1,MARGIN=1,FUN=function(x){paste0(x,collapse="")})))#
-		gt3 <- cbind(rownames(gt1),gt2)#
-		gt4 <- unname(do.call(rbind,as.list(apply(X=gt3,MARGIN=1,FUN=function(x){paste0(x,collapse="")}))))#
-		writeLines(text=c(paste(nindv,nsites),gt4),con=save.as)#
-	} else {#
-		#stop("interleaved not yet implemented")#
-		#start.temp <- 0#
-		#gt2 <- list()#
-		#start.temp <- 1#
-		#for()#
-		ranges.out <- matrix(data=c(1:nsites,rep(NA,((ceiling(nsites/width)*width)-nsites))),ncol=width,byrow=TRUE)#
-		ranges     <- do.call(rbind,lapply(X=1:nrow(ranges.out),FUN=function(x){range(ranges.out[x,],na.rm=TRUE)}))#
-		# A list with matrices to write#
-		gt2 <- lapply(X=1:nrow(ranges),FUN=function(r){do.call(rbind,as.list(apply(X=gt1[,c(ranges[r,1]:ranges[r,2])], MARGIN=1,FUN=function(x){paste0(x,collapse="")})))})#
-		gt3 <- lapply(X=1:length(gt2),FUN=function(x){cbind(rownames(gt1),gt2[[x]])})#
-		gt4 <- lapply(X=gt3,FUN=function(j){unname(do.call(rbind,as.list(apply(X=j,MARGIN=1,FUN=function(x){paste0(x,collapse="")}))))})#
-		for(i in 1:length(gt4)){#
-			if(i==1){#
-				writeLines(text=c(paste(nindv,nsites),gt4[[i]]),con=save.as,append=FALSE)#
-			} else {#
-				writeLines(text=c("",gt4[[i]]),con=save.as,append=TRUE)#
-			}#
-		}#
-	}#
-#	loci        <- c(fx[,"CHROM"])#
-#	loci.unique <- unique(loci)#
-	# list of numerical vectors indicating range of sites for each locus (start and end)#
-#	ranges.list     <- lapply(X=1:length(loci.unique),FUN=function(x){range(which(loci == loci.unique[x]))})#
-	# two-column matrix with range (start and end) of each locus#
-#	ranges.mat      <- do.call(rbind,ranges.list)#
-#	partition.lines <- paste0("DNA, part",1:nrow(ranges.mat)," = ",ranges.mat[,1],"-",ranges.mat[,2])#
-#	writeLines(text=partition.lines,con=save.as)#
-#	save.as#
+testfunB()
+testfunB <- function(argB1=10,argB2=10,...){#
+	fun.name = sys.function(sys.parent())#
+	return(c(list(function=fun.name),formals()))#
+	return(argB1/argB2)#
 }
-test <- vcf2phy(x="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/DAPC/Oxyrhabdium_AllSpecies_BestSNP.vcf",save.as="/Users/alyssaleinweber/Documents/test.phy")
-test_interleaved <- vcf2phy(x="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/DAPC/Oxyrhabdium_AllSpecies_BestSNP.vcf",save.as="/Users/alyssaleinweber/Documents/test_sequential.phy",sequential=FALSE)
-length(gt4)
-if(is(x,"vcfR")){#
-		vcf.obj <- vcf <- x#
+testfunB <- function(argB1=10,argB2=10,...){#
+	fun.name <- list(sys.function(sys.parent()))#
+	fun.args <- formals()#
+	return(c(fun.name,fun.args))#
+	#return(argB1/argB2)#
+}
+testfunB()
+testfunB <- function(argB1=10,argB2=10,...){#
+	fun.name <- list(names(sys.function(sys.parent())))#
+	fun.args <- formals()#
+	return(c(fun.name,fun.args))#
+	#return(argB1/argB2)#
+}
+testfunB()
+testfunB
+class(testfunB)
+str(testfunB)
+attr(testfunB)
+attributes(testfunB)
+formals(testfunB)
+fun.name <- "testfunB"
+get(fun.name)
+fun.args <- formals(get("fun.name"))
+fun.args
+names(fun.args)
+test <- unname(fun.args)
+test
+formals(get("fun.name"))[-c("...")]
+setdiff(names(fun.args),"...")
+fun.args0 <- formals(get("fun.name"))
+fun.args <- fun.args0[setdiff(names(fun.args0),"...")]
+fun.args
+buildfun <- function(x){#
+	fun.name <- x#
+	### List with default values for all arguments of the function#
+	fun.args0 <- formals(get("fun.name"))#
+	### Keep the arguments with values#
+	fun.args <- fun.args0[setdiff(names(fun.args0),"...")]#
+	return(fun.args)#
+}
+buildfun("testfunB")
+argnames <- names(fun.args)
+argnames0 <- names(fun.args)
+testfunB <- function(x,argB1=10,argB2=10,...){#
+	fun.name <- list(names(sys.function(sys.parent())))#
+	fun.args <- formals()#
+	return(c(fun.name,fun.args))#
+	#return(argB1/argB2)#
+}
+fun.name <- testfunB
+fun.name
+fun.args0 <- formals(get("fun.name"))#
+	### Keep arguments except for "..."#
+	fun.args <- fun.args0[setdiff(names(fun.args0),"...")]#
+	### Character vector with names of all arguments, including those without default values, but not "..."#
+	argnames0 <- names(fun.args)
+argnames0
+fun.args
+fun.args$x
+missing(fun.args)
+missing(fun.args$x)
+length(fun.args$x)
+class(fun.args$x)
+class(fun.args$argB1)
+class(fun.args)
+str(fun.args)
+is(fun.args$x,"symbol")
+is(fun.args$x,"name")
+is(fun.args,"name")
+sapply(fun.args,is,"name")
+argnames0 <- names(fun.args)
+argnames <- argnames0[!sapply(fun.args,is,"name")]
+argnames
+fun.args0 <- formals(get("fun.name"))#
+	### Keep arguments except for "..."#
+	fun.args1 <- fun.args0[setdiff(names(fun.args0),"...")]#
+	### Character vector with names of all arguments, including those without default values, but not "..."#
+	argnames0 <- names(fun.args1)#
+	### Character vector with names of arguments with defined values#
+	argnames <- argnames0[!sapply(fun.args1,is,"name")]#
+	### subset of fun.args with define values#
+	fun.args2 <- fun.args1[!sapply(fun.args1,is,"name")]
+fun.args2
+argslist <- list(x=10,argB2=4)
+argslist
+names(argslist) %in% argnames0
+names(list(z=10,argB3=4)) %in% argnames0
+argslist[names(argslist) %in% argnames0]
+argslist
+if(!argslist){#
+		# Check if any of the arguments in argslist are for this function#
+		if(any( names(argslist) %in% argnames0)){#
+			args.use <- c(argslist[names(argslist) %in% argnames0], fun.args1[!(argnames0 %in% names(argslist))])#
+		} else{#
+			# Not sure which one of these would work#
+			# args.use <- fun.args2#
+			args.use <- fun.args1#
+		}#
 	} else {#
-		vcf <- x#
-		vcf.obj <- vcfR::read.vcfR(vcf,verbose=F,checkFile=F)#
-	}#
-	gt    <- vcf.obj@gt#
-	fx    <- vcf.obj@fix#
-	met   <- vcf.obj@meta#
-	RA    <- cbind(fx[,"REF"],fx[,"ALT"])#
-#	letter.het  <- apply(X=RA,MARGIN=1,FUN=function(x){toupper(seqinr::bma(x))})#
-#	RHA <- cbind(R=fx[,"REF"],H=letter.het,A=fx[,"ALT"])#
-	ra  <- paste0(fx[,"REF"],fx[,"ALT"])#
-	rat <- table(ra)#
-	gt0 <- gsub(":.+","",t(gt[,-1]))
+		args.use <- fun.args1#
+	}
+!argslist
+if(!is.null(argslist)){#
+		# Check if any of the arguments in argslist are for this function#
+		if(any( names(argslist) %in% argnames0)){#
+			args.use <- c(argslist[names(argslist) %in% argnames0], fun.args1[!(argnames0 %in% names(argslist))])#
+		} else{#
+			# Not sure which one of these would work#
+			# args.use <- fun.args2#
+			args.use <- fun.args1#
+		}#
+	} else {#
+		args.use <- fun.args1#
+	}
+args.use
+form.expr=paste0(fun.name,"(",paste(paste0(args.use,"=", unname(c(args.use))),collapse=","),")")
+paste0(args.use,"=", unname(c(args.use)))
+paste(paste0(names(args.use),"=", unname(c(args.use))), collapse=",")
+paste0(fun.name,"(", paste(paste0(names(args.use),"=", unname(c(args.use))), collapse=",") ,")")
+paste(paste0(names(args.use),"=", unname(c(args.use))), collapse=",")
+paste0(fun.name,"(",args.expr,")")
+args.expr=paste(paste0(names(args.use),"=", unname(c(args.use))), collapse=",")
+form.expr=paste0(fun.name,"(",args.expr,")")
+fun.name
 x
-sequential=FALSE
-for(i in 1:length(rat)){#
-		ra.temp   <- names(rat)[i]#
-		RA.temp   <- unlist(strsplit(ra.temp,split=""))#
-		h.temp    <- toupper(seqinr::bma(RA.temp))#
-		RHA.temp  <- c(RA.temp[1],h.temp,RA.temp[2])#
-		cols.temp <- which(ra==ra.temp)#
-		sub.temp  <- gt0[,cols.temp]#
-		sub.temp1 <- gsub("0[/,|]0",RHA.temp[1],sub.temp)#
-		sub.temp2 <- gsub("0[/,|]1",RHA.temp[2],sub.temp1)#
-		sub.temp3 <- gsub("1[/,|]1",RHA.temp[3],sub.temp2)#
-		gt0[,cols.temp] <- sub.temp3#
-		#gt0[,cols.temp] <- gsub("0[/,|]0",RHA.temp[1],gt0[,cols.temp])#
-		#gt0[,cols.temp] <- gsub("0[/,|]1",RHA.temp[2],gt0[,cols.temp])#
-		#gt0[,cols.temp] <- gsub("1[/,|]1",RHA.temp[3],gt0[,cols.temp])#
-	}#
-	gt1 <- gsub("./.",missing,gt0,fixed=TRUE)#
-	gt1 <- gsub(".|.",missing,gt1,fixed=TRUE)#
-	gt1[is.na(gt1)] <- missing#
-	#gt0[,cols.temp] <- gsub("1[/,|]1",RHA.temp[3],gt0[,cols.temp])#
-	samplenames <- colnames(gt)[-1]#
-	nsites      <- nrow(gt)#
-	nindv       <- length(samplenames)#
-	npadcol <- (max(nchar(samplenames))-nchar(samplenames))+padding#
-	padcol  <- do.call(rbind,lapply(X=npadcol,FUN=function(x){paste0(rep(" ",x),collapse="")}))#
-	rownames(gt1) <- paste0(samplenames,padcol)
-ranges.out <- matrix(data=c(1:nsites,rep(NA,((ceiling(nsites/width)*width)-nsites))),ncol=width,byrow=TRUE)#
-		ranges     <- do.call(rbind,lapply(X=1:nrow(ranges.out),FUN=function(x){range(ranges.out[x,],na.rm=TRUE)}))
-dim(ranges)
-gt2 <- lapply(X=1:nrow(ranges),FUN=function(r){do.call(rbind,as.list(apply(X=gt1[,c(ranges[r,1]:ranges[r,2])], MARGIN=1,FUN=function(x){paste0(x,collapse="")})))})
-gt3 <- lapply(X=1:length(gt2),FUN=function(x){cbind(rownames(gt1),gt2[[x]])})
-gt4 <- lapply(X=gt3,FUN=function(j){unname(do.call(rbind,as.list(apply(X=j,MARGIN=1,FUN=function(x){paste0(x,collapse="")}))))})
-length(gt4)
-rownames(gt1)
-usenames <- paste0(samplenames,padcol)
-dim(gt4[[1]])
-gt4 <- lapply(X=gt3,FUN=function(j){unname(do.call(c,as.list(apply(X=j,MARGIN=1,FUN=function(x){paste0(x,collapse="")}))))})
-length(gt4[[1]])
-gt4 <- lapply(X=gt3,FUN=function(j){c(unname(do.call(c,as.list(apply(X=j,MARGIN=1,FUN=function(x){paste0(x,collapse="")})))),"")})
-gt5 <- c(paste(nindv,nsites),do.call(c,gt4))
-length(gt5)
-gt5[1]
-substring(gt5[2],1,50)
-substring(gt5[2],1,100)
-vcf2phy <- function(x,save.as,missing="-",sequential=TRUE,width=300,padding=5){#
-#	if(file.exists(save.as)){#
-#		stop("Output file already exists. Use a different name for 'save.as' argument.")#
-#	}#
-	if(is(x,"vcfR")){#
-		vcf.obj <- vcf <- x#
+x <- "testfunB"
+fun.name <- "testfunB"
+fun.args0 <- formals(get("fun.name"))
+fun.args0
+form.expr=paste0(fun.name,"(",args.expr,")")
+form.expr
+evalfun <- function(fun.name,supplied=NULL,passed=NULL){#
+	# Name of the function#
+	#fun.name <- fun#
+	# List with default values for all arguments of the function#
+	fun.args0 <- formals(get("fun.name"))#
+	# Keep arguments except for "..."#
+	fun.args1 <- fun.args0[setdiff(names(fun.args0),"...")]#
+	# Character vector with names of all arguments, including those without default values, but not "..."#
+	argnames0 <- names(fun.args1)#
+	# Character vector with names of arguments with defined values#
+	argnames <- argnames0[!sapply(fun.args1,is,"name")]#
+	# subset of fun.args with defined values#
+	fun.args2 <- fun.args1[!sapply(fun.args1,is,"name")]#
+	# Merging 'supplied' and 'passed'.#
+	argslist <- c(supplied,passed)#
+	if(!is.null(argslist)){#
+		# Check if any of the arguments in argslist are for this function#
+		if(any( names(argslist) %in% argnames0)){#
+			args.use <- c(argslist[names(argslist) %in% argnames0], fun.args1[!(argnames0 %in% names(argslist))])#
+		} else{#
+			# Not sure which one of these would work#
+			# args.use <- fun.args2#
+			args.use <- fun.args1#
+		}#
 	} else {#
-		vcf <- x#
-		vcf.obj <- vcfR::read.vcfR(vcf,verbose=F,checkFile=F)#
+		args.use <- fun.args1#
 	}#
-	gt    <- vcf.obj@gt#
-	fx    <- vcf.obj@fix#
-	met   <- vcf.obj@meta#
-	RA    <- cbind(fx[,"REF"],fx[,"ALT"])#
-#	letter.het  <- apply(X=RA,MARGIN=1,FUN=function(x){toupper(seqinr::bma(x))})#
-#	RHA <- cbind(R=fx[,"REF"],H=letter.het,A=fx[,"ALT"])#
-	ra  <- paste0(fx[,"REF"],fx[,"ALT"])#
-	rat <- table(ra)#
-	gt0 <- gsub(":.+","",t(gt[,-1]))#
-	for(i in 1:length(rat)){#
-		ra.temp   <- names(rat)[i]#
-		RA.temp   <- unlist(strsplit(ra.temp,split=""))#
-		h.temp    <- toupper(seqinr::bma(RA.temp))#
-		RHA.temp  <- c(RA.temp[1],h.temp,RA.temp[2])#
-		cols.temp <- which(ra==ra.temp)#
-		sub.temp  <- gt0[,cols.temp]#
-		sub.temp1 <- gsub("0[/,|]0",RHA.temp[1],sub.temp)#
-		sub.temp2 <- gsub("0[/,|]1",RHA.temp[2],sub.temp1)#
-		sub.temp3 <- gsub("1[/,|]1",RHA.temp[3],sub.temp2)#
-		gt0[,cols.temp] <- sub.temp3#
-		#gt0[,cols.temp] <- gsub("0[/,|]0",RHA.temp[1],gt0[,cols.temp])#
-		#gt0[,cols.temp] <- gsub("0[/,|]1",RHA.temp[2],gt0[,cols.temp])#
-		#gt0[,cols.temp] <- gsub("1[/,|]1",RHA.temp[3],gt0[,cols.temp])#
-	}#
-	gt1 <- gsub("./.",missing,gt0,fixed=TRUE)#
-	gt1 <- gsub(".|.",missing,gt1,fixed=TRUE)#
-	gt1[is.na(gt1)] <- missing#
-	#gt0[,cols.temp] <- gsub("1[/,|]1",RHA.temp[3],gt0[,cols.temp])#
-	samplenames <- colnames(gt)[-1]#
-	nsites      <- nrow(gt)#
-	nindv       <- length(samplenames)#
-	npadcol <- (max(nchar(samplenames))-nchar(samplenames))+padding#
-	padcol  <- do.call(rbind,lapply(X=npadcol,FUN=function(x){paste0(rep(" ",x),collapse="")}))#
-	usenames <- paste0(samplenames,padcol)#
-	rownames(gt1) <- usenames#
-	if(sequential){#
-		gt2 <- do.call(rbind,as.list(apply(X=gt1,MARGIN=1,FUN=function(x){paste0(x,collapse="")})))#
-		gt3 <- cbind(rownames(gt1),gt2)#
-		gt4 <- unname(do.call(rbind,as.list(apply(X=gt3,MARGIN=1,FUN=function(x){paste0(x,collapse="")}))))#
-		gt5 <- c(paste(nindv,nsites),gt4)#
-		writeLines(text=gt5,con=save.as)#
-	} else {#
-		#stop("interleaved not yet implemented")#
-		#start.temp <- 0#
-		#gt2 <- list()#
-		#start.temp <- 1#
-		#for()#
-		ranges.out <- matrix(data=c(1:nsites,rep(NA,((ceiling(nsites/width)*width)-nsites))),ncol=width,byrow=TRUE)#
-		ranges     <- do.call(rbind,lapply(X=1:nrow(ranges.out),FUN=function(x){range(ranges.out[x,],na.rm=TRUE)}))#
-		# A list with matrices to write#
-		gt2 <- lapply(X=1:nrow(ranges),FUN=function(r){do.call(rbind,as.list(apply(X=gt1[,c(ranges[r,1]:ranges[r,2])], MARGIN=1,FUN=function(x){paste0(x,collapse="")})))})#
-		gt3 <- lapply(X=1:length(gt2),FUN=function(x){cbind(usenames,gt2[[x]])})#
-		gt4 <- lapply(X=gt3,FUN=function(j){c(unname(do.call(c,as.list(apply(X=j,MARGIN=1,FUN=function(x){paste0(x,collapse="")})))),"")})#
-		gt5 <- c(paste(nindv,nsites),do.call(c,gt4))#
-		writeLines(text=gt5,con=save.as)#
-		#for(i in 1:length(gt4)){#
-		#	if(i==1){#
-		#		writeLines(text=c(paste(nindv,nsites),gt4[[i]]),con=save.as,append=FALSE)#
-		#	} else {#
-		#		writeLines(text=c("",gt4[[i]]),con=save.as,append=TRUE)#
-		#	}#
-		#	#
-		#}#
-	}#
-#	loci        <- c(fx[,"CHROM"])#
-#	loci.unique <- unique(loci)#
-	# list of numerical vectors indicating range of sites for each locus (start and end)#
-#	ranges.list     <- lapply(X=1:length(loci.unique),FUN=function(x){range(which(loci == loci.unique[x]))})#
-	# two-column matrix with range (start and end) of each locus#
-#	ranges.mat      <- do.call(rbind,ranges.list)#
-#	partition.lines <- paste0("DNA, part",1:nrow(ranges.mat)," = ",ranges.mat[,1],"-",ranges.mat[,2])#
-#	writeLines(text=partition.lines,con=save.as)#
-#	save.as#
+	args.expr=paste(paste0(names(args.use),"=", unname(c(args.use))), collapse=",")#
+	form.expr=paste0(fun.name,"(",args.expr,")")#
+	# parse the expression#
+	eval(parse(text= form.expr))#
 }
-test_interleaved <- vcf2phy(x="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/DAPC/Oxyrhabdium_AllSpecies_BestSNP.vcf",save.as="/Users/alyssaleinweber/Documents/test_interleaved.phy",sequential=FALSE)
-getwd()
+testfunB <- function(x,argB1=10,argB2=10,...){#
+	#fun.name <- list(names(sys.function(sys.parent())))#
+	#fun.args <- formals()#
+	return(argB1/argB2)#
+}
+testfunB <- function(argB1=10,argB2=10){#
+	#fun.name <- list(names(sys.function(sys.parent())))#
+	#fun.args <- formals()#
+	return(argB1/argB2)#
+}
+testfunB <- function(argB1=10,argB2=10){#
+	#fun.name <- list(names(sys.function(sys.parent())))#
+	#fun.args <- formals()#
+	return(argB1/argB2)#
+}
+evalfun("testfunB")
+evalfun("testfunB")
+evalfun("testfunB",list(argB1=5),list(argB2=4))
+evalfun("testfunB",list(argB1=5),list(argB2=4, argB3))
+evalfun("testfunB",list(argB1=5),list(argB2=4,argB3=10))
+evalfun("testfunB",list("argB1"=5),list("argB2"=4,"argB3"=10))
+testfun <- function(...){#
+	moreArgs <- list(...)#
+	evalfun("testfunB",passed=moreArgs)#
+}
+testfun(argA1=5, argA2=6, argB1=7, argB2=8)
+testfunA <- function(argA1=10,argA2=10){#
+	return(argA1*argA2)#
+}#
+#
+testfunB <- function(argB1=10,argB2=10){#
+	return(argB1/argB2)#
+}
+testfun <- function(...){#
+	moreArgs <- list(...)#
+	res1 <- evalfun("testfunA",passed=moreArgs)#
+	res2 <- evalfun("testfunB",passed=moreArgs)#
+	list(result1=res1,result2=res2)#
+}
+testfun(argA1=5, argA2=6, argB1=7, argB2=8)
+evalfun("testfunA",list(...))
+testfunAB <- function(...){#
+    moreArgs <- list(...)#
+    result1 <- evalfun("testfunA",list(...))#
+    result2 <- evalfun("testfunB",list(...))#
+    list("result1"=result1,"result"=result2)#
+}
+evalfun <- function(fun.name, passed=list(...), ...){#
+	# List with default values for all arguments of the function#
+	fun.args0 <- formals(get("fun.name"))#
+	# Keep arguments except for "..."#
+	fun.args1 <- fun.args0[setdiff(names(fun.args0),"...")]#
+	# Character vector with names of all arguments, including those without default values, but not "..."#
+	argnames0 <- names(fun.args1)#
+	# Character vector with names of arguments with defined values#
+	argnames <- argnames0[!sapply(fun.args1,is,"name")]#
+	# subset of fun.args with defined values#
+	fun.args2 <- fun.args1[!sapply(fun.args1,is,"name")]#
+	# List of the arguments suppplied explicitely#
+	supplied <- list(...)#
+	# Merging 'supplied' and 'passed'.#
+	argslist <- c(supplied,passed)#
+	if(!is.null(argslist)){#
+		# Check if any of the arguments in argslist are for this function#
+		if(any( names(argslist) %in% argnames0)){#
+			args.use <- c(argslist[names(argslist) %in% argnames0], fun.args1[!(argnames0 %in% names(argslist))])#
+		} else{#
+			# Not sure which one of these would work#
+			# args.use <- fun.args2#
+			args.use <- fun.args1#
+		}#
+	} else {#
+		args.use <- fun.args1#
+	}#
+	args.expr=paste(paste0(names(args.use),"=", unname(c(args.use))), collapse=",")#
+	form.expr=paste0(fun.name,"(",args.expr,")")#
+	# parse the expression#
+	eval(parse(text= form.expr))#
+}
+testfunA <- function(argA1=10,argA2=10){#
+	return(argA1*argA2)#
+}
+testfunB <- function(argB1=10,argB2=10){#
+	return(argB1/argB2)#
+}
+testfunAB <- function(...){#
+    moreArgs <- list(...)#
+    result1 <- evalfun("testfunA")#
+    result2 <- evalfun("testfunB")#
+    list("result1"=result1,"result"=result2)#
+}
+testfun(argA1=5, argA2=6, argB1=7, argB2=8)
+testfun()
+testfun(argA1=5)
 devtools::document()
-rm(list = c("vcf2phy"))
+rm(list = c("evalfun"))
 devtools::document()
-lonlat1 <- cbind(sample(c(-88:-80),size=200), sample(c(25.4:40),size=200))
-c(-88:-80)
-lonlat1 <- cbind(sample(c(-88:-80),size=200,replace=TRUE), sample(c(25.4:40),size=200,replace=TRUE))
-lonlat1[1,]
-lonlat1[2,]
-c(-88.001:-80.00)
-c(-88.00:-80.00)
-seq(from=-88,to=-80,by=0.001)
-lonlat1 <- cbind(sample(seq(from=-88,to=-80,by=0.001),size=200,replace=FALSE), sample(seq(from=25,to=40,by=0.001),size=200,replace=FALSE))
-lonlat1[1:10,]
-lonlat2 <- cbind(sample(seq(from=-98,to=-92,by=0.001),size=200,replace=FALSE), sample(seq(from=26,to=40,by=0.001),size=200,replace=FALSE))
-lonlat2[1:10,]
-world_sf      <- rnaturalearth::ne_countries(scale=10,returnclass="sf")[1]
-library(sf)
-p <- rbind(c(3.2,4), c(3,4.6), c(3.8,4.4), c(3.5,3.8), c(3.4,3.6), c(3.9,4.5))
-p
-latlon1.sf <- st_multipoint(lonlat1)
-latlon1.sf
-latlon2.sf <- st_multipoint(lonlat2)
-test <- st_intersection(x= latlon1,y=world_sf)
-test <- st_intersection(x=lonlat1.sf,y=world_sf)
-lonlat1.sf <- st_multipoint(lonlat1)
-lonlat2.sf <- st_multipoint(lonlat2)
-test <- st_intersection(x=lonlat1.sf,y=world_sf)
-st_crs(x)
-st_crs(lonlat1.sf)
-st_crs(world_sf)
-st_crs(lonlat1.sf) <- st_crs(world_sf)
-st_transform(lonlat1.sf) <- st_crs(world_sf)
-st_transform(lonlat1.sf,st_crs(world_sf))
-st_crs(lonlat1.sf)
-st_crs(lonlat1.sf) <- proj(world_sf)
-proj(world_sf)
-st_crs(lonlat1.sf) <- st_crs(world_sf)
-st_crs(world_sf) <- 4326
-st_crs(lonlat1.sf) <- 4326
-class(world_sf)
-class(lonlat1.sf)
-st_point(lonlat1)
-SpatialPoints(coords= lonlat1)
-sp1 <- SpatialPoints(coords= lonlat1)
-sp1 <- SpatialPoints(coords= lonlat1,proj4string=CRS(4326))
-CRS(4326)
-st_crs(sp1,4326)
-st_crs(sp1) <- 4326
-CRS(world_sf)
-spdf_world_10             <- rnaturalearth::ne_countries(scale=10)
-crs.string <- "+init=EPSG:4326"
-suppressWarnings(raster::crs(spdf_world_10)   <- crs.string)
-sp1
-suppressWarnings(raster::crs(sp1) <- crs.string)
-suppressWarnings(raster::crs(spdf_world_10) <- raster::crs(sp1) <- crs.string)
-sp2 <- sp::SpatialPoints(coords= lonlat2)
-suppressWarnings(raster::crs(spdf_world_10) <- raster::crs(sp1) <- raster::crs(sp2) <-crs.string)
-circles.sp1 <- coords2sp.poly(coords.mat=sp1,r=1)
-circles.sp1 <- coords2sp.poly(coords.mat=lonlat1,r=1)
-circles.sp2 <- coords2sp.poly(coords.mat=lonlat2,r=1)
-suppressWarnings(raster::crs(spdf_world_10) <- raster::crs(sp1) <- raster::crs(sp2) <- raster::crs(circles.sp1) <- raster::crs(circles.sp2) <-crs.string)
-unique.features.at.circles <- do.call(rbind,unique(sp::over(spdf_world_10, circles.sp1, returnList=T)))
-dim(unique.features.at.circles)
-unique.features.at.circles[1:10,]
-unique.features.at.circles[,1:10]
-class(unique.features.at.circles)
-test <- sp::over(spdf_world_10, circles.sp1)
-class(test)
-test[1]
-test[2]
-test[3]
-is.na(test)
-test <- sp::over(spdf_world_10, circles.sp1,returnList=TRUE)
-class(test)
-dim(test[[1]])
-test[[1]]
-do.call(rbind,test)
-dim(do.call(rbind,test))
-test[1:10]
-do.call(c,test)
-lonlat1.over <- lonlat1[do.call(c,unique(sp::over(spdf_world_10, circles.sp1, returnList=T))),]
-dim(lonlat1)
-dim(lonlat1.over)
-lonlat1.over[1:10,]
+formal("rcoords")
+formals("rcoords")
+names(formals("rcoords"))
+names(formals("rcoords")), names(formals(adegenet::glSim))
+names(formals(adegenet::glSim))
+intersect(names(formals("rcoords")), names(formals(adegenet::glSim),names(formals(adegenet::glSim)))
+intersect(names(formals("rcoords"), names(formals(adegenet::glSim),names(formals(adegenet::glSim))))
+intersect( names(formals(adegenet::glSim)) ,  names(formals("rcoords")) )
+test4 <- sim.vcf(x= example_vcf_path, save.as="/Users/alyssaleinweber/Documents/simtest4_K2.vcf.gz",n.ind=100,n.snps=1000,K=2, sim.coords=TRUE)
+devtools::document()
+test4 <- sim.vcf(x= example_vcf_path, save.as="/Users/alyssaleinweber/Documents/simtest4_K2.vcf.gz",n.ind=100,n.snps=1000,K=2, sim.coords=TRUE)
+devtools::document()
+devtools::document()
+test4 <- sim.vcf(x= example_vcf_path, save.as="/Users/alyssaleinweber/Documents/simtest4_K2.vcf.gz",n.ind=100,n.snps=1000,K=2, sim.coords=TRUE)
+devtools::document()
+test4 <- sim.vcf(x= example_vcf_path, save.as="/Users/alyssaleinweber/Documents/simtest4_K2.vcf.gz",n.ind=100,n.snps=1000,K=2, sim.coords=TRUE)
+devtools::document()
+test4 <- sim.vcf(x= example_vcf_path, save.as="/Users/alyssaleinweber/Documents/simtest4_K2.vcf.gz",n.ind=100,n.snps=1000,K=2, sim.coords=TRUE)
+devtools::document()
+test4 <- sim.vcf(x= example_vcf_path, save.as="/Users/alyssaleinweber/Documents/simtest4_K2.vcf.gz",n.ind=100,n.snps=1000,K=2, sim.coords=TRUE)
+devtools::document()
+test4 <- sim.vcf(x= example_vcf_path, save.as="/Users/alyssaleinweber/Documents/simtest4_K2.vcf.gz",n.ind=100,n.snps=1000,K=2, sim.coords=TRUE)
+?glSim
+devtools::document()
+test4 <- sim.vcf(x= example_vcf_path, save.as="/Users/alyssaleinweber/Documents/simtest4_K2.vcf.gz",n.ind=100,n.snps=1000,K=2, sim.coords=TRUE)
+devtools::document()
+test4 <- sim.vcf(x= example_vcf_path, save.as="/Users/alyssaleinweber/Documents/simtest4_K2.vcf.gz",n.ind=100,n.snps=1000,K=2, sim.coords=TRUE)
+devtools::document()
+test4 <- sim.vcf(x= example_vcf_path, save.as="/Users/alyssaleinweber/Documents/simtest4_K2.vcf.gz",n.ind=100,n.snps=1000,K=2, sim.coords=TRUE)
+test4
+devtools::document()
+test4 <- sim.vcf(x= example_vcf_path, save.as="/Users/alyssaleinweber/Documents/simtest4_K2.vcf.gz",n.ind=100,n.snps=1000,K=2, sim.coords=TRUE)
+length(test4)
+lengths(test4)
+test4
+lengths(test4)
+test4$supplied.list
+supplied
+test4$supplied
+test4$argslist
+tst4$args.use
+test4$args.use
+table(names(test4$args.use))
+setdiff(names(test4$args.use), names(test4$argslist))
+table(names(test4$argslist))
+devtools::document()
+test4 <- sim.vcf(x= example_vcf_path, save.as="/Users/alyssaleinweber/Documents/simtest4_K2.vcf.gz",n.ind=100,n.snps=1000,K=2, sim.coords=TRUE)
+lengths(test4)
+test4$form.expr
+devtools::document()
+test4 <- sim.vcf(x= example_vcf_path, save.as="/Users/alyssaleinweber/Documents/simtest4_K2.vcf.gz",n.ind=100,n.snps=1000,K=2, sim.coords=TRUE)
+test4$form.expr
+devtools::document()
+test4 <- sim.vcf(x= example_vcf_path, save.as="/Users/alyssaleinweber/Documents/simtest4_K2.vcf.gz",n.ind=100,n.snps=1000,K=2, sim.coords=TRUE)
+test$form.expr
+test4$form.expr
+table(names(test4$argslist))
+lengths(test4)
+table(names(test4$args.use))
+devtools::document()
+test4 <- sim.vcf(x= example_vcf_path, save.as="/Users/alyssaleinweber/Documents/simtest4_K2.vcf.gz",n.ind=100,n.snps=1000,K=2, sim.coords=TRUE)
+table(names(test4$args.use))
+test4$form.expr
+devtools::document()
+test4 <- sim.vcf(x= example_vcf_path, save.as="/Users/alyssaleinweber/Documents/simtest4_K2.vcf.gz",n.ind=100,n.snps=1000,K=2, sim.coords=TRUE)
+test4$form.expr
+table(names(test4$args.use))
+devtools::document()
+test4 <- sim.vcf(x= example_vcf_path, save.as="/Users/alyssaleinweber/Documents/simtest4_K2.vcf.gz",n.ind=100,n.snps=1000,K=2, sim.coords=TRUE)
+table(names(test4$args.use))
+test4$form.expr
+devtools::document()
+test4 <- sim.vcf(x= example_vcf_path, save.as="/Users/alyssaleinweber/Documents/simtest4_K2.vcf.gz",n.ind=100,n.snps=1000,K=2, sim.coords=TRUE)
+devtools::document()
+devtools::document()
+test5 <- sim.vcf(x= example_vcf_path, save.as="/Users/alyssaleinweber/Documents/simtest5_K2.vcf.gz",n.ind=100,n.snps=1000,K=2, sim.coords=TRUE)
+grid.newpage; grid.draw(test5[[2]])
+grid.newpage; grid.draw(test5[[1]])
+grid.newpage; grid.draw(test5[[3]])
 dev.off()
-pdf("/Users/alyssaleinweber/Documents/misc.wrappers/inst/extdata/example_model.pdf", width=10, height=6)#
-plot_model(tpl.path="/Users/alyssaleinweber/Documents/misc.wrappers/inst/extdata/example.tpl",est.path="/Users/alyssaleinweber/Documents/misc.wrappers/inst/extdata/example.est")#
-dev.off()
-getwd()
+bothmaps = test5[[3]]; pdf(file="Users/alyssaleinweber/Documents/simtest5_K2.pdf",width=8,height=6,onefile=TRUE); grid::grid.newpage(); grid::grid.draw(bothmaps); dev.off()
+bothmaps = test5[[3]]; pdf(file="/Users/alyssaleinweber/Documents/simtest5_K2.pdf",width=8,height=6,onefile=TRUE); grid::grid.newpage(); grid::grid.draw(bothmaps); dev.off()
+save.as <- "/Users/alyssaleinweber/Documents/simtest5_K2.vcf.gz"
+save.as4 <- paste0(tools::file_path_sans_ext(save.as),"_simulated_coords_map.pdf")
+save.as4
+pdf(file="save.as4",width=8,height=6,onefile=TRUE)#
+			grid::grid.newpage()#
+			grid::grid.draw(bothmaps)#
+		dev.off()
+file.exists("simtest5_K2.vcf_simulated_coords_map.pdf")
+save.as.name <- gsub("[.]+","",dirname(save.as))
+save.as.name
+save.as.name <- gsub("[.]+","",basename(save.as))
+save.as.name
+save.as.name <- gsub("[.].+","",basename(save.as))
+save.as.name
+save.as.name <- file.path(dirname(save.as),gsub("[.].+","",basename(save.as)),"_simulated_coords_map.pdf")
+save.as.name
+save.as4 <- file.path(dirname(save.as),paste0(gsub("[.].+","",basename(save.as)),"_simulated_coords_map.pdf"))
+save.as4
+save.as3 <- file.path(dirname(save.as),paste0(gsub("[.].+","",basename(save.as)),"_simulated_coords.txt"))
+save.as3
+save.as3 <- file.path(dirname(save.as),paste0(gsub("[.vcf].+","",basename(save.as)),"_simulated_coords.txt"))
+save.as3
+save.as4 <- file.path(dirname(save.as),paste0(gsub("[.vcf].+","",basename(save.as)),"_simulated_coords_map.pdf"))
+save.as4
+file.exists(save.as4)
+pdf(file="save.as4",width=8,height=6,onefile=TRUE)#
+			grid::grid.newpage()#
+			grid::grid.draw(bothmaps)#
+		dev.off()
+length(bothmaps)
+pdf(file="save.as4",width=8,height=6,onefile=TRUE)#
+			#grid::grid.newpage()#
+			grid::grid.draw(bothmaps)#
+		dev.off()
+pdf(file=save.as4,width=8,height=6,onefile=TRUE)#
+			grid::grid.newpage()#
+			grid::grid.draw(bothmaps)#
+		dev.off()
 devtools::document()
-devtools::document()
-devtools::document()
-devtools::document()
-devtools::document()
-devtools::document()
-?grid.newpage
-devtools::document()
+test6 <- sim.vcf(x= example_vcf_path, save.as="/Users/alyssaleinweber/Documents/simtest6_K2.vcf.gz",n.ind=100,n.snps=1000,K=2, sim.coords=TRUE)
 q()

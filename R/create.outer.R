@@ -342,18 +342,41 @@ points.on.land <- function(x,return.as="data.frame"){
 #' @param n.grp Number of groups to sample (default 1). Each group is defined by its own spatial polygon from which samples are drawn. The center of each group's sampling polygon falls within a polygon with size = ('regionsize' * area of 'wnd').
 #' @param grp.n.weights Probability weights for group sample sizes of groups. Default is equal weights. The sum of points sampled for each group = 'samplesize' argument.
 #' @param grp.area.weights Probability weights determing group region sizes. Default is equal weights.
-#' @param wnd Numerical vector specifying the bounding box (longitude and latitude ranges) for the region where sampling is allowed. Default is to include all of Earth c(-180,180,-90,90). 
+#' @param wnd Either a character string or vector describing one or more regions of Earth, or a length four numerical vector specifying the bounding box (longitude and latitude ranges) for the region where sampling is allowed. Default is to include all of Earth c(-180,180,-90,90). 
+#' Character strings can be one of the following (NOT ENTIRELY IMPLEMENTED): "Earth", "tropics", "middleSouth", "middleNorth" "middle", "Arctic", "Antarctic", "Polar", "NorthernHemisphere", "WesternHemisphere", or "EasternHemisphere".
 #' @param over.land Logical indicating whether or not all returned points must occur over land. Default TRUE. Note that this condition is only applied to samples returned as output. Therefore, 'samplesize' is really a 'sample until' rule. This is faster than performing clipping operations on proposed sample polygons to conform to geography.
 #' @param interactions Numeric vector with the minimum and maximum amount of overlap between each pair of groups (aka populations), calculated as (intersect area)/(minimum of non-intersected area for each group). Default c(0,1) allows for all possible scenarios. Examples: c(0,0) specifies that groups must be allopatric; c(1,1) requires complete overlap of groups, which is not realistic given the stochasticity determining region sizes; c(0.5,1) requires that at least half-overlaps between groups; c(0.2,0.25) specifies a small contact zone.
 ##' @param d.grp Number controlling the distance between the centers of a pair of areas, as a function of the pair's radii. Default 1, which would allow sample regions to nearly coincide. Future option may allow for a pairwise distance matrix.
 ##' @param expf Number that affects dispersion relative to regionsize. Higher numbers increase dispersion. Default 8.
 #' @param min.grp.size Minimum number of samples required for each group. Default 2.
-#' @param grp.scaler Number > 0 that scales geographical areas of all groups
+##' @param grp.scaler Number > 0 that scales geographical areas of all groups
 #' @param return.as Character string with class to use for object returned. Default "data.frame". Can also be "matrix" or "SP" (SpatialPoints).
 #' @param show.plot Whether or not the points should be plotted on a low-resolution land map. The map is used is the rnaturalearth countries map, 110 meter resolution.
 #' @return An object with class equal to the value of 'return.as' and containing the set of points that meet the specified sampling requirements. If return.as='matrix' or 'data.frame', the columns are 'X' (for longitude), 'Y' (for latitude), and 'group' (all 1 if 'n.grp'=1).
 #' @export rcoords
-rcoords <- function(regionsize=0.25, samplesize=100, n.grp=1, grp.n.weights=rep(1,n.grp), grp.area.weights=rep(1,n.grp), grp.scaler=(1/n.grp), min.grp.size=2, wnd= c(-180, 180,-90, 90), over.land=TRUE, interactions=c(0,1), show.plot=FALSE, return.as="data.frame"){
+rcoords <- function(regionsize=0.25, samplesize=100, n.grp=1, grp.n.weights=NULL, grp.area.weights=NULL, min.grp.size=2, wnd= c(-180, 180,-90, 90), over.land=TRUE, interactions=c(0,1), show.plot=FALSE, return.as="data.frame"){
+	if(is.null(grp.n.weights)){
+		grp.n.weights <- rep(1,n.grp)
+	}
+	if(is.null(grp.area.weights)){
+		grp.area.weights <- rep(1,n.grp)
+	}
+	# Number > 0 that scales geographical areas of all groups relative to 'regionsize'*(area of 'wnd')
+	grp.scaler=(1/n.grp)
+	# Adding this soon. Plan is to convert each bounding box to an extent object and then Polygon object, and then combine into SpatialPolygons for multi-part areas.
+	if(FALSE){
+		earth.bb         <- c(-180, 180,-90, 90)
+		tropics.bb       <- c(-180,180,-23.43651,23.43651)
+		south.middle.wnd <- c(-180,180,-23.439444,-66.560833)
+		north.middle.wnd <- c(-180,180,0,66.560833)
+		arctic.wnd    <- c()
+		antarctic.wnd <- c()
+		western.hemisphere  <- c()
+		eastern.hemisphere  <- c()
+		northern.hemisphere <- c()
+		southern.hemisphere <- c()
+		# Continents and Bioregions...
+	}
 	# Defaults: n.grp=2; samplesize=100; regionsize=0.25; grp.n.weights=rep(1,n.grp); grp.area.weights=rep(1,n.grp); wnd= c(-180, 180,-90, 90); over.land=TRUE; interactions=c(0,1); expf=8; show.plot=FALSE;  return.as="data.frame"; grp.scaler=1
 	grp.scaler.start <- grp.scaler
 	#result.temp        <- data.frame(NULL)

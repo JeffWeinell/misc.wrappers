@@ -11,9 +11,8 @@ rcoords(
   regionsize = 0.25,
   samplesize = 100,
   n.grp = 1,
-  grp.n.weights = rep(1, n.grp),
-  grp.area.weights = rep(1, n.grp),
-  grp.scaler = (1/n.grp),
+  grp.n.weights = NULL,
+  grp.area.weights = NULL,
   min.grp.size = 2,
   wnd = c(-180, 180, -90, 90),
   over.land = TRUE,
@@ -33,11 +32,10 @@ rcoords(
 
 \item{grp.area.weights}{Probability weights determing group region sizes. Default is equal weights.}
 
-\item{grp.scaler}{Number > 0 that scales geographical areas of all groups}
-
 \item{min.grp.size}{Minimum number of samples required for each group. Default 2.}
 
-\item{wnd}{Numerical vector specifying the bounding box (longitude and latitude ranges) for the region where sampling is allowed. Default is to include all of Earth c(-180,180,-90,90).}
+\item{wnd}{Either a character string or vector describing one or more regions of Earth, or a length four numerical vector specifying the bounding box (longitude and latitude ranges) for the region where sampling is allowed. Default is to include all of Earth c(-180,180,-90,90).
+Character strings can be one of the following (NOT ENTIRELY IMPLEMENTED): "Earth", "tropics", "middleSouth", "middleNorth" "middle", "Arctic", "Antarctic", "Polar", "NorthernHemisphere", "WesternHemisphere", or "EasternHemisphere".}
 
 \item{over.land}{Logical indicating whether or not all returned points must occur over land. Default TRUE. Note that this condition is only applied to samples returned as output. Therefore, 'samplesize' is really a 'sample until' rule. This is faster than performing clipping operations on proposed sample polygons to conform to geography.}
 
@@ -52,6 +50,8 @@ rcoords(
 \item{d.grp}{Number controlling the distance between the centers of a pair of areas, as a function of the pair's radii. Default 1, which would allow sample regions to nearly coincide. Future option may allow for a pairwise distance matrix.}
 
 \item{expf}{Number that affects dispersion relative to regionsize. Higher numbers increase dispersion. Default 8.}
+
+\item{grp.scaler}{Number > 0 that scales geographical areas of all groups}
 }
 \value{
 An object with class equal to the value of 'return.as' and containing the set of points that meet the specified sampling requirements. If return.as='matrix' or 'data.frame', the columns are 'X' (for longitude), 'Y' (for latitude), and 'group' (all 1 if 'n.grp'=1).
