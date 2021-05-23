@@ -1924,13 +1924,13 @@ filter.vcf <- function(x,save.as=NULL,nsample=c(NA,NA), specificSites=NULL,speci
 #' @param block.minsize Number with minimum. Ignored if 'LD' is FALSE or coerced to FALSE. Default 10.
 #' @param block.maxsize Number indicating the maximum size of linkage blocks. Ignored if 'LD' is FALSE or coerced to FALSE, or if 'use.maxLDx' is TRUE and 'x' is non-NULL, in which case the max block size is equal to the max position of any snps in a linkage block). Default 1000.
 #' @param use.maxLDx Logical indicating whether or not the maximum linkage block size should be set as the max position of any snp within a linkage block of the input data. Default FALSE, which means that max linkage block size should be the value of 'block.maxsize'.
-#' @param sim.coords NOT YET IMPLEMENTED. Logical indicating if a simulated coordinates (sample localities) should be produced for each simulated individual. Default FALSE.
-#' @param ... Additional arguments passed to the function 'glSim' from 'adegenet' package. These include arguments 'grp.size', 'pop.freq', 'alpha', 'parallel', and 'theta'. Not yet implemented.
+#' @param sim.coords Logical indicating if a simulated coordinates (sample localities) should be produced for each simulated individual. Default FALSE.
+#' @param ... Additional arguments passed to 'adegenet::glSim' to control SNPs simulation, or to 'misc.wrappers::rcoords' to further control the simulation of geographic localities when 'sim.coords' is TRUE. Possible 'glSim' arguments include 'grp.size', 'pop.freq', 'alpha', 'parallel', and 'theta' (see ?adegenet::glSim for details). Arguments that can be passed to 'rcoords' include wnd', 'over.land', and 'interactions'; see ?misc.wrappers::rcoords).
 #' @return An object with class vcfR (see 'vcfR' package for details regarding this class)
 #' @export sim.vcf
 sim.vcf <- function(x=NULL, save.as=NULL, RA.probs=NULL, n.ind=NULL, n.snps=NULL, snp.str = 0, ploidy=NULL, K=2, include.missing=FALSE, fMD=NULL, pMDi=NULL, LD=FALSE, block.minsize=10, block.maxsize=NULL, use.maxLDx=FALSE, sim.coords=FALSE , ...){
 #	x=NULL; save.as=NULL; RA.probs=NULL; n.ind=NULL; n.snps=NULL; snp.str = 0; ploidy=NULL; K=2; include.missing=FALSE; fMD=NULL; LD=NULL; block.minsize=10; block.maxsize=NULL; use.maxLDx=FALSE
-#	args  <- list(...)
+	additional.args  <- list(...)
 	RA.pairnames <- c("AC","AG","AT","CA","CG","CT","GA","GC","GT","TA","TC","TG")
 	if(!is.null(x)){
 		vcf   <- vcfR::read.vcfR(x,verbose=F,checkFile=F)
@@ -2045,7 +2045,14 @@ sim.vcf <- function(x=NULL, save.as=NULL, RA.probs=NULL, n.ind=NULL, n.snps=NULL
 	n.snp.nonstruc <- n.snps-n.snp.struc
 	### Perform simulation
 #	simK2 <- adegenet::glSim(n.ind=n.ind,n.snp.nonstruc=n.snp.nonstruc,ploidy=ploidy,K=K,args)
-	sim <- adegenet::glSim(n.ind=n.ind, n.snp.nonstruc=n.snp.nonstruc, n.snp.struc=n.snp.struc, ploidy=ploidy, k=K, LD=LD, block.minsize = block.minsize, block.maxsize = block.maxsize, sort.pop=TRUE,...)
+#	sim <- adegenet::glSim(n.ind=n.ind, n.snp.nonstruc=n.snp.nonstruc, n.snp.struc=n.snp.struc, ploidy=ploidy, k=K, LD=LD, block.minsize = block.minsize, block.maxsize = block.maxsize, sort.pop=TRUE,...)
+	glSim      <- adegenet::glSim
+	#glSim.args <- list(n.ind=n.ind,n.snp.nonstruc=n.snp.nonstruc, n.snp.struc=n.snp.struc, ploidy=ploidy, LD=LD, block.minsize = block.minsize) # , block.maxsize = block.maxsize)
+	#names(...) %in% names(supplied)
+	# sim   <- evalfun(fun.name="glSim", n.ind=n.ind, n.snp.nonstruc=n.snp.nonstruc, n.snp.struc=n.snp.struc, ploidy=ploidy, k=K, LD=LD, block.minsize = block.minsize, block.maxsize = block.maxsize, sort.pop=TRUE)
+	#sim   <- evalfun(fun.name="glSim", supplied.list=glSim.args, k=K, sort.pop=TRUE)
+	sim   <- evalfun(fun.name="glSim", k=K, sort.pop=TRUE,n.ind=n.ind,n.snp.nonstruc=n.snp.nonstruc, n.snp.struc=n.snp.struc, ploidy=ploidy, LD=LD)
+	#return(sim)
 	### Ancestral population assignments of simulated samples
 	anc.pops <- gsub(".", "", as.character(sim@other$ancestral.pops), fixed=T)
 	### Genotype matrix of simulated dataset
@@ -2085,7 +2092,7 @@ sim.vcf <- function(x=NULL, save.as=NULL, RA.probs=NULL, n.ind=NULL, n.snps=NULL
 				}
 			}
 			### Introduce missing data at each site.
-			sim.gt00 <- do.call(rbind,lapply(X=1:length(sim.sites.nMD),FUN=function(x){res=sim.gt0[x,]; res[sample(n.ind,size=sim.sites.nMD[x],replace=FALSE,prob=pMDi)] <- NA;res}))
+			sim.gt00 <- do.call(rbind,lapply(X=1:length(sim.sites.nMD),FUN=function(x){res=sim.gt0[x,]; res[sample(n.ind,size=sim.sites.nMD[x],replace=FALSE,prob=pMDi)] <- NA; res}))
 			# check which sites have less than two genotypes
 ###			sitediv <- vapply(X=sim.gt4,FUN=function(x){length(table(x))},FUN.VALUE=1)
 			sitediv <- apply(X=sim.gt00,MARGIN=1,FUN=function(x){length(unique(x))>1})
@@ -2124,6 +2131,31 @@ sim.vcf <- function(x=NULL, save.as=NULL, RA.probs=NULL, n.ind=NULL, n.snps=NULL
 		"##source=\"misc.wrappers\"",
 		"##INFO=<ID=AF,Number=A,Type=Float,Description=\"Allele Frequency\">",
 		"##FORMAT=<ID=GT,Number=1,Type=String,Description=\"Genotype\">")
+	
+	
+	#return(list(n.per.pop=anc.pops,K=K))
+	if(sim.coords){
+		#n.per.pop    <- table(as.numeric(gsub("pop","",anc.pops)))
+		n.per.pop    <- table(anc.pops)
+		#simcoords <- rcoords(regionsize=0.7,samplesize=n.per.pop,n.grp=K,show.plot=F,wnd=c(-180,180,-60,60),interactions=c(0,0),return.as="DF_plot")
+		simcoords <- evalfun("rcoords",regionsize=0.7,samplesize=n.per.pop,n.grp=K,show.plot=F,wnd=c(-180,180,-60,60),interactions=c(0,0))
+		simcoords.df <- simcoords$coords.df
+		rownames(simcoords.df) <- samplenames
+		colnames(simcoords.df) <- c("longitude","latitude","group")
+		#save.as3 <- paste0(tools::file_path_sans_ext(save.as),"_simulated_coords.txt")
+		save.as3 <- file.path(dirname(save.as),paste0(gsub("[.vcf].+","",basename(save.as)),"_simulated_coords.txt"))
+		write.table(x=simcoords.df,file=save.as3, row.names=TRUE,col.names=TRUE,sep="\t",quote=FALSE)
+		gg.map <- simcoords$map.ggplot
+		#save.as4 <- paste0(tools::file_path_sans_ext(save.as),"_simulated_coords_map.pdf")
+		save.as4 <- file.path(dirname(save.as),paste0(gsub("[.vcf].+","",basename(save.as)),"_simulated_coords_map.pdf"))
+		#save.as4 <- file.path(dirname(save.as),"_simulated_coords_map.pdf")
+		pdf(file=save.as4,width=8,height=6,onefile=TRUE)
+			grid::grid.newpage()
+			grid::grid.draw(bothmaps)
+		dev.off()
+		# Add coordinates as metadata lines?
+	}
+
 	#### Create vcfR object with simulated dataset
 	vcf.sim <- new("vcfR", meta=sim.meta,fix=sim.fx,gt=sim.gt)
 	if(!is.null(save.as)){
@@ -2132,27 +2164,14 @@ sim.vcf <- function(x=NULL, save.as=NULL, RA.probs=NULL, n.ind=NULL, n.snps=NULL
 		vcfR::write.vcf(x=vcf.sim,file=save.as2)
 		vcf.sim <- vcfR::read.vcfR(save.as2)
 	}
-	
-	#return(list(n.per.pop=anc.pops,K=K))
-	if(sim.coords){
-		#n.per.pop    <- table(as.numeric(gsub("pop","",anc.pops)))
-		n.per.pop    <- table(anc.pops)
-		simcoords <- rcoords(regionsize=0.7,samplesize=n.per.pop,n.grp=K,show.plot=F,wnd=c(-180,180,-60,60),interactions=c(0,0),return.as="DF_plot")
-		simcoords.df <- simcoords$coords.df
-		rownames(simcoords.df) <- samplenames
-		colnames(simcoords.df) <- c("longitude","latitude","group")
-		save.as3 <- paste0(tools::file_path_sans_ext(save.as),"_simulated_coords.txt")
-		write.table(x=simcoords.df,file=save.as3, row.names=TRUE,col.names=TRUE,sep="\t",quote=FALSE)
-		gg.map <- simcoords$map.ggplot
-		save.as4 <- paste0(tools::file_path_sans_ext(save.as),"_simulated_coords_map.pdf")
-		pdf(file="save.as4",width=8,height=6)
-		grid::grid.newpage()
-		grid::grid.draw(bothmaps)
-		dev.off()
-	}
+
 	### Return the simulated dataset as vcfR object
 	# If save.as is null, then the object returned will always report "zero missing data", although missing data may exists. Writing and rereading the VCF removes this vcfR bug. May need to use NA in gt matrix of vcfR.
-	vcf.sim
+	if(sim.coords){
+		 return(list(simulated.vcf=vcf.sim,simulated.LonLat=simcoords.df,gg.map=bothmaps))
+	} else {
+		return(vcf.sim)
+	}
 }
 ##' @examples
 ##' library(misc.wrappers)

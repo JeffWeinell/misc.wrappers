@@ -58,9 +58,9 @@ If RA.probs="empirical", the frequencies of each Reference:Alternative allele co
 
 \item{use.maxLDx}{Logical indicating whether or not the maximum linkage block size should be set as the max position of any snp within a linkage block of the input data. Default FALSE, which means that max linkage block size should be the value of 'block.maxsize'.}
 
-\item{sim.coords}{NOT YET IMPLEMENTED. Logical indicating if a simulated coordinates (sample localities) should be produced for each simulated individual. Default FALSE.}
+\item{sim.coords}{Logical indicating if a simulated coordinates (sample localities) should be produced for each simulated individual. Default FALSE.}
 
-\item{...}{Additional arguments passed to the function 'glSim' from 'adegenet' package. These include arguments 'grp.size', 'pop.freq', 'alpha', 'parallel', and 'theta'. Not yet implemented.}
+\item{...}{Additional arguments passed to 'adegenet::glSim' to control SNPs simulation, or to 'misc.wrappers::rcoords' to further control the simulation of geographic localities when 'sim.coords' is TRUE. Possible 'glSim' arguments include 'grp.size', 'pop.freq', 'alpha', 'parallel', and 'theta' (see ?adegenet::glSim for details). Arguments that can be passed to 'rcoords' include wnd', 'over.land', and 'interactions'; see ?misc.wrappers::rcoords).}
 
 \item{n.snp.nonstruc}{Number of nonstructured SNPs. If n.snp.nonstruc is NULL and x is non-NULL, n.snp.nonstruc will equal half the number of SNPs in the input dataset.}
 

@@ -354,7 +354,6 @@ points.on.land <- function(x,return.as="data.frame"){
 #' @return An object with class equal to the value of 'return.as' and containing the set of points that meet the specified sampling requirements. If return.as='matrix' or 'data.frame', the columns are 'X' (for longitude), 'Y' (for latitude), and 'group' (all 1 if 'n.grp'=1).
 #' @export rcoords
 rcoords <- function(regionsize=0.25, samplesize=100, n.grp=1, grp.n.weights=rep(1,n.grp), grp.area.weights=rep(1,n.grp), grp.scaler=(1/n.grp), min.grp.size=2, wnd= c(-180, 180,-90, 90), over.land=TRUE, interactions=c(0,1), show.plot=FALSE, return.as="data.frame"){
-	# 
 	# Defaults: n.grp=2; samplesize=100; regionsize=0.25; grp.n.weights=rep(1,n.grp); grp.area.weights=rep(1,n.grp); wnd= c(-180, 180,-90, 90); over.land=TRUE; interactions=c(0,1); expf=8; show.plot=FALSE;  return.as="data.frame"; grp.scaler=1
 	grp.scaler.start <- grp.scaler
 	#result.temp        <- data.frame(NULL)
@@ -387,7 +386,8 @@ rcoords <- function(regionsize=0.25, samplesize=100, n.grp=1, grp.n.weights=rep(
 	wnd.sp2 <- wnd.sp
 	#sp::proj4string(wnd.sp2) <- sp::CRS("+proj=longlat +datum=WGS84")
 	raster::crs(wnd.sp2) <- sp::CRS("EPSG:4326")
-	wnd.area <- attributes(attributes(wnd.sp2)$polygons[[1]])$area
+	#wnd.area <- attributes(attributes(wnd.sp2)$polygons[[1]])$area
+	wnd.area <- wnd.sp2@polygons[[1]]@Polygons[[1]]@area
 	# area of region spanning all group sampling areas, in decimal degrees
 	regionsize.dd0 <- (regionsize*wnd.area)
 	regionsize.dd  <- (regionsize.dd0*0.25)
@@ -496,15 +496,17 @@ rcoords <- function(regionsize=0.25, samplesize=100, n.grp=1, grp.n.weights=rep(
 		if(!is.null(interactions) & n.grp > 1){
 			if(!(interactions[1]==0 & interactions[2]==1)){
 				# Much less complex list holding the sample sampling polygons
-				polygons.list <- lapply(X=1:n.grp, function(x){attributes(attributes(grp.areas.sp[[x]])$"polygons"[[1]])[[1]][[1]]})
+				# polygons.list <- lapply(X=1:n.grp, function(x){attributes(attributes(grp.areas.sp[[x]])$"polygons"[[1]])[[1]][[1]]})
+				# Possibly equivalent:
+				polygons.list <- lapply(X=1:n.grp, function(x) grp.areas.sp[[x]]@polygons[[1]]@Polygons[[1]])
 				# All possible pairwise group comparisons
 				grp.pairs <- do.call(rbind,pset(1:n.grp,2,2))
 				# Calculate intersect area yet and sum areas for each pair of groups. (Doesnt work yet).
 				grp.int.area <- grp.sum.area <- grp.ratio <- c()
 				for(i in 1:nrow(grp.pairs)){
 					polygon.pair   <- polygons.list[c(grp.pairs[i,1],grp.pairs[i,2])]
-					grp1.area.temp <- attributes(polygon.pair[[1]])$area
-					grp2.area.temp <- attributes(polygon.pair[[2]])$area
+					grp1.area.temp <- polygon.pair[[1]]@area
+					grp2.area.temp <- polygon.pair[[2]]@area
 					pairsum.temp   <- sum(c(grp1.area.temp, grp2.area.temp))
 					#grp.int <- raster::intersect(sample.area.sp[[grp.pairs[i,1]]], sample.area.sp[[grp.pairs[i,2]]])
 					# returns NULL if polygons do not intersect; returns SpatialPolygons object if they do intersect
@@ -517,18 +519,22 @@ rcoords <- function(regionsize=0.25, samplesize=100, n.grp=1, grp.n.weights=rep(
 					if(is.null(grp.int)){
 						int.area.temp <- 0
 					} else {
-						int.area.temp <- attributes(attributes(attributes(grp.int)$"polygons"[[1]])[[1]][[1]])$area
+						#int.area.temp <- attributes(attributes(attributes(grp.int)$"polygons"[[1]])[[1]][[1]])$area
+						int.area.temp <- grp.int@polygons[[1]]@Polygons[[1]]@area
+
 					}
 					# Area of the region of group 1 that does not intersect group 2 (for this pair of groups).
 					if(is.null(grp.diff1)){
 						diff1.area.temp <- 0
 					} else {
-						diff1.area.temp <- attributes(attributes(attributes(grp.diff1)$"polygons"[[1]])[[1]][[1]])$area
+						#diff1.area.temp <- attributes(attributes(attributes(grp.diff1)$"polygons"[[1]])[[1]][[1]])$area
+						diff1.area.temp <- grp.diff1@polygons[[1]]@Polygons[[1]]@area
 					}
 					if(is.null(grp.diff2)){
 						diff2.area.temp <- 0
 					} else {
-						diff2.area.temp <- attributes(attributes(attributes(grp.diff2)$"polygons"[[1]])[[1]][[1]])$area
+						#diff2.area.temp <- attributes(attributes(attributes(grp.diff2)$"polygons"[[1]])[[1]][[1]])$area
+						diff2.area.temp <- grp.diff2@polygons[[1]]@Polygons[[1]]@area
 					}
 					#if(is.null(grp.diff)){
 					#	diff.area.temp <- 0
@@ -623,9 +629,10 @@ rcoords <- function(regionsize=0.25, samplesize=100, n.grp=1, grp.n.weights=rep(
 	mode(result[,"group"]) <- "character"
 	# Convert data frame to spatial points object.
 	result.sp <- sp::SpatialPoints(result[,c(1,2)])
-	# Area of minimum convex hull polygon of all points.
-	mcp.sp      <- suppressWarnings(adehabitatHR::mcp(result.sp,percent=100))
-	mcp.sp.area <- attributes(attributes(attributes(mcp.sp)$"polygons"[[1]])[[1]][[1]])$area
+	# Minimum convex hull polygon of all points.
+	mcp.sp         <- suppressWarnings(adehabitatHR::mcp(result.sp,percent=100))
+	#mcp.sp.area <- attributes(attributes(attributes(mcp.sp)$"polygons"[[1]])[[1]][[1]])$area
+	mcp.sp.area    <- mcp.sp@polygons[[1]]@Polygons[[1]]@area
 	absolute.areas <- c(windowarea=wnd.area,regionsize.dd0=regionsize.dd0,regionsize.dd=regionsize.dd,min.convex.hull.result=mcp.sp.area)
 	relative.areas <- round((absolute.areas/wnd.area),digits=4)
 	areas.df       <- data.frame(absolute =absolute.areas, relative.to.wnd=relative.areas)
@@ -679,6 +686,7 @@ rcoords <- function(regionsize=0.25, samplesize=100, n.grp=1, grp.n.weights=rep(
 		grid::grid.draw(bothmaps)
 	}
 	#result <- result.temp[sample(x=1:nrow(result.temp),size=size),]
+	return(list(coords.df=result.df,map.ggplot=bothmaps))
 	if(return.as=="matrix"){
 		result <- data.matrix(result)
 	}
@@ -843,7 +851,79 @@ gg.world110_proj <- function(CRS="EPSG:4326",df=NULL){
 }
 
 
-
-
+#' Evaluate function name with lists of arguments
+#' 
+#' This function determines which entries in the lists 'supplied' and 'passed' are arguments of the function 'fun.name', and then evaluates the function with those arguments.
+#' Entries with names that are not arguments of 'fun.name' are ignored, making it possible to include arguments for multiple functions called in a parent function with argument '...'. See examples.
+#' 
+#' 
+#' @param fun.name Character string with name of the function to be evaluated
+#' @param supplied.list Arguments and values of fun.name defined explicitely in a list
+#' @param passed A list with names equal to argument names in the set of names of some arguments with values to use for arguments. This list is typically formed by capturing the "additional arguments to be passed with '...'" in a parent function list(...).
+#' @param ... Arguments and values of fun.name defined explicitely and not together in a list
+#' @return Value returned by evaluating the function with 'fun.name' and arguments in lists 'supplied' and 'passed'
+#' @export evalfun
+evalfun <- function(fun.name, supplied.list=NULL, passed=list(...), ...){
+	# List with default values for all arguments of the function
+	fun.args0 <- formals(get("fun.name"))
+	# Keep arguments except for "..."
+	fun.args1 <- fun.args0[setdiff(names(fun.args0),"...")]
+	# Character vector with names of all arguments, including those without default values, but not "..."
+	argnames0 <- names(fun.args1)
+	# Character vector with names of arguments with defined values
+	argnames <- argnames0[!sapply(fun.args1,is,"name")]
+	# subset of fun.args with defined values
+	fun.args2 <- fun.args1[!sapply(fun.args1,is,"name")]
+	# List of arguments supplied direct
+	suppllied.direct <- list(...)
+	# If arguments in the supplied list were also supplied directly, the ignored/remove the list-supplied version.
+	if(any((names(supplied.list) %in% names(suppllied.direct)))){
+		supplied.list <- supplied.list[!(names(supplied.list) %in% names(suppllied.direct))]
+	}
+	# List of the arguments suppplied explicitely, either directly or as a list.
+	supplied <- c(supplied.list,suppllied.direct)
+	# If passed arguments are already in supplied, the supplied version has priority and the duplicated version in 'passed' is ignored/removed
+	if(any((names(passed) %in% names(supplied)))){
+		passed <- passed[!(names(passed) %in% names(supplied))]
+	}
+	# Merging 'supplied' and 'passed'.
+	argslist <- c(supplied, passed)
+	if(!is.null(argslist)){
+		# Check if any of the arguments in argslist are for this function
+		if(any( names(argslist) %in% argnames0)){
+			args.use <- c(argslist[names(argslist) %in% argnames0], fun.args1[!(argnames0 %in% names(argslist))])
+		} else{
+			# Not sure which one of these would work
+			# args.use <- fun.args2
+			args.use <- fun.args1
+		}
+	} else {
+		args.use <- fun.args1
+	}
+	args.expr=paste(paste0(names(args.use),"=", unname(c(args.use))), collapse=",")
+	form.expr=paste0(fun.name,"(",args.expr,")")
+	#return(list(supplied.direct=suppllied.direct,supplied.list=supplied.list,supplied=supplied,passed=passed,argslist=argslist,args.use=args.use,form.expr=form.expr))
+	# parse the expression
+	eval(parse(text= form.expr))
+} 
+#' @examples
+#' # Consider two functions, 'testfunA' and 'testfunB', each with two arguments and no shared argument names):
+#' testfunA <- function(argA1=10,argA2=10){
+#' 	return(argA1*argA2)
+#' }
+#' 
+#' testfunB <- function(argB1=10,argB2=10){
+#' 	return(argB1/argB2)
+#' }
+#' 
+#' # 'evalfun' can be used to evaluate 'testfunA' and 'testfunB' from within another function, by passing arguments to 'evalfun'. The parent function must not have any argument names shared with the daughter functions that are not but not intended for inheritance.
+#' testfunAB <- function(...){
+#'     #moreArgs <- list(...)
+#'     result1 <- evalfun("testfunA",list(...))
+#'     result2 <- evalfun("testfunB",list(...))
+#'     list("result1"=result1,"result"=result2)
+#' }
+#' # Result
+#' testfun(argA1=5, argA2=6, argB1=7, argB2=8)
 
 
