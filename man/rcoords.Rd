@@ -13,7 +13,7 @@ rcoords(
   n.grp = 1,
   grp.n.weights = rep(1, n.grp),
   grp.area.weights = rep(1, n.grp),
-  grp.scaler = 1,
+  grp.scaler = (1/(0.9 + log(x = n.grp, base = 10))),
   min.grp.size = 2,
   wnd = c(-180, 180, -90, 90),
   over.land = TRUE,

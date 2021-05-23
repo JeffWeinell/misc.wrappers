@@ -353,10 +353,10 @@ points.on.land <- function(x,return.as="data.frame"){
 #' @param show.plot Whether or not the points should be plotted on a low-resolution land map. The map is used is the rnaturalearth countries map, 110 meter resolution.
 #' @return An object with class equal to the value of 'return.as' and containing the set of points that meet the specified sampling requirements. If return.as='matrix' or 'data.frame', the columns are 'X' (for longitude), 'Y' (for latitude), and 'group' (all 1 if 'n.grp'=1).
 #' @export rcoords
-rcoords <- function(regionsize=0.25, samplesize=100, n.grp=1, grp.n.weights=rep(1,n.grp), grp.area.weights=rep(1,n.grp), grp.scaler=1, min.grp.size=2, wnd= c(-180, 180,-90, 90), over.land=TRUE, interactions=c(0,1), show.plot=FALSE, return.as="data.frame"){
+rcoords <- function(regionsize=0.25, samplesize=100, n.grp=1, grp.n.weights=rep(1,n.grp), grp.area.weights=rep(1,n.grp), grp.scaler=(1/(0.9+log(x=n.grp,base=10))), min.grp.size=2, wnd= c(-180, 180,-90, 90), over.land=TRUE, interactions=c(0,1), show.plot=FALSE, return.as="data.frame"){
 	# 
 	# Defaults: n.grp=2; samplesize=100; regionsize=0.25; grp.n.weights=rep(1,n.grp); grp.area.weights=rep(1,n.grp); wnd= c(-180, 180,-90, 90); over.land=TRUE; interactions=c(0,1); expf=8; show.plot=FALSE;  return.as="data.frame"; grp.scaler=1
-	
+	grp.scaler.start <- grp.scaler
 	#result.temp        <- data.frame(NULL)
 	PASS=FALSE
 	miter <- 100
@@ -385,12 +385,17 @@ rcoords <- function(regionsize=0.25, samplesize=100, n.grp=1, grp.n.weights=rep(
 	wnd.sp <- as(raster::extent(wnd), "SpatialPolygons")
 	# area of the region bounded by 'wnd', in decimal degrees
 	wnd.sp2 <- wnd.sp
-	sp::proj4string(wnd.sp2) <- sp::CRS("+proj=longlat +datum=WGS84")
+	#sp::proj4string(wnd.sp2) <- sp::CRS("+proj=longlat +datum=WGS84")
+	raster::crs(wnd.sp2) <- sp::CRS("EPSG:4326")
 	wnd.area <- attributes(attributes(wnd.sp2)$polygons[[1]])$area
 	# area of region spanning all group sampling areas, in decimal degrees
-	regionsize.dd <- (regionsize*wnd.area)
-	regionsize.dd <- (regionsize.dd*grp.scaler*0.5)
-
+	regionsize.dd0 <- (regionsize*wnd.area)
+	regionsize.dd  <- (regionsize.dd0*0.25)
+	# wnd.sp3              <- sp::spTransform(wnd.sp2,sp::CRS("ESRI:54009"))
+	# xymeters    <- dfTransform(df=data.frame(attributes(attributes(attributes(wnd.sp3)$polygons[[1]])[[1]][[1]])$coords),CRS2="ESRI:54009")
+	# xy.sp       <- as(extent(xymeters),"SpatialPolygons")
+	# raster::crs(xy.sp) <- sp::CRS("ESRI:54009")
+	# wnd.area.m2 <- attributes(attributes(xy.sp)$polygons[[1]])$area
 	if(FALSE){
 		# area of the region defined by 'wnd'; when 'wnd' includes entire earth, seems to be underestimated by about 20% (measure=geodesic or haversine), 
 		pts.corners <- bbox2points(rbind(x=c(min=-180, max=180),y=c(min=-90,max=90)))
@@ -403,7 +408,11 @@ rcoords <- function(regionsize=0.25, samplesize=100, n.grp=1, grp.n.weights=rep(
 	while(!PASS){
 		ctr <- ctr + 1
 		if(ctr > miter){
-			stop(paste("after",miter,"attemps, failed to find points that pass conditions. ctr=",ctr,"ctr2=",ctr2))
+			stop(paste("after",miter,"attemps, failed to find points that pass conditions. ctr=",ctr,"ctr2=",ctr2,"; grp.scaler=",grp.scaler))
+		}
+		#if(ctr %in% seq(from=10,to=miter,by=10)){
+		if(ctr>1){
+			grp.scaler <- (grp.scaler*0.95)
 		}
 		### Clear the data frame if too few points on land during previous attempt
 		#result.temp         <- data.frame(NULL)
@@ -412,8 +421,12 @@ rcoords <- function(regionsize=0.25, samplesize=100, n.grp=1, grp.n.weights=rep(
 		ctr2 <- 0
 		while(!initial){
 			ctr2 <- ctr2 + 1
-			if(ctr2 > miter){
-				stop(paste("failed to initialize after",miter,"attemps. ctr=",ctr,"ctr2=",ctr2))
+			if(ctr2 > (miter/10)){
+				break
+				# stop(paste("failed to initialize after",miter,"attemps. ctr=",ctr,"ctr2=",ctr2))
+			}
+			if(ctr2>1){
+				grp.scaler <- (grp.scaler*0.99)
 			}
 			# Random point within wnd.sp to determine subregion within which group centers will occur
 			center.sp <- sp::spsample(wnd.sp,n=1,type="random")
@@ -427,6 +440,7 @@ rcoords <- function(regionsize=0.25, samplesize=100, n.grp=1, grp.n.weights=rep(
 			#regionsize.dd <- (regionsize.dd*grp.scaler*0.5)
 			#}
 			sample.area.sp <- sampSurf::spCircle(radius=sqrt((regionsize.dd/pi)),centerPoint=center.xy)[[1]]
+			#sample.area.sp.area <- attributes(attributes(attributes(sample.area.sp)$polygons[[1]])[[1]][[1]])$area
 			# Check if entire sample.area.sp is within window defined by 'wnd' argument
 	#		area.wnd.diff <- rgeos::gDifference(spgeom1=sample.area.sp,spgeom2=wnd.sp)
 	#		# If area.wnd.diff is not NULL, then part of 'sample.area.sp' falls outside of the sampling window.
@@ -439,11 +453,13 @@ rcoords <- function(regionsize=0.25, samplesize=100, n.grp=1, grp.n.weights=rep(
 				# coordinates extracted from grp.pts
 				grp.pts.mat <- sp::coordinates(grp.pts)
 				colnames(grp.pts.mat) <- c("x","y")
-				grp.areas <- (regionsize.dd*(grp.area.weights/(sum(grp.area.weights)))*grp.scaler*0.5)
+				grp.areas <- (regionsize.dd*(grp.area.weights/(sum(grp.area.weights)))*grp.scaler)
 				# create polygons centered at grp.pts, from which each groups points will be drawn. First need to determine group sizes...
 				grp.areas.sp <- lapply(X=1:n.grp, FUN=function(x){sampSurf::spCircle(radius=sqrt((grp.areas/pi))[x],centerPoint=c(grp.pts.mat[x,]))[[1]]})
 				# Distance between group centers. Not sure if this is necessary.
 				# geodist(grp.pts.mat,measure="geodesic")
+				grp.center.dists0 <- geodist::geodist(grp.pts.mat,measure="geodesic")
+				grp.center.dists  <- grp.center.dists0[lower.tri(grp.center.dists0)]
 				# check that each group centers occur over land, if over.land is true
 			} else {
 				grp.pts.mat  <- matrix(center.xy,nrow=1,dimnames=list(c(NULL),c("x","y")))
@@ -587,7 +603,8 @@ rcoords <- function(regionsize=0.25, samplesize=100, n.grp=1, grp.n.weights=rep(
 			# colnames(samples.temp) <- c("longitude","latitude")
 		}
 		# Number of points sampled for each group after filtering points
-		n.grp.pass  <- table(samples.temp[,"group"])
+	#	n.grp.pass  <- table(samples.temp[,"group"])
+		n.grp.pass  <- sapply(X=1:n.grp, FUN=function(x) length(grep(x,samples.temp[,"group"])))
 		#n.grp.pass  <- sapply(samples.temp,nrow)
 		#sapply(n.grp.pass,funct)
 		if(all(n.grp.pass >= grp.sizes)){
@@ -606,6 +623,13 @@ rcoords <- function(regionsize=0.25, samplesize=100, n.grp=1, grp.n.weights=rep(
 	mode(result[,"group"]) <- "character"
 	# Convert data frame to spatial points object.
 	result.sp <- sp::SpatialPoints(result[,c(1,2)])
+	# Area of minimum convex hull polygon of all points.
+	mcp.sp      <- suppressWarnings(adehabitatHR::mcp(result.sp,percent=100))
+	mcp.sp.area <- attributes(attributes(attributes(mcp.sp)$"polygons"[[1]])[[1]][[1]])$area
+	absolute.areas <- c(windowarea=wnd.area,regionsize.dd0=regionsize.dd0,regionsize.dd=regionsize.dd,min.convex.hull.result=mcp.sp.area)
+	relative.areas <- round((absolute.areas/wnd.area),digits=4)
+	areas.df       <- data.frame(absolute =absolute.areas, relative.to.wnd=relative.areas)
+
 	if(show.plot){
 		world.land     <- rnaturalearth::ne_countries(scale=110, returnclass="sf")
 		world.land10   <- rnaturalearth::ne_countries(scale=10, returnclass="sf")
@@ -660,7 +684,7 @@ rcoords <- function(regionsize=0.25, samplesize=100, n.grp=1, grp.n.weights=rep(
 	}
 	if(return.as=="SP"){
 		result.df <- result
-		result <- list(result.sp,sample.area.sp,result.df,zoom.plot,global.plot,bothmaps)
+		result <- list(result.sp=result.sp,sample.area.sp=sample.area.sp,result.df=result.df,zoom.gg=zoom.plot,global.gg=global.plot,bothmaps.gg=bothmaps,mcp.hull=mcp.sp,areas.df=areas.df,group.center.distances= grp.center.dists,grp.scaler.info=c(grp.scaler.start,grp.scaler),counters=c(ctr,ctr2))
 		#result <- sp::SpatialPoints(result)
 	}
 	result
