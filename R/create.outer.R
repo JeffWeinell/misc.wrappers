@@ -346,13 +346,14 @@ points.on.land <- function(x,return.as="data.frame"){
 #' @param over.land Logical indicating whether or not all returned points must occur over land. Default TRUE. Note that this condition is only applied to samples returned as output. Therefore, 'samplesize' is really a 'sample until' rule. This is faster than performing clipping operations on proposed sample polygons to conform to geography.
 #' @param interactions Numeric vector with the minimum and maximum amount of overlap between each pair of groups (aka populations), calculated as (intersect area)/(minimum of non-intersected area for each group). Default c(0,1) allows for all possible scenarios. Examples: c(0,0) specifies that groups must be allopatric; c(1,1) requires complete overlap of groups, which is not realistic given the stochasticity determining region sizes; c(0.5,1) requires that at least half-overlaps between groups; c(0.2,0.25) specifies a small contact zone.
 ##' @param d.grp Number controlling the distance between the centers of a pair of areas, as a function of the pair's radii. Default 1, which would allow sample regions to nearly coincide. Future option may allow for a pairwise distance matrix.
-#' @param expf Number that affects dispersion relative to regionsize. Higher numbers increase dispersion. Default 8.
+##' @param expf Number that affects dispersion relative to regionsize. Higher numbers increase dispersion. Default 8.
+#' @param min.grp.size Minimum number of samples required for each group. Default 2.
 #' @param grp.scaler Number > 0 that scales geographical areas of all groups
 #' @param return.as Character string with class to use for object returned. Default "data.frame". Can also be "matrix" or "SP" (SpatialPoints).
 #' @param show.plot Whether or not the points should be plotted on a low-resolution land map. The map is used is the rnaturalearth countries map, 110 meter resolution.
 #' @return An object with class equal to the value of 'return.as' and containing the set of points that meet the specified sampling requirements. If return.as='matrix' or 'data.frame', the columns are 'X' (for longitude), 'Y' (for latitude), and 'group' (all 1 if 'n.grp'=1).
 #' @export rcoords
-rcoords <- function(regionsize=0.25, samplesize=100, n.grp=1, grp.n.weights=rep(1,n.grp), grp.area.weights=rep(1,n.grp), wnd= c(-180, 180,-90, 90), over.land=TRUE, interactions=c(0,1), expf=8, show.plot=FALSE, return.as="data.frame",grp.scaler=1){
+rcoords <- function(regionsize=0.25, samplesize=100, n.grp=1, grp.n.weights=rep(1,n.grp), grp.area.weights=rep(1,n.grp), grp.scaler=1, min.grp.size=2, wnd= c(-180, 180,-90, 90), over.land=TRUE, interactions=c(0,1), show.plot=FALSE, return.as="data.frame"){
 	# 
 	# Defaults: n.grp=2; samplesize=100; regionsize=0.25; grp.n.weights=rep(1,n.grp); grp.area.weights=rep(1,n.grp); wnd= c(-180, 180,-90, 90); over.land=TRUE; interactions=c(0,1); expf=8; show.plot=FALSE;  return.as="data.frame"; grp.scaler=1
 	
@@ -360,6 +361,15 @@ rcoords <- function(regionsize=0.25, samplesize=100, n.grp=1, grp.n.weights=rep(
 	PASS=FALSE
 	miter <- 100
 	ctr   <- 0
+	if(length(samplesize)==1){
+		if((n.grp*min.grp.size) > samplesize){
+			stop("Total sample size 'samplesize' must be greater than the number of groups 'n.grp' times minimum group size 'min.grp.size'.",call.=FALSE)
+		}
+	} else {
+		if(length(samplesize)!=n.grp){
+			stop("If 'samplesize' is a numerical vector, then it must have a length equal to the number of groups 'n.grp'.",call.=FALSE)
+		}
+	}
 	# Find group centers over land
 	#if(over.land){
 	#	intial <- data.frame(NULL)
@@ -379,7 +389,7 @@ rcoords <- function(regionsize=0.25, samplesize=100, n.grp=1, grp.n.weights=rep(
 	wnd.area <- attributes(attributes(wnd.sp2)$polygons[[1]])$area
 	# area of region spanning all group sampling areas, in decimal degrees
 	regionsize.dd <- (regionsize*wnd.area)
-
+	regionsize.dd <- (regionsize.dd*grp.scaler*0.5)
 
 	if(FALSE){
 		# area of the region defined by 'wnd'; when 'wnd' includes entire earth, seems to be underestimated by about 20% (measure=geodesic or haversine), 
@@ -414,7 +424,7 @@ rcoords <- function(regionsize=0.25, samplesize=100, n.grp=1, grp.n.weights=rep(
 			# regionsize2 <- (10^regionsize)
 			# regionsize2 <- regionsize.dd
 			#if(n.grp==1){
-			regionsize.dd <- (regionsize.dd*grp.scaler*0.5)
+			#regionsize.dd <- (regionsize.dd*grp.scaler*0.5)
 			#}
 			sample.area.sp <- sampSurf::spCircle(radius=sqrt((regionsize.dd/pi)),centerPoint=center.xy)[[1]]
 			# Check if entire sample.area.sp is within window defined by 'wnd' argument
@@ -447,16 +457,27 @@ rcoords <- function(regionsize=0.25, samplesize=100, n.grp=1, grp.n.weights=rep(
 			}
 			initial <- TRUE
 		}
+		
 		### For each group, the number of samples that will be drawn (or saved, if over.land=TRUE) from the group's sample region.
-		if(n.grp==1){
-			grp.sizes <- samplesize
+		if(length(samplesize)==1){
+			if(n.grp==1){
+				grp.sizes <- samplesize
+			} else {
+				# Initial values for entering while loop
+				grp.sizes <- rep(0,n.grp)
+				while(any(grp.sizes < min.grp.size)){
+					grp.sizes  <- c(table(sample(x=c(1:n.grp),size=samplesize,prob=grp.n.weights,replace=TRUE)))
+					# verify that at least each group has at least min.grp.size.
+				}
+			}
 		} else {
-			grp.sizes  <- c(table(sample(x=n.grp,size=samplesize,prob=grp.n.weights,replace=TRUE)))
+			grp.sizes <- samplesize
 		}
+		# grp.sizes <- round(samplesize * (grp.n.weights/sum(grp.n.weights)))
 		### Creates a SpatialPolygons object (sampling region) for each group
 		#sample.area.sp <- lapply(1:n.grp, FUN=function(x){sampSurf::spCircle(radius= sqrt((grp.areas/pi))[x] , centerPoint=c(x=group.centers[x,1],y=group.centers[x,2]))[[1]]})
 		### Check if groups meet conditions set by 'interactions' argument.
-		if(!is.null(interactions) & n.grp>1){
+		if(!is.null(interactions) & n.grp > 1){
 			if(!(interactions[1]==0 & interactions[2]==1)){
 				# Much less complex list holding the sample sampling polygons
 				polygons.list <- lapply(X=1:n.grp, function(x){attributes(attributes(grp.areas.sp[[x]])$"polygons"[[1]])[[1]][[1]]})
@@ -465,41 +486,41 @@ rcoords <- function(regionsize=0.25, samplesize=100, n.grp=1, grp.n.weights=rep(
 				# Calculate intersect area yet and sum areas for each pair of groups. (Doesnt work yet).
 				grp.int.area <- grp.sum.area <- grp.ratio <- c()
 				for(i in 1:nrow(grp.pairs)){
-					polygon.pair <- polygons.list[c(grp.pairs[i,1],grp.pairs[i,2])]
+					polygon.pair   <- polygons.list[c(grp.pairs[i,1],grp.pairs[i,2])]
 					grp1.area.temp <- attributes(polygon.pair[[1]])$area
 					grp2.area.temp <- attributes(polygon.pair[[2]])$area
-					pairsum.temp <- sum(c(grp1.area.temp, grp2.area.temp))
+					pairsum.temp   <- sum(c(grp1.area.temp, grp2.area.temp))
 					#grp.int <- raster::intersect(sample.area.sp[[grp.pairs[i,1]]], sample.area.sp[[grp.pairs[i,2]]])
 					# returns NULL if polygons do not intersect; returns SpatialPolygons object if they do intersect
 					grp.int  <- rgeos::gIntersection(spgeom1=grp.areas.sp[[grp.pairs[i,1]]],spgeom2=grp.areas.sp[[grp.pairs[i,2]]])
 					#Nonintersecting portions of areas 1 and 2 (faster than getting diff of each in the other and then adding)
-					grp.diff <- rgeos::gSymdifference(spgeom1=grp.areas.sp[[grp.pairs[i,1]]],spgeom2=grp.areas.sp[[grp.pairs[i,2]]])
+					#grp.diff <- rgeos::gSymdifference(spgeom1=grp.areas.sp[[grp.pairs[i,1]]],spgeom2=grp.areas.sp[[grp.pairs[i,2]]])
 					# returns a spatial polygons object with the non-intersecting portions of the group pair polygons each as their own polygons. If no overlap the returned polygons are the same the input polygons.
-					#grp.diff1 <- rgeos::gDifference(spgeom1=grp.areas.sp[[grp.pairs[i,1]]],spgeom2=grp.areas.sp[[grp.pairs[i,2]]])
-					#grp.diff2 <- rgeos::gDifference(spgeom1=grp.areas.sp[[grp.pairs[i,2]]],spgeom2=grp.areas.sp[[grp.pairs[i,1]]])
+					grp.diff1 <- rgeos::gDifference(spgeom1=grp.areas.sp[[grp.pairs[i,1]]],spgeom2=grp.areas.sp[[grp.pairs[i,2]]])
+					grp.diff2 <- rgeos::gDifference(spgeom1=grp.areas.sp[[grp.pairs[i,2]]],spgeom2=grp.areas.sp[[grp.pairs[i,1]]])
 					if(is.null(grp.int)){
 						int.area.temp <- 0
 					} else {
 						int.area.temp <- attributes(attributes(attributes(grp.int)$"polygons"[[1]])[[1]][[1]])$area
 					}
 					# Area of the region of group 1 that does not intersect group 2 (for this pair of groups).
-					#if(is.null(grp.diff1)){
-					#	diff1.area.temp <- 0
-					#} else {
-					#	diff1.area.temp <- attributes(attributes(attributes(grp.diff1)$"polygons"[[1]])[[1]][[1]])$area
-					#}
-					#if(is.null(grp.diff2)){
-					#	diff2.area.temp <- 0
-					#} else {
-					#	diff2.area.temp <- attributes(attributes(attributes(grp.diff2)$"polygons"[[1]])[[1]][[1]])$area
-					#}
-					if(is.null(grp.diff)){
-						diff.area.temp <- 0
+					if(is.null(grp.diff1)){
+						diff1.area.temp <- 0
 					} else {
-						diff1.area.temp <- attributes(attributes(attributes(grp.diff)$"polygons"[[1]])[[1]][[1]])$area
-						diff2.area.temp <- attributes(attributes(attributes(grp.diff)$"polygons"[[1]])[[1]][[2]])$area
-						diff.area.temp <- diff1.area.temp + diff2.area.temp
+						diff1.area.temp <- attributes(attributes(attributes(grp.diff1)$"polygons"[[1]])[[1]][[1]])$area
 					}
+					if(is.null(grp.diff2)){
+						diff2.area.temp <- 0
+					} else {
+						diff2.area.temp <- attributes(attributes(attributes(grp.diff2)$"polygons"[[1]])[[1]][[1]])$area
+					}
+					#if(is.null(grp.diff)){
+					#	diff.area.temp <- 0
+					#} else {
+					#	diff1.area.temp <- attributes(attributes(attributes(grp.diff)$"polygons"[[1]])[[1]][[1]])$area
+					#	diff2.area.temp <- attributes(attributes(attributes(grp.diff)$"polygons"[[1]])[[1]][[2]])$area
+					#}
+					diff.area.temp  <- diff1.area.temp + diff2.area.temp
 					ratio.temp <- int.area.temp/diff.area.temp
 					#ratio.temp <- (int.area.temp/pairsum.temp)
 					#grp.int <- raster::intersect(spgeom1=sample.area.sp[[1]],spgeom2=sample.area.sp[[2]])
@@ -586,10 +607,9 @@ rcoords <- function(regionsize=0.25, samplesize=100, n.grp=1, grp.n.weights=rep(
 	# Convert data frame to spatial points object.
 	result.sp <- sp::SpatialPoints(result[,c(1,2)])
 	if(show.plot){
-		world.land    <- rnaturalearth::ne_countries(scale=110,returnclass="sf")
-		world.land10  <- rnaturalearth::ne_countries(scale=10,returnclass="sf")
-		result.df2plot   <- result
-		
+		world.land     <- rnaturalearth::ne_countries(scale=110, returnclass="sf")
+		world.land10   <- rnaturalearth::ne_countries(scale=10, returnclass="sf")
+		result.df2plot <- result
 		xdist <- geodist::geodist(result.df2plot[order(result.df2plot[,1]),][c(1,nrow(result.df2plot)),1:2],measure="geodesic",sequential=T)
 		ydist <- geodist::geodist(result.df2plot[order(result.df2plot[,2]),][c(1,nrow(result.df2plot)),1:2],measure="geodesic",sequential=T)
 		plot.margin <- which(c(xdist,ydist)==max(c(xdist,ydist)))
@@ -603,21 +623,33 @@ rcoords <- function(regionsize=0.25, samplesize=100, n.grp=1, grp.n.weights=rep(
 		spbb   <- sp::bbox(result.sp)
 		spbb2  <- apply(spbb,MARGIN=1,FUN=rangeBuffer,f=0.1)
 		dfbb   <- data.frame(x1=spbb[1,1], x2=spbb[1,2], y1=spbb[2,1], y2=spbb[2,2])
-		#dfbb   <- as.data.frame(t( as.matrix(ggmap::make_bbox(lon= spbb[,1],lat= spbb[,2]))))
 		ggrect <- ggplot2::geom_rect(data=dfbb, mapping=ggplot2::aes(xmin=x1, xmax=x2, ymin=y1, ymax=y2),fill="black",color="black",alpha=0.1)
-		#ggrect <- ggplot2::geom_rect(data=dfbb, mapping=ggplot2::aes(xmin=left, xmax=right, ymin=bottom, ymax=top),color="black",alpha=0)
-		#exf  <- 1.5
-		#xlim <- rangeBuffer(result.df2plot[,1],exf*1.5)
-		#ylim <- rangeBuffer(result.df2plot[,2],exf)
-		#zoom.plot   <- ggplot2::ggplot(data = world.land) + ggplot2::geom_sf() + ggplot2::theme_classic() + ggplot2::geom_point(data = result.df2plot, ggplot2::aes(x = X, y = Y, fill=group), size = 2, shape = 21) + ggplot2::coord_sf(xlim = xlim, ylim = ylim ) + ggplot2::theme(panel.border = ggplot2::element_rect(color = "black", fill=NA, size=1))
 		zoom.plot   <- ggplot2::ggplot(data = zoom.map) + ggplot2::geom_sf() + ggplot2::theme_classic() + ggplot2::geom_point(data = result.df2plot, ggplot2::aes(x = X, y = Y, fill=group), size = 2, shape = 21) + ggplot2::coord_sf(xlim =range(result.df2plot[,1]),ylim = range(result.df2plot[,2])) + ggplot2::theme(panel.border = ggplot2::element_rect(color = "black", fill=NA, size=1)) + ggplot2::theme(legend.position = "none") + ggplot2::xlab("longitude") + ggplot2::ylab("latitude")
 		global.plot <- ggplot2::ggplot(data = world.land) + ggplot2::geom_sf() + ggplot2::theme_classic() + ggplot2::geom_point(data = result.df2plot, ggplot2::aes(x = X, y = Y, fill=group), size = 2, shape = 21) + ggplot2::theme(panel.border = ggplot2::element_rect(color = "black", fill=NA, size=1)) + ggplot2::theme(axis.title.y = ggplot2::element_blank(), axis.title.x = ggplot2::element_blank()) + ggrect
-		#print(zoom.plot)
+		###### Thus far failed attempt to reproject points and basemap using a different CRS
+		if(FALSE){
+			# 'result' data frame converted to SpatialPointsDataFrame
+			# result.spdf <- sp::SpatialPointsDataFrame(coords=result[,c(1,2)],data=data.frame(group=result[,3]))
+			### Set the 'original' CRS of the points
+			# sp::proj4string(result.spdf) <- sp::CRS("EPSG:4326")
+		#	raster::crs(result.spdf) <- sp::CRS("EPSG:4326")
+			# Name of CRS to use
+			crs.name <- "ESRI:54009"
+			# Transformed coordinates
+			result_proj <- dfTransform(df=result,CRS2=crs.name)
+			# Reprojecting the 110m resolution map from latlon to Moller
+			sf.world110_proj <- sf::st_transform(x=world.land,crs=sf::st_crs(crs.name))
+			### ggplot with Moller project 110m resolution basemap
+			gg.world110_proj <- ggplot2::ggplot(data = sf.world110_proj) + ggplot2::geom_sf() + ggplot2::theme_classic() + ggplot2::theme(panel.border = ggplot2::element_rect(color = "black", fill=NA, size=1)) + ggplot2::theme(axis.title.y = ggplot2::element_blank(), axis.title.x = ggplot2::element_blank())
+			### Adding the reprojected points to the ggplot
+			gg.map <- gg.world110_proj +  ggplot2::geom_point(data = result_proj, ggplot2::aes(x = X, y = Y, fill=group), size = 2, shape = 21) # + ggplot2::coord_sf(crs= sf::st_crs(crs.name), datum = sf::st_crs(crs.name) )
+		}
+		
 		grobs.list <- list(ggplot2::ggplotGrob(global.plot),ggplot2::ggplotGrob(zoom.plot))
 		if(plot.margin==2){
-			bothmaps   <- gridExtra::arrangeGrob(grobs=grobs.list,layout_matrix=matrix(c(1,1,2),ncol=3))
+			bothmaps   <- gridExtra::arrangeGrob(grobs=grobs.list, layout_matrix=matrix(c(1,1,2),ncol=3))
 		} else {
-			bothmaps   <- gridExtra::arrangeGrob(grobs=grobs.list,layout_matrix=matrix(c(1,2),ncol=1))
+			bothmaps   <- gridExtra::arrangeGrob(grobs=grobs.list, layout_matrix=matrix(c(1,2),ncol=1))
 		}
 		grid::grid.newpage()
 		grid::grid.draw(bothmaps)
@@ -705,6 +737,82 @@ bbox2points <- function(bb){
 #	}
 #}
 
+#' @title Transform CRS coordinates data frame
+#' 
+#' Transform coordinates held in a dataframe given the starting and final coordinate reference systems
+#' 
+#' @param data frame with, minimally, longitude and latitude columns
+#' @param x Name of the column (variable) with longitude
+#' @param y Name of the column (variable) with latitude
+#' @param CRS1 CRS of the input coordinates
+#' @param CRS2 CRS to use for the output coordinates
+#' @return data frame with reprojected coordinates. Other columns of the input data frame are preserved.
+#' @export dfTransform
+dfTransform <- function(df,x,y,CRS1="EPSG:4326",CRS2){
+	if(missing(x)){
+		x     <- 1
+		xvals <- df[,1]
+	} else {
+		x <- grep(x,names(df))
+	}
+	if(missing(y)){
+		y <- 2
+	} else {
+		y <- grep(y,names(df))
+	}
+	if(missing(CRS2)){
+		stop("CRS2 must be supplied")
+	}
+	xy.df <- data.frame(X=df[,x],Y=df[,y])
+	if(ncol(df)>2){
+		data.df <- data.frame(df[, setdiff(1:ncol(df),c(x,y))])
+	} else {
+		data.df <- NULL
+	}
+	### Convert to Spatial Points object
+	xy.sp <- sp::SpatialPoints(xy.df)
+	### Set the 'original' CRS
+	raster::crs(xy.sp) <- sp::CRS(CRS1)
+	### Transform CRS
+	xyT.sp <-  sp::spTransform(xy.sp,sp::CRS(CRS2))
+	### Extract coordinates
+	xyT.df <- sp::coordinates(xyT.sp)
+	if(!is.null(data.df)){
+		res.df           <- cbind(xyT.df,data.df)
+		colnames(res.df) <- c(names(df)[c(x,y)], names(df)[-c(x,y)])
+	} else {
+		res.df <- xyT.df
+	}
+	res.df
+}
+
+#' @title ggplot projected Natural Earth
+#' 
+#' This function creates a ggplot object of Earth from the 110m resolution Natural Earth dataset, and the function is useful for exploring different map projections.
+#' 
+#' @param CRS Character string with name of EPSG or ESRI coordinate reference system ID. Default is 'EPSG:4326'.
+#' @param df Optional data frame with longitude and latitude coordinates (datum must be WGS84) in first two columns, respectively, for points that should be plotted on the map.
+#' @return ggplot object of Natural Earth data plotted using the projection specified by 'CRS' argument.
+#' @export gg.world110_proj
+gg.world110_proj <- function(CRS="EPSG:4326",df=NULL){
+	world.land     <- rnaturalearth::ne_countries(scale=110, returnclass="sf")
+	# world.land10   <- rnaturalearth::ne_countries(scale=10, returnclass="sf")
+	crs.name <- CRS
+	# Transformed coordinates
+	if(!is.null(df)){
+		df_proj <- dfTransform(df=df,CRS2=crs.name)
+		names(df_proj[,1:2]) <- c("X","Y")
+	}
+	# Reprojecting the 110m resolution map from latlon to Moller
+	sf.world110_proj <- sf::st_transform(x=world.land,crs=sf::st_crs(crs.name))
+	### ggplot of projected basemap
+	gg.map <- ggplot2::ggplot(data = sf.world110_proj) + ggplot2::geom_sf() + ggplot2::theme_classic() + ggplot2::theme(panel.border = ggplot2::element_rect(color = "black", fill=NA, size=1)) + ggplot2::theme(axis.title.y = ggplot2::element_blank(), axis.title.x = ggplot2::element_blank())
+	if(!is.null(df)){
+		### Adding the reprojected points to the ggplot
+		gg.map <- gg.map +  ggplot2::geom_point(data = df_proj, ggplot2::aes(x = X, y = Y), fill="black",size = 2, shape = 21)
+	}
+	gg.map
+}
 
 
 

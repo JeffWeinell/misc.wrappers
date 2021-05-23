@@ -13,13 +13,13 @@ rcoords(
   n.grp = 1,
   grp.n.weights = rep(1, n.grp),
   grp.area.weights = rep(1, n.grp),
+  grp.scaler = 1,
+  min.grp.size = 2,
   wnd = c(-180, 180, -90, 90),
   over.land = TRUE,
   interactions = c(0, 1),
-  expf = 8,
   show.plot = FALSE,
-  return.as = "data.frame",
-  grp.scaler = 1
+  return.as = "data.frame"
 )
 }
 \arguments{
@@ -33,23 +33,25 @@ rcoords(
 
 \item{grp.area.weights}{Probability weights determing group region sizes. Default is equal weights.}
 
+\item{grp.scaler}{Number > 0 that scales geographical areas of all groups}
+
+\item{min.grp.size}{Minimum number of samples required for each group. Default 2.}
+
 \item{wnd}{Numerical vector specifying the bounding box (longitude and latitude ranges) for the region where sampling is allowed. Default is to include all of Earth c(-180,180,-90,90).}
 
 \item{over.land}{Logical indicating whether or not all returned points must occur over land. Default TRUE. Note that this condition is only applied to samples returned as output. Therefore, 'samplesize' is really a 'sample until' rule. This is faster than performing clipping operations on proposed sample polygons to conform to geography.}
 
 \item{interactions}{Numeric vector with the minimum and maximum amount of overlap between each pair of groups (aka populations), calculated as (intersect area)/(minimum of non-intersected area for each group). Default c(0,1) allows for all possible scenarios. Examples: c(0,0) specifies that groups must be allopatric; c(1,1) requires complete overlap of groups, which is not realistic given the stochasticity determining region sizes; c(0.5,1) requires that at least half-overlaps between groups; c(0.2,0.25) specifies a small contact zone.}
 
-\item{expf}{Number that affects dispersion relative to regionsize. Higher numbers increase dispersion. Default 8.}
-
 \item{show.plot}{Whether or not the points should be plotted on a low-resolution land map. The map is used is the rnaturalearth countries map, 110 meter resolution.}
 
 \item{return.as}{Character string with class to use for object returned. Default "data.frame". Can also be "matrix" or "SP" (SpatialPoints).}
 
-\item{grp.scaler}{Number > 0 that scales geographical areas of all groups}
-
 \item{r}{Number specifying the radius of group areas, in decimal degrees, or a numerical vector with min and max values of uniform sampling distribution from which radii of areas will be drawn.}
 
 \item{d.grp}{Number controlling the distance between the centers of a pair of areas, as a function of the pair's radii. Default 1, which would allow sample regions to nearly coincide. Future option may allow for a pairwise distance matrix.}
+
+\item{expf}{Number that affects dispersion relative to regionsize. Higher numbers increase dispersion. Default 8.}
 }
 \value{
 An object with class equal to the value of 'return.as' and containing the set of points that meet the specified sampling requirements. If return.as='matrix' or 'data.frame', the columns are 'X' (for longitude), 'Y' (for latitude), and 'group' (all 1 if 'n.grp'=1).

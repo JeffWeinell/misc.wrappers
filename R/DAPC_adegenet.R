@@ -1924,10 +1924,11 @@ filter.vcf <- function(x,save.as=NULL,nsample=c(NA,NA), specificSites=NULL,speci
 #' @param block.minsize Number with minimum. Ignored if 'LD' is FALSE or coerced to FALSE. Default 10.
 #' @param block.maxsize Number indicating the maximum size of linkage blocks. Ignored if 'LD' is FALSE or coerced to FALSE, or if 'use.maxLDx' is TRUE and 'x' is non-NULL, in which case the max block size is equal to the max position of any snps in a linkage block). Default 1000.
 #' @param use.maxLDx Logical indicating whether or not the maximum linkage block size should be set as the max position of any snp within a linkage block of the input data. Default FALSE, which means that max linkage block size should be the value of 'block.maxsize'.
+#' @param sim.coords NOT YET IMPLEMENTED. Logical indicating if a simulated coordinates (sample localities) should be produced for each simulated individual. Default FALSE.
 #' @param ... Additional arguments passed to the function 'glSim' from 'adegenet' package. These include arguments 'grp.size', 'pop.freq', 'alpha', 'parallel', and 'theta'. Not yet implemented.
 #' @return An object with class vcfR (see 'vcfR' package for details regarding this class)
 #' @export sim.vcf
-sim.vcf <- function(x=NULL, save.as=NULL, RA.probs=NULL, n.ind=NULL, n.snps=NULL, snp.str = 0, ploidy=NULL, K=2, include.missing=FALSE, fMD=NULL, pMDi=NULL, LD=FALSE, block.minsize=10, block.maxsize=NULL, use.maxLDx=FALSE, ...){
+sim.vcf <- function(x=NULL, save.as=NULL, RA.probs=NULL, n.ind=NULL, n.snps=NULL, snp.str = 0, ploidy=NULL, K=2, include.missing=FALSE, fMD=NULL, pMDi=NULL, LD=FALSE, block.minsize=10, block.maxsize=NULL, use.maxLDx=FALSE, sim.coords=FALSE , ...){
 #	x=NULL; save.as=NULL; RA.probs=NULL; n.ind=NULL; n.snps=NULL; snp.str = 0; ploidy=NULL; K=2; include.missing=FALSE; fMD=NULL; LD=NULL; block.minsize=10; block.maxsize=NULL; use.maxLDx=FALSE
 #	args  <- list(...)
 	RA.pairnames <- c("AC","AG","AT","CA","CG","CT","GA","GC","GT","TA","TC","TG")
@@ -2130,6 +2131,13 @@ sim.vcf <- function(x=NULL, save.as=NULL, RA.probs=NULL, n.ind=NULL, n.snps=NULL
 		save.as <- gsub(".vcf$",".vcf.gz",save.as)
 		vcfR::write.vcf(x=vcf.sim,file=save.as)
 		vcf.sim <- vcfR::read.vcfR(save.as)
+	}
+	if(FALSE){
+	if(!is.null(sim.coords)){
+		simcoords.df0 <- rcoords(regionsize=0.7,samplesize=(n.ind*50),n.grp=K,show.plot=F,wnd=c(-180,180,-60,60),interactions=c(0,0))
+		table(as.numeric(anc.pops)) > 
+		unique(simcoords.df0$group)
+	}
 	}
 	### Return the simulated dataset as vcfR object
 	# If save.as is null, then the object returned will always report "zero missing data", although missing data may exists. Writing and rereading the VCF removes this vcfR bug. May need to use NA in gt matrix of vcfR.

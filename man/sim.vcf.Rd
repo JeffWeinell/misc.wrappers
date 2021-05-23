@@ -20,6 +20,7 @@ sim.vcf(
   block.minsize = 10,
   block.maxsize = NULL,
   use.maxLDx = FALSE,
+  sim.coords = FALSE,
   ...
 )
 }
@@ -56,6 +57,8 @@ If RA.probs="empirical", the frequencies of each Reference:Alternative allele co
 \item{block.maxsize}{Number indicating the maximum size of linkage blocks. Ignored if 'LD' is FALSE or coerced to FALSE, or if 'use.maxLDx' is TRUE and 'x' is non-NULL, in which case the max block size is equal to the max position of any snps in a linkage block). Default 1000.}
 
 \item{use.maxLDx}{Logical indicating whether or not the maximum linkage block size should be set as the max position of any snp within a linkage block of the input data. Default FALSE, which means that max linkage block size should be the value of 'block.maxsize'.}
+
+\item{sim.coords}{NOT YET IMPLEMENTED. Logical indicating if a simulated coordinates (sample localities) should be produced for each simulated individual. Default FALSE.}
 
 \item{...}{Additional arguments passed to the function 'glSim' from 'adegenet' package. These include arguments 'grp.size', 'pop.freq', 'alpha', 'parallel', and 'theta'. Not yet implemented.}
 
