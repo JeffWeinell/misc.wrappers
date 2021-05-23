@@ -4,15 +4,16 @@
 ### Package Description
 This package includes functions to fascilitate running some popular programs used for assessing population structure, demographic modelling, and genetic/genomic and phylogenetic/genomic programs, and to summarize results in useful ways. The main functions are shown in the table below along with example input and output files. The values used for function arguments, not shown in table, also control analyses and should be set mindfully - see examples (will add soon) of function usage.
 
-function | example input files | example output files
+function | description | example input files | example output files
 ---|---|---
-```plot_model``` | [model10_K3.tpl](inst/extdata/example.tpl), [model10_K3.est](inst/extdata/example.est) | [model10_K3.pdf](inst/extdata/example_model.pdf)
-```create.outer``` | [coords.txt](inst/extdata/createouter_exampleInput_coords.txt) | 'method'=1: [outer.txt](inst/extdata/createouter_exampleOutput_method1_outer.text), [outer.pdf](inst/extdata/createouter_exampleOutput_method1_outer.pdf)<br /> 'method'=2: [outer.txt](inst/extdata/createouter_exampleOutput_method2_outer.text), [outer.pdf](inst/extdata/createouter_exampleOutput_method2_outer.pdf)<br /> 'method'=3: [outer.txt](inst/extdata/createouter_exampleOutput_method3_outer.text), [outer.pdf](inst/extdata/createouter_exampleOutput_method3_outer.pdf)
-```run_DAPC``` | [simulated_K4.vcf.gz](inst/extdata/simulated_K4.vcf.gz),<br/> *coords.txt* (optional) | coming soon
-```run_sNMF``` | [simulated_K4.vcf.gz](inst/extdata/simulated_K4.vcf.gz),<br/> *coords.txt* (optional)| 'coords'=NULL: [simK4_coordsNULL_sNMF.pdf](inst/extdata/simK4_coordsNULL_sNMF.pdf)<br/>'coords'="*/coords.txt": coming soon
-```run_fastStructure```  | [simulated_K4.vcf.gz](inst/extdata/simulated_K4.vcf.gz),<br/> *coords.txt* (optional) | 'coords'=NULL:[simK4_coordsNULL_fs.pdf](inst/extdata/simK4_coordsNULL_fs.pdf)<br/>'coords'="*/coords.txt": coming soon
-```runtess``` | [simulated_K4.vcf.gz](inst/extdata/simulated_K4.vcf.gz),<br/> *coords.txt*| coming soon
-```runeems_snps_setup``` | [simulated_K4.vcf.gz](inst/extdata/simulated_K4.vcf.gz),<br/> *coords.txt* | coming soon
+```plot_model``` | Makes a cartoon figure of a model described in a pair of .tpl and .est files | [model10_K3.tpl](inst/extdata/example.tpl), [model10_K3.est](inst/extdata/example.est) | [model10_K3.pdf](inst/extdata/example_model.pdf)
+```create.outer``` | Generates a set of outer habitat coordinates that can be used for EEMS | [coords.txt](inst/extdata/createouter_exampleInput_coords.txt) | 'method'=1: [outer.txt](inst/extdata/createouter_exampleOutput_method1_outer.text), [outer.pdf](inst/extdata/createouter_exampleOutput_method1_outer.pdf)<br /> 'method'=2: [outer.txt](inst/extdata/createouter_exampleOutput_method2_outer.text), [outer.pdf](inst/extdata/createouter_exampleOutput_method2_outer.pdf)<br /> 'method'=3: [outer.txt](inst/extdata/createouter_exampleOutput_method3_outer.text), [outer.pdf](inst/extdata/createouter_exampleOutput_method3_outer.pdf)
+```sim.vcf ``` | Simulate SNPs and save as a VCF; optionally introduce missing data; optionally simulate locality data | [example.vcf.gz](inst/extdata/example.vcf.gz) (optional); can also specify parameters to simulate from scratch | [simK2.vcf.gz](inst/extdata/simK2.vcf.gz); [simK2_coords.txt](inst/extdata/simK2_coords.txt); [simK2_coords_map.pdf](inst/extdata/simK2_coords_map.pdf)
+```run_DAPC``` | Pipeline for running DAPC and graphing results | [simulated_K4.vcf.gz](inst/extdata/simulated_K4.vcf.gz),<br/> *coords.txt* (optional) | coming soon
+```run_sNMF``` | Pipeline for running sNMF (LEA) and graphing results | [simulated_K4.vcf.gz](inst/extdata/simulated_K4.vcf.gz),<br/> *coords.txt* (optional)| 'coords'=NULL: [simK4_coordsNULL_sNMF.pdf](inst/extdata/simK4_coordsNULL_sNMF.pdf)<br/>'coords'="*/coords.txt": coming soon
+```run_fastStructure```  | Pipeline for running fastStructure and graphing results| [simulated_K4.vcf.gz](inst/extdata/simulated_K4.vcf.gz),<br/> *coords.txt* (optional) | 'coords'=NULL:[simK4_coordsNULL_fs.pdf](inst/extdata/simK4_coordsNULL_fs.pdf)<br/>'coords'="*/coords.txt": coming soon
+```runtess``` | Pipeline for running tess3r and generating graphs of results comparable to the other pop structure methods | [simulated_K4.vcf.gz](inst/extdata/simulated_K4.vcf.gz),<br/> *coords.txt*| coming soon
+```runeems_snps_setup``` | Generates some of the input files and arranges all necessary inputs in a nice environment for EEMS | coming soon | coming soon
 
 
  <!-- - ```eemsgg2raster```-->
