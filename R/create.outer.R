@@ -353,7 +353,7 @@ points.on.land <- function(x,return.as="data.frame"){
 #' @param show.plot Whether or not the points should be plotted on a low-resolution land map. The map is used is the rnaturalearth countries map, 110 meter resolution.
 #' @return An object with class equal to the value of 'return.as' and containing the set of points that meet the specified sampling requirements. If return.as='matrix' or 'data.frame', the columns are 'X' (for longitude), 'Y' (for latitude), and 'group' (all 1 if 'n.grp'=1).
 #' @export rcoords
-rcoords <- function(regionsize=0.25, samplesize=100, n.grp=1, grp.n.weights=rep(1,n.grp), grp.area.weights=rep(1,n.grp), grp.scaler=(1/(0.9+log(x=n.grp,base=10))), min.grp.size=2, wnd= c(-180, 180,-90, 90), over.land=TRUE, interactions=c(0,1), show.plot=FALSE, return.as="data.frame"){
+rcoords <- function(regionsize=0.25, samplesize=100, n.grp=1, grp.n.weights=rep(1,n.grp), grp.area.weights=rep(1,n.grp), grp.scaler=(1/n.grp), min.grp.size=2, wnd= c(-180, 180,-90, 90), over.land=TRUE, interactions=c(0,1), show.plot=FALSE, return.as="data.frame"){
 	# 
 	# Defaults: n.grp=2; samplesize=100; regionsize=0.25; grp.n.weights=rep(1,n.grp); grp.area.weights=rep(1,n.grp); wnd= c(-180, 180,-90, 90); over.land=TRUE; interactions=c(0,1); expf=8; show.plot=FALSE;  return.as="data.frame"; grp.scaler=1
 	grp.scaler.start <- grp.scaler
@@ -686,6 +686,10 @@ rcoords <- function(regionsize=0.25, samplesize=100, n.grp=1, grp.n.weights=rep(
 		result.df <- result
 		result <- list(result.sp=result.sp,sample.area.sp=sample.area.sp,result.df=result.df,zoom.gg=zoom.plot,global.gg=global.plot,bothmaps.gg=bothmaps,mcp.hull=mcp.sp,areas.df=areas.df,group.center.distances= grp.center.dists,grp.scaler.info=c(grp.scaler.start,grp.scaler),counters=c(ctr,ctr2))
 		#result <- sp::SpatialPoints(result)
+	}
+	if(return.as=="DF_plot"){
+		result.df <- result
+		result <- list(coords.df=result.df,map.ggplot=bothmaps)
 	}
 	result
 }

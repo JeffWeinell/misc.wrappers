@@ -2132,12 +2132,23 @@ sim.vcf <- function(x=NULL, save.as=NULL, RA.probs=NULL, n.ind=NULL, n.snps=NULL
 		vcfR::write.vcf(x=vcf.sim,file=save.as2)
 		vcf.sim <- vcfR::read.vcfR(save.as2)
 	}
-	if(!is.null(sim.coords)){
-		simcoords.df <- rcoords(regionsize=0.7,samplesize=c(table(as.numeric(anc.pops))),n.grp=K,show.plot=F,wnd=c(-180,180,-60,60),interactions=c(0,0))
+	
+	#return(list(n.per.pop=anc.pops,K=K))
+	if(sim.coords){
+		#n.per.pop    <- table(as.numeric(gsub("pop","",anc.pops)))
+		n.per.pop    <- table(anc.pops)
+		simcoords <- rcoords(regionsize=0.7,samplesize=n.per.pop,n.grp=K,show.plot=F,wnd=c(-180,180,-60,60),interactions=c(0,0),return.as="DF_plot")
+		simcoords.df <- simcoords$coords.df
 		rownames(simcoords.df) <- samplenames
 		colnames(simcoords.df) <- c("longitude","latitude","group")
-		save.as3 <- paste0(file_path_sans_ext(save.as),"_simulated_coords.txt")
-		write.table(x=simcoords.df,file=save.as3, row.names=TRUE,col.names=TRUE,sep="/t",quote=FALSE)
+		save.as3 <- paste0(tools::file_path_sans_ext(save.as),"_simulated_coords.txt")
+		write.table(x=simcoords.df,file=save.as3, row.names=TRUE,col.names=TRUE,sep="\t",quote=FALSE)
+		gg.map <- simcoords$map.ggplot
+		save.as4 <- paste0(tools::file_path_sans_ext(save.as),"_simulated_coords_map.pdf")
+		pdf(file="save.as4",width=8,height=6)
+		grid::grid.newpage()
+		grid::grid.draw(bothmaps)
+		dev.off()
 	}
 	### Return the simulated dataset as vcfR object
 	# If save.as is null, then the object returned will always report "zero missing data", although missing data may exists. Writing and rereading the VCF removes this vcfR bug. May need to use NA in gt matrix of vcfR.
