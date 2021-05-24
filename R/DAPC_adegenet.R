@@ -14,7 +14,7 @@
 #' @return A list of plots.
 #' @export run_DAPC
 run_DAPC <- function(x, format="VCF", kmax=40, coords=NULL, samplenames=NULL,reps=100,probs.out=NULL,save.as=NULL,include.out=c(".pdf",".Qlog",".BIClog")){
-	debug <- TRUE
+	debug <- FALSE
 	if(is.null(save.as)){
 		save.as <- file.path(getwd(),"result_DAPC.pdf")
 	}
@@ -55,9 +55,11 @@ run_DAPC <- function(x, format="VCF", kmax=40, coords=NULL, samplenames=NULL,rep
 		#world_df <- ggplot2::map_data(rnaturalearth::ne_countries(scale=10))
 		world_sf      <- rnaturalearth::ne_countries(scale=10,returnclass="sf")[1]
 		world_sp      <- rnaturalearth::ne_countries(scale=10,returnclass="sp")
-		current_sf    <- suppressMessages(sf::st_crop(world_sf,xmin=x.min,xmax=x.max,ymin=y.min,ymax=y.max))
-		current.gg.sf <- ggplot2::geom_sf(data=current_sf,colour = "black", fill = NA)
+		current_sf    <- suppressWarnings(suppressMessages(sf::st_crop(world_sf,xmin=x.min,xmax=x.max,ymin=y.min,ymax=y.max)))
+		current.gg.sf <- ggplot2::geom_sf(data=current_sf,color = "black", fill = NA)
 		#world.gg.sf   <- ggplot2::geom_sf(data=world_sf,colour = "black", fill = NA)
+		message("potential replacement for 'current_sf' and 'current.gg.sf' is on the next line")
+		current.gg.sf2 <- ggplot2::geom_sf(data=world_sf) + ggplot2::coord_sf(xlim=c(x.min,x.max),ylim=c(y.min,ymax=y.max))
 	} else {
 		maxK <- (numind-1)
 	}
@@ -304,7 +306,7 @@ run_DAPC <- function(x, format="VCF", kmax=40, coords=NULL, samplenames=NULL,rep
 	df.biplots.list <- list(); length(df.biplots.list) <- length(da.psets2)
 	for(i in 1:length(da.psets2)){
 		K <- as.numeric(names(da.psets2))[i]
-		df.biplots.list[[i]] <- lapply(X=1:nrow(da.psets2[[i]]), FUN=function(x){ggplot2::ggplotGrob(ggscatter.dapc(dapc.list[[(K-1)]], vartype="df", xax=da.psets2[[i]][x,1], yax=da.psets2[[i]][x,2], col=myCols, legend=F, show.title=F, hideperimeter=T,cellipse=0))})
+		df.biplots.list[[i]] <- lapply(X=1:nrow(rbind(da.psets2[[i]])), FUN=function(x){ggplot2::ggplotGrob(ggscatter.dapc(dapc.list[[(K-1)]], vartype="df", xax= rbind(da.psets2[[i]]) [x,1], yax=rbind(da.psets2[[i]])[x,2], col=myCols, legend=F, show.title=F, hideperimeter=T,cellipse=0))})
 		# Names matching those used in 'dapc.mats'
 		names(df.biplots.list[[i]]) <- c(t(damats2[[i]]))[!is.na(c(t(damats2[[i]])))]
 	}
@@ -312,7 +314,7 @@ run_DAPC <- function(x, format="VCF", kmax=40, coords=NULL, samplenames=NULL,rep
 	pc.biplots.list <- list(); length(pc.biplots.list) <- length(pca.psets2)
 	for(i in 1:length(pca.psets2)){
 		K <- as.numeric(names(pca.psets2))[i]
-		pc.biplots.list[[i]] <- lapply(X=1:nrow(pca.psets2[[i]]), FUN=function(x){ggplot2::ggplotGrob(ggscatter.dapc(dapc.list[[(K-1)]], vartype="pc", xax=pca.psets2[[i]][x,1], yax=pca.psets2[[i]][x,2], col=myCols, legend=F, show.title=F, hideperimeter=T,cellipse=0))})
+		pc.biplots.list[[i]] <- lapply(X=1:nrow(rbind(pca.psets2[[i]])), FUN=function(x){ggplot2::ggplotGrob(ggscatter.dapc(dapc.list[[(K-1)]], vartype="pc", xax=rbind(pca.psets2[[i]])[x,1], yax=rbind(pca.psets2[[i]])[x,2], col=myCols, legend=F, show.title=F, hideperimeter=T,cellipse=0))})
 		names(pc.biplots.list[[i]]) <- c(pcmats2[[i]])[!is.na(c(pcmats2[[i]]))]
 	}
 	### Removes rows and columns that are completely filled with NAs
@@ -415,29 +417,30 @@ run_DAPC <- function(x, format="VCF", kmax=40, coords=NULL, samplenames=NULL,rep
 		#}
 		if(debug) message(cat("\r",paste0("K=",K," step 3.3")))
 		### biplots of discriminant functions
-		if(dapc.pcabest.K$n.da>1){
-			da.pairs.i        <- pset(x=1:dapc.pcabest.K$n.da,min.length=2,max.length=2)
-			da.pairs.mat.i    <- do.call(rbind,da.pairs.i)
-			da.psets[[i]]     <- da.pairs.mat.i
-			da.layout.mat.i   <- matrix(data=NA,nrow=max(da.pairs.mat.i[,1]),ncol=max(da.pairs.mat.i[,2]))
-			for(j in 1:length(da.pairs.i)){
-				da.layout.mat.i[da.pairs.mat.i[j,1],da.pairs.mat.i[j,2]] <- j
-			}
-			#da.layout.mat[[i]]  <- da.layout.mat.i[,c(2:ncol(da.layout.mat.i)),drop=F]
-			da.layout.mat.i    <- as.matrix(da.layout.mat.i)
-			da.layout.mat.i2   <- da.layout.mat.i[,c(2:ncol(da.layout.mat.i)),drop=FALSE]
-			da.layout.mat.i3   <- da.layout.mat.i2[1:nrow(da.layout.mat.i2),,drop=FALSE]
-			da.layout.mat[[i]] <- da.layout.mat.i3
-			biplots.da.list.i  <- list(); length(biplots.da.list.i) <- length(da.pairs.i)
-			for(z in 1:length(da.pairs.i)){
-				da.pairs.i.z <- da.pairs.i[[z]]
-				biplots.da.list.i[[z]] <- ggscatter.dapc(dapc.pcabest.K,xax=da.pairs.i.z[1],yax=da.pairs.i.z[2],col=myCols,legend=F,cstar=0,cellipse=0,cpoint=4,label=F,show.title=F,varname="DF",axis.title.cex=0.7,hideperimeter=T)
-			}
-		} else {
-			biplots.da.list.i  <- NULL
-			da.psets[[i]]      <- NULL
-			da.layout.mat[[i]] <- NULL
-		}
+		# Old versions
+	#	if(dapc.pcabest.K$n.da>1){
+	#		da.pairs.i        <- pset(x=1:dapc.pcabest.K$n.da,min.length=2,max.length=2)
+	#		da.pairs.mat.i    <- do.call(rbind,da.pairs.i)
+	#		da.psets[[i]]     <- da.pairs.mat.i
+	#		da.layout.mat.i   <- matrix(data=NA,nrow=max(da.pairs.mat.i[,1]),ncol=max(da.pairs.mat.i[,2]))
+	#		for(j in 1:length(da.pairs.i)){
+	#			da.layout.mat.i[da.pairs.mat.i[j,1],da.pairs.mat.i[j,2]] <- j
+	#		}
+	#		#da.layout.mat[[i]]  <- da.layout.mat.i[,c(2:ncol(da.layout.mat.i)),drop=F]
+	#		da.layout.mat.i    <- as.matrix(da.layout.mat.i)
+	#		da.layout.mat.i2   <- da.layout.mat.i[,c(2:ncol(da.layout.mat.i)),drop=FALSE]
+	#		da.layout.mat.i3   <- da.layout.mat.i2[1:nrow(da.layout.mat.i2),,drop=FALSE]
+	#		da.layout.mat[[i]] <- da.layout.mat.i3
+	#		biplots.da.list.i  <- list(); length(biplots.da.list.i) <- length(da.pairs.i)
+	#		for(z in 1:length(da.pairs.i)){
+	#			da.pairs.i.z <- da.pairs.i[[z]]
+	#			biplots.da.list.i[[z]] <- ggscatter.dapc(dapc.pcabest.K,xax=da.pairs.i.z[1],yax=da.pairs.i.z[2],col=myCols,legend=F,cstar=0,cellipse=0,cpoint=4,label=F,show.title=F,varname="DF",axis.title.cex=0.7,hideperimeter=T)
+	#		}
+	#	} else {
+	#		biplots.da.list.i  <- NULL
+	#		da.psets[[i]]      <- NULL
+	#		da.layout.mat[[i]] <- NULL
+	#	}
 		#if(debug) message(cat("\r",paste0("K=",K," step 3.4")))
 		##### ggplot density plots of principle components
 		#if(!density.stop){
@@ -450,30 +453,30 @@ run_DAPC <- function(x, format="VCF", kmax=40, coords=NULL, samplenames=NULL,rep
 		#}
 		if(debug) message(cat("\r",paste0("K=",K," step 3.5")))
 		### ggplot biplots of principle components
-		if(dapc.pcabest.K$n.pca>1){
-			pca.pairs.i        <- pset(x=1:dapc.pcabest.K$n.pca,min.length=2,max.length=2)
-			pca.pairs.mat.i    <- do.call(rbind,pca.pairs.i)
-			pca.psets[[i]]     <- pca.pairs.mat.i
-			pca.layout.mat.i   <- matrix(data=NA,nrow=max(pca.pairs.mat.i[,1]),ncol=max(pca.pairs.mat.i[,2]))
-			for(j in 1:length(pca.pairs.i)){
-				pca.layout.mat.i[pca.pairs.mat.i[j,1],pca.pairs.mat.i[j,2]] <- j
-			}
-			pca.layout.mat.i    <- as.matrix(pca.layout.mat.i)
-			pca.layout.mat.i2   <- pca.layout.mat.i[,c(2:ncol(pca.layout.mat.i)),drop=FALSE]
-			pca.layout.mat.i3   <- pca.layout.mat.i2[1:nrow(pca.layout.mat.i2),,drop=FALSE]
-			pca.layout.mat[[i]] <- pca.layout.mat.i3
-			#pca.layout.mat[[i]] <- pca.layout.mat.i[,c(2:ncol(pca.layout.mat.i)),drop=F]
-			biplots.pca.list.i <- list(); length(biplots.pca.list.i) <- length(pca.pairs.i)
-			for(z in 1:length(pca.pairs.i)){
-				pca.pairs.i.z           <- pca.pairs.i[[z]]
-				biplots.pca.list.i[[z]] <- ggscatter.dapc(dapc.pcabest.K,vartype="pc",xax=pca.pairs.i.z[1],yax=pca.pairs.i.z[2],col=myCols,legend=F,cstar=0,cellipse=0,cpoint=4,label=F,show.title=F,varname="PC",axis.title.cex=0.7,hideperimeter=T)
-			}
-		} else {
-			biplots.pca.list.i  <- NULL
-			pca.psets[[i]]      <- NULL
-			pca.layout.mat[[i]] <- NULL
-		}
-		if(debug) message(cat("\r",paste0("K=",K," step 3.6")))
+	#	if(dapc.pcabest.K$n.pca>1){
+	#		pca.pairs.i        <- pset(x=1:dapc.pcabest.K$n.pca,min.length=2,max.length=2)
+	#		pca.pairs.mat.i    <- do.call(rbind,pca.pairs.i)
+	#		pca.psets[[i]]     <- pca.pairs.mat.i
+	#		pca.layout.mat.i   <- matrix(data=NA,nrow=max(pca.pairs.mat.i[,1]),ncol=max(pca.pairs.mat.i[,2]))
+	#		for(j in 1:length(pca.pairs.i)){
+	#			pca.layout.mat.i[pca.pairs.mat.i[j,1],pca.pairs.mat.i[j,2]] <- j
+	#		}
+	#		pca.layout.mat.i    <- as.matrix(pca.layout.mat.i)
+	#		pca.layout.mat.i2   <- pca.layout.mat.i[,c(2:ncol(pca.layout.mat.i)),drop=FALSE]
+	#		pca.layout.mat.i3   <- pca.layout.mat.i2[1:nrow(pca.layout.mat.i2),,drop=FALSE]
+	#		pca.layout.mat[[i]] <- pca.layout.mat.i3
+	#		#pca.layout.mat[[i]] <- pca.layout.mat.i[,c(2:ncol(pca.layout.mat.i)),drop=F]
+	#		biplots.pca.list.i <- list(); length(biplots.pca.list.i) <- length(pca.pairs.i)
+	#		for(z in 1:length(pca.pairs.i)){
+	#			pca.pairs.i.z           <- pca.pairs.i[[z]]
+	#			biplots.pca.list.i[[z]] <- ggscatter.dapc(dapc.pcabest.K,vartype="pc",xax=pca.pairs.i.z[1],yax=pca.pairs.i.z[2],col=myCols,legend=F,cstar=0,cellipse=0,cpoint=4,label=F,show.title=F,varname="PC",axis.title.cex=0.7,hideperimeter=T)
+	#		}
+	#	} else {
+	#		biplots.pca.list.i  <- NULL
+	#		pca.psets[[i]]      <- NULL
+	#		pca.layout.mat[[i]] <- NULL
+	#	}
+	#	if(debug) message(cat("\r",paste0("K=",K," step 3.6")))
 		posterior.gg        <- ggplot2::ggplot(posterior.df, ggplot2::aes(fill= pop, x= assignment, y=indv)) + ggplot2::geom_bar(position="stack", stat="identity") + ggplot2::theme_classic() + ggplot2::theme(axis.text.y = ggplot2::element_text(size = label.size), panel.grid.major = ggplot2::element_blank(), panel.grid.minor = ggplot2::element_blank(), panel.background = ggplot2::element_blank()) + ggplot2::labs(x = "Membership Probability",y="",fill="Cluster",title=paste0("K = ",K,"; PCs retained = ",best.npca[i])) + ggplot2::scale_fill_manual(values=myCols[1:K])
 		admixturePlot[[i]]  <- posterior.gg
 		#indv.KmaxPosterior <- apply(X=q.matrix, MARGIN=1, FUN=function(x){which(x==max(x))})
@@ -488,15 +491,25 @@ run_DAPC <- function(x, format="VCF", kmax=40, coords=NULL, samplenames=NULL,rep
 		if(!is.null(coords)){
 			my.palette      <- tess3r::CreatePalette(myCols[1:K], 9)
 			tess3r.qmat     <- suppressWarnings(tess3r::as.qmatrix(q.matrix))
-			coords.mat      <- as.matrix(coords)
+			#coords.mat      <- as.matrix(coords)
+			coords.mat      <- as.matrix(coords)[,1:2]
 			mapplot.i       <- tess3r::ggtess3Q(tess3r.qmat,coords.mat, interpolation.model = tess3r::FieldsKrigModel(10),resolution = c(500,500), col.palette = my.palette, window=c(x.min,x.max,y.min,y.max),background=TRUE,map.polygon=world_sp)
-			mapplot[[i]]    <- mapplot.i + ggplot2::theme_classic() + ggplot2::labs(title=paste0("Ancestry coefficients; K=",K), x="latitude", y="longitude") + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) + current.gg.sf + ggplot2::geom_point(data = coords, ggplot2::aes(x = Lon, y = Lat), size = 1, shape = 21, fill = "black")
+			coords.df <- coords
+			#colnames(coords.df[,1:2]) <- c("Lon","Lat")
+			names(coords.df)[1:2] <- c("Lon","Lat")
+		#	message("Note to self: change the next line to use geom_sf and coord_sf instead of 'current.gg.sf'")
+		#	mapplot[[i]]    <- mapplot.i + ggplot2::theme_classic() + ggplot2::labs(title=paste0("Ancestry coefficients; K=",K), x="latitude", y="longitude") + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) + current.gg.sf + ggplot2::geom_point(data = coords, ggplot2::aes(x = Lon, y = Lat), size = 1, shape = 21, fill = "black")
+			mapplot[[i]]    <- mapplot.i + ggplot2::theme_classic() + ggplot2::labs(title=paste0("Ancestry coefficients; K=",K), x="latitude", y="longitude") + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) + current.gg.sf + ggplot2::geom_point(data = coords.df, ggplot2::aes(x = Lon, y = Lat), size = 1, shape = 21, fill = "black")
+			### Use coord_sf and geom_sf instead of 
+			# ggplot2::coord_sf(xlim =,ylim = )
+			#mapplot[[i]]    <- mapplot.i + ggplot2::theme_classic() + ggplot2::labs(title=paste0("Ancestry coefficients; K=",K), x="latitude", y="longitude") + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) + ggplot2::geom_point(data = coords, ggplot2::aes(x = Lon, y = Lat), size = 1, shape = 21, fill = "black")
+			### Edit this to
 		}
 		if(debug) message(cat("\r",paste0("K=",K," step 3.9")))
 		#da.densityPlot[[i]]  <- density.da.list.i
-		da.biPlot[[i]]       <- biplots.da.list.i
+		#da.biPlot[[i]]       <- biplots.da.list.i
 		#pca.densityPlot[[i]] <- density.pca.list.i
-		pca.biPlot[[i]]      <- biplots.pca.list.i
+		#pca.biPlot[[i]]      <- biplots.pca.list.i
 	} ### END OF LOOP
 	### Plots of DF or PC density for each given K
 	
@@ -582,7 +595,10 @@ run_DAPC <- function(x, format="VCF", kmax=40, coords=NULL, samplenames=NULL,rep
 	#resultsA.grobs.list <- lapply(list(BICPlot, grp.plot2), FUN=ggplot2::ggplotGrob)
 	resultsA            <- lapply(X=lapply(list(BICPlot, grp.plot2), FUN=ggplot2::ggplotGrob), FUN=gridExtra::arrangeGrob, vp=vp)
 	if(!is.null(coords)){
-		resultsB <- lapply(X=lapply(c(admixturePlot, assignmentPlot,mapplot), FUN=ggplot2::ggplotGrob), FUN=gridExtra::arrangeGrob,vp=vp)
+		gg.plots.list0 <- c(admixturePlot, assignmentPlot, mapplot)
+		gg.plots.list  <- gg.plots.list0[!sapply(gg.plots.list,is.null)]
+		resultsB       <- lapply(X= lapply(c(admixturePlot, assignmentPlot, mapplot), FUN=ggplot2::ggplotGrob), FUN=gridExtra::arrangeGrob,vp=vp)
+		
 	} else {
 		resultsB <- lapply(X=lapply(c(admixturePlot, assignmentPlot), FUN=ggplot2::ggplotGrob), FUN=gridExtra::arrangeGrob,vp=vp)
 	}
@@ -597,28 +613,28 @@ run_DAPC <- function(x, format="VCF", kmax=40, coords=NULL, samplenames=NULL,rep
 			}
 		}
 		dev.off()
-		### Save the PC and DF density and biplots to a separate PDF, with height and width determined by number of rows and columns of plots.
-		if(FALSE){
-			res2.save.as <- paste0(tools::file_path_sans_ext(save.as),"_plots2.pdf")
-			pdf(height=res2.height,width=res2.width,file=res2.save.as, onefile=TRUE)
-			for(i in 1:length(dapc.componentPlots)){
-				grid::grid.draw(dapc.componentPlots[[i]])
-				if(i < length(dapc.componentPlots)){
-					grid::grid.newpage()
-				}
-			}
-			dev.off()
-		}
+		#### Save the PC and DF density and biplots to a separate PDF, with height and width determined by number of rows and columns of plots.
+		#if(FALSE){
+		#	res2.save.as <- paste0(tools::file_path_sans_ext(save.as),"_plots2.pdf")
+		#	pdf(height=res2.height,width=res2.width,file=res2.save.as, onefile=TRUE)
+		#	for(i in 1:length(dapc.componentPlots)){
+		#		grid::grid.draw(dapc.componentPlots[[i]])
+		#		if(i < length(dapc.componentPlots)){
+		#			grid::grid.newpage()
+		#		}
+		#	}
+		#	dev.off()
+		#}
 	}
 	results1
 }
 #' @examples
 #' library(misc.wrappers)
 #' # Define path to input VCF file containing similated data for 500 SNPs from 50 individuals in three populations.
-#' example_vcf_path <- file.path(system.file("extdata", package = "misc.wrappers"),"simulated_K4.vcf.gz")
-#' # Perform DAPC analyses on the simulated dataset for for K=2–10 and 30 replicates of adegenet::find.clusters (explanation below). Save output graphs to a file called "DAPC_example.pdf" in your current directory.
+#' example_vcf_path <- file.path(system.file("extdata", package = "misc.wrappers"),"simK4.vcf.gz")
+#' # DAPC analyses for K=2–10 and 30 replicates of find.clusters (adegenet). Saves graphs to "DAPC_example.pdf" in your current directory.
 #' run_DAPC(x=example_vcf_path, kmax=10, reps=30, save.as="DAPC_example.pdf", include.out=c(".pdf"))
-#' specifically, perform 30 replicates adegenet::find.clusters and plot boxplots of the K vs. BIC;  on the simulated dataset; 
+#' Performs 30 replicates adegenet::find.clusters and plot boxplots of the K vs. BIC;  on the simulated dataset; 
 
 #' @title Arrange DAPC density plots.
 #' 

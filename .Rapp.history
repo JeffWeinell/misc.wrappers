@@ -1,28 +1,3 @@
-attributes(snmf.obj)
-vcf
-samplenames
-vcf.obj     <- vcfR::read.vcfR(vcf)
-samplenames <- colnames(vcf.obj@gt)[-1]#
-	numind      <- length(samplenames)
-numind
-vcftools.path="/panfs/pfs.local/home/j926w878/programs/vcftools_0.1.13/bin/vcftools";vcf="/panfs/pfs.local/home/j926w878/work/ddRAD/snps_goodData/Oxyrhabdium_AllSpecies_AllSNPs.vcf"; indv.keep=indvskeep; out="/panfs/pfs.local/home/j926w878/work/ddRAD/snps_goodData/Oxyrhabdium_both-modestum_BestSNP.vcf"; which.site="best"
-indvkeep
-indv.keep
-indv.keep="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/tess3r/indv_keep_Oxyrhabdium_both-modestum.txt"
-!is.null(indv.keep)
-is(indv.keep,"character"))
-is(indv.keep,"character")
-is(indv.keep,"character") & length(indv.keep)==1
-file.exists(indv.keep)
-indv.keep <- read.table(indv.keep)
-indv.keep
-indv.keep="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/tess3r/indv_keep_Oxyrhabdium_both-modestum.txt"
-unlist(read.table(indv.keep))
-unname(unlist(read.table(indv.keep)))
-indv.keep <- unname(unlist(read.table(indv.keep)))
-indv.keep
-readLines(indv.keep)
-indv.keep="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/tess3r/indv_keep_Oxyrhabdium_both-modestum.txt"
 readLines(indv.keep)
 indv.keep <- suppressWarnings(readLines(indv.keep))
 indv.keep
@@ -1012,51 +987,212 @@ library(remotes)
 remotes::install_github("JeffWeinell/misc.wrappers",upgrade=FALSE,auth_token="323d9e4cd00247a39a805dbb66f37db6403cfb8b")
 library(misc.wrappers)
 q()
-library(devtools)#
-library(remotes)
-install_github("JeffWeinell/misc.wrappers",upgrade="no")
-install_github("JeffWeinell/misc.wrappers")
-library(misc.wrappers)
 setwd("Documents/misc.wrappers")
+library(devtools)
+devtools::document()
 vcf.path    <- file.path(system.file("extdata", package = "misc.wrappers"),"example.vcf.gz")
-simK2_test7 <- sim.vcf(x=vcf.path,save.as="/Users/alyssaleinweber/Documents/simtest7_K2.vcf.gz",n.ind=100,n.snps=1000,K=2,sim.coords=T)
+simK2_test10 <- sim.vcf(x=vcf.path,save.as="/Users/alyssaleinweber/Documents/simtest10_K2.vcf.gz",n.ind=100,n.snps=1000,K=2,sim.coords=T)
+simK2_test11 <- sim.vcf(x=vcf.path,save.as="/Users/alyssaleinweber/Documents/simtest11_K2.vcf.gz",n.ind=100,n.snps=1000,K=2,sim.coords=T)
+class(simK2_test11)
+simK2_test11[[2]]
+simK2_test11[[1]]
+simK2_test11[[3]]
+simK2_test11[[4]]
+simK2_test11 <- sim.vcf(x=vcf.path,save.as="/Users/alyssaleinweber/Documents/simtest11_K2.vcf.gz",n.ind=100,n.snps=1000,K=2,sim.coords=T,show.plot=TRUE)
+simK2_test5 <- sim.vcf(x=vcf.path,save.as="/Users/alyssaleinweber/Documents/simtest5_K2.vcf.gz",n.ind=100,n.snps=1000,K=2,sim.coords=T,show.plot=TRUE)
+simK3_test2 <- sim.vcf(x=vcf.path,save.as="/Users/alyssaleinweber/Documents/simtest2_K3.vcf.gz",n.ind=100,n.snps=1000,K=3,sim.coords=T,show.plot=TRUE)
+devtools::documents()
 devtools::document()
-simK2_test7 <- sim.vcf(x=vcf.path,save.as="/Users/alyssaleinweber/Documents/simtest7_K2.vcf.gz",n.ind=100,n.snps=1000,K=2,sim.coords=T)
+vcf.path
 devtools::document()
-simK2_test7 <- sim.vcf(x=vcf.path,save.as="/Users/alyssaleinweber/Documents/simtest7_K2.vcf.gz",n.ind=100,n.snps=1000,K=2,sim.coords=T)
 devtools::document()
-simK2_test7 <- sim.vcf(x=vcf.path,save.as="/Users/alyssaleinweber/Documents/simtest7_K2.vcf.gz",n.ind=100,n.snps=1000,K=2,sim.coords=T)
-exists("bothmaps")
 devtools::document()
-simK2_test7 <- sim.vcf(x=vcf.path,save.as="/Users/alyssaleinweber/Documents/simtest7_K2.vcf.gz",n.ind=100,n.snps=1000,K=2,sim.coords=T)
-simK2_test8 <- sim.vcf(x=vcf.path,save.as="/Users/alyssaleinweber/Documents/simtest8_K2.vcf.gz",n.ind=100,n.snps=1000,K=2,sim.coords=T,show.plot=T)
+simK4_test2 <- sim.vcf(x=vcf.path,save.as="/Users/alyssaleinweber/Documents/simtest2_K3.vcf.gz",n.ind=100,n.snps=1000,K=4,sim.coords=T,show.plot=TRUE)
+simK4_test2 <- sim.vcf(x=vcf.path,save.as="/Users/alyssaleinweber/Documents/simtest2_K4.vcf.gz",n.ind=100,n.snps=1000,K=4,sim.coords=T,show.plot=TRUE)
+devtools::document()
+simK4_test2 <- sim.vcf(x=vcf.path,save.as="/Users/alyssaleinweber/Documents/simtest2_K4.vcf.gz",n.ind=100,n.snps=1000,K=4,sim.coords=T,show.plot=TRUE,regionsize=0.4,interactions=c(0,0.05))
+simK4_test2 <- sim.vcf(x=vcf.path,save.as="/Users/alyssaleinweber/Documents/simtest2_K4.vcf.gz",n.ind=100,n.snps=1000,K=4,sim.coords=T,show.plot=TRUE,regionsize=0.3,interactions=c(0,0.05))
+simK3_test3 <- sim.vcf(x=vcf.path,save.as="/Users/alyssaleinweber/Documents/simtest2_K3.vcf.gz",n.ind=100,n.snps=1000,K=3,sim.coords=T,show.plot=TRUE,regionsize=0.3,interactions=c(0,0.05),wnd=c(-180,180,-30,30))
+simK4 <- sim.vcf(x=vcf.path,save.as="/Users/alyssaleinweber/Documents/simK4.vcf.gz",n.ind=100,n.snps=1000,K=4,sim.coords=T,show.plot=TRUE,regionsize=0.3,interactions=c(0.1,0.4),wnd=c(-180,180,-30,30))
+simK4 <- sim.vcf(x=vcf.path,save.as="/Users/alyssaleinweber/Documents/simK4.vcf.gz",n.ind=100,n.snps=1000,K=4,sim.coords=T,show.plot=TRUE,regionsize=0.7,interactions=c(0.05,0.7),wnd=c(-180,180,-30,30))
+simK4 <- sim.vcf(x=vcf.path,save.as="/Users/alyssaleinweber/Documents/simK4.vcf.gz",n.ind=100,n.snps=1000,K=4,sim.coords=T,show.plot=TRUE,regionsize=0.7,interactions=c(0,1),wnd=c(-180,180,-30,30))
+devtools::document()
+devtools::document()
 dev.off()
-dev.off()
-simK2_test8 <- sim.vcf(x=vcf.path,save.as="/Users/alyssaleinweber/Documents/simtest8_K2.vcf.gz",n.ind=100,n.snps=1000,K=2,sim.coords=T,show.plot=T)
-dev.off()
-class(simK2_test8)
-length(simK2_test8)
-devtools::document()
-class(simK2_test8[[2]])
-devtools::document()
-simK2_test8 <- sim.vcf(x=vcf.path,save.as="/Users/alyssaleinweber/Documents/simtest8_K2.vcf.gz",n.ind=100,n.snps=1000,K=2,sim.coords=T,show.plot=T)
-simK2_test8
-devtools::document()
-simK2_test8 <- sim.vcf(x=vcf.path,save.as="/Users/alyssaleinweber/Documents/simtest8_K2.vcf.gz",n.ind=100,n.snps=1000,K=2,sim.coords=T,show.plot=T)
-simK2_test8
-devtools::document()
-simK2_test8 <- sim.vcf(x=vcf.path,save.as="/Users/alyssaleinweber/Documents/simtest8_K2.vcf.gz",n.ind=100,n.snps=1000,K=2,sim.coords=T,show.plot=T)
-simK2_test8
-devtools::document()
-simK2_test8 <- sim.vcf(x=vcf.path,save.as="/Users/alyssaleinweber/Documents/simtest8_K2.vcf.gz",n.ind=100,n.snps=1000,K=2,sim.coords=T)
-length(simK2_test8)
-simK2_test8[[1]]
-class(simK2_test8)
 devtools::document()
 devtools::document()
-simK2_test8 <- sim.vcf(x=vcf.path,save.as="/Users/alyssaleinweber/Documents/simtest8_K2.vcf.gz",n.ind=100,n.snps=1000,K=2,sim.coords=T)
 devtools::document()
-simK2_test8 <- sim.vcf(x=vcf.path,save.as="/Users/alyssaleinweber/Documents/simtest8_K2.vcf.gz",n.ind=100,n.snps=1000,K=2,sim.coords=T)
-dev.off()
-simK2_test9 <- sim.vcf(x=vcf.path,save.as="/Users/alyssaleinweber/Documents/simtest9_K2.vcf.gz",n.ind=100,n.snps=1000,K=2,sim.coords=T)
+example_vcf_path <- file.path(system.file("extdata", package = "misc.wrappers"),"simK4.vcf.gz")
+example_vcf_path
+run_DAPC(x=example_vcf_path, kmax=10, reps=30, save.as="/Users/alyssaleinweber/Documents/DAPC_example_v2.pdf", include.out=c(".pdf"))
+DAPC_sim4K_withCoords <- run_DAPC(x=example_vcf_path, coords= "/Users/alyssaleinweber/Documents/misc.wrappers/inst/extdata/simK4_coords.txt", kmax=10, reps=30, save.as="/Users/alyssaleinweber/Documents/DAPC_simK4_withCoords_v2.pdf", include.out=c(".pdf"))
+example_vcf_path
+coords= "/Users/alyssaleinweber/Documents/misc.wrappers/inst/extdata/simK4_coords.txt"
+kmax=10, reps=30, save.as="/Users/alyssaleinweber/Documents/DAPC_simK4_withCoords_v2.pdf", include.out=c(".pdf")
+kmax=10; reps=30; save.as="/Users/alyssaleinweber/Documents/DAPC_simK4_withCoords_v2.pdf"; include.out=c(".pdf")
+format="VCF"
+samplenames=NULL
+probs.out=NULL
+debug <- TRUE#
+	if(is.null(save.as)){#
+		save.as <- file.path(getwd(),"result_DAPC.pdf")#
+	}#
+	if(file.exists(save.as)){#
+		stop("Output file already exists. Use a different name for 'save.as' argument.")#
+	}#
+	if(format=="VCF" | is(x,"vcfR")){#
+		if(is(x,"vcfR")){#
+			vcf.obj <- vcf <- x#
+		} else {#
+			vcf <- x#
+			vcf.obj     <- vcfR::read.vcfR(vcf,verbose=F,checkFile=F)#
+		}#
+		if(is.null(samplenames)){#
+			samplenames <- colnames(vcf.obj@gt)[-1]#
+		}#
+		genind      <- suppressWarnings(vcfR::vcfR2genind(vcf.obj))#
+		#numind      <- (dim(attributes(vcf.obj)[["gt"]])[2])-1#
+	} else {#
+		stop("Currently, 'format' must be 'VCF'")#
+	}#
+	numind      <- length(samplenames)#
+	label.size  <- min((288/numind),7)#
+	if(debug) message("step 0")
+if(!is.null(coords)){#
+		if(is(coords,"array") | is(coords,"data.frame")){#
+			coords <-  coords#
+		} else {#
+			if(file.exists(coords)){#
+				coords   <- read.table(coords)#
+			}#
+		}#
+		x.min <- min((coords[,1]-0.5))#
+		x.max <- max((coords[,1]+0.5))#
+		y.min <- min((coords[,2]-0.5))#
+		y.max <- max((coords[,2]+0.5))#
+		maxK  <- min(nrow(unique(coords)),(numind-1))#
+		#world_df <- ggplot2::map_data(rnaturalearth::ne_countries(scale=10))#
+		world_sf      <- rnaturalearth::ne_countries(scale=10,returnclass="sf")[1]#
+		world_sp      <- rnaturalearth::ne_countries(scale=10,returnclass="sp")#
+		current_sf    <- suppressMessages(sf::st_crop(world_sf,xmin=x.min,xmax=x.max,ymin=y.min,ymax=y.max))#
+		current.gg.sf <- ggplot2::geom_sf(data=current_sf,colour = "black", fill = NA)#
+		#world.gg.sf   <- ggplot2::geom_sf(data=world_sf,colour = "black", fill = NA)#
+	} else {#
+		maxK <- (numind-1)#
+	}#
+	if(is.null(kmax)){#
+		kmax <- maxK#
+	} else {#
+		if(kmax > maxK){#
+			kmax <- maxK#
+		}#
+	}#
+	max.clusters <- kmax#
+	Krange       <- 1:max.clusters#
+	### Defining colors to use
+if(max.clusters <= 15){#
+			myCols  <- goodcolors2(n=max.clusters)#
+		}#
+		if(max.clusters>15){#
+			myCols  <- c(goodcolors2(n=15), sample(adegenet::funky(100), size=max.clusters-15))#
+	}#
+	if(debug) message("step 1")#
+	#### find.clusters#
+	grp          <- adegenet::find.clusters(genind, max.n.clust=max.clusters,n.pca=max.clusters,choose.n.clust=F)#
+	grp.list     <- list(); length(grp.list) <- reps#
+	# par(mar=c(3.5,4,3,2.1))#
+	for(i in 1:reps){#
+		grp.list[[i]] <- adegenet::find.clusters(genind, max.n.clust=max.clusters,n.pca=max.clusters,choose.n.clust=F)#
+	}#
+	BIC.mat           <- do.call(cbind,lapply(X=1:reps,FUN=function(x){grp.list[[x]]$Kstat}))#
+	rownames(BIC.mat) <- 1:max.clusters#
+	colnames(BIC.mat) <- paste0("rep",1:reps)#
+	mean.BIC        <- apply(BIC.mat,MARGIN=1,FUN=mean,na.rm=TRUE)#
+	### Lowest K with a lower mean BIC than K+1 mean BIC.#
+	if(any(diff(mean.BIC)>0)){#
+		bestK <- unname(which(diff(mean.BIC)>0)[1])#
+	} else {#
+		bestK <- 1#
+	}#
+	Kbest.criteria1   <- bestK#
+	### Construct data frame holding BIC scores for each replicate of each K#
+	BIC.df      <- data.frame(BIC=unname(unlist(c(BIC.mat))),K=rep(Krange,reps),replicate=rep(1:reps,each=length(Krange)))
+if(max.clusters <= 15){#
+			myCols  <- goodcolors2(n=max.clusters)#
+		}#
+		if(max.clusters>15){#
+			myCols  <- c(goodcolors2(n=15), sample(adegenet::funky(100), size=max.clusters-15))#
+	}#
+	if(debug) message("step 1")
+max.clusters
+kmax
+kmax=10;reps=30
+debug <- TRUE#
+	if(is.null(save.as)){#
+		save.as <- file.path(getwd(),"result_DAPC.pdf")#
+	}#
+	if(file.exists(save.as)){#
+		stop("Output file already exists. Use a different name for 'save.as' argument.")#
+	}#
+	if(format=="VCF" | is(x,"vcfR")){#
+		if(is(x,"vcfR")){#
+			vcf.obj <- vcf <- x#
+		} else {#
+			vcf <- x#
+			vcf.obj     <- vcfR::read.vcfR(vcf,verbose=F,checkFile=F)#
+		}#
+		if(is.null(samplenames)){#
+			samplenames <- colnames(vcf.obj@gt)[-1]#
+		}#
+		genind      <- suppressWarnings(vcfR::vcfR2genind(vcf.obj))#
+		#numind      <- (dim(attributes(vcf.obj)[["gt"]])[2])-1#
+	} else {#
+		stop("Currently, 'format' must be 'VCF'")#
+	}#
+	numind      <- length(samplenames)#
+	label.size  <- min((288/numind),7)#
+	if(debug) message("step 0")#
+	if(!is.null(coords)){#
+		if(is(coords,"array") | is(coords,"data.frame")){#
+			coords <-  coords#
+		} else {#
+			if(file.exists(coords)){#
+				coords   <- read.table(coords)#
+			}#
+		}#
+		x.min <- min((coords[,1]-0.5))#
+		x.max <- max((coords[,1]+0.5))#
+		y.min <- min((coords[,2]-0.5))#
+		y.max <- max((coords[,2]+0.5))#
+		maxK  <- min(nrow(unique(coords)),(numind-1))#
+		#world_df <- ggplot2::map_data(rnaturalearth::ne_countries(scale=10))#
+		world_sf      <- rnaturalearth::ne_countries(scale=10,returnclass="sf")[1]#
+		world_sp      <- rnaturalearth::ne_countries(scale=10,returnclass="sp")#
+		current_sf    <- suppressMessages(sf::st_crop(world_sf,xmin=x.min,xmax=x.max,ymin=y.min,ymax=y.max))#
+		current.gg.sf <- ggplot2::geom_sf(data=current_sf,colour = "black", fill = NA)#
+		#world.gg.sf   <- ggplot2::geom_sf(data=world_sf,colour = "black", fill = NA)#
+	} else {#
+		maxK <- (numind-1)#
+	}
+!is.null(coords)
+is(coords,"array") | is(coords,"data.frame")
+coords[1:10,]
+maxK  <- min(nrow(unique(coords)),(numind-1))
+maxK
+(numind-1)
+numind
+samplenames
+x
+x=example_vcf_path
+format=="VCF" | is(x,"vcfR")
+if(is(x,"vcfR")){#
+			vcf.obj <- vcf <- x#
+		} else {#
+			vcf <- x#
+			vcf.obj     <- vcfR::read.vcfR(vcf,verbose=F,checkFile=F)#
+		}
+vcf.obj
+is.null(samplenames)
+samplenames <- colnames(vcf.obj@gt)[-1]
+samplenames
 q("no")

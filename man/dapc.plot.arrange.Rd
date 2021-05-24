@@ -63,8 +63,8 @@ Function to arrange plots of density for each DF or PC and each K
 \examples{
 library(misc.wrappers)
 # Define path to input VCF file containing similated data for 500 SNPs from 50 individuals in three populations.
-example_vcf_path <- file.path(system.file("extdata", package = "misc.wrappers"),"simulated_K4.vcf.gz")
-# Perform DAPC analyses on the simulated dataset for for K=2–10 and 30 replicates of adegenet::find.clusters (explanation below). Save output graphs to a file called "DAPC_example.pdf" in your current directory.
+example_vcf_path <- file.path(system.file("extdata", package = "misc.wrappers"),"simK4.vcf.gz")
+# DAPC analyses for K=2–10 and 30 replicates of find.clusters (adegenet). Saves graphs to "DAPC_example.pdf" in your current directory.
 run_DAPC(x=example_vcf_path, kmax=10, reps=30, save.as="DAPC_example.pdf", include.out=c(".pdf"))
-specifically, perform 30 replicates adegenet::find.clusters and plot boxplots of the K vs. BIC;  on the simulated dataset; 
+Performs 30 replicates adegenet::find.clusters and plot boxplots of the K vs. BIC;  on the simulated dataset; 
 }
