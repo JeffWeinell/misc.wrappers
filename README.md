@@ -60,11 +60,15 @@ config_miscwrappers(exe.paths=c("*/PATH/TO/python","*/fastStructure-master/struc
 ```
 library(misc.wrappers)
 # Define path to a VCF file that contains simulated SNP data, or, set the path to a file your own data.
-vcf_path <- file.path(system.file("extdata", package = "misc.wrappers"),"simulated_K4.vcf.gz")
+vcf.path    <- file.path(system.file("extdata", package = "misc.wrappers"),"simK4.vcf.gz")
 # Run DAPC analyses and save the results to files in your current directory.
-simDAPC <- run_DAPC(vcf="/PATH/TO/SNPs/VCF.vcf",coords="/PATH/TO/LonLat.txt",out="/PATH/FOR/RESULTS.pdf")
-# Mostly the same as before, but include a file with coordinates of the samples in the VCF.
-# example will be added soon # 
+run_DAPC(x=vcf.path,format="VCF",kmax=10,samplenames=NULL,reps=30,probs.out=NULL,save.as="DAPC_simK4_withCoords_v4.pdf",include.out=c(".pdf"))
+# Mostly the same as before, but with coordinates of individuals supplied; maps of population assignment probabilities geographically interpolated are included in 'save.out'.
+# Path to VCF file and coordinates file with longitude and latitude of samples
+vcf.path    <- file.path(system.file("extdata", package = "misc.wrappers"),"simK4.vcf.gz")
+coords.path <- file.path(system.file("extdata", package = "misc.wrappers"),"simK4_coords.txt")
+# Run DAPC analyses
+run_DAPC(x=vcf.path,format="VCF",kmax=10,coords=coords.path,samplenames=NULL,reps=30,probs.out=NULL,save.as="DAPC_simK4_withCoords_v4.pdf",include.out=c(".pdf"))
 ```
 
 ### ```run_sNMF``` Run sNMF/LEA from SNP data in a VCF file and plot results
