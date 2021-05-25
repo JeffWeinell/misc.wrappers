@@ -65,8 +65,8 @@ run_sNMF <- function(x,format="VCF",coords=NULL,samplenames=NULL,kmax=40,reps=10
 		maxK  <- min(nrow(unique(coords)),(numind-1))
 		world_sf      <- rnaturalearth::ne_countries(scale=10,returnclass="sf")[1]
 		world_sp      <- rnaturalearth::ne_countries(scale=10,returnclass="sp")
-		current_sf    <- suppressWarnings(suppressMessages(sf::st_crop(world_sf,xmin=x.min,xmax=x.max,ymin=y.min,ymax=y.max)))
-		current.gg.sf <- ggplot2::geom_sf(data=current_sf,colour = "black", fill = NA)
+		#current_sf    <- suppressWarnings(suppressMessages(sf::st_crop(world_sf,xmin=x.min,xmax=x.max,ymin=y.min,ymax=y.max)))
+		#current.gg.sf <- ggplot2::geom_sf(data=current_sf,colour = "black", fill = NA)
 	} else {
 		maxK <- (numind-1)
 	}
