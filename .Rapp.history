@@ -17,6 +17,7 @@ vcftools.path
 vcftools.path=vcftools
 vcftools.path="vcftools"
 vcf.obj    <- vcfR::read.vcfR(vcf)#
+	# matrix with "fixed" columns, which are the columns with site-specific stats across all samples#
 	# fix.mat    <- attributes(vcf.obj)[["fix"]]#
 	fix.mat    <- vcf.obj@fix
 gt.mat     <- gsub(":.+","",vcf.obj@gt[,-1])
