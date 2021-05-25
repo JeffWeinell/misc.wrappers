@@ -16,7 +16,8 @@ run_sNMF(
   entropy = TRUE,
   project = "new",
   iter = 500,
-  save.as = NULL
+  save.as = NULL,
+  ...
 )
 }
 \arguments{
@@ -40,7 +41,7 @@ run_sNMF(
 
 \item{save.as}{Character string with where to save the output PDF with plots of results. Default is NULL.}
 
-\item{CPU}{Defualt 2}
+\item{...}{Additional arguments passed to 'snmf' function of LEA package}
 }
 \value{
 List of plots
