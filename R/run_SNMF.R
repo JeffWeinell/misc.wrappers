@@ -20,8 +20,7 @@ run_sNMF <- function(x,format="VCF",coords=NULL,samplenames=NULL,kmax=40,reps=10
 	#	save.as <- file.path(getwd(),"result_LEA-sNMF.pdf")
 	#}
 	# otherArgs <- list(NULL)
-	othersArgs <- list(...)
-	
+	# othersArgs <- list(...)
 	if(!is.null(save.as)){
 		if(file.exists(save.as)){
 			stop("Output file already exists. Use a different name for 'save.as' argument.")
