@@ -9,7 +9,7 @@ function | description | example input files | example output files
 ```plot_model``` | Makes a cartoon figure of a model described in a pair of .tpl and .est files | [model10_K3.tpl](inst/extdata/example.tpl), [model10_K3.est](inst/extdata/example.est) | [model10_K3.pdf](inst/extdata/example_model.pdf)
 ```create.outer``` | Generates a set of outer habitat coordinates that can be used for EEMS | [coords.txt](inst/extdata/createouter_exampleInput_coords.txt) | method 1: [outer1.txt](inst/extdata/createouter_exampleOutput_method1_outer.text), [outer1.pdf](inst/extdata/createouter_exampleOutput_method1_outer.pdf)<br /><br /> method 2: [outer2.txt](inst/extdata/createouter_exampleOutput_method2_outer.text), [outer2.pdf](inst/extdata/createouter_exampleOutput_method2_outer.pdf)<br /><br /> method 3: [outer3.txt](inst/extdata/createouter_exampleOutput_method3_outer.text), [outer3.pdf](inst/extdata/createouter_exampleOutput_method3_outer.pdf)
 ```sim.vcf ``` | Simulate SNPs and save as a VCF; optionally introduce missing data; optionally simulate locality data | [example.vcf.gz](inst/extdata/example.vcf.gz) (optional) | K=3, allopatric: [simK3.vcf.gz](inst/extdata/simK3.vcf.gz), [simK3_coords.txt](inst/extdata/simK3_coords.txt), [simK3_coords_map.pdf](inst/extdata/simK3_coords_map.pdf)<br /><br /> K=4, some contact: [simK4.vcf.gz](inst/extdata/simK4.vcf.gz), [simK4_coords.txt](inst/extdata/simK4_coords.txt), [simK4_coords_map.pdf](inst/extdata/simK4_coords_map.pdf)
-```run_DAPC``` | Pipeline for running DAPC and graphing results | [simK4.vcf.gz](inst/extdata/simK4.vcf.gz),<br/> [simK4_coords.txt](inst/extdata/simK4_coords.txt) (optional) |  [DAPC_simK4_withCoords_v2.pdf](inst/extdata/DAPC_simK4_withCoords_v2.pdf) <br/>[DAPC_simK4_withCoords_v2_BiPlots.pdf](inst/extdata/DAPC_simK4_withCoords_v2_BiPlots.pdf) <br/>[DAPC_simK4_withCoords_v2_densityPlots_PC.pdf](inst/extdata/DAPC_simK4_withCoords_v2_densityPlots_PC.pdf) <br/>[DAPC_simK4_withCoords_v2_densityPlots_DF.pdf](inst/extdata/DAPC_simK4_withCoords_v2_densityPlots_DF.pdf)
+```run_DAPC``` | Pipeline for running DAPC and graphing results | [simK4.vcf.gz](inst/extdata/simK4.vcf.gz),<br/> [simK4_coords.txt](inst/extdata/simK4_coords.txt) (optional) |  [DAPC_simK4_withCoords_v2.pdf](inst/extdata/DAPC_simK4_withCoords_v6.pdf) <br/>[DAPC_simK4_withCoords_v2_BiPlots.pdf](inst/extdata/DAPC_simK4_withCoords_v6_BiPlots.pdf) <br/>[DAPC_simK4_withCoords_v2_densityPlots_PC.pdf](inst/extdata/DAPC_simK4_withCoords_v6_densityPlots_PC.pdf) <br/>[DAPC_simK4_withCoords_v2_densityPlots_DF.pdf](inst/extdata/DAPC_simK4_withCoords_v6_densityPlots_DF.pdf)
 ```run_sNMF``` | Pipeline for running sNMF (LEA) and graphing results | [simK4.vcf.gz](inst/extdata/simK4.vcf.gz),<br/> [simK4_coords.txt](inst/extdata/simK4_coords.txt) (optional)| [sNMF_simK4_withCoords.pdf](inst/extdata/sNMF_simK4_withCoords.pdf)
 ```run_fastStructure```  | Pipeline for running fastStructure and graphing results| [simK4.vcf.gz](inst/extdata/simK4.vcf.gz),<br/> [simK4_coords.txt](inst/extdata/simK4_coords.txt) (optional) | coming soon
 ```runtess``` | Pipeline for running tess3r and generating graphs of results comparable to the other pop structure methods | [simK4.vcf.gz](inst/extdata/simK4.vcf.gz),<br/> [simK4_coords.txt](inst/extdata/simK4_coords.txt)| coming soon
@@ -71,7 +71,7 @@ vcf.path    <- file.path(system.file("extdata", package = "misc.wrappers"),"simK
 # Path to coordinates file
 coords.path <- file.path(system.file("extdata", package = "misc.wrappers"),"simK4_coords.txt")
 # Running DAPC analyses
-run_DAPC(x=vcf.path,format="VCF",kmax=10,coords=coords.path,samplenames=NULL,reps=30,probs.out=NULL,save.as="DAPC_simK4_withCoords_v4.pdf",include.out=c(".pdf"))
+run_DAPC(x=vcf.path, format="VCF", kmax=10, coords=coords.path, samplenames=NULL, reps=30,probs.out=NULL, save.as="DAPC_simK4_withCoords_v4.pdf", include.out=c(".pdf"))
 ```
 
 ### ```run_sNMF``` Run sNMF/LEA from SNP data in a VCF file and plot results
@@ -86,7 +86,7 @@ run_sNMF(x=vcf.path,format="VCF",kmax=10,reps=30,save.as="sNMF_simK4.pdf")
 ## Example 2: Same SNP dataset as example 1, but here we also provide Lon/Lat coordinates of individuals to geographically interpolate admixture coefficients.
 vcf.path    <- file.path(system.file("extdata", package = "misc.wrappers"),"simK4.vcf.gz")
 coords.path <- file.path(system.file("extdata", package = "misc.wrappers"),"simK4_coords.txt")
-run_sNMF(x=vcf.path,format="VCF",coords=coords.path,samplenames=NULL,kmax=10,reps=30,entropy=TRUE,project="new",iter=500,save.as="sNMF_simK4_withCoords.pdf")
+run_sNMF(x=vcf.path, format="VCF", coords=coords.path, samplenames=NULL, kmax=10, reps=30, entropy=TRUE, project="new", iter=500, save.as="sNMF_simK4_withCoords.pdf")
 ```
 
 ### ```run_fastStructure``` Run fastStructure from SNP data in a VCF file and and plot results.

@@ -96,12 +96,20 @@ run_fastStructure <- function(x,format="VCF",coords=NULL,samplenames=NULL,kmax=4
 	### Loading coordinates of individuals if coordinates were supplied.
 	if(!is.null(coords)){
 		if(is(coords,"array") | is(coords,"data.frame")){
-			coords <-  coords
+			coords <-  coords[,c(1:2)]
 		} else {
 			if(file.exists(coords)){
-				coords   <- read.table(coords)
+				coords   <- read.table(coords)[,c(1:2)]
 			}
 		}
+		colnames(coords) <- c("Lon","Lat")
+		if(!is.null(rownames(coords))){
+			### Check that all individuals with coords are in the vcf file, and vice versa.
+			if(!all(samplenames %in% rownames(coords) & rownames(coords) %in% samplenames)){
+				stop("All individuals in coords file must be in vcf")
+			}
+		}
+		
 		maxK <- min(nrow(unique(coords)),(numind-1))
 	} else {
 		maxK <- (numind-1)
@@ -187,8 +195,8 @@ run_fastStructure <- function(x,format="VCF",coords=NULL,samplenames=NULL,kmax=4
 		y.max <- max((coords[,2]+0.5))
 		world_sf      <- rnaturalearth::ne_countries(scale=10,returnclass="sf")[1]
 		world_sp      <- rnaturalearth::ne_countries(scale=10,returnclass="sp")
-		current_sf    <- sf::st_crop(world_sf,xmin=x.min,xmax=x.max,ymin=y.min,ymax=y.max)
-		current.gg.sf <- ggplot2::geom_sf(data=current_sf,colour = "black", fill = NA)
+		#current_sf    <- sf::st_crop(world_sf,xmin=x.min,xmax=x.max,ymin=y.min,ymax=y.max)
+		#current.gg.sf <- ggplot2::geom_sf(data=current_sf,colour = "black", fill = NA)
 	} else {
 		mapplot <- NULL
 	}
@@ -211,12 +219,14 @@ run_fastStructure <- function(x,format="VCF",coords=NULL,samplenames=NULL,kmax=4
 		indv.maxPosterior  <- apply(X=q.matrix, MARGIN=1, FUN=function(x){max(x)})
 		labels             <- rep("",nrow(posterior.df))
 		labels[posterior.df[,"assignment"] %in% indv.maxPosterior] <- "+"
-		assignment.K       <- ggplot2::ggplot(data=posterior.df, ggplot2::aes(x= pop, y=indv,fill=assignment)) + ggplot2::geom_tile(color="gray") + ggplot2::theme_classic() + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5), axis.text.y = ggplot2::element_text(size = label.size), panel.grid.major = ggplot2::element_blank(), panel.grid.minor = ggplot2::element_blank(), panel.background = ggplot2::element_blank(), legend.position = "none", ) + ggplot2::labs(title = paste0("K = ",K), x="Clusters", y="") + ggplot2::scale_fill_gradient2(low = "white", mid = "yellow", high = "red", midpoint = 0.5) + ggplot2::geom_text(label=labels)
+		assignment.K         <- ggplot2::ggplot(data=posterior.df, ggplot2::aes(x= pop, y=indv,fill=assignment)) + ggplot2::geom_tile(color="gray") + ggplot2::theme_classic() + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5), axis.text.y = ggplot2::element_text(size = label.size), panel.grid.major = ggplot2::element_blank(), panel.grid.minor = ggplot2::element_blank(), panel.background = ggplot2::element_blank(), legend.position = "none", ) + ggplot2::labs(title = paste0("K = ",K), x="Clusters", y="") + ggplot2::scale_fill_gradient2(low = "white", mid = "yellow", high = "red", midpoint = 0.5) + ggplot2::geom_text(label=labels)
 		assignmentPlot[[i]]  <- assignment.K
 		if(!is.null(coords)){
 			my.palette      <- tess3r::CreatePalette(myCols, 9)
 			mapplot.i       <- tess3r::ggtess3Q(suppressWarnings(tess3r::as.qmatrix(q.matrix)), as.matrix(coords), interpolation.model = tess3r::FieldsKrigModel(10),resolution = c(500,500), col.palette = my.palette, window=c(x.min,x.max,y.min,y.max),background=TRUE, map.polygon=world_sp)
-			mapplot[[i]]    <- mapplot.i + ggplot2::theme_classic() + ggplot2::labs(title=paste0("Ancestry coefficients; K=",K), x="latitude", y="longitude") + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) + current.gg.sf + ggplot2::geom_point(data = coords, ggplot2::aes(x = Lon, y = Lat), size = 1, shape = 21, fill = "black")
+			mapplot2.i      <- mapplot.i + ggplot2::theme_classic() + ggplot2::labs(title=paste0("Ancestry coefficients; K=",K), x="latitude", y="longitude") + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5), panel.border = ggplot2::element_rect(color = "black", fill=NA, size=1)) + ggplot2::geom_sf(data=world_sf,colour = "black", fill = NA) + ggplot2::coord_sf(xlim=c(x.min, x.max), ylim=c(y.min, ymax=y.max),expand=FALSE)
+			mapplot[[i]]    <- mapplot2.i + ggplot2::geom_point(data = coords, ggplot2::aes(x = Lon, y = Lat), size = 1, shape = 21, fill = "black")
+			#mapplot[[i]]    <- mapplot.i + ggplot2::theme_classic() + ggplot2::labs(title=paste0("Ancestry coefficients; K=",K), x="latitude", y="longitude") + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) + current.gg.sf + ggplot2::geom_point(data = coords, ggplot2::aes(x = Lon, y = Lat), size = 1, shape = 21, fill = "black")
 		} else {
 			mapplot[[i]] <- NULL
 		}
