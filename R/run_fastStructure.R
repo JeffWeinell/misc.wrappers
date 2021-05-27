@@ -197,7 +197,9 @@ run_fastStructure <- function(x,format="VCF",coords=NULL,samplenames=NULL,kmax=4
 		q.matrix  <- slist[[K]]
 		rownames(q.matrix) <- samplenames
 		colnames(q.matrix) <- paste0("cluster",1:ncol(q.matrix))
+		indv.pop            <- apply(X=q.matrix, MARGIN=1, FUN=function(x){which(x==max(x))})
 		posterior.df       <- data.frame(indv=rep(rownames(q.matrix),ncol(q.matrix)), pop=rep(colnames(q.matrix),each=nrow(q.matrix)), assignment=c(unlist(unname(q.matrix))))
+		posterior.df$indv  <- factor(posterior.df$indv, levels = names(sort(indv.pop)))
 		if(K <= 15){
 			myCols          <- goodcolors2(n=K)
 		}

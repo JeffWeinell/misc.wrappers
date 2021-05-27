@@ -237,8 +237,6 @@ run_DAPC <- function(x, format="VCF", kmax=40, coords=NULL, samplenames=NULL,rep
 	pdf(file=paste0(tools::file_path_sans_ext(save.as),"_desnsityPlots_PC.pdf"), height=(nrow(indexmat.pc)*3),width=(ncol(indexmat.pc)*3))
 	grid::grid.draw(pc.arranged)
 	dev.off()
-
-
 	#######
 	## Bi-component plots
 	#######
@@ -323,9 +321,9 @@ run_DAPC <- function(x, format="VCF", kmax=40, coords=NULL, samplenames=NULL,rep
 	### Reverse the order of rows so that axis labels (DF and PC components) start at lower left.
 	dapc.mats3 <- lapply(dapc.mats2,apply,2,rev)
 	### Index matrix
-	index.bi <- lapply(1:length(dapc.mats3),FUN=function(x){ apply(matrix(data=c(1:length(dapc.mats3[[x]])) ,ncol=ncol(dapc.mats3[[x]])),2,rev)  })
+	index.bi <- lapply(1:length(dapc.mats3), FUN=function(x){ apply(matrix(data=c(1:length(dapc.mats3[[x]])) ,ncol=ncol(dapc.mats3[[x]])),2,rev)  })
 	### Emptry matrices
-	empty.bi <- lapply(1:length(dapc.mats3),FUN=function(x){matrix(data=rep("",length(dapc.mats3[[x]])),ncol=ncol(dapc.mats3[[x]]))})
+	empty.bi <- lapply(1:length(dapc.mats3), FUN=function(x){matrix(data=rep("",length(dapc.mats3[[x]])), ncol=ncol(dapc.mats3[[x]]))})
 	### Arrange the biplots into a gtable for each K
 	Ks.n.da.bi  <- Ks.n.da[which(Ks.n.da>1)]
 	Ks.n.pca.bi <- Ks.n.pca[which(Ks.n.pca>1)]
@@ -372,14 +370,18 @@ run_DAPC <- function(x, format="VCF", kmax=40, coords=NULL, samplenames=NULL,rep
 		}
 	}
 	dev.off()
-
 	if(debug) message("step 3")
 	#density.stop<-FALSE
 	for(K in 2:max.clusters){
 		if(debug) message(paste0("K=",K," step 3.1"))
 		i=(K-1)
-		q.matrix            <- posterior.list[[i]]
+		q.matrix           <- posterior.list[[i]]
+		rownames(q.matrix) <- samplenames
+		colnames(q.matrix) <- paste0("cluster",1:ncol(q.matrix))
+		indv.pop            <- apply(X=q.matrix, MARGIN=1, FUN=function(x){which(x==max(x))})
 		posterior.df        <- q.df[q.df$K==K,]
+		#posterior.df$indv   <- factor(posterior.df$indv, levels = names(sort(posterior.df$assignment)))
+		posterior.df$indv  <- factor(posterior.df$indv, levels = names(sort(indv.pop)))
 		if(debug) message(cat("\r",paste0("K=",K," step 3.3")))
 		if(debug) message(cat("\r",paste0("K=",K," step 3.5")))
 		posterior.gg        <- ggplot2::ggplot(posterior.df, ggplot2::aes(fill= pop, x= assignment, y=indv)) + ggplot2::geom_bar(position="stack", stat="identity") + ggplot2::theme_classic() + ggplot2::theme(axis.text.y = ggplot2::element_text(size = label.size), panel.grid.major = ggplot2::element_blank(), panel.grid.minor = ggplot2::element_blank(), panel.background = ggplot2::element_blank()) + ggplot2::labs(x = "Membership Probability",y="",fill="Cluster",title=paste0("K = ",K,"; PCs retained = ",best.npca[i])) + ggplot2::scale_fill_manual(values=myCols[1:K])
