@@ -32,7 +32,8 @@ run_sNMF <- function(x,format="VCF",coords=NULL,samplenames=NULL,kmax=40,reps=10
 			vcf.obj <- vcf <- x
 		} else {
 			vcf <- x
-			vcf.obj     <- vcfR::read.vcfR(vcf,verbose=F,checkFile=F)
+			#vcf.obj     <- vcfR::read.vcfR(vcf,verbose=F,checkFile=F)
+			vcf.obj     <- vcfR::read.vcfR(vcf,verbose=F,checkFile=F,convertNA=FALSE)
 		}
 		if(is.null(samplenames)){
 			samplenames <- colnames(vcf.obj@gt)[-1]
@@ -73,16 +74,16 @@ run_sNMF <- function(x,format="VCF",coords=NULL,samplenames=NULL,kmax=40,reps=10
 		Krange <- 1:maxK
 	}
 	geno.temp.path   <- paste0(tempfile(),".geno")
-	geno.obj         <- vcfR2geno(vcf=vcf,out=geno.temp.path)
+	geno.obj         <- vcfR2geno(vcf=vcf, out=geno.temp.path)
 	num.CPUs         <- parallel::detectCores()
 	if(!is.numeric(num.CPUs)){
 		num.CPUs <- 2
 	}
 	snmf.obj         <- LEA::snmf(geno.temp.path, K=Krange, repetitions=reps, entropy=entropy, project="new", iterations=iter, CPU=num.CPUs)
-	crossentropy.mat <- t(do.call(cbind,lapply(X=Krange,FUN=function(x){LEA::cross.entropy(snmf.obj,K = x)})))
+	crossentropy.mat <- t(do.call(cbind, lapply(X=Krange, FUN=function(x){LEA::cross.entropy(snmf.obj,K = x)})))
 	rownames(crossentropy.mat) <- Krange
-	colnames(crossentropy.mat) <- paste0("rep",1:reps)
-	mean.entropy   <- apply(crossentropy.mat,MARGIN=1,FUN=mean,na.rm=TRUE)
+	colnames(crossentropy.mat) <- paste0("rep", 1:reps)
+	mean.entropy   <- apply(crossentropy.mat, MARGIN=1,FUN=mean, na.rm=TRUE)
 	if(any(diff(mean.entropy)>0)){
 		bestK <- unname(which(diff(mean.entropy)>0)[1])
 	} else {
@@ -252,7 +253,8 @@ run_sNMF <- function(x,format="VCF",coords=NULL,samplenames=NULL,kmax=40,reps=10
 #' @return Matrix with genotypes in geno format
 #' @export vcfR2geno
 vcfR2geno <- function(vcf,out=NULL){
-	vcf.obj   <- vcfR::read.vcfR(vcf,verbose=FALSE)
+	#vcf.obj   <- vcfR::read.vcfR(vcf,verbose=FALSE,convertNA=FALSE)
+	vcf.obj   <- vcfR::read.vcfR(vcf,verbose=FALSE,convertNA=FALSE)
 	gt.mat    <- gsub(":.+","",vcf.obj@gt[,-1])
 	mat.temp0 <- gsub("|","/",gt.mat,fixed=TRUE)
 	mat.temp1 <- gsub("^0/0$","0",mat.temp0)
