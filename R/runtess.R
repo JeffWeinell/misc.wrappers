@@ -64,7 +64,6 @@ runtess <- function(x,format="VCF",coords,samplenames=NULL,kmax=40,reps=100,save
 	crossentropy.mat           <- do.call(rbind,lapply(X=1:length(tess.obj),FUN=function(x){matrix(unlist(tess.obj[[x]]["crossentropy"]),nrow=1)}))
 	rownames(crossentropy.mat) <- Krange
 	colnames(crossentropy.mat) <- paste0("rep",1:reps)
-	#par(mfrow=c(1,1))
 	mean.entropy      <- apply(crossentropy.mat,MARGIN=1,FUN=mean,na.rm=TRUE)
 	range.entropy.mat <- do.call(rbind,lapply(X=1:nrow(crossentropy.mat),FUN=function(x){range(crossentropy.mat[x,],na.rm=TRUE)}))
 	if(any(diff(mean.entropy)>0)){
@@ -72,49 +71,11 @@ runtess <- function(x,format="VCF",coords,samplenames=NULL,kmax=40,reps=100,save
 	} else {
 		bestK <- unname(Krange[1])
 	}
-#	boxplot(t(crossentropy.mat))
 	crossentropy.df <- data.frame(crossentropy=unname(unlist(c(crossentropy.mat))),Kval=rep(Krange,reps))
-	# mode(crossentropy.df$Kval) <- "character"
 	crossentropy.df$Kval <- factor(crossentropy.df$Kval, levels=c(1:nrow(crossentropy.df)))
 	entropyPlot <- ggplot2::ggplot(crossentropy.df, ggplot2::aes(x=Kval, y=crossentropy)) + ggplot2::geom_boxplot(fill='lightgray', outlier.colour="black", outlier.shape=16,outlier.size=2, notch=FALSE) + ggplot2::theme_classic() + ggplot2::labs(title= paste0("Cross-entropy (",reps," replicates) vs. number of ancestral populations (K)"), x="Number of ancestral populations", y = "Cross-entropy") + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) #+ ggplot2::geom_vline(xintercept=bestK, linetype=2, color="black", size=0.25)
-	### Future feature
-	#if(FALSE){
-	#	### Criteria 3: Which K value (for K>=2) yields the least variable entropy scores.
-	#	Entropy.variation <- apply(X=crossentropy.mat,MARGIN=1,FUN=var,na.rm=TRUE)
-	#	Kbest.criteria3   <- which(Entropy.variation==min(Entropy.variation[-1]))
-	#	### Criteria 4: t-tests for entropy of each pairwise adjacent K
-	#	for(i in 2:nrow(crossentropy.mat)){
-	#		if(Entropy.variation[Kbest.criteria3]==0){
-	#			Kbest.criteria4 <- NULL
-	#			break
-	#		}
-	#		t.test.i <- t.test(crossentropy.mat[i-1,],crossentropy.mat[i,])
-	#		pval.i   <- t.test.i$p.value
-	#		stat.i   <- t.test.i$statistic
-	#		if(pval.i < 0.05 & stat.i > 0){
-	#			next
-	#		} else {
-	#			if(i==nrow(crossentropy.mat)){
-	#				Kbest.criteria4 <- NULL
-	#			} else{
-	#				Kbest.criteria4 <- (i-1)
-	#				break
-	#			}
-	#		}
-	#	}
-	#}
-	###
-#	if(bestK>1){
-#		segments(x0=bestK,y0=par("usr")[3],y1=par("usr")[4],lty=2)
-#	}
-#	mtext(side=1,"Number of ancestral populations",line=2.2)
-#	mtext(side=2,"Cross-validation score",line=2.2)
-#	mtext(side=3,paste0("Cross-validation score (",reps," replicates) vs. number of ancestral populations (K)"),line=1)
-#	axis(1,at=Krange)
-#	entropyPlot <- recordPlot()
 	## List holding population assignment probabilities for each K
 	slist <- lapply(X=Krange,FUN=function(x){as.data.frame(tess3r::qmatrix(tess3=tess.obj, K = x))})
-#	par(mar=c(5.1,4.1,4.1,2.1),mfrow=c(1,1))
 	Krange.plot    <- setdiff(Krange,1)
 	admixturePlot  <- list(); length(admixturePlot)   <- length(Krange.plot)
 	assignmentPlot <- list(); length(assignmentPlot)  <- length(Krange.plot)
@@ -125,7 +86,6 @@ runtess <- function(x,format="VCF",coords,samplenames=NULL,kmax=40,reps=100,save
 	y.max <- max((coords[,2]+0.5))
 	world_sf      <- rnaturalearth::ne_countries(scale=10,returnclass="sf")[1]
 	world_sp      <- rnaturalearth::ne_countries(scale=10,returnclass="sp")
-	
 #	current_sf    <- sf::st_crop(world_sf,xmin=x.min,xmax=x.max,ymin=y.min,ymax=y.max)
 #	current.gg.sf <- ggplot2::geom_sf(data=current_sf,colour = "black", fill = NA)
 	for(K in Krange.plot){
@@ -190,43 +150,14 @@ runtess <- function(x,format="VCF",coords,samplenames=NULL,kmax=40,reps=100,save
 	result
 }
 #' @examples
-####
 #' library(misc.wrappers)
-#' Oxyrhabdium_AllSpecies <- runtess(vcf="Oxyrhabdium_AllSpecies_BestSNP.vcf",
-#'                      coords="Oxyrhabdium_AllSpecies_coords.txt",
-#'                      Krange=1:15,
-#'                      max.iteration=500,
-#'                      save.as="Oxyrhabdium_AllSpecies_BestSNP_tess3r_run2.pdf")
-#'
-#' leporinum <- runtess(vcf="Oxyrhabdium-leporinum_BestSNP.vcf",
-#'                      coords="Oxyrhabdium-leporinum_coords.txt",
-#'                      Krange=1:15,
-#'                      max.iteration=500,
-#'                      save.as="Oxyrhabdium-leporinum_BestSNP_tess3r_run3.pdf")
-#'
-#' modestum        <- runtess(vcf="Oxyrhabdium-modestum_BestSNP.vcf",
-#'                            coords="Oxyrhabdium-modestum_coords.txt",
-#'                            Krange=1:15,
-#'                            max.iteration=500,
-#'                            save.as="Oxyrhabdium-modestum_BestSNP_tess3r_run3.pdf")
-#'
-#' cfmodestum        <- runtess(vcf="Oxyrhabdium-cf.modestum_BestSNP.vcf",
-#'                            coords="Oxyrhabdium-cfmodestum_coords.txt",
-#'                            Krange=1:15,
-#'                            max.iteration=500,
-#'                            save.as="Oxyrhabdium-cf.modestum_BestSNP_tess3r_run2.pdf")
-#'
-#' leporinum_Luzon <- runtess(vcf="Oxyrhabdium-leporinum_Luzon_BestSNP.vcf",
-#'                            coords="Oxyrhabdium-leporinum_Luzon_coords.txt",
-#'                            Krange=1:15,
-#'                            max.iteration=500,
-#'                            save.as="Oxyrhabdium-leporinum_Luzon_BestSNP_tess3r_run2.pdf")
-#'
-#' cfmodestum_Luzon        <- runtess(vcf="Oxyrhabdium-cf.modestum_Luzon_BestSNP.vcf",
-#'                            coords="Oxyrhabdium-cfmodestum_Luzon_coords.txt",
-#'                            Krange=1:15,
-#'                            max.iteration=500,
-#'                            save.as="Oxyrhabdium-cf.modestum_Luzon_BestSNP_tess3r_run3.pdf")
+#' 
+#' # Path to VCF with SNPs
+#' vcf.path    <- file.path(system.file("extdata", package = "misc.wrappers"), "simK4.vcf.gz")
+#' # Path to file with longitude and latitude of sampling locality of each individual
+#' coords.path <- file.path(system.file("extdata", package = "misc.wrappers"), "simK4_coords.txt")
+#' # Run tess3r 30 times each for K=1-10
+#' runtess(x=vcf.path,coords=coords.path,kmax=10,reps=30,save.as="tess3r_simK4.pdf")
 
 
 #' @title Filter (query) genotype by variation

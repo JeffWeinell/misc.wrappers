@@ -21,8 +21,14 @@ This function searches the system path and the settings file of the misc.wrapper
 }
 \examples{
 library(misc.wrappers)
-# Define path to input VCF file containing similated data for 500 SNPs from 50 individuals in three populations.
-example_vcf_path <- file.path(system.file("extdata", package = "misc.wrappers"),"simulated_K4.vcf.gz")
-# Perform sNMF analyses on the simulated dataset for for K=2–10 and 30 replicates.
-test_fastStructure_K4 <- run_fastStructure(x=example_vcf_path, kmax=10, reps=30, save.as="fastStructure_example_K4.pdf",include.out=c(".pdf"))
+## Example 1:
+# Path to VCF with SNPs
+vcf.path    <- file.path(system.file("extdata", package = "misc.wrappers"),"simK4.vcf.gz")
+# Run fastStructure 30 times each for K=1-10
+run_fastStructure(x=vcf.path,kmax=10,reps=30,save.as="fs_simK4.pdf",include.out=c(".pdf"))
+
+## Example 2: Same SNP dataset as example 1, but here we also provide Lon/Lat coordinates of individuals to geographically interpolate admixture coefficients.
+vcf.path    <- file.path(system.file("extdata", package = "misc.wrappers"), "simK4.vcf.gz")
+coords.path <- file.path(system.file("extdata", package = "misc.wrappers"), "simK4_coords.txt")
+run_fastStructure(x=vcf.path, coords=coords.path, kmax=10, reps=30, save.as="fs_simK4_withCoords.pdf", include.out=c(".pdf"))
 }

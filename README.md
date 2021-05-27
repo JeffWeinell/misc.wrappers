@@ -11,8 +11,8 @@ function | description | example input files | example output files
 ```sim.vcf ``` | Simulate SNPs and save as a VCF; optionally introduce missing data; optionally simulate locality data | [example.vcf.gz](inst/extdata/example.vcf.gz) (optional) | K=3, allopatric: [simK3.vcf.gz](inst/extdata/simK3.vcf.gz), [simK3_coords.txt](inst/extdata/simK3_coords.txt), [simK3_coords_map.pdf](inst/extdata/simK3_coords_map.pdf)<br /><br /> K=4, some contact: [simK4.vcf.gz](inst/extdata/simK4.vcf.gz), [simK4_coords.txt](inst/extdata/simK4_coords.txt), [simK4_coords_map.pdf](inst/extdata/simK4_coords_map.pdf)
 ```run_DAPC``` | Pipeline for running DAPC and graphing results | [simK4.vcf.gz](inst/extdata/simK4.vcf.gz),<br/> [simK4_coords.txt](inst/extdata/simK4_coords.txt) (optional) |  [DAPC_simK4_withCoords_v2.pdf](inst/extdata/DAPC_simK4_withCoords_v6.pdf) <br/>[DAPC_simK4_withCoords_v2_BiPlots.pdf](inst/extdata/DAPC_simK4_withCoords_v6_BiPlots.pdf) <br/>[DAPC_simK4_withCoords_v2_densityPlots_PC.pdf](inst/extdata/DAPC_simK4_withCoords_v6_densityPlots_PC.pdf) <br/>[DAPC_simK4_withCoords_v2_densityPlots_DF.pdf](inst/extdata/DAPC_simK4_withCoords_v6_densityPlots_DF.pdf)
 ```run_sNMF``` | Pipeline for running sNMF (LEA) and graphing results | [simK4.vcf.gz](inst/extdata/simK4.vcf.gz),<br/> [simK4_coords.txt](inst/extdata/simK4_coords.txt) (optional)| [sNMF_simK4_withCoords.pdf](inst/extdata/sNMF_simK4_withCoords.pdf)
-```run_fastStructure```  | Pipeline for running fastStructure and graphing results| [simK4.vcf.gz](inst/extdata/simK4.vcf.gz),<br/> [simK4_coords.txt](inst/extdata/simK4_coords.txt) (optional) | coming soon
-```runtess``` | Pipeline for running tess3r and generating graphs of results comparable to the other pop structure methods | [simK4.vcf.gz](inst/extdata/simK4.vcf.gz),<br/> [simK4_coords.txt](inst/extdata/simK4_coords.txt)| coming soon
+```run_fastStructure```  | Pipeline for running fastStructure and graphing results| [simK4.vcf.gz](inst/extdata/simK4.vcf.gz),<br/> [simK4_coords.txt](inst/extdata/simK4_coords.txt) (optional) | [fs_simK4_withCoords.pdf](inst/extdata/fs_simK4_withCoords.pdf)
+```runtess``` | Pipeline for running tess3r and generating graphs of results comparable to the other pop structure methods | [simK4.vcf.gz](inst/extdata/simK4.vcf.gz),<br/> [simK4_coords.txt](inst/extdata/simK4_coords.txt)| [tess3r_simK4.pdf](inst/extdata/tess3r_simK4.pdf)
 ```runeems_snps_setup``` | Generates some of the input files and arranges all necessary inputs in a nice environment for EEMS | coming soon | coming soon
 
 
@@ -108,8 +108,12 @@ run_fastStructure(x=vcf.path, coords=coords.path, kmax=10, reps=30, save.as="fs_
 ```
 library(misc.wrappers)
 
-## Example 1:
-
+# Path to VCF with SNPs
+vcf.path    <- file.path(system.file("extdata", package = "misc.wrappers"), "simK4.vcf.gz")
+# Path to file with longitude and latitude of sampling locality of each individual
+coords.path <- file.path(system.file("extdata", package = "misc.wrappers"), "simK4_coords.txt")
+# Run tess3r 30 times each for K=1-10
+runtess(x=vcf.path,coords=coords.path,kmax=10,reps=30,save.as="tess3r_simK4.pdf")
 ```
 
 ### ```plot_model``` Create a graphical representation of a demographic model that is defined by a template (.tpl) and estimation (.est) file.

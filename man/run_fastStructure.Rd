@@ -25,7 +25,8 @@ run_fastStructure(
   python.path = NULL,
   fastStructure.path = NULL,
   cleanup = TRUE,
-  include.out = c(".pdf", ".Qlog", ".margLlog")
+  include.out = c(".pdf", ".Qlog", ".margLlog"),
+  debug = FALSE
 )
 }
 \arguments{
@@ -58,6 +59,8 @@ run_fastStructure(
 \item{cleanup}{Whether or not the original fastStructure output files (*.log, *.meanQ, *meanP file for each replicate of each K) should be deleted after the data from those files are compiled and saved in three tables. Default TRUE.}
 
 \item{include.out}{Character vector indicating which type of files should be included as output. Default is c(".pdf",".Qlog",".margLlog"). An additional file ".Plog" can be included but can be very large.}
+
+\item{debug}{Logical indicating whether or not to print messages indicating the internal step of the function.}
 }
 \value{
 List of plots

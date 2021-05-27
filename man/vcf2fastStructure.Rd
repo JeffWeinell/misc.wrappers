@@ -27,5 +27,4 @@ Converts a VCF file or vcfR object with SNP data into a fastStructure file.
 }
 \examples{
 library(misc.wrappers)
-vcf2structure(vcf="Ahaetulla-prasina_AllPops_BestSNP.vcf",out="example.str")
 }
