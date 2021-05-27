@@ -1761,7 +1761,7 @@ filter.vcf <- function(x,save.as=NULL,nsample=c(NA,NA), specificSites=NULL,speci
 #' @export sim.vcf
 sim.vcf <- function(x=NULL, save.as=NULL, RA.probs=NULL, n.ind=NULL, n.snps=NULL, snp.str = 0, ploidy=NULL, K=2, include.missing=FALSE, fMD=NULL, pMDi=NULL, LD=FALSE, block.minsize=10, block.maxsize=NULL, use.maxLDx=FALSE, sim.coords=FALSE , regionsize=0.7, wnd=c(-180,180,-90,90), interactions=c(0,1), over.land=TRUE, ...){
 #	x=NULL; save.as=NULL; RA.probs=NULL; n.ind=NULL; n.snps=NULL; snp.str = 0; ploidy=NULL; K=2; include.missing=FALSE; fMD=NULL; LD=NULL; block.minsize=10; block.maxsize=NULL; use.maxLDx=FALSE
-	additional.args  <- list(...)
+	# additional.args  <- list(...)
 	RA.pairnames <- c("AC","AG","AT","CA","CG","CT","GA","GC","GT","TA","TC","TG")
 	if(!is.null(x)){
 		vcf   <- vcfR::read.vcfR(x,verbose=F,checkFile=F)
@@ -1882,8 +1882,15 @@ sim.vcf <- function(x=NULL, save.as=NULL, RA.probs=NULL, n.ind=NULL, n.snps=NULL
 	#names(...) %in% names(supplied)
 	# sim   <- evalfun(fun.name="glSim", n.ind=n.ind, n.snp.nonstruc=n.snp.nonstruc, n.snp.struc=n.snp.struc, ploidy=ploidy, k=K, LD=LD, block.minsize = block.minsize, block.maxsize = block.maxsize, sort.pop=TRUE)
 	#sim   <- evalfun(fun.name="glSim", supplied.list=glSim.args, k=K, sort.pop=TRUE)
-	sim   <- evalfun(fun.name="glSim", k=K, sort.pop=TRUE,n.ind=n.ind,n.snp.nonstruc=n.snp.nonstruc, n.snp.struc=n.snp.struc, ploidy=ploidy, LD=LD)
+	sim0   <- evalfun(fun.name="glSim", k=K, sort.pop=TRUE,n.ind=(n.ind*K),n.snp.nonstruc=n.snp.nonstruc, n.snp.struc=n.snp.struc, ploidy=ploidy, LD=LD)
+	#sim   <- adegenet::glSim(k=K, sort.pop=TRUE, n.ind=(n.ind*K), n.snp.nonstruc=n.snp.nonstruc, n.snp.struc=n.snp.struc, ploidy=ploidy, LD=LD)
 	#return(sim)
+
+	pops.index.mat <- matrix(data=1:(n.ind*K),ncol=K)
+	K.weights      <- rep(1, K)
+	K.sizes        <- table(sample(1:K,size=n.ind,replace=T,prob=K.weights))
+	ind.keep       <- sort(unlist(lapply(1:K,FUN=function(x){sample(pops.index.mat[,x],size=K.sizes[x],replace=F)})))
+	sim <- sim0[ind.keep]
 	### Ancestral population assignments of simulated samples
 	anc.pops <- gsub(".", "", as.character(sim@other$ancestral.pops), fixed=T)
 	### Genotype matrix of simulated dataset
@@ -2017,19 +2024,19 @@ sim.vcf <- function(x=NULL, save.as=NULL, RA.probs=NULL, n.ind=NULL, n.snps=NULL
 		return(vcf.sim)
 	}
 }
-##' @examples
-##' library(misc.wrappers)
-##' # Define path to example input VCF containing 5000 variants and 100 individuals.
-##' vcf.path <- file.path(system.file("extdata", package = "misc.wrappers"),"example.vcf.gz")
-##' 
-##' # Simulate a dataset of 1000 variants and 50 individuals in one population, and save the simulated dataset in the current directory as "example_simulated_K2.vcf.gz"
-##' simK2 <- sim.vcf(x=vcf.path,save.as="example_simulated_K2.vcf.gz",n.ind=100,n.snps=1000,K=2)
-##' 
-##' # Simulate a dataset of 1000 variants and 50 individuals in one population, and save the simulated dataset in the current directory as "example_simulated_K3.vcf.gz"
-##' simK3<- sim.vcf(x=vcf.path,save.as="example_simulated_K3.vcf.gz",n.ind=100,n.snps=1000,K=3)
-##' 
-##' # Simulate a dataset of 1000 variants and 50 individuals in one population, and save the simulated dataset in the current directory as "example_simulated_K4.vcf.gz"
-##' simK4 <- sim.vcf(x=vcf.path,save.as="example_simulated_K4.vcf.gz",n.ind=100,n.snps=1000,K=4)
+#' @examples
+#' library(misc.wrappers)
+#' # Define path to example input VCF containing 5000 variants and 100 individuals.
+#' vcf.path <- file.path(system.file("extdata", package = "misc.wrappers"),"example.vcf.gz")
+#' 
+#' # Simulate a dataset of 1000 variants and 50 individuals in one population, and save the simulated dataset in the current directory as "example_simulated_K2.vcf.gz"
+#' simK2 <- sim.vcf(x=vcf.path,save.as="example_simulated_K2.vcf.gz",n.ind=100,n.snps=1000,K=2)
+#' 
+#' # Simulate a dataset of 1000 variants and 50 individuals in one population, and save the simulated dataset in the current directory as "example_simulated_K3.vcf.gz"
+#' simK3<- sim.vcf(x=vcf.path,save.as="example_simulated_K3.vcf.gz",n.ind=100,n.snps=1000,K=3)
+#' 
+#' # Simulate a dataset of 1000 variants and 50 individuals in one population, and save the simulated dataset in the current directory as "example_simulated_K4.vcf.gz"
+#' simK4 <- sim.vcf(x=vcf.path,save.as="example_simulated_K4.vcf.gz",n.ind=100,n.snps=1000,K=4)
 
 #' @title Components plottable
 #' 
