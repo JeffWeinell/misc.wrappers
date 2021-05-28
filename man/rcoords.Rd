@@ -35,6 +35,7 @@ rcoords(
 \item{min.grp.size}{Minimum number of samples required for each group. Default 2.}
 
 \item{wnd}{Either a character string or vector describing one or more regions of Earth, or a length four numerical vector specifying the bounding box (longitude and latitude ranges) for the region where sampling is allowed. Default is to include all of Earth c(-180,180,-90,90).
+FUTURE OPTION: 'wnd' is a matrix with four columns, with each row describing the bounding box for one of the populations.
 Character strings can be one of the following (NOT ENTIRELY IMPLEMENTED): "Earth", "tropics", "middleSouth", "middleNorth" "middle", "Arctic", "Antarctic", "Polar", "NorthernHemisphere", "WesternHemisphere", or "EasternHemisphere".}
 
 \item{over.land}{Logical indicating whether or not all returned points must occur over land. Default TRUE. Note that this condition is only applied to samples returned as output. Therefore, 'samplesize' is really a 'sample until' rule. This is faster than performing clipping operations on proposed sample polygons to conform to geography.}

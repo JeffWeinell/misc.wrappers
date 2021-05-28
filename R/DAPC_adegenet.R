@@ -1488,13 +1488,14 @@ newpoint <-function(p0,p1,c){
 #' @param vcftools.path Character string with path to the vcftools executable.
 #' @param out Character string where to write output vcf.
 #' @param indv.keep Character string with names of individuals to keep. Default is NULL (all individuals kept).
-#' @param min.n Minimum number of non-missing alleles required to keep a site. Default = 4. If set to "all", then no sites with any missing data are removed (after first filtering individuals if indv.keep is non-NULL).
+#' @param min.n Integer >= 1 specifying the minimum number of non-missing alleles required to keep a site. Default = 4. If set to "all", only complete-data sites kept.
+#' @param max.fMD Number in the range (0,1) specifying the maximum fraction of missing alleles at a site. Default = 1.
 #' @param min.n0 Minimum number of individuals required to have at least one copy of the major allele to keep a site. Default = 2.
 #' @param min.n1 Minimum number of individuals required to have at least one copy of the minor allele to keep a site. Default = 1.
 #' @param which.site Character string indicating the method for choosing a site to keep for each locus (or chromosome). Default = "best", which is considered the one with the least missing data, or the first among sites tied for least missing data. Other options are "all.passing", which retains all sites (positions) that pass variation filters (min.n, min.0.n.0, min.1.n), "first" (first site kept at each locus), or "random".
 #' @return List with [[1]] path to vcftools, [[2]] dataframe with input and output values for VCF filepaths, number of loci (chromosomes), sites (positions), and individuals (samples).
 #' @export vcf_getSNP
-vcf_getSNP      <- function(vcftools.path,vcf,out,indv.keep=NULL,which.site="best",min.n=4,min.n0=2,min.n1=1){
+vcf_getSNP      <- function(vcftools.path,vcf,out,indv.keep=NULL,which.site="best",min.n=4,max.fMD=1,min.n0=2,min.n1=1){
 	vcf.obj     <- vcfR::read.vcfR(vcf)
 	samplenames <- colnames(vcf.obj@gt)[-1]
 	# matrix with "fixed" columns, which are the columns with site-specific stats across all samples
@@ -1528,6 +1529,9 @@ vcf_getSNP      <- function(vcftools.path,vcf,out,indv.keep=NULL,which.site="bes
 		ploidy <- length(unlist(strsplit(test.sample,split="[/,|]",fixed=T)))
 		min.n  <- ploidy*ncol(gt.mat)
 	}
+	n.ind  <- ploidy*ncol(gt.mat)
+	min.n2 <- ceiling(n.ind-(max.fMD*n.ind))
+	min.n  <- max(min.n, min.n2)
 	# For each site, the number of non-missing alleles
 	site.NS      <- vapply(X=1:nrow(gt.mat),FUN=function(x){length(grep(".", unlist(strsplit(gt.mat[x,],split="/",fixed=T)),fixed=T,invert=T))},FUN.VALUE=1)
 	# For each site, the number of individuals with at least one copy of the major allele

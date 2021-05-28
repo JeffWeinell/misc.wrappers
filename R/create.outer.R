@@ -343,6 +343,7 @@ points.on.land <- function(x,return.as="data.frame"){
 #' @param grp.n.weights Probability weights for group sample sizes of groups. Default is equal weights. The sum of points sampled for each group = 'samplesize' argument.
 #' @param grp.area.weights Probability weights determing group region sizes. Default is equal weights.
 #' @param wnd Either a character string or vector describing one or more regions of Earth, or a length four numerical vector specifying the bounding box (longitude and latitude ranges) for the region where sampling is allowed. Default is to include all of Earth c(-180,180,-90,90). 
+#' FUTURE OPTION: 'wnd' is a matrix with four columns, with each row describing the bounding box for one of the populations.
 #' Character strings can be one of the following (NOT ENTIRELY IMPLEMENTED): "Earth", "tropics", "middleSouth", "middleNorth" "middle", "Arctic", "Antarctic", "Polar", "NorthernHemisphere", "WesternHemisphere", or "EasternHemisphere".
 #' @param over.land Logical indicating whether or not all returned points must occur over land. Default TRUE. Note that this condition is only applied to samples returned as output. Therefore, 'samplesize' is really a 'sample until' rule. This is faster than performing clipping operations on proposed sample polygons to conform to geography.
 #' @param interactions Numeric vector with the minimum and maximum amount of overlap between each pair of groups (aka populations), calculated as (intersect area)/(minimum of non-intersected area for each group). Default c(0,1) allows for all possible scenarios. Examples: c(0,0) specifies that groups must be allopatric; c(1,1) requires complete overlap of groups, which is not realistic given the stochasticity determining region sizes; c(0.5,1) requires that at least half-overlaps between groups; c(0.2,0.25) specifies a small contact zone.
@@ -403,17 +404,25 @@ rcoords <- function(regionsize=0.25, samplesize=100, n.grp=1, grp.n.weights=NULL
 	#	}
 	#}
 	
-	# rectangular SpatialPolygons object with extent formed by 'wnd' argument.
-	wnd.sp <- as(raster::extent(wnd), "SpatialPolygons")
-	# area of the region bounded by 'wnd', in decimal degrees
-	wnd.sp2 <- wnd.sp
-	#sp::proj4string(wnd.sp2) <- sp::CRS("+proj=longlat +datum=WGS84")
-	raster::crs(wnd.sp2) <- sp::CRS("EPSG:4326")
-	#wnd.area <- attributes(attributes(wnd.sp2)$polygons[[1]])$area
-	wnd.area <- wnd.sp2@polygons[[1]]@Polygons[[1]]@area
-	# area of region spanning all group sampling areas, in decimal degrees
-	regionsize.dd0 <- (regionsize*wnd.area)
-	regionsize.dd  <- (regionsize.dd0*0.25)
+	
+	if(is(wnd,"matrix")){
+			stop("not yet implemented")
+			### in the future, each row will describe the bounding box of a group
+		} else {
+		if(is(wnd,"numeric")){
+			# rectangular SpatialPolygons object with extent formed by 'wnd' argument.
+			wnd.sp <- as(raster::extent(wnd), "SpatialPolygons")
+			# area of the region bounded by 'wnd', in decimal degrees
+			wnd.sp2 <- wnd.sp
+			#sp::proj4string(wnd.sp2) <- sp::CRS("+proj=longlat +datum=WGS84")
+			raster::crs(wnd.sp2) <- sp::CRS("EPSG:4326")
+			#wnd.area <- attributes(attributes(wnd.sp2)$polygons[[1]])$area
+			wnd.area <- wnd.sp2@polygons[[1]]@Polygons[[1]]@area
+			# area of region spanning all group sampling areas, in decimal degrees
+			regionsize.dd0 <- (regionsize*wnd.area)
+			regionsize.dd  <- (regionsize.dd0*0.25)
+		}
+	}
 	# wnd.sp3              <- sp::spTransform(wnd.sp2,sp::CRS("ESRI:54009"))
 	# xymeters    <- dfTransform(df=data.frame(attributes(attributes(attributes(wnd.sp3)$polygons[[1]])[[1]][[1]])$coords),CRS2="ESRI:54009")
 	# xy.sp       <- as(extent(xymeters),"SpatialPolygons")
