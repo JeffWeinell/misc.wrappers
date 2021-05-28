@@ -1434,7 +1434,7 @@ ggscatter.dapc <- function (x, xax = 1, yax = 2, vartype="df", varname=NULL,axis
 		}
 		# Add 'star' lines from each cluster mean to the coordinates of individuals in the cluster.
 		if(cstar > 0){
-			ggscatter.temp3 <- ggscatter.temp2 + ggplot2::geom_segment(data = coords.df, ggplot2::aes(x = x3, y = y3, xend = grp.center.x, yend = grp.center.y, color = Cluster),show.legend=FALSE)
+			ggscatter.temp3 <- ggscatter.temp2 + suppressWarnings(ggplot2::geom_segment(data = coords.df, ggplot2::aes(x = x3, y = y3, xend = grp.center.x, yend = grp.center.y, color = Cluster),show.legend=FALSE))
 		} else {
 			ggscatter.temp3 <- ggscatter.temp2
 		}
@@ -1453,7 +1453,7 @@ ggscatter.dapc <- function (x, xax = 1, yax = 2, vartype="df", varname=NULL,axis
 			coords.df[,"tree.y0"] <- y0
 			coords.df[,"tree.x1"] <- x1
 			coords.df[,"tree.y1"] <- y1
-			ggscatter.temp4 <- ggscatter.temp3 + ggplot2::geom_segment(data = coords.df, ggplot2::aes(x = tree.x0, y = tree.y0, xend = tree.x1, yend = tree.y1), color = segcol, size=lwd,linetype=lty,show.legend=FALSE)
+			ggscatter.temp4 <- ggscatter.temp3 + suppressWarnings(ggplot2::geom_segment(data = coords.df, ggplot2::aes(x = tree.x0, y = tree.y0, xend = tree.x1, yend = tree.y1), color = segcol, size=lwd,linetype=lty,show.legend=FALSE))
 		} else {
 			ggscatter.temp4 <- ggscatter.temp3
 		}
