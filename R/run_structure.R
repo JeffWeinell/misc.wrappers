@@ -22,13 +22,14 @@
 ##' @param full Whether or not to generate output files holding variation of Q, P, and marginal likelihood, in addition to the files holding means. Default FALSE.
 ##' @param seed Value to use as a seed for reproducing results. Default NULL.
 #' @param structure.path Character string with path to folder containing the structure executable called 'structure.py'
+#' @param samplenames NULL. Not yet implemented.
 #' @param cleanup Whether or not the original output files should be deleted/replaced with one, simple table holding all of the information usually spread across multiple files and tables. Default TRUE.
 #' @param include.out Character vector indicating which type of files should be included as output. Default is c(".pdf",".Qlog",".margLlog"). An additional file ".Plog" can be included but can be very large.
 #' @param debug Logical indicating whether or not to print messages indicating the internal step of the function. Default FALSE. Typically only used for development.
 #' @param ... Additional arguments passed to STRUCTURE. Not yet implemented in the future may include 'LABEL', 'POPDATA', 'POPFLAG', 'LOCDATA', 'PHENOTYPE', 'EXTRACOLS', 'MARKERNULLMES', 'RECESSIVEALLELES', 'MAPDISTANCES', 'PHASED', 'PHASEINFO', 'MARKOVPHASE', and 'NOTAMBIGUOUS'
 #' @return List of plots
 #' @export run_structure
-run_structure <- function(x, format="VCF", coords=NULL, mainparams.path=NULL, extraparams.path=NULL, burnin=1000, kmax=10, reps=10000, ploidy=NULL,missing=NULL, onerowperind=NULL, save.as=NULL, structure.path=NULL, cleanup=TRUE, include.out=c(".pdf",".Qlog",".margLlog"), debug=FALSE){
+run_structure <- function(x, format="VCF", coords=NULL, mainparams.path=NULL, extraparams.path=NULL, burnin=1000, kmax=10, reps=10000, ploidy=NULL,missing=NULL, onerowperind=NULL, save.as=NULL, structure.path=NULL, samplenames=NULL, cleanup=TRUE, include.out=c(".pdf",".Qlog",".margLlog"), debug=FALSE,...){
 	# list with user-specified arguments
 	argslist <- list(...)
 	if(length(argslist)>0){
@@ -337,7 +338,6 @@ run_structure <- function(x, format="VCF", coords=NULL, mainparams.path=NULL, ex
 		# copies extraparams into the output directory
 		file.copy(from=extraparams.path,to=file.path(outdir.temp,"extraparams"))
 	}
-	#for(i in 1:reps){
 	for(K in Krange){
 		outfile.K <- paste0(tools::file_path_sans_ext(outfile.temp),"_K",K,".log")
 		### Modify command1 for STRUCTURE arguments
@@ -345,7 +345,6 @@ run_structure <- function(x, format="VCF", coords=NULL, mainparams.path=NULL, ex
 		command1     <- paste0(structure.path," -K ",K," -m ",mainparams.path," -e ",extraparams.path," -o ",outfile.K)
 		run.command1 <- system(command1)
 	}
-	#}
 	return(NULL)
 	stop("function not ready for implementation")
 	##### CODE BELOW HERE NOT UPDATED #####

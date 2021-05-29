@@ -23,9 +23,11 @@ run_structure(
   onerowperind = NULL,
   save.as = NULL,
   structure.path = NULL,
+  samplenames = NULL,
   cleanup = TRUE,
   include.out = c(".pdf", ".Qlog", ".margLlog"),
-  debug = FALSE
+  debug = FALSE,
+  ...
 )
 }
 \arguments{
@@ -55,11 +57,15 @@ run_structure(
 
 \item{structure.path}{Character string with path to folder containing the structure executable called 'structure.py'}
 
+\item{samplenames}{NULL. Not yet implemented.}
+
 \item{cleanup}{Whether or not the original output files should be deleted/replaced with one, simple table holding all of the information usually spread across multiple files and tables. Default TRUE.}
 
 \item{include.out}{Character vector indicating which type of files should be included as output. Default is c(".pdf",".Qlog",".margLlog"). An additional file ".Plog" can be included but can be very large.}
 
 \item{debug}{Logical indicating whether or not to print messages indicating the internal step of the function. Default FALSE. Typically only used for development.}
+
+\item{...}{Additional arguments passed to STRUCTURE. Not yet implemented in the future may include 'LABEL', 'POPDATA', 'POPFLAG', 'LOCDATA', 'PHENOTYPE', 'EXTRACOLS', 'MARKERNULLMES', 'RECESSIVEALLELES', 'MAPDISTANCES', 'PHASED', 'PHASEINFO', 'MARKOVPHASE', and 'NOTAMBIGUOUS'}
 
 \item{tolerance}{Tolerance for convergence, i.e., the change in marginal likelihood required to continue.}
 
@@ -68,8 +74,6 @@ run_structure(
 \item{full}{Whether or not to generate output files holding variation of Q, P, and marginal likelihood, in addition to the files holding means. Default FALSE.}
 
 \item{seed}{Value to use as a seed for reproducing results. Default NULL.}
-
-\item{...}{Additional arguments passed to STRUCTURE. Not yet implemented in the future may include 'LABEL', 'POPDATA', 'POPFLAG', 'LOCDATA', 'PHENOTYPE', 'EXTRACOLS', 'MARKERNULLMES', 'RECESSIVEALLELES', 'MAPDISTANCES', 'PHASED', 'PHASEINFO', 'MARKOVPHASE', and 'NOTAMBIGUOUS'}
 }
 \value{
 List of plots
