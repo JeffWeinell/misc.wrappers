@@ -1,986 +1,749 @@
-kmax=50
-reps=100
-vcf.obj     <- vcfR::read.vcfR(vcf,verbose=F)#
-	samplenames <- colnames(vcf.obj@gt)[-1]#
-	genind      <- suppressWarnings(vcfR::vcfR2genind(vcf.obj))#
-	numind      <- (dim(attributes(vcf.obj)[["gt"]])[2])-1#
-	label.size  <- min((288/numind),7)
-samplenames
-!is.null(coords)
-if(is(coords,"array") | is(coords,"data.frame")){#
-			coords <-  coords#
-		} else {#
-			if(file.exists(coords)){#
-				coords   <- read.table(coords)#
-			}#
-		}
-coords
-x.min <- min((coords[,1]-0.5))#
-		x.max <- max((coords[,1]+0.5))#
-		y.min <- min((coords[,2]-0.5))#
-		y.max <- max((coords[,2]+0.5))#
-		maxK <- min(nrow(unique(coords)),(numind-1))
-if(is.null(kmax)){#
-		kmax <- maxK#
+plot(Polygon(Luzon.polygon@coords))
+as_sf(Polygon(Luzon.polygon@coords))
+sf::as_sf(Polygon(Luzon.polygon@coords))
+ggplot2::as_sf(Polygon(Luzon.polygon@coords))
+sf::st_sf(Polygon(Luzon.polygon@coords))
+ggplot2::geom_polygon(Polygon(Luzon.polygon@coords))
+ggplot2::geom_polygon(Polygon(Luzon.polygon@coords))
+ph.df <- data.frame(x=Luzon.polygon@coords[,1],y=Luzon.polygon@coords[,2],island=1)
+ph.df
+ggplot2::ggplot() + ggplot2::geom_polygon(ph.df,aes(x=x,y=y))
+ggplot2::ggplot() + ggplot2::geom_polygon(ph.df,ggplot2::aes(x=x,y=y))
+library(ggplot2)
+ggplot2::ggplot() + ggplot2::geom_polygon(ph.df,mapping=ggplot2::aes(x=x,y=y))
+wnd= c(-180, 180,-90, 90)
+wnd
+raster::extent(wnd)
+extent(wnd)
+test.sp <- as(ph.df, "SpatialPolygons")
+test.sp <- as(Luzon.polygon, "SpatialPolygons")
+test.sp <- as(extent(Luzon.polygon), "SpatialPolygons")
+test.sp <- as(extent(Luzon.polygon@coords), "SpatialPolygons")
+test.sp <- as(raster::extent(Luzon.polygon@coords), "SpatialPolygons")
+test.sp
+?raster::extent
+?SpatialPolygons()
+test.sp <- as(list(Luzon.polygon), "SpatialPolygons")
+test.sp <- SpatialPolygons(list(Luzon.polygon))
+test.sp <- SpatialPolygons(Polygons(Luzon.polygon))
+test.sp <- SpatialPolygons(list(Polygons(list(Luzon.polygon))))
+test.sp <- SpatialPolygons(list(Polygons(list(Luzon.polygon),1)))
+plot(test.sp)
+world.land.sp    <- rnaturalearth::ne_countries(scale=110, returnclass="sp")
+ph.land10.sp     <- world.land10.sp[which(world.land10.sp[,"sovereignt"][[1]]=="Philippines"),]
+ph.island.areas  <- sapply(X=1:length(ph.land10.sp@polygons[[1]]@Polygons),FUN=function(x){ph.land10.sp@polygons[[1]]@Polygons[[x]]@area})
+Luzon.polygon    <- ph.land10.sp@polygons[[1]]@Polygons[[which(ph.island.areas == max(ph.island.areas))]]
+test.sp          <- SpatialPolygons(list(Polygons(list(Luzon.polygon),1)))
+Luzon.sp          <- SpatialPolygons(list(Polygons(list(Luzon.polygon),1)))
+plot(Luzon.sp)
+raster::crs(Luzon.sp) <- sp::CRS("EPSG:4326")
+wnd.sp           <- Luzon.sp
+wnd.sp               <- Luzon.sp
+raster::crs(wnd.sp2) <- sp::CRS("EPSG:4326")#
+				wnd.area             <- wnd.sp2@polygons[[1]]@Polygons[[1]]@area
+raster::crs(wnd.sp)  <- sp::CRS("EPSG:4326")#
+				wnd.area             <- wnd.sp@polygons[[1]]@Polygons[[1]]@area
+wnd.area
+regionsize=1
+regionsize.dd0       <- (regionsize*wnd.area)#
+				regionsize.dd        <- (regionsize.dd0*0.25)
+wnd <- Luzon.sp#
+				# wnd.sp is simply wnd#
+				wnd.sp <- wnd#
+				raster::crs(wnd.sp)  <- sp::CRS("EPSG:4326")#
+				wnd.area             <- wnd.sp@polygons[[1]]@Polygons[[1]]@area#
+				regionsize.dd0       <- (regionsize*wnd.area)#
+				regionsize.dd        <- (regionsize.dd0*0.25)
+samplesize=100; n.grp=2; grp.n.weights=NULL; grp.area.weights=NULL; min.grp.size=2; wnd=Luzon.sp; over.land=TRUE; interactions=c(0,1); show.plot=TRUE; return.as="data.frame"
+if(is.null(grp.n.weights)){#
+		grp.n.weights <- rep(1,n.grp)#
+	}#
+	if(is.null(grp.area.weights)){#
+		grp.area.weights <- rep(1,n.grp)#
+	}#
+	# Number > 0 that scales geographical areas of all groups relative to 'regionsize'*(area of 'wnd')#
+	grp.scaler=(1/n.grp)#
+	# Adding this soon. Plan is to convert each bounding box to an extent object and then Polygon object, and then combine into SpatialPolygons for multi-part areas.
+grp.scaler.start <- grp.scaler#
+	#result.temp        <- data.frame(NULL)#
+	PASS=FALSE#
+	miter <- 100#
+	ctr   <- 0#
+	if(length(samplesize)==1){#
+		if((n.grp*min.grp.size) > samplesize){#
+			stop("Total sample size 'samplesize' must be greater than the number of groups 'n.grp' times minimum group size 'min.grp.size'.",call.=FALSE)#
+		}#
 	} else {#
-		if(kmax > maxK){#
-			kmax <- maxK#
+		if(length(samplesize)!=n.grp){#
+			stop("If 'samplesize' is a numerical vector, then it must have a length equal to the number of groups 'n.grp'.",call.=FALSE)#
 		}#
 	}
-max.clusters <- kmax
-grp          <- adegenet::find.clusters(genind, max.n.clust=max.clusters,n.pca=max.clusters,choose.n.clust=F)
-for(i in 1:reps){#
-		grp.list[[i]] <- adegenet::find.clusters(genind, max.n.clust=max.clusters,n.pca=max.clusters,choose.n.clust=F)#
-	}#
-	BIC.mat           <- do.call(cbind,lapply(X=1:reps,FUN=function(x){grp.list[[x]]$Kstat}))
-grp.list <- list(); length(grp.list) <- reps#
-	par(mar=c(3.5,4,3,2.1))#
-	for(i in 1:reps){#
-		grp.list[[i]] <- adegenet::find.clusters(genind, max.n.clust=max.clusters,n.pca=max.clusters,choose.n.clust=F)#
-	}#
-	BIC.mat           <- do.call(cbind,lapply(X=1:reps,FUN=function(x){grp.list[[x]]$Kstat}))
-rownames(BIC.mat) <- 1:max.clusters#
-	colnames(BIC.mat) <- paste0("rep",1:reps)#
-	boxplot(t(BIC.mat))#
-	mean.BIC        <- apply(BIC.mat,MARGIN=1,FUN=mean,na.rm=TRUE)
-if(any(diff(mean.BIC)>0)){#
-		bestK <- unname(which(diff(mean.BIC)>0)[1])#
-	} else {#
-		bestK <- 1#
-	}#
-	Kbest.criteria1   <- bestK
-Kbest.criteria1
-range.BIC.mat     <- do.call(rbind,lapply(X=1:nrow(BIC.mat),FUN=function(x){range(BIC.mat[x,],na.rm=TRUE)}))#
-	BIC.is.nonoverlap <- NULL#
-	BIC.is.reduced    <- NULL
-range.BIC.mat
-for(i in 2:nrow(range.BIC.mat)){#
-		BIC.is.nonoverlap     <- c(BIC.is.nonoverlap,range.BIC.mat[i,1] > range.BIC.mat[(i-1),2] | range.BIC.mat[i,2] < range.BIC.mat[(i-1),1])#
-		BIC.is.reduced     <- c(BIC.is.reduced,range.BIC.mat[i,2] < range.BIC.mat[(i-1),1])#
-	}
-if(any(!BIC.is.reduced) & BIC.is.reduced[1]){#
-		Kbest.criteria2 <- which(!BIC.is.reduced)[1]#
-	} else {#
-		Kbest.criteria2 <- 1#
-	}
-BICvK.variation <- apply(X=BIC.mat,MARGIN=1,FUN=var)
-BICvK.variation
-KminVarBIC      <- which(BICvK.variation==min(BICvK.variation[-1]))
-KminVarBIC
-Kbest.criteria3 <- KminVarBIC[1]
-Kbest.criteria3
-for(i in 2:nrow(BIC.mat)){#
-		t.test.i <- t.test(BIC.mat[i-1,],BIC.mat[i,])#
-		pval.i   <- t.test.i$p.value#
-		stat.i   <- t.test.i$statistic#
-		if(pval.i < 0.05 & stat.i > 0){#
-			next#
-		} else {#
-			if(i==nrow(BIC.mat)){#
-				Kbest.criteria4 <- NULL#
-			} else{#
-				Kbest.criteria4 <- (i-1)#
+is(wnd,"matrix")
+is(wnd,"SpatialPolygons")
+while(!PASS){#
+		ctr <- ctr + 1#
+		if(ctr > miter){#
+			stop(paste("after",miter,"attemps, failed to find points that pass conditions. ctr=",ctr,"ctr2=",ctr2,"; grp.scaler=",grp.scaler))#
+		}#
+		#if(ctr %in% seq(from=10,to=miter,by=10)){#
+		if(ctr>1){#
+			grp.scaler <- (grp.scaler*0.95)#
+		}#
+		### Clear the data frame if too few points on land during previous attempt#
+		#result.temp         <- data.frame(NULL)#
+		initial <- FALSE#
+		### Find group centers that pass conditions#
+		ctr2 <- 0#
+		while(!initial){#
+			ctr2 <- ctr2 + 1#
+			if(ctr2 > (miter/10)){#
 				break#
+				# stop(paste("failed to initialize after",miter,"attemps. ctr=",ctr,"ctr2=",ctr2))#
 			}#
-		}#
-	}
-t.test.i <- t.test(BIC.mat[i-1,],BIC.mat[i,])
-for(i in 2:nrow(BIC.mat)){#
-		if(KminVarBIC==0){#
-			Kbest.criteria4 <- NULL#
-			break#
-		}#
-		t.test.i <- t.test(BIC.mat[i-1,],BIC.mat[i,])#
-		pval.i   <- t.test.i$p.value#
-		stat.i   <- t.test.i$statistic#
-		if(pval.i < 0.05 & stat.i > 0){#
-			next#
-		} else {#
-			if(i==nrow(BIC.mat)){#
-				Kbest.criteria4 <- NULL#
-			} else{#
-				Kbest.criteria4 <- (i-1)#
-				break#
+			if(ctr2>1){#
+				grp.scaler <- (grp.scaler*0.99)#
 			}#
-		}#
-	}
-KminVarBIC==0
-BICvK.variation[Kbest.criteria3]
-for(i in 2:nrow(BIC.mat)){#
-		if(BICvK.variation[Kbest.criteria3]==0){#
-			Kbest.criteria4 <- NULL#
-			break#
-		}#
-		t.test.i <- t.test(BIC.mat[i-1,],BIC.mat[i,])#
-		pval.i   <- t.test.i$p.value#
-		stat.i   <- t.test.i$statistic#
-		if(pval.i < 0.05 & stat.i > 0){#
-			next#
-		} else {#
-			if(i==nrow(BIC.mat)){#
-				Kbest.criteria4 <- NULL#
-			} else{#
-				Kbest.criteria4 <- (i-1)#
-				break#
-			}#
-		}#
-	}
-if(bestK>1){#
-		segments(x0=Kbest.criteria1, y0=par("usr")[3], y1=par("usr")[4],lty=2,col="black")#
-	}
-bestK
-if(bestK>1){#
-		segments(x0=Kbest.criteria1, y0=par("usr")[3], y1=par("usr")[4],lty=2,col="black")#
-	}
-mtext(side=1,"Number of ancestral populations",line=2.2)#
-	mtext(side=2,"BIC",line=2.2)#
-	mtext(side=3,paste0("BIC (",reps," replicates of find.clusters) vs. number of clusters (K)"),line=1)
-axis(1,at=1:max.clusters)#
-	BICPlot    <- recordPlot()#
-	best.npca    <- NULL#
-	grp.mat      <- matrix(data=0,nrow=length(grp$grp),ncol=(max.clusters-1))#
-	for(K in 2:max.clusters){#
-		i=(K-1)#
-		grp.K         <- adegenet::find.clusters(genind, max.n.clust=max.clusters,n.pca=max.clusters,n.clust=K)#
-		grp.mat[,i]   <- grp.K$grp#
-		dapc.pcamax.K <- suppressWarnings(adegenet::dapc(genind, grp.K$grp,n.pca=max.clusters,n.da=5))#
-		alpha_optim.K <- suppressWarnings(adegenet::optim.a.score(dapc.pcamax.K,plot=FALSE))#
-		best.npca     <- c(best.npca,alpha_optim.K$best)#
-	}
-##### Plot 2: BIC vs. K when number of PCs retained = alpha optimized #
-	par(mar=c(4,4,3,2.1))#
-	names(best.npca) <- 2:max.clusters#
-	barplot(best.npca)#
-	mtext(text="Alpha optimized number of principle components to retain",side=2,line=2)#
-	mtext(text="Number of clusters",side=1,line=2)#
-	mtext(text="alpha optimized # of PCs vs. number of clusters",side=3,line=1)#
-	grp.plot2      <- recordPlot()#
-	par(mfrow=c(1,1))#
-	admixturePlot  <- list(); length(admixturePlot)   <- max.clusters-1#
-	assignmentPlot <- list(); length(assignmentPlot)  <- max.clusters-1#
-	posterior.list <- list(); length(posterior.list)  <- max.clusters-1#
-	mapplot <- list(); length(mapplot)  <- max.clusters-1
-for(K in 2:max.clusters){#
-		i=(K-1)#
-		par(mar=c(5.1,4.1,4.1,2.1),mfrow=c(1,1))#
-		dapc.pcabest.K  <- adegenet::dapc(genind, grp.mat[,i],n.pca=best.npca[i],n.da=5)#
-		posterior       <- dapc.pcabest.K$posterior#
-		q.matrix        <- posterior#
-		posterior.list[[i]] <- posterior#
-		posterior.df    <- data.frame(indv=rep(rownames(posterior),ncol(posterior)), pop=rep(colnames(posterior),each=nrow(posterior)), assignment=c(posterior))#
-		if(K < 5){#
-			myCols          <- goodcolors(K,thresh=100)#
-		}#
-		if(K >= 5 & K < 7){#
-			myCols          <- goodcolors(K,thresh=100,cbspace="deut")#
-		}#
-		if(K >= 7 & K < 15){#
-			myCols          <- goodcolors(K,thresh=100,cbspace="")#
-		}#
-		if(K>=15){#
-			myCols          <- c(goodcolors(14,thresh=100,cbspace=""), sample(adegenet::funky(100), size=K-14))#
-		}#
-		posterior.gg        <- ggplot2::ggplot(posterior.df, aes(fill= pop, x= assignment, y=indv)) + geom_bar(position="stack", stat="identity") + theme_classic() + theme(axis.text.y = element_text(size = label.size), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank()) + ggplot2::labs(x = "Membership Probability",y="",fill="Cluster",title=paste0("K = ",K,"; PCs retained = ",best.npca[i])) + scale_fill_manual(values=myCols[1:K])#
-		plot(posterior.gg)#
-		admixturePlot[[i]]   <- recordPlot()#
-		par(mar=c(5,20,2,2.1),mfrow=c(1,1))#
-		assignment.K         <- adegenet::assignplot(dapc.pcabest.K,cex.lab=(label.size/10))#
-		mtext(text=paste0("K = ",K,"; PCs retained = ",best.npca[i]))#
-		assignmentPlot[[i]]  <- recordPlot()#
-		par(mar=c(5.1,4.1,4.1,2.1),mfrow=c(1,1))#
-		if(!is.null(coords)){#
-			my.palette      <- tess3r::CreatePalette(myCols, 9)#
-			xdist           <- geosphere::distm(x=c(x.min,0),y=c(x.max,0))#
-			ydist           <- geosphere::distm(x=c(0,y.min),y=c(0,y.max))#
-			tess3r.qmat     <- suppressWarnings(tess3r::as.qmatrix(q.matrix))#
-			coords.mat      <- as.matrix(coords)#
-			mapplot.initial <- plot(tess3r.qmat, coords.mat, method = "map.max", interpol = FieldsKrigModel(10), main = paste0("Ancestry coefficients; K=",K), xlab = "", ylab = "",resolution = c(100,100), cex = 0.4,col.palette = my.palette, window=c(x.min,x.max,y.min,y.max),asp=xdist/ydist)#
-			mapplot.i       <- plot(tess3r.qmat, coords.mat, method = "map.max", interpol = FieldsKrigModel(10), main = paste0("Ancestry coefficients; K=",K), xlab = "", ylab = "",resolution = c(500,500), cex = 0.4,col.palette = my.palette, window=c(par("usr")[1],par("usr")[2],par("usr")[3],par("usr")[4]),asp=xdist/ydist)#
-			mapplot[[i]]    <- recordPlot()#
-		}#
-	}
-if(bestK>1){#
-		posterior.bestK <- posterior.list[[bestK-1]]#
-		colnames(posterior.bestK) <- paste0("K",colnames(posterior.bestK))#
-		if(!is.null(probs.out)){#
-			write.table(posterior.bestK,file=probs.out,quote=F,col.names=T,row.names=T)#
-		}#
-	} else {#
-		posterior.bestK <- matrix(data=rep(1,numind),ncol=1)#
-		rownames(posterior.bestK) <- samplenames#
-	}
-if(!is.null(coords)){#
-		result <- c(list(BICPlot,grp.plot2),admixturePlot,assignmentPlot,mapplot)#
-	} else {#
-		result <- c(list(BICPlot,grp.plot2),admixturePlot,assignmentPlot)#
-	}
-pdf(height=6,width=10,file=save.as,onefile=TRUE)
-result
-dev.off()
-dev.new(height=6,width=10)
-source("/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/DAPC/DAPC_adegenet.R")
-q()
-library(remotes)
-remotes::install_github("JeffWeinell/misc.wrappers",upgrade=FALSE,auth_token="323d9e4cd00247a39a805dbb66f37db6403cfb8b")
-library(misc.wrappers)
-q()
-library(remotes)
-install_github("JeffWeinell/misc.wrappers")
-library(misc.wrappers)
-test <- run_DAPC(#
-	x=file.path(system.file("extdata", package = "misc.wrappers"),"simK4.vcf.gz"),#
-	format="VCF",#
-	kmax=10,#
-	coords="/Users/alyssaleinweber/Documents/misc.wrappers/inst/extdata/simK4_coords.txt",#
-	samplenames=NULL,#
-	reps=30,#
-	probs.out=NULL,#
-	save.as="/Users/alyssaleinweber/Documents/DAPC_simK4_withCoords_v3.pdf",#
-	include.out=c(".pdf")#
-)
-q("no")
-library(misc.wrappers)
-setwd("Documents/misc.wrappers")
-devtools::document()
-vcf.path    <- file.path(system.file("extdata", package = "misc.wrappers"),"simK4.vcf.gz")#
-coords.path <- file.path(system.file("extdata", package = "misc.wrappers"),"simK4_coords.txt")
-vcf.path
-coords.path
-x=vcf.path#
-format="VCF"#
-coords=coords.path#
-samplenames=NULL#
-kmax=10#
-reps=30#
-save.as="tess3r_simK4_withCoords.pdf"#
-mask=0.05,#
-max.iteration=500
-mask=0.05
-max.iteration=500
-save.as
-getwd("")
-getwd()
-setwd("...")
-setwd("..")
-if(is.null(save.as)){#
-		save.as <- file.path(getwd(),"result_tess.pdf")#
-	}#
-	if(file.exists(save.as)){#
-		stop("Output file already exists. Use a different name for 'save.as' argument.")#
-	}
-Krange=1:kmax#
-	if(format=="VCF" | is(x,"vcfR")){#
-		if(is(x,"vcfR")){#
-			vcf.obj <- vcf <- x#
-		} else {#
-			vcf <- x#
-			vcf.obj     <- vcfR::read.vcfR(vcf,verbose=F,checkFile=F)#
-		}#
-		gt.mat      <- gsub(":.+","",vcf.obj@gt[,-1])#
-		# Detect ploidy from genotype matrix of vcf#
-		test.sample <- unlist(gt.mat)[!is.na(unlist(gt.mat))][1]#
-		ploidy      <- length(unlist(strsplit(gt.mat[1],split="[/,|]",fixed=T)))#
-		if(is.null(samplenames)){#
-			samplenames <- colnames(vcf.obj@gt)[-1]#
-		}#
-		lfmm.obj    <- vcfR2lfmm(vcf=vcf)#
-	} else {#
-		stop("Currently, 'format' must be 'VCF'")#
-	}#
-	numind      <- length(samplenames)#
-	label.size  <- min((288/numind),7)#
-	if(is(coords,"array") | is(coords,"data.frame")){#
-		coords <-  coords[,c(1:2)]#
-	} else {#
-		if(file.exists(coords)){#
-			coords   <- read.table(coords)[,c(1:2)]#
-		}#
-	}#
-	colnames(coords) <- c("Lon","Lat")#
-	if(!is.null(rownames(coords))){#
-		### Check that all individuals with coords are in the vcf file, and vice versa.#
-		if(!all(samplenames %in% rownames(coords) & rownames(coords) %in% samplenames)){#
-			stop("All individuals in coords file must be in vcf")#
-		}#
-	}
-maxK <- min(nrow(unique(coords)),(numind-1))#
-	if(max(Krange) > maxK){#
-		Krange <- 1:maxK#
-	}#
-	tess.obj <- tess3r::tess3(X = lfmm.obj, coord = as.matrix(coords), K=Krange, ploidy = ploidy, verbose=FALSE ,mask=mask, rep=reps, max.iteration=max.iteration,keep="all")#
-	crossentropy.mat <- do.call(rbind,lapply(X=1:length(tess.obj),FUN=function(x){matrix(unlist(tess.obj[[x]]["crossentropy"]),nrow=1)}))#
-	rownames(crossentropy.mat) <- Krange#
-	colnames(crossentropy.mat) <- paste0("rep",1:reps)#
-	#par(mfrow=c(1,1))#
-	mean.entropy <- apply(crossentropy.mat,MARGIN=1,FUN=mean,na.rm=TRUE)#
-	range.entropy.mat <- do.call(rbind,lapply(X=1:nrow(crossentropy.mat),FUN=function(x){range(crossentropy.mat[x,],na.rm=TRUE)}))#
-	if(any(diff(mean.entropy)>0)){#
-		bestK <- unname(which(diff(mean.entropy)>0)[1])#
-	} else {#
-		bestK <- unname(Krange[1])#
-	}#
-#	boxplot(t(crossentropy.mat))#
-	crossentropy.df <- data.frame(crossentropy=unname(unlist(c(crossentropy.mat))),Kval=rep(Krange,reps))#
-	# mode(crossentropy.df$Kval) <- "character"#
-	crossentropy.df$Kval <- factor(crossentropy.df$Kval, levels=c(1:nrow(crossentropy.df)))#
-	entropyPlot <- ggplot2::ggplot(crossentropy.df, ggplot2::aes(x=Kval, y=crossentropy)) + ggplot2::geom_boxplot(fill='lightgray', outlier.colour="black", outlier.shape=16,outlier.size=2, notch=FALSE) + ggplot2::theme_classic() + ggplot2::labs(title= paste0("Cross-entropy (",reps," replicates) vs. number of ancestral populations (K)"), x="Number of ancestral populations", y = "Cross-entropy") + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) #+ ggplot2::geom_vline(xintercept=bestK, linetype=2, color="black", size=0.25)#
-	### Future feature
-maxK <- min(nrow(unique(coords)),(numind-1))#
-	if(max(Krange) > maxK){#
-		Krange <- 1:maxK#
-	}
-as.matrix(coords)
-Krange
-ploidy
-format=="VCF" | is(x,"vcfR")
-ploidy      <- length(unlist(strsplit(gt.mat[1],split="[/,|]",fixed=T)))
-ploidy
-dim(gt.mat)
-gt.mat[1:10,1:10]
-test <- strsplit(gt.mat[1],split="[/,|]",fixed=T)
-test[1:10]
-unlist( strsplit(gt.mat[1],split="[/,|]",fixed=T) )
-strsplit(gt.mat[1],split="[/,|]")
-ploidy      <- length(unlist(strsplit(gt.mat[1],split="[/,|]")))
-ploidy
-if(format=="VCF" | is(x,"vcfR")){#
-		if(is(x,"vcfR")){#
-			vcf.obj <- vcf <- x#
-		} else {#
-			vcf <- x#
-			vcf.obj     <- vcfR::read.vcfR(vcf,verbose=F,checkFile=F)#
-		}#
-		gt.mat      <- gsub(":.+","",vcf.obj@gt[,-1])#
-		# Detect ploidy from genotype matrix of vcf#
-		test.sample <- unlist(gt.mat)[!is.na(unlist(gt.mat))][1]#
-		ploidy      <- length(unlist(strsplit(gt.mat[1],split="[/,|]")))#
-		if(is.null(samplenames)){#
-			samplenames <- colnames(vcf.obj@gt)[-1]#
-		}#
-		lfmm.obj    <- vcfR2lfmm(vcf=vcf)#
-	} else {#
-		stop("Currently, 'format' must be 'VCF'")#
-	}#
-	numind      <- length(samplenames)#
-	label.size  <- min((288/numind),7)#
-	if(is(coords,"array") | is(coords,"data.frame")){#
-		coords <-  coords[,c(1:2)]#
-	} else {#
-		if(file.exists(coords)){#
-			coords   <- read.table(coords)[,c(1:2)]#
-		}#
-	}#
-	colnames(coords) <- c("Lon","Lat")
-if(!is.null(rownames(coords))){#
-		### Check that all individuals with coords are in the vcf file, and vice versa.#
-		if(!all(samplenames %in% rownames(coords) & rownames(coords) %in% samplenames)){#
-			stop("All individuals in coords file must be in vcf")#
-		}#
-	}#
-	maxK <- min(nrow(unique(coords)),(numind-1))#
-	if(max(Krange) > maxK){#
-		Krange <- 1:maxK#
-	}
-tess.obj <- tess3r::tess3(X = lfmm.obj, coord = as.matrix(coords), K=Krange, ploidy = ploidy, verbose=FALSE ,mask=mask, rep=reps, max.iteration=max.iteration,keep="all")#
-	crossentropy.mat <- do.call(rbind,lapply(X=1:length(tess.obj),FUN=function(x){matrix(unlist(tess.obj[[x]]["crossentropy"]),nrow=1)}))#
-	rownames(crossentropy.mat) <- Krange#
-	colnames(crossentropy.mat) <- paste0("rep",1:reps)#
-	#par(mfrow=c(1,1))#
-	mean.entropy <- apply(crossentropy.mat,MARGIN=1,FUN=mean,na.rm=TRUE)#
-	range.entropy.mat <- do.call(rbind,lapply(X=1:nrow(crossentropy.mat),FUN=function(x){range(crossentropy.mat[x,],na.rm=TRUE)}))#
-	if(any(diff(mean.entropy)>0)){#
-		bestK <- unname(which(diff(mean.entropy)>0)[1])#
-	} else {#
-		bestK <- unname(Krange[1])#
-	}
-crossentropy.df <- data.frame(crossentropy=unname(unlist(c(crossentropy.mat))),Kval=rep(Krange,reps))#
-	# mode(crossentropy.df$Kval) <- "character"#
-	crossentropy.df$Kval <- factor(crossentropy.df$Kval, levels=c(1:nrow(crossentropy.df)))#
-	entropyPlot <- ggplot2::ggplot(crossentropy.df, ggplot2::aes(x=Kval, y=crossentropy)) + ggplot2::geom_boxplot(fill='lightgray', outlier.colour="black", outlier.shape=16,outlier.size=2, notch=FALSE) + ggplot2::theme_classic() + ggplot2::labs(title= paste0("Cross-entropy (",reps," replicates) vs. number of ancestral populations (K)"), x="Number of ancestral populations", y = "Cross-entropy") + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) #+ ggplot2::geom_vline(xintercept=bestK, linetype=2, color="black", size=0.25)
-slist <- lapply(X=Krange,FUN=function(x){as.data.frame(tess3r::qmatrix(tess3=tess.obj, K = x))})
-Krange.plot    <- setdiff(Krange,1)#
-	admixturePlot  <- list(); length(admixturePlot)   <- length(Krange.plot)#
-	assignmentPlot <- list(); length(assignmentPlot)  <- length(Krange.plot)#
-	mapplot        <- list(); length(mapplot)         <- length(Krange.plot)
-x.min <- min((coords[,1]-0.5))#
-	x.max <- max((coords[,1]+0.5))#
-	y.min <- min((coords[,2]-0.5))#
-	y.max <- max((coords[,2]+0.5))#
-	world_sf      <- rnaturalearth::ne_countries(scale=10,returnclass="sf")[1]#
-	world_sp      <- rnaturalearth::ne_countries(scale=10,returnclass="sp")
-for(K in Krange.plot){#
-		i=(K-1)#
-		q.matrix  <- slist[[K]]#
-		rownames(q.matrix) <- samplenames#
-		colnames(q.matrix) <- paste0("cluster",1:ncol(q.matrix))#
-		posterior.df       <- data.frame(indv=rep(rownames(q.matrix),ncol(q.matrix)), pop=rep(colnames(q.matrix),each=nrow(q.matrix)), assignment=c(unlist(unname(q.matrix))))#
-		if(K <= 15){#
-			myCols          <- goodcolors2(n=K)#
-		}#
-		if(K>15){#
-			myCols          <- c(goodcolors2(n=K), sample(adegenet::funky(100), size=K-15))#
-		}#
-		posterior.gg        <- ggplot2::ggplot(posterior.df, ggplot2::aes(fill= pop, x= assignment, y=indv)) + ggplot2::geom_bar(position="stack", stat="identity") + ggplot2::theme_classic() + ggplot2::theme(axis.text.y = ggplot2::element_text(size = label.size), panel.grid.major = ggplot2::element_blank(), panel.grid.minor = ggplot2::element_blank(), panel.background = ggplot2::element_blank()) + ggplot2::labs(x = "Admixture Proportion",y="",fill="Cluster",title=paste0("K = ",K)) + ggplot2::scale_fill_manual(values=myCols[1:K])#
-		admixturePlot[[i]]  <- posterior.gg#
-		indv.maxPosterior  <- apply(X=q.matrix, MARGIN=1, FUN=function(x){max(x)})#
-		labels             <- rep("",nrow(posterior.df))#
-		labels[posterior.df[,"assignment"] %in% indv.maxPosterior] <- "+"#
-		assignment.K       <- ggplot2::ggplot(data=posterior.df, ggplot2::aes(x= pop, y=indv,fill=assignment)) + ggplot2::geom_tile(color="gray") + ggplot2::theme_classic() + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5), axis.text.y = ggplot2::element_text(size = label.size), panel.grid.major = ggplot2::element_blank(), panel.grid.minor = ggplot2::element_blank(), panel.background = ggplot2::element_blank(), legend.position = "none", ) + ggplot2::labs(title = paste0("K = ",K), x="Clusters", y="") + ggplot2::scale_fill_gradient2(low = "white", mid = "yellow", high = "red", midpoint = 0.5) + ggplot2::geom_text(label=labels)#
-#		assignment.K        <- adegenet::assignplot(dapc.pcabest.K,cex.lab=(label.size/10))#
-#		mtext(text=paste0("K = ",K,"; PCs retained = ",best.npca[i]))#
-		assignmentPlot[[i]]  <- assignment.K#
-#
-		#plot(posterior.gg)#
-		#admixturePlot[[i]]   <- recordPlot()#
-		my.palette      <- tess3r::CreatePalette(myCols, 9)#
-	#	xdist           <- geosphere::distm(x=c(x.min,0),y=c(x.max,0))#
-	#	ydist           <- geosphere::distm(x=c(0,y.min),y=c(0,y.max))#
-	#	extent.test     <- raster::raster(raster::extent(c(x.min,x.max,y.min,y.max)), ncol = 500, nrow = 500, vals = 1)#
-	#	interpol.stack  <- InterpolRaster(coord, Q, raster.grid, interpolation.model)#
-	#	mapplot.initial <- plot(suppressWarnings(tess3r::as.qmatrix(q.matrix)), as.matrix(coords), main = "", xlab = "", ylab = "",resolution = c(2,2), col.palette = lapply(X=1:K,FUN=function(x){rep("#FFFFFF",9)}), cex=0,window=c(x.min,x.max,y.min,y.max),asp=xdist/ydist,add=FALSE)#
-#		mapplot.i       <- plot(suppressWarnings(tess3r::as.qmatrix(q.matrix)), as.matrix(coords), method = "map.max", interpol = tess3r::FieldsKrigModel(10), main = paste0("Ancestry coefficients; K=",K), xlab = "", ylab = "",resolution = c(500,500), cex = 0.4, col.palette = my.palette, window=par("usr"),asp=xdist/ydist,add=FALSE)#
-#		maps::map(add=TRUE)#
-#		#
-		#mapplot.i       <- tess3r::ggtess3Q(suppressWarnings(tess3r::as.qmatrix(q.matrix)), as.matrix(coords), interpolation.model = tess3r::FieldsKrigModel(10),resolution = c(500,500), col.palette = my.palette, window=c(x.min,x.max,y.min,y.max),background=TRUE)#
-		mapplot.i       <- tess3r::ggtess3Q(suppressWarnings(tess3r::as.qmatrix(q.matrix)), as.matrix(coords), interpolation.model = tess3r::FieldsKrigModel(10),resolution = c(500,500), col.palette = my.palette, window=c(x.min,x.max,y.min,y.max),background=TRUE,map.polygon=world_sp)#
-		#mapplot[[i]]    <- mapplot.i + ggplot2::theme_classic() + ggplot2::labs(title=paste0("Ancestry coefficients; K=",K), x="latitude", y="longitude") + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) + ggplot2::borders(database="world", xlim=c(x.min,x.max), ylim=c(y.min,y.max), colour="black") + ggplot2::geom_point(data = coords, ggplot2::aes(x = Lon, y = Lat), size = 1, shape = 21, fill = "black")#
-		#mapplot[[i]]    <- mapplot.i + ggplot2::theme_classic() + ggplot2::labs(title=paste0("Ancestry coefficients; K=",K), x="latitude", y="longitude") + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) + current.gg.sf + ggplot2::geom_point(data = coords, ggplot2::aes(x = Lon, y = Lat), size = 1, shape = 21, fill = "black")#
-#		mapplot.initial <- tess3r::ggtess3Q(suppressWarnings(tess3r::as.qmatrix(q.matrix)), as.matrix(coords), interpolation.model = tess3r::FieldsKrigModel(10),resolution = c(100,100), col.palette = my.palette, window=c(x.min,x.max,y.min,y.max),background=TRUE)#
-#		plot(mapplot.initial + ggplot2::theme_classic())#
-#		map(xlim=c(x.min,x.max),ylim=c(y.min,y.max),mar=c(5.1,4.1,4.1,2.1))#
-#		mapplot.i       <- tess3r::ggtess3Q(suppressWarnings(tess3r::as.qmatrix(q.matrix)), as.matrix(coords), interpolation.model = tess3r::FieldsKrigModel(10),resolution = c(500,500), col.palette = my.palette, window=par("usr"),background=TRUE)#
-#		plot(mapplot.i + ggplot2::theme_classic())#
-		#mapplot[[i]]    <- recordPlot()#
-		mapplot2.i    <- mapplot.i + ggplot2::theme_classic() + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5), panel.border = ggplot2::element_rect(color = "black", fill=NA, size=1)) + ggplot2::labs(title=paste0("Ancestry coefficients; K=",K), x="latitude", y="longitude") + ggplot2::geom_sf(data=world_sf,colour = "black", fill = NA) + ggplot2::coord_sf(xlim=c(x.min, x.max), ylim=c(y.min, ymax=y.max),expand=FALSE)#
-		mapplot[[i]]  <- mapplot2.i + ggplot2::geom_point(data = coords, ggplot2::aes(x = Lon, y = Lat), size = 1, shape = 21, fill = "black")#
-	}
-result <- c(list(entropyPlot), admixturePlot, assignmentPlot, mapplot)
-if(!is.null(save.as)){#
-		pdf(height=6,width=10,file=save.as,onefile=TRUE)#
-		lapply(X=result,FUN=print)#
-		dev.off()#
-	}
-result[[2]]
-dim(q.matrix)
-K=2
-i=(K-1)#
-		q.matrix  <- slist[[K]]#
-		rownames(q.matrix) <- samplenames#
-		colnames(q.matrix) <- paste0("cluster", 1:ncol(q.matrix))#
-		posterior.df       <- data.frame(indv=rep(rownames(q.matrix),ncol(q.matrix)), pop=rep(colnames(q.matrix),each=nrow(q.matrix)), assignment=c(unlist(unname(q.matrix))))#
-		if(K <= 15){#
-			myCols         <- goodcolors2(n=K)#
-		}#
-		if(K>15){#
-			myCols          <- c(goodcolors2(n=K), sample(adegenet::funky(100), size=K-15))#
-		}#
-		posterior.gg        <- ggplot2::ggplot(posterior.df, ggplot2::aes(fill= pop, x= assignment, y=indv)) + ggplot2::geom_bar(position="stack", stat="identity") + ggplot2::theme_classic() + ggplot2::theme(axis.text.y = ggplot2::element_text(size = label.size), panel.grid.major = ggplot2::element_blank(), panel.grid.minor = ggplot2::element_blank(), panel.background = ggplot2::element_blank()) + ggplot2::labs(x = "Admixture Proportion",y="",fill="Cluster",title=paste0("K = ",K)) + ggplot2::scale_fill_manual(values=myCols[1:K])
-posterior.gg
-dim(posterior.df)
-posterior.df[1:10,1]
-class(posterior.df[,1])
-class(posterior.df[,2])
-class(posterior.df[,3])
-posterior.df[1:10,]
-posterior.df$indv2 <- factor(posterior.df$indv, levels = rev(levels(factor(posterior.df$indv))) )
-posterior.gg2        <- ggplot2::ggplot(posterior.df, ggplot2::aes(fill= pop, x= assignment, y=indv2)) + ggplot2::geom_bar(position="stack", stat="identity") + ggplot2::theme_classic() + ggplot2::theme(axis.text.y = ggplot2::element_text(size = label.size), panel.grid.major = ggplot2::element_blank(), panel.grid.minor = ggplot2::element_blank(), panel.background = ggplot2::element_blank()) + ggplot2::labs(x = "Admixture Proportion",y="",fill="Cluster",title=paste0("K = ",K)) + ggplot2::scale_fill_manual(values=myCols[1:K])
-posterior.gg2
-posterior.df$indv3 <- factor(posterior.df$indv, levels = gtools::mixedsort(levels(factor(posterior.df$indv))))
-posterior.gg3        <- ggplot2::ggplot(posterior.df, ggplot2::aes(fill= pop, x= assignment, y=indv3)) + ggplot2::geom_bar(position="stack", stat="identity") + ggplot2::theme_classic() + ggplot2::theme(axis.text.y = ggplot2::element_text(size = label.size), panel.grid.major = ggplot2::element_blank(), panel.grid.minor = ggplot2::element_blank(), panel.background = ggplot2::element_blank()) + ggplot2::labs(x = "Admixture Proportion",y="",fill="Cluster",title=paste0("K = ",K)) + ggplot2::scale_fill_manual(values=myCols[1:K])
-posterior.gg3
-length(levels(posterior.df$indv3))
-nrow(posterior.df)
-levels(posterior.df$indv3)
-dim(slist)
-length(slist)
-dim(slist[[1]])
-slist[[1]][1:5,]
-dim(slist[[2]])
-slist[[2]][1:10,]
-q.matrix  <- slist[[K]]#
-		rownames(q.matrix) <- samplenames#
-		colnames(q.matrix) <- paste0("cluster", 1:ncol(q.matrix))
-q.matrix[1:10,]
-order(q.matrix[,1])
-order(q.matrix[,1] & q.matrix[,2])
-order(q.matrix[,1]) & order(q.matrix[,2])
-order(q.matrix[,2])
-order(order(q.matrix[,1]) & order(q.matrix[,2]))
-order(q.matrix[,1:2])
-lapply(1:ncol(q.matrix), FUN=function(x) order(q.matrix[,x]) )
-do.call (order, lapply(1:ncol(q.matrix), FUN=function(x) order(q.matrix[,x]) ))
-do.call (order, lapply(1:ncol(q.matrix), FUN=function(x) order(q.matrix[,x]) ), & )
-order(lapply(1:ncol(q.matrix), FUN=function(x) order(q.matrix[,x]) )()
-order(lapply(1:ncol(q.matrix), FUN=function(x) order(q.matrix[,x]) )
-)
-order(q.matrix)
-dplyr::arrange(q.matrix)
-q.matrix.arranegd <- dplyr::arrange(q.matrix)
-q.matrix.arranged <- dplyr::arrange(q.matrix)
-dim(posterior.df)
-posterior.df[1:10,]
-levels(factor(posterior.df$indv))
-match(levels(factor(posterior.df$indv)),rownames(q.matrix.arranged))
-rownames(q.matrix.arranged)
-posterior.df$indv3 <- factor(posterior.df$indv, levels = match(levels(factor(posterior.df$indv)),rownames(q.matrix.arranged)))
-posterior.gg3      <- ggplot2::ggplot(posterior.df, ggplot2::aes(fill= pop, x= assignment, y=indv3)) + ggplot2::geom_bar(position="stack", stat="identity") + ggplot2::theme_classic() + ggplot2::theme(axis.text.y = ggplot2::element_text(size = label.size), panel.grid.major = ggplot2::element_blank(), panel.grid.minor = ggplot2::element_blank(), panel.background = ggplot2::element_blank()) + ggplot2::labs(x = "Admixture Proportion",y="",fill="Cluster",title=paste0("K = ",K)) + ggplot2::scale_fill_manual(values=myCols[1:K])
-posterior.gg3
-match(levels(factor(posterior.df$indv)),rownames(q.matrix.arranged))
-posterior.df$indv3
-posterior.df$indv
-factor(posterior.df$indv, levels = match(levels(factor(posterior.df$indv)),rownames(q.matrix.arranged)))
-factor(posterior.df$indv, levels = gtools::mixedsort(levels(factor(posterior.df$indv))))
-gtools::mixedsort(levels(factor(posterior.df$indv)))
-match(levels(factor(posterior.df$indv)),rownames(q.matrix.arranged))
-posterior.df$indv3 <- factor(posterior.df$indv, levels = rownames(q.matrix.arranged)[match(levels(factor(posterior.df$indv)),rownames(q.matrix.arranged))])
-factor(posterior.df$indv, levels = rownames(q.matrix.arranged)[match(levels(factor(posterior.df$indv)),rownames(q.matrix.arranged))])
-posterior.gg3      <- ggplot2::ggplot(posterior.df, ggplot2::aes(fill= pop, x= assignment, y=indv3)) + ggplot2::geom_bar(position="stack", stat="identity") + ggplot2::theme_classic() + ggplot2::theme(axis.text.y = ggplot2::element_text(size = label.size), panel.grid.major = ggplot2::element_blank(), panel.grid.minor = ggplot2::element_blank(), panel.background = ggplot2::element_blank()) + ggplot2::labs(x = "Admixture Proportion",y="",fill="Cluster",title=paste0("K = ",K)) + ggplot2::scale_fill_manual(values=myCols[1:K])
-posterior.gg3
-rownames(q.matrix.arranged)[match(levels(factor(posterior.df$indv)),rownames(q.matrix.arranged))]
-match(levels(factor(posterior.df$indv)),rownames(q.matrix.arranged))]
-match(levels(factor(posterior.df$indv)),rownames(q.matrix.arranged))
-rownames(q.matrix.arranged)
-gtools::mixedorder(levels(factor(posterior.df$indv)))
-indv.maxPosterior    <- apply(X=q.matrix, MARGIN=1, FUN=function(x){max(x)})
-gtools::mixedorder(levels(factor(posterior.df$indv)) & indv.maxPosterior)
-order(gtools::mixedorder(levels(factor(posterior.df$indv))) & indv.maxPosterior)
-gtools::mixedsort(levels(factor(posterior.df$indv)))
-levels(factor(posterior.df$indv))
-levels(factor(posterior.df$indv))[order(gtools::mixedorder(levels(factor(posterior.df$indv))) & indv.maxPosterior)]
-levels(factor(posterior.df$indv))[indv.maxPosterior & order(gtools::mixedorder(levels(factor(posterior.df$indv))))]
-indv.maxPosterior & order(gtools::mixedorder(levels(factor(posterior.df$indv))))
-order(indv.maxPosterior & gtools::mixedorder(levels(factor(posterior.df$indv))))
-levels(factor(posterior.df$indv))order(indv.maxPosterior & gtools::mixedorder(levels(factor(posterior.df$indv))))
-levels(factor(posterior.df$indv))[order(indv.maxPosterior & gtools::mixedorder(levels(factor(posterior.df$indv))))]
-indv.maxPosterior
-indv.pop     <- apply(X=q.matrix, MARGIN=1, FUN=function(x){which(x==max(x))})
-indv.pop
-levels(factor(posterior.df$indv))[order(indv.pop & gtools::mixedorder(levels(factor(posterior.df$indv))))]
-sort(indv.pop)
-names(sort(indv.pop))
-posterior.df$indv3 <- factor(posterior.df$indv, levels = names(sort(indv.pop)))
-posterior.gg3      <- ggplot2::ggplot(posterior.df, ggplot2::aes(fill= pop, x= assignment, y=indv3)) + ggplot2::geom_bar(position="stack", stat="identity") + ggplot2::theme_classic() + ggplot2::theme(axis.text.y = ggplot2::element_text(size = label.size), panel.grid.major = ggplot2::element_blank(), panel.grid.minor = ggplot2::element_blank(), panel.background = ggplot2::element_blank()) + ggplot2::labs(x = "Admixture Proportion",y="",fill="Cluster",title=paste0("K = ",K)) + ggplot2::scale_fill_manual(values=myCols[1:K])
-posterior.gg3
-devtools::document()
-setwd("misc.wrappers")
-devtools::document()
-K
-i=(K-1)#
-		q.matrix  <- slist[[K]]#
-		rownames(q.matrix) <- samplenames#
-		colnames(q.matrix) <- paste0("cluster", 1:ncol(q.matrix))#
-		indv.pop           <- apply(X=q.matrix, MARGIN=1, FUN=function(x){which(x==max(x))})
-posterior.df       <- data.frame(indv=rep(rownames(q.matrix),ncol(q.matrix)), pop=rep(colnames(q.matrix),each=nrow(q.matrix)), assignment=c(unlist(unname(q.matrix))))#
-		posterior.df$indv <- factor(posterior.df$indv, levels = names(sort(indv.pop)))
-posterior.df[1:10,]
-if(K <= 15){#
-			myCols         <- goodcolors2(n=K)#
-		}#
-		if(K>15){#
-			myCols          <- c(goodcolors2(n=K), sample(adegenet::funky(100), size=K-15))#
-		}
-posterior.gg         <- ggplot2::ggplot(posterior.df, ggplot2::aes(fill= pop, x= assignment, y=indv)) + ggplot2::geom_bar(position="stack", stat="identity") + ggplot2::theme_classic() + ggplot2::theme(axis.text.y = ggplot2::element_text(size = label.size), panel.grid.major = ggplot2::element_blank(), panel.grid.minor = ggplot2::element_blank(), panel.background = ggplot2::element_blank()) + ggplot2::labs(x = "Admixture Proportion",y="",fill="Cluster",title=paste0("K = ",K)) + ggplot2::scale_fill_manual(values=myCols[1:K])
-posterior.gg
-admixturePlot[[i]]   <- posterior.gg#
-		indv.maxPosterior    <- apply(X=q.matrix, MARGIN=1, FUN=function(x){max(x)})#
-		labels               <- rep("",nrow(posterior.df))#
-		labels[posterior.df[,"assignment"] %in% indv.maxPosterior] <- "+"#
-		assignment.K         <- ggplot2::ggplot(data=posterior.df, ggplot2::aes(x= pop, y=indv, fill=assignment)) + ggplot2::geom_tile(color="gray") + ggplot2::theme_classic() + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5), axis.text.y = ggplot2::element_text(size = label.size), panel.grid.major = ggplot2::element_blank(), panel.grid.minor = ggplot2::element_blank(), panel.background = ggplot2::element_blank(), legend.position = "none", ) + ggplot2::labs(title = paste0("K = ",K), x="Clusters", y="") + ggplot2::scale_fill_gradient2(low = "white", mid = "yellow", high = "red", midpoint = 0.5) + ggplot2::geom_text(label=labels)
-assignment.K
-devtools::document()
-setwd("..")
-vcf.path    <- file.path(system.file("extdata", package = "misc.wrappers"),"simK4.vcf.gz")#
-coords.path <- file.path(system.file("extdata", package = "misc.wrappers"),"simK4_coords.txt")
-x=vcf.path#
-format="VCF"#
-kmax=10#
-coords=coords.path#
-samplenames=NULL#
-reps=30#
-probs.out=NULL#
-save.as="DAPC_simK4_withCoords_v4.pdf"#
-include.out=c(".pdf")
-debug <- FALSE#
-	if(is.null(save.as)){#
-		save.as <- file.path(getwd(),"result_DAPC.pdf")#
-	}#
-	if(file.exists(save.as)){#
-		stop("Output file already exists. Use a different name for 'save.as' argument.")#
-	}
-x=vcf.path#
-format="VCF"#
-kmax=10#
-coords=coords.path#
-samplenames=NULL#
-reps=30#
-probs.out=NULL#
-save.as="DAPC_simK4_withCoords_v5.pdf"#
-include.out=c(".pdf")
-x=vcf.path#
-format="VCF"#
-kmax=10#
-coords=coords.path#
-samplenames=NULL#
-reps=30#
-probs.out=NULL#
-save.as="DAPC_simK4_withCoords_v5.pdf"#
-include.out=c(".pdf")
-debug <- FALSE#
-	if(is.null(save.as)){#
-		save.as <- file.path(getwd(),"result_DAPC.pdf")#
-	}#
-	if(file.exists(save.as)){#
-		stop("Output file already exists. Use a different name for 'save.as' argument.")#
-	}
-if(format=="VCF" | is(x,"vcfR")){#
-		if(is(x,"vcfR")){#
-			vcf.obj <- vcf <- x#
-		} else {#
-			vcf <- x#
-			vcf.obj     <- vcfR::read.vcfR(vcf,verbose=F,checkFile=F)#
-		}#
-		if(is.null(samplenames)){#
-			samplenames <- colnames(vcf.obj@gt)[-1]#
-		}#
-		genind      <- suppressWarnings(vcfR::vcfR2genind(vcf.obj))#
-		#numind      <- (dim(attributes(vcf.obj)[["gt"]])[2])-1#
-	} else {#
-		stop("Currently, 'format' must be 'VCF'")#
-	}#
-	numind      <- length(samplenames)#
-	label.size  <- min((288/numind),7)#
-	if(debug) message("step 0")#
-	if(!is.null(coords)){#
-		if(is(coords,"array") | is(coords,"data.frame")){#
-			coords <-  coords#
-		} else {#
-			if(file.exists(coords)){#
-				coords   <- read.table(coords)#
-			}#
-		}#
-		x.min <- min((coords[,1]-0.5))#
-		x.max <- max((coords[,1]+0.5))#
-		y.min <- min((coords[,2]-0.5))#
-		y.max <- max((coords[,2]+0.5))#
-		maxK  <- min(nrow(unique(coords)),(numind-1))#
-		#world_df <- ggplot2::map_data(rnaturalearth::ne_countries(scale=10))#
-		world_sf      <- rnaturalearth::ne_countries(scale=10,returnclass="sf")[1]#
-		world_sp      <- rnaturalearth::ne_countries(scale=10,returnclass="sp")#
-		current_sf    <- suppressWarnings(suppressMessages(sf::st_crop(world_sf,xmin=x.min,xmax=x.max,ymin=y.min,ymax=y.max)))#
-		current.gg.sf <- ggplot2::geom_sf(data=current_sf,color = "black", fill = NA)#
-		#world.gg.sf   <- ggplot2::geom_sf(data=world_sf,colour = "black", fill = NA)#
-		#message("potential replacement for 'current_sf' and 'current.gg.sf' is on the next line")#
-		current.gg.sf2 <- ggplot2::geom_sf(data=world_sf) + ggplot2::coord_sf(xlim=c(x.min,x.max),ylim=c(y.min,ymax=y.max))#
-	} else {#
-		maxK <- (numind-1)#
-	}#
-	if(is.null(kmax)){#
-		kmax <- maxK#
-	} else {#
-		if(kmax > maxK){#
-			kmax <- maxK#
-		}#
-	}#
-	max.clusters <- kmax#
-	Krange       <- 1:max.clusters#
-	### Defining colors to use#
-	if(max.clusters <= 15){#
-			myCols  <- goodcolors2(n=max.clusters)#
-		}#
-		if(max.clusters>15){#
-			myCols  <- c(goodcolors2(n=15), sample(adegenet::funky(100), size=max.clusters-15))#
-	}#
-	if(debug) message("step 1")#
-	#### find.clusters#
-	grp          <- adegenet::find.clusters(genind, max.n.clust=max.clusters,n.pca=max.clusters,choose.n.clust=F)#
-	grp.list     <- list(); length(grp.list) <- reps#
-	# par(mar=c(3.5,4,3,2.1))#
-	for(i in 1:reps){#
-		grp.list[[i]] <- adegenet::find.clusters(genind, max.n.clust=max.clusters,n.pca=max.clusters,choose.n.clust=F)#
-	}#
-	BIC.mat           <- do.call(cbind,lapply(X=1:reps,FUN=function(x){grp.list[[x]]$Kstat}))#
-	rownames(BIC.mat) <- 1:max.clusters#
-	colnames(BIC.mat) <- paste0("rep",1:reps)#
-	mean.BIC        <- apply(BIC.mat,MARGIN=1,FUN=mean,na.rm=TRUE)#
-	### Lowest K with a lower mean BIC than K+1 mean BIC.#
-	if(any(diff(mean.BIC)>0)){#
-		bestK <- unname(which(diff(mean.BIC)>0)[1])#
-	} else {#
-		bestK <- 1#
-	}#
-	Kbest.criteria1   <- bestK#
-	### Construct data frame holding BIC scores for each replicate of each K#
-	BIC.df      <- data.frame(BIC=unname(unlist(c(BIC.mat))),K=rep(Krange,reps),replicate=rep(1:reps,each=length(Krange)))#
-	### save a copy of BIC scores#
-	if(".BIClog" %in% include.out){#
-		write.table(x=BIC.df,file=paste0(tools::file_path_sans_ext(save.as),".BIClog"),row.names=FALSE,col.names=TRUE,quote=FALSE,sep="\t")#
-	}#
-	#BIC.df <- BIC.df[order(BIC.df.temp[,"Kval"]),]#
-	#mode(BIC.df$Kval) <- "character"#
-	BIC.df$K <- factor(BIC.df$K, levels=c(1:nrow(BIC.df)))#
-	BICPlot  <- ggplot2::ggplot(data=BIC.df,ggplot2::aes(x=K, y=BIC)) + ggplot2::geom_boxplot(fill='lightgray', outlier.colour="black", outlier.shape=16,outlier.size=2, notch=FALSE) + ggplot2::theme_classic() + ggplot2::labs(title= paste0("BIC (",reps," replicates of find.clusters) vs. number of clusters (K)"), x="Number of ancestral populations", y = "BIC") + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) # + ggplot2::geom_vline(xintercept=bestK, linetype=2, color="black", size=0.25)#
-	if(debug) message("step 1.5")#
-	best.npca  <- NULL#
-	grp.mat    <- matrix(data=0,nrow=length(grp$grp),ncol=(max.clusters-1))#
-	for(K in 2:max.clusters){#
-		i=(K-1)#
-		grp.K         <- adegenet::find.clusters(genind, max.n.clust=max.clusters,n.pca=max.clusters,n.clust=K)#
-		grp.mat[,i]   <- grp.K$grp#
-		dapc.pcamax.K <- suppressWarnings(adegenet::dapc(genind, grp.K$grp,n.pca=max.clusters,n.da=5))#
-		alpha_optim.K <- suppressWarnings(adegenet::optim.a.score(dapc.pcamax.K,plot=FALSE))#
-		best.npca     <- c(best.npca,alpha_optim.K$best)#
-	}#
-	if(debug) message("step 2")#
-	##### Plot 2: BIC vs. K when number of PCs retained = alpha optimized #
-#	par(mar=c(4,4,3,2.1))#
-	# names(best.npca) <- 2:max.clusters#
-	best.npca.df      <- data.frame(K=2:max.clusters,best.npca=best.npca)#
-	best.npca.df$K    <- factor(best.npca.df$K)#
-	grp.plot2         <- ggplot2::ggplot(data=best.npca.df, ggplot2::aes(x=K,y=best.npca)) + ggplot2::geom_bar(stat="identity",fill="lightgray") + ggplot2::labs(title= "alpha optimized # of PCs vs. number of clusters", x="Number of clusters", y = "Alpha optimized number of principle components to retain") + ggplot2::theme_classic() + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5))#
-#
-	#### Creating lists to be filled#
-	empty.set <- list(); length(empty.set) <- max.clusters-1#
-	dapc.pcabest.list <- admixturePlot <- da.densityPlot <- da.biPlot <- pca.densityPlot <- pca.biPlot <- da.psets <- da.layout.mat<- pca.psets <- pca.layout.mat <- assignmentPlot <- posterior.list <- mapplot <- q.df <- dapc.df <- empty.set#
-	dapc.list <- empty.set#
-	for(K in 2:max.clusters){#
-		i=K-1#
-		dapc.list[[(i)]] <- adegenet::dapc(genind, grp.mat[,i],n.pca=best.npca[i],n.da=5)#
-	}#
-	names(dapc.list) <- paste0("K",c(2:max.clusters))#
-	grp.assignments.mat <- do.call(cbind,lapply(dapc.list,FUN=function(x){c(x$assign)}))#
-	rownames(grp.assignments.mat) <- samplenames#
-	colnames(grp.assignments.mat) <- paste0("K",c(2:max.clusters))#
-	grp.minsizes <- apply(grp.assignments.mat,MARGIN=2,FUN=function(x){min(table(x))})#
-	### The values of K for which density plots can be made because every cluster has at least two individuals#
-	if(any((grp.minsizes > 1))){#
-		Ks.showdensity <- unname(which((grp.minsizes > 1))+1)#
-	}#
-	posterior.list <- lapply(dapc.list,function(x){x$posterior})#
-	# Number of discriminant functions retained at each value of K#
-	Ks.n.da        <- sapply(dapc.list,function(x){x$n.da})#
-	# Number of principle components retained at each value of K#
-	Ks.n.pca       <- sapply(dapc.list,function(x){x$n.pca})#
-	# Data frame holding assignment probability of each individual in each cluster at each K.#
-	q.df           <- do.call(rbind,lapply(X=1:length(dapc.list),FUN=function(x){data.frame(indv=rep(rownames(posterior.list[[x]]),ncol(posterior.list[[x]])), pop=rep(colnames(posterior.list[[x]]),each=nrow(posterior.list[[x]])), assignment=c(posterior.list[[x]]),K=(x+1))}))#
-	if(".Qlog" %in% include.out){#
-		write.table(x=q.df,file=paste0(tools::file_path_sans_ext(save.as),".Qlog"),row.names=FALSE,col.names=TRUE,quote=FALSE,sep="\t")#
-	}#
-	########
-	## Density plots#
-	########
-	## List with two data frames with combinations of K and DF, or K and PC, respectively, for which density can be plotted.#
-	plottable   <- plottable.dapc(dapc.list)#
-	K.plottable <- as.numeric(rownames(plottable$DF))
-indexmat.da <- apply(matrix(1:length(plottable$DF),ncol=ncol(plottable$DF)),2,rev)#
-	indexmat.pc <- apply(matrix(1:length(plottable$PC),ncol=ncol(plottable$PC)),2,rev)
-emptymat.da  <- matrix(data=rep("",length(plottable$DF)),ncol=ncol(plottable$DF))#
-	emptymat.pca <- matrix(data=rep("",length(plottable$PC)),ncol=ncol(plottable$PC))#
-	left.mat.da  <- bottom.mat.da  <- right.mat.da  <- top.mat.da  <-emptymat.da#
-	left.mat.pca <- bottom.mat.pca <- right.mat.pca <- top.mat.pca <-emptymat.pca#
-	left.mat.da[,1]  <- left.mat.pca[,1] <- rev(paste0("K",K.plottable))#
-	right.mat.da[,ncol(plottable$DF)] <- right.mat.pca[,ncol(plottable$PC)] <- rev(paste0("K",K.plottable))#
-	bottom.mat.da[nrow(plottable$DF),]  <- colnames(plottable$DF)#
-	bottom.mat.pca[nrow(plottable$PC),] <- colnames(plottable$PC)#
-	top.mat.da[1,]  <- colnames(plottable$DF)#
-	top.mat.pca[1,] <- colnames(plottable$PC)
-df.plots.list <- list(); length(df.plots.list) <- length(plottable$DF)#
-	ctr <- 0
-for(j in 1:ncol(plottable$DF)){#
-		for(i in 1:nrow(plottable$DF) ){#
-			ctr <- ctr+1#
-			if(!plottable$DF[i,j]){#
-			#	next#
-				plot.ij  <- grid::rectGrob(gp=grid::gpar(col=NA))#
+			# Random point within wnd.sp to determine subregion within which group centers will occur#
+			center.sp <- sp::spsample(wnd.sp,n=1,type="random")#
+			# Length two vector with "x" and "y" entries from sample.center, to pass to spCircle#
+			center.xy <- c(sp::coordinates(center.sp)); names(center.xy) <- c("x","y")#
+			# Create a circular polygon centered at sample center; in this case #
+			# sample.area.sp <- sampSurf::spCircle(radius=sqrt((regionsize/pi)),centerPoint=center.xy)[[1]]#
+			# regionsize2 <- (10^regionsize)#
+			# regionsize2 <- regionsize.dd#
+			#if(n.grp==1){#
+			#regionsize.dd <- (regionsize.dd*grp.scaler*0.5)#
+			#}#
+			sample.area.sp <- sampSurf::spCircle(radius=sqrt((regionsize.dd/pi)), centerPoint=center.xy)[[1]]#
+			#sample.area.sp.area <- attributes(attributes(attributes(sample.area.sp)$polygons[[1]])[[1]][[1]])$area#
+			# Check if entire sample.area.sp is within window defined by 'wnd' argument#
+	#		area.wnd.diff <- rgeos::gDifference(spgeom1=sample.area.sp,spgeom2=wnd.sp)#
+	#		# If area.wnd.diff is not NULL, then part of 'sample.area.sp' falls outside of the sampling window.#
+	#		if(!is.null(area.wnd.diff)){#
+	#			next#
+	#		}#
+			if(n.grp>1){#
+				# Sample group sampling-center locations from within sample.area.sp#
+				grp.pts <- sp::spsample(sample.area.sp,n=n.grp,type="random")#
+				# coordinates extracted from grp.pts#
+				grp.pts.mat <- sp::coordinates(grp.pts)#
+				colnames(grp.pts.mat) <- c("x","y")#
+				grp.areas <- (regionsize.dd*(grp.area.weights/(sum(grp.area.weights)))*grp.scaler)#
+				# create polygons centered at grp.pts, from which each groups points will be drawn. First need to determine group sizes...#
+				grp.areas.sp <- lapply(X=1:n.grp, FUN=function(x){sampSurf::spCircle(radius=sqrt((grp.areas/pi))[x],centerPoint=c(grp.pts.mat[x,]))[[1]]})#
+				# Distance between group centers. Not sure if this is necessary.#
+				# geodist(grp.pts.mat,measure="geodesic")#
+				grp.center.dists0 <- geodist::geodist(grp.pts.mat,measure="geodesic")#
+				grp.center.dists  <- grp.center.dists0[lower.tri(grp.center.dists0)]#
+				# check that each group centers occur over land, if over.land is true#
 			} else {#
-			#	ctr <- ctr+1#
-				plot.ij  <- ggplot2::ggplotGrob(ggscatter.dapc(dapc.list[[(K.plottable[i]-1)]], vartype="df", xax=j, yax=j, col=myCols, legend=F, show.title=F, hideperimeter=T))#
+				grp.pts.mat  <- matrix(center.xy,nrow=1,dimnames=list(c(NULL),c("x","y")))#
+				grp.areas.sp <- list(sample.area.sp)#
 			}#
-			df.plots.list[[ctr]]        <- plot.ij#
-			names(df.plots.list)[[ctr]] <- paste0("K",K.plottable[i],".DF",j)#
-		}#
-	}
-da.arranged0   <- lapply(X=1:length(df.plots.list),FUN=function(x){gridExtra::arrangeGrob(df.plots.list[[x]],left=left.mat.da[indexmat.da[x]],right=right.mat.da[indexmat.da[x]],bottom=bottom.mat.da[indexmat.da[x]],top=top.mat.da[indexmat.da[x]])})#
-	da.arranged    <- gridExtra::arrangeGrob(grobs=da.arranged0,layout_matrix=indexmat.da,respect=TRUE)#
-	vp             <- grid::viewport(height=grid::unit(0.9,"npc"),width=grid::unit(0.9,"npc"))#
-	pdf(file=paste0(tools::file_path_sans_ext(save.as),"_desnsityPlots_DF.pdf"), height=(nrow(indexmat.da)*3),width=(ncol(indexmat.da)*3))#
-	grid::grid.draw(da.arranged)#
-	dev.off()
-pc.plots.list <- list(); length(pc.plots.list) <- length(plottable$PC)#
-	ctr <- 0
-for(j in 1:ncol(plottable$PC)){#
-		for(i in 1:nrow(plottable$PC) ){#
-			ctr <- ctr+1#
-			if(!plottable$PC[i,j]){#
-			#	next#
-				plot.ij  <- grid::rectGrob(gp=grid::gpar(col=NA))#
-			} else {#
-			#	ctr <- ctr+1#
-				plot.ij  <- ggplot2::ggplotGrob(ggscatter.dapc(dapc.list[[(K.plottable[i]-1)]], vartype="pc", xax=j, yax=j, col=myCols, legend=F, show.title=F, hideperimeter=T))#
-			}#
-			pc.plots.list[[ctr]]        <- plot.ij#
-			names(pc.plots.list)[[ctr]] <- paste0("K",K.plottable[i],".PC",j)#
-		}#
-	}
-pc.arranged0   <- lapply(X=1:length(pc.plots.list),FUN=function(x){gridExtra::arrangeGrob(pc.plots.list[[x]],left=left.mat.pca[indexmat.pc[x]],right=right.mat.pca[indexmat.pc[x]],bottom=bottom.mat.pca[indexmat.pc[x]],top=top.mat.pca[indexmat.pc[x]])})#
-	pc.arranged    <- gridExtra::arrangeGrob(grobs=pc.arranged0,layout_matrix=indexmat.pc,respect=TRUE)#
-	vp             <- grid::viewport(height=grid::unit(0.9,"npc"),width=grid::unit(0.9,"npc"))#
-	pdf(file=paste0(tools::file_path_sans_ext(save.as),"_desnsityPlots_PC.pdf"), height=(nrow(indexmat.pc)*3),width=(ncol(indexmat.pc)*3))#
-	grid::grid.draw(pc.arranged)#
-	dev.off()
-if(any(Ks.n.da>2)){#
-		#distmats.da <- lapply(apply(plottable$DF[apply(plottable$DF,MARGIN=1,FUN=function(x){length(which(x))>2}),],MARGIN=1,FUN=which), FUN=function(y){dist(y)})#
-		distmats.da <- lapply(X=Ks.n.da[which(Ks.n.da>1)], FUN=function(x){dist(table(paste0("DF",c(1:x))))})#
-		distlabs.da <- lapply(distmats.da,FUN=function(x){gtools::mixedsort(attributes(x)$Labels)})#
-		#damats0  <- lapply(apply(plottable$DF[apply(plottable$DF,MARGIN=1,FUN=function(x){length(which(x))>2}),],MARGIN=1,FUN=which), FUN=function(y){lower.tri(dist(y))})#
-		damats0  <- lapply(distmats.da, FUN=lower.tri)#
-		davals   <- lapply(damats0,FUN=function(x){1:length(which(x))})#
-		damats1  <- damats0#
-		for(i in 1:length(damats1)){#
-			damats1[[i]][damats0[[i]]]  <- davals[[i]]#
-			damats1[[i]][!damats0[[i]]] <- NA#
-			damats1[[i]] <- damats1[[i]] # [-c(1),-c(ncol(damats1[[i]]))]#
-			rownames(damats1[[i]]) <- distlabs.da[[i]] # [-1]#
-			colnames(damats1[[i]]) <- distlabs.da[[i]] # [-c(lengths(distlabs.da)[i])]#
-		}#
-		damats2 <- damats1#
-		for(i in 1:length(damats2)){#
-			damats2[[i]][!is.na(damats2[[i]])] <- paste0("bp",damats2[[i]][!is.na(damats2[[i]])],".da")#
-			damats2[[i]] <- t(damats2[[i]])#
-		}#
-	}
-if(any(Ks.n.pca>2)){#
-		#distmats.pc <- lapply(apply(plottable$PC[apply(plottable$PC,MARGIN=1,FUN=function(x){length(which(x))>2}),],MARGIN=1,FUN=which), FUN=function(y){dist(y)})#
-		distmats.pc <- lapply(X=Ks.n.pca[which(Ks.n.pca>1)], FUN=function(x){dist(table(paste0("DF",c(1:x))))})#
-		distlabs.pc <- lapply(distmats.pc,FUN=function(x){gtools::mixedsort(attributes(x)$Labels)})#
-		#pcmats0  <- lapply(apply(plottable$PC[apply(plottable$PC,MARGIN=1,FUN=function(x){length(which(x))>2}),],MARGIN=1,FUN=which), FUN=function(y){lower.tri(dist(y))})#
-		pcmats0  <- lapply(distmats.pc,lower.tri)#
-		pcvals   <- lapply(pcmats0,FUN=function(x){1:length(which(x))})#
-		pcmats1  <- pcmats0#
-		for(i in 1:length(pcmats1)){#
-			pcmats1[[i]][pcmats0[[i]]]  <- pcvals[[i]]#
-			pcmats1[[i]][!pcmats0[[i]]] <- NA#
-			pcmats1[[i]] <- pcmats1[[i]]   # [-c(1),-c(ncol(pcmats1[[i]]))]#
-			rownames(pcmats1[[i]]) <- distlabs.pc[[i]]  #[-1]#
-			colnames(pcmats1[[i]]) <- distlabs.pc[[i]]  # [-c(lengths(distlabs.pc)[i])]#
-		}#
-		pcmats2 <- pcmats1#
-		for(i in 1:length(pcmats2)){#
-			pcmats2[[i]][!is.na(pcmats2[[i]])] <- paste0("bp",pcmats2[[i]][!is.na(pcmats2[[i]])],".pc")#
-		}#
-	}
-dapc.mats <- pcmats2#
-	### The value of dapc.mats mostly portrays the desired plotting layout.#
-	for(i in 1:length(dapc.mats)){#
-		dapc.mats[[i]][which(is.na(pcmats2[[i]]))[1:length(c(damats2[[i]][!lower.tri(damats2[[i]])]))]] <- c(damats2[[i]][!lower.tri(damats2[[i]])])#
-		colnames(dapc.mats[[i]]) <- 1:ncol(dapc.mats[[i]])#
-	}
-## Row m of matrix in da.psets2 contains the dimensions to of the mth da biplot to generate.#
-	da.psets <- lapply(X=1:length(Ks.n.da),FUN=function(x){ do.call(rbind, pset(x=1:Ks.n.da[x], min.length=2, max.length=2))})#
-	da.psets2 <- lapply(which(lengths(da.psets)>0), FUN=function(x){da.psets[[x]][order(c(da.psets[[x]][,1]),c( da.psets[[x]][,2])),]})#
-	names(da.psets2) <- which(lengths(da.psets)>0)+1
-### Row m of matrix in pca.psets2 contains the dimensions to of the mth pca biplot to generate.#
-	pca.psets <- lapply(X=1:length(Ks.n.pca),FUN=function(x){ do.call(rbind, pset(x=1:Ks.n.pca[x], min.length=2, max.length=2))})#
-	pca.psets2 <- lapply(which(lengths(pca.psets)>0), FUN=function(x){pca.psets[[x]][order(c(pca.psets[[x]][,1]),c( pca.psets[[x]][,2])),]})#
-	names(pca.psets2) <- which(lengths(pca.psets)>0)+1
-#### Generate DF biplots.#
-	df.biplots.list <- list(); length(df.biplots.list) <- length(da.psets2)#
-	for(i in 1:length(da.psets2)){#
-		K <- as.numeric(names(da.psets2))[i]#
-		df.biplots.list[[i]] <- lapply(X=1:nrow(rbind(da.psets2[[i]])), FUN=function(x){ggplot2::ggplotGrob(ggscatter.dapc(dapc.list[[(K-1)]], vartype="df", xax= rbind(da.psets2[[i]]) [x,1], yax=rbind(da.psets2[[i]])[x,2], col=myCols, legend=F, show.title=F, hideperimeter=T,cellipse=0))})#
-		# Names matching those used in 'dapc.mats'#
-		names(df.biplots.list[[i]]) <- c(t(damats2[[i]]))[!is.na(c(t(damats2[[i]])))]#
-	}#
-	#### Generate PC biplots.#
-	pc.biplots.list <- list(); length(pc.biplots.list) <- length(pca.psets2)#
-	for(i in 1:length(pca.psets2)){#
-		K <- as.numeric(names(pca.psets2))[i]#
-		pc.biplots.list[[i]] <- lapply(X=1:nrow(rbind(pca.psets2[[i]])), FUN=function(x){ggplot2::ggplotGrob(ggscatter.dapc(dapc.list[[(K-1)]], vartype="pc", xax=rbind(pca.psets2[[i]])[x,1], yax=rbind(pca.psets2[[i]])[x,2], col=myCols, legend=F, show.title=F, hideperimeter=T,cellipse=0))})#
-		names(pc.biplots.list[[i]]) <- c(pcmats2[[i]])[!is.na(c(pcmats2[[i]]))]#
-	}#
-	### Removes rows and columns that are completely filled with NAs#
-	dapc.mats2 <- dapc.mats#
-	for(i in 1:length(dapc.mats2)){#
-		dapc.mats2[[i]] <- unname(dapc.mats[[i]][!apply(dapc.mats[[i]],MARGIN=1,FUN=function(x){all(is.na(x))}),!apply(dapc.mats[[i]],MARGIN=2,FUN=function(x){all(is.na(x))})])#
-	}
-dapc.mats3 <- lapply(dapc.mats2,apply,2,rev)#
-	### Index matrix#
-	index.bi <- lapply(1:length(dapc.mats3), FUN=function(x){ apply(matrix(data=c(1:length(dapc.mats3[[x]])) ,ncol=ncol(dapc.mats3[[x]])),2,rev)  })
-empty.bi <- lapply(1:length(dapc.mats3), FUN=function(x){matrix(data=rep("",length(dapc.mats3[[x]])), ncol=ncol(dapc.mats3[[x]]))})#
-	### Arrange the biplots into a gtable for each K#
-	Ks.n.da.bi  <- Ks.n.da[which(Ks.n.da>1)]#
-	Ks.n.pca.bi <- Ks.n.pca[which(Ks.n.pca>1)]#
-	# initializing lists of matrices that will hold the names along axes#
-	left.mat.bi <- right.mat.bi <- bottom.mat.bi <- top.mat.bi <- empty.bi#
-	f
-for(i in 1:length(dapc.mats3)){#
-		left.mat.bi[[i]][,1]   <- rev(c("",paste0("PC",2:Ks.n.pca.bi[i])))#
-		right.mat.bi[[i]][,ncol(right.mat.bi[[i]])]  <- rev(c(paste0("DF", 1:(Ks.n.da.bi[i]-1)),rep("",(nrow(right.mat.bi[[i]])-(Ks.n.da.bi[i]-1)))))#
-		bottom.mat.bi[[i]][nrow(bottom.mat.bi[[i]]),] <- c(rep("",(ncol(bottom.mat.bi[[i]])- (Ks.n.da.bi[i]-1) )),paste0("DF",2:(Ks.n.da.bi[i])))#
-		top.mat.bi[[i]][1,]  <- c(paste0("PC", (1:(Ks.n.pca.bi[i]-1))), rep("",(ncol(top.mat.bi[[i]])-(Ks.n.pca.bi[i]-1))))#
-	}
-bi.arranged0 <- list(); length(bi.arranged0) <- length(dapc.mats3)#
-	bi.arranged  <- list(); length(bi.arranged) <- length(dapc.mats3)
-bi.arranged0 <- list(); length(bi.arranged0) <- length(dapc.mats3)#
-	bi.arranged  <- list(); length(bi.arranged) <- length(dapc.mats3)
-for(i in 1:length(dapc.mats3)){#
-		for(j in 1:length(dapc.mats3[[i]])){#
-			plot.name <- dapc.mats3[[i]][which(index.bi[[i]]==j)]#
-			if(is.na(plot.name)){#
-				plot.ij <- grid::rectGrob(gp=grid::gpar(col=NA))#
-			} else {#
-				if(plot.name %in% names(pc.biplots.list[[i]])){#
-					plot.ij <- pc.biplots.list[[i]][plot.name][[1]]#
-				} else {#
-					if(plot.name %in% names(df.biplots.list[[i]])){#
-						plot.ij <- df.biplots.list[[i]][plot.name][[1]]#
-					}#
+			if(over.land){#
+				if(length(points.on.land(x=grp.pts.mat)[,1]) < n.grp){#
+				#if(length(points.on.land(x=sp::coordinates(grp.pts))[,1]) < n.grp){#
+					next#
 				}#
 			}#
-			bi.arranged0[[i]][[j]] <- gridExtra::arrangeGrob(plot.ij,left=left.mat.bi[[i]][which(index.bi[[i]]==j)],right=right.mat.bi[[i]][which(index.bi[[i]]==j)],bottom=bottom.mat.bi[[i]][which(index.bi[[i]]==j)],top=top.mat.bi[[i]][which(index.bi[[i]]==j)])#
+			initial <- TRUE#
 		}#
-		bi.arranged[[i]] <- gridExtra::arrangeGrob(grobs=bi.arranged0[[i]],layout_matrix=index.bi[[i]],respect=TRUE)#
-		#test <- gridExtra::arrangeGrob(grobs=bi.arranged0[[i]],layout_matrix=index.bi,respect=TRUE)#
+		### For each group, the number of samples that will be drawn (or saved, if over.land=TRUE) from the group's sample region.#
+		if(length(samplesize)==1){#
+			if(n.grp==1){#
+				grp.sizes <- samplesize#
+			} else {#
+				# Initial values for entering while loop#
+				grp.sizes <- rep(0,n.grp)#
+				while(any(grp.sizes < min.grp.size)){#
+					grp.sizes  <- c(table(sample(x=c(1:n.grp),size=samplesize,prob=grp.n.weights,replace=TRUE)))#
+					# verify that at least each group has at least min.grp.size.#
+				}#
+			}#
+		} else {#
+			grp.sizes <- samplesize#
+		}#
+		# grp.sizes <- round(samplesize * (grp.n.weights/sum(grp.n.weights)))#
+		### Creates a SpatialPolygons object (sampling region) for each group#
+		#sample.area.sp <- lapply(1:n.grp, FUN=function(x){sampSurf::spCircle(radius= sqrt((grp.areas/pi))[x] , centerPoint=c(x=group.centers[x,1],y=group.centers[x,2]))[[1]]})#
+		### Check if groups meet conditions set by 'interactions' argument.#
+		if(!is.null(interactions) & n.grp > 1){#
+			if(!(interactions[1]==0 & interactions[2]==1)){#
+				# Much less complex list holding the sample sampling polygons#
+				# polygons.list <- lapply(X=1:n.grp, function(x){attributes(attributes(grp.areas.sp[[x]])$"polygons"[[1]])[[1]][[1]]})#
+				# Possibly equivalent:#
+				polygons.list <- lapply(X=1:n.grp, function(x) grp.areas.sp[[x]]@polygons[[1]]@Polygons[[1]])#
+				# All possible pairwise group comparisons#
+				grp.pairs <- do.call(rbind,pset(1:n.grp,2,2))#
+				# Calculate intersect area yet and sum areas for each pair of groups. (Doesnt work yet).#
+				grp.int.area <- grp.sum.area <- grp.ratio <- c()#
+				for(i in 1:nrow(grp.pairs)){#
+					polygon.pair   <- polygons.list[c(grp.pairs[i,1],grp.pairs[i,2])]#
+					grp1.area.temp <- polygon.pair[[1]]@area#
+					grp2.area.temp <- polygon.pair[[2]]@area#
+					pairsum.temp   <- sum(c(grp1.area.temp, grp2.area.temp))#
+					#grp.int <- raster::intersect(sample.area.sp[[grp.pairs[i,1]]], sample.area.sp[[grp.pairs[i,2]]])#
+					# returns NULL if polygons do not intersect; returns SpatialPolygons object if they do intersect#
+					grp.int  <- rgeos::gIntersection(spgeom1=grp.areas.sp[[grp.pairs[i,1]]],spgeom2=grp.areas.sp[[grp.pairs[i,2]]])#
+					#Nonintersecting portions of areas 1 and 2 (faster than getting diff of each in the other and then adding)#
+					#grp.diff <- rgeos::gSymdifference(spgeom1=grp.areas.sp[[grp.pairs[i,1]]],spgeom2=grp.areas.sp[[grp.pairs[i,2]]])#
+					# returns a spatial polygons object with the non-intersecting portions of the group pair polygons each as their own polygons. If no overlap the returned polygons are the same the input polygons.#
+					grp.diff1 <- rgeos::gDifference(spgeom1=grp.areas.sp[[grp.pairs[i,1]]],spgeom2=grp.areas.sp[[grp.pairs[i,2]]])#
+					grp.diff2 <- rgeos::gDifference(spgeom1=grp.areas.sp[[grp.pairs[i,2]]],spgeom2=grp.areas.sp[[grp.pairs[i,1]]])#
+					if(is.null(grp.int)){#
+						int.area.temp <- 0#
+					} else {#
+						#int.area.temp <- attributes(attributes(attributes(grp.int)$"polygons"[[1]])[[1]][[1]])$area#
+						int.area.temp <- grp.int@polygons[[1]]@Polygons[[1]]@area#
+#
+					}#
+					# Area of the region of group 1 that does not intersect group 2 (for this pair of groups).#
+					if(is.null(grp.diff1)){#
+						diff1.area.temp <- 0#
+					} else {#
+						#diff1.area.temp <- attributes(attributes(attributes(grp.diff1)$"polygons"[[1]])[[1]][[1]])$area#
+						diff1.area.temp <- grp.diff1@polygons[[1]]@Polygons[[1]]@area#
+					}#
+					if(is.null(grp.diff2)){#
+						diff2.area.temp <- 0#
+					} else {#
+						#diff2.area.temp <- attributes(attributes(attributes(grp.diff2)$"polygons"[[1]])[[1]][[1]])$area#
+						diff2.area.temp <- grp.diff2@polygons[[1]]@Polygons[[1]]@area#
+					}#
+					#if(is.null(grp.diff)){#
+					#	diff.area.temp <- 0#
+					#} else {#
+					#	diff1.area.temp <- attributes(attributes(attributes(grp.diff)$"polygons"[[1]])[[1]][[1]])$area#
+					#	diff2.area.temp <- attributes(attributes(attributes(grp.diff)$"polygons"[[1]])[[1]][[2]])$area#
+					#}#
+					diff.area.temp  <- diff1.area.temp + diff2.area.temp#
+					ratio.temp <- int.area.temp/diff.area.temp#
+					#ratio.temp <- (int.area.temp/pairsum.temp)#
+					#grp.int <- raster::intersect(spgeom1=sample.area.sp[[1]],spgeom2=sample.area.sp[[2]])#
+					grp.int.area <- c(grp.int.area,int.area.temp)#
+					grp.sum.area <- c(grp.sum.area,pairsum.temp)#
+					grp.ratio    <- c(grp.ratio,ratio.temp)#
+				}#
+				area.df <- data.frame(group.i=grp.pairs[,1],group.j=grp.pairs[,2],area.intersection=grp.int.area,area.sumpair=grp.sum.area,area.intersection.sum.ratio=grp.ratio)#
+				# Check that the required conditions for interactions are met#
+				if(!all(area.df$area.intersection.sum.ratio >= interactions[1] & area.df$area.intersection.sum.ratio <= interactions[2])){#
+					# If conditions not met, try again from scratch. In future versions it would be useful to slide the polygons along their center axes to make minor adjustments.#
+					next#
+				}#
+			}#
+		}#
+		### Method using st_sample from SF package. Probably not as useful as the spsample from SP.#
+		if(FALSE){#
+			### Convert each SpatialPolygons object to an SF object#
+	#		sample.area.sf <- sf::st_as_sf(sample.area.sp)#
+			grp.areas.sf <- lapply(X=1:n.grp,FUN=function(x){sf::st_as_sf(grp.areas.sp[[x]])})#
+			### Sample within each area. If points must be over land, sample four times as many points as requested by 'size' argument.#
+			if(over.land){#
+				nsamp <- (grp.sizes*4)#
+				samples.sf.temp  <- lapply(X=1:n.grp,FUN=function(x){sf::st_sample(x=grp.areas.sf[[x]], size= nsamp[x])})#
+			} else {#
+				samples.sf.temp  <- lapply(X=1:n.grp,FUN=function(x) {sf::st_sample(x= grp.areas.sf[[x]],size=grp.sizes[x])})#
+			}#
+			### Hold sampled coordinates as a list of data matrices#
+			samples.mat.temp <- lapply(X=1:n.grp,FUN=function(x){sf::st_coordinates(samples.sf.temp[[x]])})#
+		}#
+		### Method using spsample from SP package.#
+		if(over.land){#
+			nsamp <- (grp.sizes*4)#
+			samples.sp.temp  <- lapply(X=1:n.grp,FUN=function(x){sp::spsample(x=grp.areas.sp[[x]], n= nsamp[x], type="random")})#
+		} else {#
+			samples.sp.temp  <- lapply(X=1:n.grp,FUN=function(x) {sp::spsample(x= grp.areas.sp[[x]],n=grp.sizes[x], type="random")})#
+		}#
+		samples.mat.temp <- lapply(X=1:n.grp,FUN=function(x){sp::coordinates(samples.sp.temp[[x]])})#
+		### Hold sampled coordinates as a list of data frames, and include a column in each data frame to indicate group assignment#
+		samples.df.temp <- do.call(rbind,lapply(X=1:n.grp,FUN=function(x){data.frame(X=samples.mat.temp[[x]][,1],Y=samples.mat.temp[[x]][,2],group=x)}))#
+		# Filtering samples outside of 'wnd'; 1=sample is within wnd; NA=sample is outside of wnd#
+		samples.in.wnd <- unlist(lapply(1:n.grp,function(x) over(samples.sp.temp[[x]],wnd.sp)))#
+		if(any(samples.in.wnd)==1){#
+			samples.df.temp <- samples.df.temp[which(samples.in.wnd==1),]#
+		}#
+		### Hold sampled coordinates as a list of data frames, and include a column in each data frame to indicate group assignment#
+#		samples.df.temp <- lapply(X=1:n.grp,FUN=function(x){data.frame(X=samples.mat.temp[[x]][,1],Y=samples.mat.temp[[x]][,2],group=x)})#
+		####### PAUSED HERE ###########
+		# ggplot2::ggplot(data = world.land) + ggplot2::geom_sf() + ggplot2::theme_classic() + ggplot2::geom_point(data = samples.df.temp, ggplot2::aes(x = X, y = Y), size = 2, shape = 21, fill = "darkred") # + coord_sf(xlim = c(-90, -78), ylim = c(24.5, 40), expand = FALSE)#
+		if(over.land){#
+			### Get subset of sampled coordinates that fall on land#
+			#samples.temp <- lapply(X=1:n.grp,FUN=function(x){points.on.land(x=samples.mat.temp[[x]])})#
+			# filtering samples that are not on land#
+			samples.temp <- points.on.land(samples.df.temp)#
+		#	samples.temp <- lapply(X=1:n.grp,FUN=function(x){points.on.land(x=samples.df.temp[[x]])})#
+			#samples.land.temp <- points.on.land(x=samples.df.temp)#
+		} else {#
+			samples.temp           <- samples.df.temp#
+			# colnames(samples.temp) <- c("longitude","latitude")#
+		}#
+		# Number of points sampled for each group after filtering points#
+	#	n.grp.pass  <- table(samples.temp[,"group"])#
+		n.grp.pass  <- sapply(X=1:n.grp, FUN=function(x) length(grep(x,samples.temp[,"group"])))#
+		#n.grp.pass  <- sapply(samples.temp,nrow)#
+		#sapply(n.grp.pass,funct)#
+		if(all(n.grp.pass >= grp.sizes)){#
+			PASS=TRUE#
+		} else {#
+			PASS=FALSE#
+		}#
+		# result.temp <- rbind(result.temp,samples.temp)#
 	}
-vp             <- grid::viewport(height=grid::unit(0.95,"npc"),width=grid::unit(0.95,"npc"))#
-	pdf(file=paste0(tools::file_path_sans_ext(save.as),"_BiPlots.pdf"), height=(max(sapply(dapc.mats3,nrow))*3),width=(max(sapply(dapc.mats3,ncol))*3))#
-	for(i in 1:length(dapc.mats3)){#
-		grid::grid.draw(bi.arranged[[i]])#
-		if(i < length(dapc.mats3)){#
-			grid::grid.newpage()#
+wnd.sp
+plot(wnd.sp)
+grp.scaler.start <- grp.scaler#
+	#result.temp        <- data.frame(NULL)#
+	PASS=FALSE#
+	miter <- 100#
+	ctr   <- 0
+if(length(samplesize)==1){#
+		if((n.grp*min.grp.size) > samplesize){#
+			stop("Total sample size 'samplesize' must be greater than the number of groups 'n.grp' times minimum group size 'min.grp.size'.",call.=FALSE)#
 		}#
-	}#
-	dev.off()
-K=2
-if(debug) message(paste0("K=",K," step 3.1"))#
-		i=(K-1)#
-		q.matrix            <- posterior.list[[i]]#
-		indv.pop            <- apply(X=q.matrix, MARGIN=1, FUN=function(x){which(x==max(x))})#
-		posterior.df        <- q.df[q.df$K==K,]#
-		posterior.df$indv   <- factor(posterior.df$indv, levels = names(sort(assignment)))
-posterior.df[1:10,]
-posterior.df$indv   <- factor(posterior.df$indv, levels = names(sort(posterior.df$assignment)))
-posterior.df[1:10,]
-sort(posterior.df$assignment)
-posterior.df$indv  <- factor(posterior.df$indv, levels = names(sort(indv.pop)))
-posterior.df[1:10,]
-indv.pop
-sort(indv.pop)
-q.matrix            <- posterior.list[[i]]#
-		indv.pop            <- apply(X=q.matrix, MARGIN=1, FUN=function(x){which(x==max(x))})#
-		posterior.df        <- q.df[q.df$K==K,]#
-		#posterior.df$indv   <- factor(posterior.df$indv, levels = names(sort(posterior.df$assignment)))#
-		posterior.df$indv  <- factor(posterior.df$indv, levels = names(sort(indv.pop)))
-posterior.df[1:10,]
-if(debug) message(cat("\r",paste0("K=",K," step 3.3")))#
-		if(debug) message(cat("\r",paste0("K=",K," step 3.5")))#
-		posterior.gg        <- ggplot2::ggplot(posterior.df, ggplot2::aes(fill= pop, x= assignment, y=indv)) + ggplot2::geom_bar(position="stack", stat="identity") + ggplot2::theme_classic() + ggplot2::theme(axis.text.y = ggplot2::element_text(size = label.size), panel.grid.major = ggplot2::element_blank(), panel.grid.minor = ggplot2::element_blank(), panel.background = ggplot2::element_blank()) + ggplot2::labs(x = "Membership Probability",y="",fill="Cluster",title=paste0("K = ",K,"; PCs retained = ",best.npca[i])) + ggplot2::scale_fill_manual(values=myCols[1:K])
-posterior.gg
-q.matrix[1:10,]
-posterior.list[[1]]
-rownames(q.matrix) <- samplenames#
-		colnames(q.matrix) <- paste0("cluster",1:ncol(q.matrix))
-q.matrix[1:10,]
+	} else {#
+		if(length(samplesize)!=n.grp){#
+			stop("If 'samplesize' is a numerical vector, then it must have a length equal to the number of groups 'n.grp'.",call.=FALSE)#
+		}#
+	}
+wnd <- Luzon.sp
+if(is(wnd,"matrix")){#
+			stop("not yet implemented")#
+			### in the future, each row will describe the bounding box of a group#
+		} else {#
+			if(is(wnd,"SpatialPolygons")){#
+				if(FALSE){#
+					stop("not yet implemented")#
+					### In the future, a spatial polygons object can be supplied#
+					world.land.sp    <- rnaturalearth::ne_countries(scale=110, returnclass="sp")#
+					ph.land10.sp     <- world.land10.sp[which(world.land10.sp[,"sovereignt"][[1]]=="Philippines"),]#
+					ph.island.areas  <- sapply(X=1:length(ph.land10.sp@polygons[[1]]@Polygons),FUN=function(x){ph.land10.sp@polygons[[1]]@Polygons[[x]]@area})#
+					Luzon.polygon    <- ph.land10.sp@polygons[[1]]@Polygons[[which(ph.island.areas == max(ph.island.areas))]]#
+					Luzon.sp         <- sp::SpatialPolygons(list(sp::Polygons(list(Luzon.polygon),1)))#
+					# Would set 'wnd' argument to Luzon.sp#
+					wnd <- Luzon.sp#
+					# wnd.sp is simply wnd#
+				}#
+				wnd.sp <- wnd#
+				raster::crs(wnd.sp)  <- sp::CRS("EPSG:4326")#
+				wnd.area             <- wnd.sp@polygons[[1]]@Polygons[[1]]@area#
+				regionsize.dd0       <- (regionsize*wnd.area)#
+				regionsize.dd        <- (regionsize.dd0*0.25)#
+			} else {#
+			if(is(wnd,"numeric")){#
+				# rectangular SpatialPolygons object with extent formed by 'wnd' argument.#
+				wnd.sp <- as(raster::extent(wnd), "SpatialPolygons")#
+				# area of the region bounded by 'wnd', in decimal degrees#
+				wnd.sp2 <- wnd.sp#
+				#sp::proj4string(wnd.sp2) <- sp::CRS("+proj=longlat +datum=WGS84")#
+				raster::crs(wnd.sp2) <- sp::CRS("EPSG:4326")#
+				#wnd.area <- attributes(attributes(wnd.sp2)$polygons[[1]])$area#
+				wnd.area <- wnd.sp2@polygons[[1]]@Polygons[[1]]@area#
+				# area of region spanning all group sampling areas, in decimal degrees#
+				regionsize.dd0 <- (regionsize*wnd.area)#
+				regionsize.dd  <- (regionsize.dd0*0.25)#
+			}#
+		}#
+	}
+plot(wnd.sp)
+!PASS
+ctr <- ctr + 1#
+		if(ctr > miter){#
+			stop(paste("after",miter,"attemps, failed to find points that pass conditions. ctr=",ctr,"ctr2=",ctr2,"; grp.scaler=",grp.scaler))#
+		}#
+		#if(ctr %in% seq(from=10,to=miter,by=10)){#
+		if(ctr>1){#
+			grp.scaler <- (grp.scaler*0.95)#
+		}#
+		### Clear the data frame if too few points on land during previous attempt#
+		#result.temp         <- data.frame(NULL)#
+		initial <- FALSE#
+		### Find group centers that pass conditions#
+		ctr2 <- 0
+!initial
+ctr2 <- ctr2 + 1#
+			if(ctr2 > (miter/10)){#
+				break#
+				# stop(paste("failed to initialize after",miter,"attemps. ctr=",ctr,"ctr2=",ctr2))#
+			}#
+			if(ctr2>1){#
+				grp.scaler <- (grp.scaler*0.99)#
+			}#
+			# Random point within wnd.sp to determine subregion within which group centers will occur#
+			center.sp <- sp::spsample(wnd.sp,n=1,type="random")#
+			# Length two vector with "x" and "y" entries from sample.center, to pass to spCircle#
+			center.xy <- c(sp::coordinates(center.sp)); names(center.xy) <- c("x","y")#
+			# Create a circular polygon centered at sample center; in this case #
+			# sample.area.sp <- sampSurf::spCircle(radius=sqrt((regionsize/pi)),centerPoint=center.xy)[[1]]#
+			# regionsize2 <- (10^regionsize)#
+			# regionsize2 <- regionsize.dd#
+			#if(n.grp==1){#
+			#regionsize.dd <- (regionsize.dd*grp.scaler*0.5)#
+			#}#
+			sample.area.sp <- sampSurf::spCircle(radius=sqrt((regionsize.dd/pi)), centerPoint=center.xy)[[1]]#
+			#sample.area.sp.area <- attributes(attributes(attributes(sample.area.sp)$polygons[[1]])[[1]][[1]])$area
+sp::spsample(wnd.sp,n=1,type="random")
+plot(center.sp,add=T)
+center.sp
+proj4string(wnd.sp)
+crs(wnd.sp)
+CRS(wnd.sp)
+sp::CRS(wnd.sp)
+sp::CRS("EPSG:4326")
+raster::crs(wnd.sp)  <- sp::CRS("EPSG:4326")
+proj4string(wnd.sp)
+wkt(wnd.sp)
+CRS(wnd.sp)
+class(wnd.sp)
+center.sp <- sp::spsample(wnd.sp, n=1, type="random")#
+			# Length two vector with "x" and "y" entries from sample.center, to pass to spCircle#
+			center.xy <- c(sp::coordinates(center.sp)); names(center.xy) <- c("x","y")#
+			# Create a circular polygon centered at sample center; in this case #
+			# sample.area.sp <- sampSurf::spCircle(radius=sqrt((regionsize/pi)),centerPoint=center.xy)[[1]]#
+			# regionsize2 <- (10^regionsize)#
+			# regionsize2 <- regionsize.dd#
+			#if(n.grp==1){#
+			#regionsize.dd <- (regionsize.dd*grp.scaler*0.5)#
+			#}#
+			sample.area.sp <- sampSurf::spCircle(radius=sqrt((regionsize.dd/pi)), centerPoint=center.xy)[[1]]
+plot(center.sp)
+plot(wnd.sp)
+plot(center.sp,add=T)
+n.grp>1
+grp.pts <- sp::spsample(sample.area.sp,n=n.grp,type="random")#
+				# coordinates extracted from grp.pts#
+				grp.pts.mat <- sp::coordinates(grp.pts)#
+				colnames(grp.pts.mat) <- c("x","y")
+grp.areas <- (regionsize.dd*(grp.area.weights/(sum(grp.area.weights)))*grp.scaler)#
+				# create polygons centered at grp.pts, from which each groups points will be drawn. First need to determine group sizes...#
+				grp.areas.sp <- lapply(X=1:n.grp, FUN=function(x){sampSurf::spCircle(radius=sqrt((grp.areas/pi))[x],centerPoint=c(grp.pts.mat[x,]))[[1]]})#
+				# Distance between group centers. Not sure if this is necessary.
+grp.center.dists0 <- geodist::geodist(grp.pts.mat,measure="geodesic")#
+				grp.center.dists  <- grp.center.dists0[lower.tri(grp.center.dists0)]
+grp.pts
+grp.areas
+grp.center.dists0
+plot(grp.pts,add=T,col="red")
+sample.area.sp
+plot(sample.area.sp,add=T)
+regionsize.dd        <- (regionsize.dd0)
+regionsize.dd
+center.sp <- sp::spsample(wnd.sp, n=1, type="random")#
+			# Length two vector with "x" and "y" entries from sample.center, to pass to spCircle#
+			center.xy <- c(sp::coordinates(center.sp)); names(center.xy) <- c("x","y")#
+			# Create a circular polygon centered at sample center; in this case #
+			# sample.area.sp <- sampSurf::spCircle(radius=sqrt((regionsize/pi)),centerPoint=center.xy)[[1]]#
+			# regionsize2 <- (10^regionsize)#
+			# regionsize2 <- regionsize.dd#
+			#if(n.grp==1){#
+			#regionsize.dd <- (regionsize.dd*grp.scaler*0.5)#
+			#}#
+			sample.area.sp <- sampSurf::spCircle(radius=sqrt((regionsize.dd/pi)), centerPoint=center.xy)[[1]]
+plot(sample.area.sp,add=T)
+if(n.grp>1){#
+				# Sample group sampling-center locations from within sample.area.sp#
+				grp.pts <- sp::spsample(sample.area.sp,n=n.grp,type="random")#
+				# coordinates extracted from grp.pts#
+				grp.pts.mat <- sp::coordinates(grp.pts)#
+				colnames(grp.pts.mat) <- c("x","y")#
+				grp.areas <- (regionsize.dd*(grp.area.weights/(sum(grp.area.weights)))*grp.scaler)#
+				# create polygons centered at grp.pts, from which each groups points will be drawn. First need to determine group sizes...#
+				grp.areas.sp <- lapply(X=1:n.grp, FUN=function(x){sampSurf::spCircle(radius=sqrt((grp.areas/pi))[x],centerPoint=c(grp.pts.mat[x,]))[[1]]})#
+				# Distance between group centers. Not sure if this is necessary.#
+				# geodist(grp.pts.mat,measure="geodesic")#
+				grp.center.dists0 <- geodist::geodist(grp.pts.mat,measure="geodesic")#
+				grp.center.dists  <- grp.center.dists0[lower.tri(grp.center.dists0)]#
+				# check that each group centers occur over land, if over.land is true#
+			} else {#
+				grp.pts.mat  <- matrix(center.xy,nrow=1,dimnames=list(c(NULL),c("x","y")))#
+				grp.areas.sp <- list(sample.area.sp)#
+			}
+if(over.land){#
+				if(length(points.on.land(x=grp.pts.mat)[,1]) < n.grp){#
+				#if(length(points.on.land(x=sp::coordinates(grp.pts))[,1]) < n.grp){#
+					next#
+				}#
+			}
+length(points.on.land(x=grp.pts.mat)[,1]) < n.grp
+ctr2 <- ctr2 + 1#
+			if(ctr2 > (miter/10)){#
+				break#
+				# stop(paste("failed to initialize after",miter,"attemps. ctr=",ctr,"ctr2=",ctr2))#
+			}#
+			if(ctr2>1){#
+				grp.scaler <- (grp.scaler*0.99)#
+			}#
+			# Random point within wnd.sp to determine subregion within which group centers will occur#
+			center.sp <- sp::spsample(wnd.sp, n=1, type="random")#
+			# Length two vector with "x" and "y" entries from sample.center, to pass to spCircle#
+			center.xy <- c(sp::coordinates(center.sp)); names(center.xy) <- c("x","y")#
+			# Create a circular polygon centered at sample center; in this case #
+			# sample.area.sp <- sampSurf::spCircle(radius=sqrt((regionsize/pi)),centerPoint=center.xy)[[1]]#
+			# regionsize2 <- (10^regionsize)#
+			# regionsize2 <- regionsize.dd#
+			#if(n.grp==1){#
+			#regionsize.dd <- (regionsize.dd*grp.scaler*0.5)#
+			#}#
+			sample.area.sp <- sampSurf::spCircle(radius=sqrt((regionsize.dd/pi)), centerPoint=center.xy)[[1]]#
+			#sample.area.sp.area <- attributes(attributes(attributes(sample.area.sp)$polygons[[1]])[[1]][[1]])$area#
+			# Check if entire sample.area.sp is within window defined by 'wnd' argument#
+	#		area.wnd.diff <- rgeos::gDifference(spgeom1=sample.area.sp,spgeom2=wnd.sp)#
+	#		# If area.wnd.diff is not NULL, then part of 'sample.area.sp' falls outside of the sampling window.#
+	#		if(!is.null(area.wnd.diff)){#
+	#			next#
+	#		}#
+			if(n.grp>1){#
+				# Sample group sampling-center locations from within sample.area.sp#
+				grp.pts <- sp::spsample(sample.area.sp,n=n.grp,type="random")#
+				# coordinates extracted from grp.pts#
+				grp.pts.mat <- sp::coordinates(grp.pts)#
+				colnames(grp.pts.mat) <- c("x","y")#
+				grp.areas <- (regionsize.dd*(grp.area.weights/(sum(grp.area.weights)))*grp.scaler)#
+				# create polygons centered at grp.pts, from which each groups points will be drawn. First need to determine group sizes...#
+				grp.areas.sp <- lapply(X=1:n.grp, FUN=function(x){sampSurf::spCircle(radius=sqrt((grp.areas/pi))[x],centerPoint=c(grp.pts.mat[x,]))[[1]]})#
+				# Distance between group centers. Not sure if this is necessary.#
+				# geodist(grp.pts.mat,measure="geodesic")#
+				grp.center.dists0 <- geodist::geodist(grp.pts.mat,measure="geodesic")#
+				grp.center.dists  <- grp.center.dists0[lower.tri(grp.center.dists0)]#
+				# check that each group centers occur over land, if over.land is true#
+			} else {#
+				grp.pts.mat  <- matrix(center.xy,nrow=1,dimnames=list(c(NULL),c("x","y")))#
+				grp.areas.sp <- list(sample.area.sp)#
+			}
+length(points.on.land(x=grp.pts.mat)[,1]) < n.grp
+plot(grp.pts,add=T,col="blue")
+plot(sample.area.sp,add=T,col="blue")
+if(length(samplesize)==1){#
+			if(n.grp==1){#
+				grp.sizes <- samplesize#
+			} else {#
+				# Initial values for entering while loop#
+				grp.sizes <- rep(0,n.grp)#
+				while(any(grp.sizes < min.grp.size)){#
+					grp.sizes  <- c(table(sample(x=c(1:n.grp),size=samplesize,prob=grp.n.weights,replace=TRUE)))#
+					# verify that at least each group has at least min.grp.size.#
+				}#
+			}#
+		} else {#
+			grp.sizes <- samplesize#
+		}
+grp.sizes
+!is.null(interactions) & n.grp > 1
+!(interactions[1]==0 & interactions[2]==1)
+polygons.list <- lapply(X=1:n.grp, function(x) grp.areas.sp[[x]]@polygons[[1]]@Polygons[[1]])#
+				# All possible pairwise group comparisons#
+				grp.pairs <- do.call(rbind,pset(1:n.grp,2,2))#
+				# Calculate intersect area yet and sum areas for each pair of groups. (Doesnt work yet).#
+				grp.int.area <- grp.sum.area <- grp.ratio <- c()
+nrow(grp.pairs)
+i=1
+polygon.pair   <- polygons.list[c(grp.pairs[i,1],grp.pairs[i,2])]#
+					grp1.area.temp <- polygon.pair[[1]]@area#
+					grp2.area.temp <- polygon.pair[[2]]@area#
+					pairsum.temp   <- sum(c(grp1.area.temp, grp2.area.temp))
+grp.int  <- rgeos::gIntersection(spgeom1=grp.areas.sp[[grp.pairs[i,1]]],spgeom2=grp.areas.sp[[grp.pairs[i,2]]])#
+					#Nonintersecting portions of areas 1 and 2 (faster than getting diff of each in the other and then adding)#
+					#grp.diff <- rgeos::gSymdifference(spgeom1=grp.areas.sp[[grp.pairs[i,1]]],spgeom2=grp.areas.sp[[grp.pairs[i,2]]])#
+					# returns a spatial polygons object with the non-intersecting portions of the group pair polygons each as their own polygons. If no overlap the returned polygons are the same the input polygons.#
+					grp.diff1 <- rgeos::gDifference(spgeom1=grp.areas.sp[[grp.pairs[i,1]]],spgeom2=grp.areas.sp[[grp.pairs[i,2]]])#
+					grp.diff2 <- rgeos::gDifference(spgeom1=grp.areas.sp[[grp.pairs[i,2]]],spgeom2=grp.areas.sp[[grp.pairs[i,1]]])#
+					if(is.null(grp.int)){#
+						int.area.temp <- 0#
+					} else {#
+						#int.area.temp <- attributes(attributes(attributes(grp.int)$"polygons"[[1]])[[1]][[1]])$area#
+						int.area.temp <- grp.int@polygons[[1]]@Polygons[[1]]@area#
+					}#
+					# Area of the region of group 1 that does not intersect group 2 (for this pair of groups).#
+					if(is.null(grp.diff1)){#
+						diff1.area.temp <- 0#
+					} else {#
+						#diff1.area.temp <- attributes(attributes(attributes(grp.diff1)$"polygons"[[1]])[[1]][[1]])$area#
+						diff1.area.temp <- grp.diff1@polygons[[1]]@Polygons[[1]]@area#
+					}#
+					if(is.null(grp.diff2)){#
+						diff2.area.temp <- 0#
+					} else {#
+						#diff2.area.temp <- attributes(attributes(attributes(grp.diff2)$"polygons"[[1]])[[1]][[1]])$area#
+						diff2.area.temp <- grp.diff2@polygons[[1]]@Polygons[[1]]@area#
+					}
+diff.area.temp  <- diff1.area.temp + diff2.area.temp#
+					ratio.temp <- int.area.temp/diff.area.temp#
+					#ratio.temp <- (int.area.temp/pairsum.temp)#
+					#grp.int <- raster::intersect(spgeom1=sample.area.sp[[1]],spgeom2=sample.area.sp[[2]])#
+					grp.int.area <- c(grp.int.area,int.area.temp)#
+					grp.sum.area <- c(grp.sum.area,pairsum.temp)#
+					grp.ratio    <- c(grp.ratio,ratio.temp)
+area.df <- data.frame(group.i=grp.pairs[,1],group.j=grp.pairs[,2],area.intersection=grp.int.area,area.sumpair=grp.sum.area,area.intersection.sum.ratio=grp.ratio)
+!all(area.df$area.intersection.sum.ratio >= interactions[1] & area.df$area.intersection.sum.ratio <= interactions[2])
+nsamp <- (grp.sizes*4)
+samples.sp.temp  <- lapply(X=1:n.grp,FUN=function(x){sp::spsample(x=grp.areas.sp[[x]], n= nsamp[x], type="random")})
+samples.mat.temp <- lapply(X=1:n.grp,FUN=function(x){sp::coordinates(samples.sp.temp[[x]])})
+samples.df.temp <- do.call(rbind,lapply(X=1:n.grp,FUN=function(x){data.frame(X=samples.mat.temp[[x]][,1],Y=samples.mat.temp[[x]][,2],group=x)}))
+samples.in.wnd <- unlist(lapply(1:n.grp,function(x) over(samples.sp.temp[[x]],wnd.sp)))
+CRS(wnd.sp)
+class(wnd.sp)
+CRS(samples.sp.temp)
+identicalCRS(samples.sp.temp, wnd.sp)
+proj4string(samples.sp.temp)
+class(samples.sp.temp)
+samples.sp.temp
+identicalCRS(samples.sp.temp[[1]], wnd.sp)
+identicalCRS(samples.sp.temp[[2]], wnd.sp)
+identicalCRS(wnd.sp,wnd.sp)
+CRS(wnd.sp)
+sp::CRS(wnd.sp)
+sp::CRS(list(wnd.sp))
+plot(wnd.sp)
+class(wnd.sp)
+test <- <- as(raster::extent(c(-180,180,-90,90)), "SpatialPolygons")
+test <- as(raster::extent(c(-180,180,-90,90)), "SpatialPolygons")
+CRS(test)
+raster::crs(test) <- sp::CRS("EPSG:4326")
+CRS(test)
+test
+crs(test)
+sp::crs(test)
+raster::crs(test)
+raster::crs(wnd.sp)
+plot(samples.sp.temp[[1]],add=T)
+raster::crs(samples.sp.temp)
+raster::crs(samples.sp.temp) <- sp::CRS("EPSG:4326")
+class(samples.sp.temp)
+for(i in 1:length(samples.sp.temp)){#
+				raster::crs(samples.sp.temp[[i]]) <- sp::CRS("EPSG:4326")#
+			}
+samples.mat.temp <- lapply(X=1:n.grp,FUN=function(x){sp::coordinates(samples.sp.temp[[x]])})#
+		### Hold sampled coordinates as a list of data frames, and include a column in each data frame to indicate group assignment#
+		samples.df.temp <- do.call(rbind,lapply(X=1:n.grp,FUN=function(x){data.frame(X=samples.mat.temp[[x]][,1],Y=samples.mat.temp[[x]][,2],group=x)}))
+samples.in.wnd <- unlist(lapply(1:n.grp,function(x) over(samples.sp.temp[[x]],wnd.sp)))
+if(any(samples.in.wnd)==1){#
+			samples.df.temp <- samples.df.temp[which(samples.in.wnd==1),]#
+		}
+samples.temp <- points.on.land(samples.df.temp)
+n.grp.pass  <- sapply(X=1:n.grp, FUN=function(x) length(grep(x,samples.temp[,"group"])))
+all(n.grp.pass >= grp.sizes)
+result <- samples.temp[unlist(lapply(1:n.grp,function(x) grep(x,samples.temp[,"group"])[1:grp.sizes[x]])),]
+mode(result[,"group"]) <- "character"#
+	# Convert data frame to spatial points object.#
+	result.sp <- sp::SpatialPoints(result[,c(1,2)])#
+	# Minimum convex hull polygon of all points.#
+	mcp.sp         <- suppressWarnings(adehabitatHR::mcp(result.sp,percent=100))#
+	#mcp.sp.area <- attributes(attributes(attributes(mcp.sp)$"polygons"[[1]])[[1]][[1]])$area#
+	mcp.sp.area    <- mcp.sp@polygons[[1]]@Polygons[[1]]@area#
+	absolute.areas <- c(windowarea=wnd.area,regionsize.dd0=regionsize.dd0,regionsize.dd=regionsize.dd,min.convex.hull.result=mcp.sp.area)#
+	relative.areas <- round((absolute.areas/wnd.area),digits=4)#
+	areas.df       <- data.frame(absolute =absolute.areas, relative.to.wnd=relative.areas)
+world.land     <- rnaturalearth::ne_countries(scale=110, returnclass="sf")#
+		world.land10   <- rnaturalearth::ne_countries(scale=10, returnclass="sf")#
+		result.df2plot <- result#
+		xdist <- geodist::geodist(result.df2plot[order(result.df2plot[,1]),][c(1,nrow(result.df2plot)),1:2],measure="geodesic",sequential=T)#
+		ydist <- geodist::geodist(result.df2plot[order(result.df2plot[,2]),][c(1,nrow(result.df2plot)),1:2],measure="geodesic",sequential=T)#
+		plot.margin <- which(c(xdist,ydist)==max(c(xdist,ydist)))#
+		zoommaparea.km <- (xdist/1000)*(ydist/1000)#
+		if(zoommaparea.km <10e6){#
+			zoom.map <- world.land10#
+		} else {#
+			zoom.map <- world.land#
+		}
+spbb   <- sp::bbox(result.sp)#
+		spbb2  <- apply(spbb,MARGIN=1,FUN=rangeBuffer,f=0.1)#
+		dfbb   <- data.frame(x1=spbb[1,1], x2=spbb[1,2], y1=spbb[2,1], y2=spbb[2,2])#
+		ggrect <- ggplot2::geom_rect(data=dfbb, mapping=ggplot2::aes(xmin=x1, xmax=x2, ymin=y1, ymax=y2),fill="black",color="black",alpha=0.1)#
+		zoom.plot   <- ggplot2::ggplot(data = zoom.map) + ggplot2::geom_sf() + ggplot2::theme_classic() + ggplot2::geom_point(data = result.df2plot, ggplot2::aes(x = X, y = Y, fill=group), size = 2, shape = 21) + ggplot2::coord_sf(xlim =range(result.df2plot[,1]),ylim = range(result.df2plot[,2])) + ggplot2::theme(panel.border = ggplot2::element_rect(color = "black", fill=NA, size=1)) + ggplot2::theme(legend.position = "none") + ggplot2::xlab("longitude") + ggplot2::ylab("latitude")#
+		global.plot <- ggplot2::ggplot(data = world.land) + ggplot2::geom_sf() + ggplot2::theme_classic() + ggplot2::geom_point(data = result.df2plot, ggplot2::aes(x = X, y = Y, fill=group), size = 2, shape = 21) + ggplot2::theme(panel.border = ggplot2::element_rect(color = "black", fill=NA, size=1)) + ggplot2::theme(axis.title.y = ggplot2::element_blank(), axis.title.x = ggplot2::element_blank()) + ggrect
+grobs.list <- list(ggplot2::ggplotGrob(global.plot),ggplot2::ggplotGrob(zoom.plot))#
+		if(plot.margin==2){#
+			bothmaps   <- gridExtra::arrangeGrob(grobs=grobs.list, layout_matrix=matrix(c(1,1,2),ncol=3))#
+		} else {#
+			bothmaps   <- gridExtra::arrangeGrob(grobs=grobs.list, layout_matrix=matrix(c(1,2),ncol=1))#
+		}
+grid::grid.newpage()#
+		grid::grid.draw(bothmaps)
 devtools::document()
-setwd("misc.wrappers")
+test <- rcoords(regionsize=1,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP")
+test <- rcoords(regionsize=1,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP")
+test <- rcoords(regionsize=2,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP")
+test <- rcoords(regionsize=2,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP")
+test <- rcoords(regionsize=2,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP")
 devtools::document()
+test <- rcoords(regionsize=2,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP")
+test <- rcoords(regionsize=3,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP")
+test <- rcoords(regionsize=5,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP")
+test <- rcoords(regionsize=4,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP")
+any(c(1,1,1)==1)
+any(c(1,1,1))==1
+devtools::document()
+test <- rcoords(regionsize=5,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP")
+any(samples.in.wnd == 1)
+devtools::document()
+test <- rcoords(regionsize=5,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP")
+test
+any(samples.in.wnd == 1)
+test <- rcoords(regionsize=5,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP")
+any(samples.in.wnd == 1)
+test <- rcoords(regionsize=5,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP")
+any(samples.in.wnd == 1)
+devtools::document()
+test <- rcoords(regionsize=5,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP")
+test <- rcoords(regionsize=5,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP")
+test <- rcoords(regionsize=5,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP")
+test <- rcoords(regionsize=5,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP")
+test <- rcoords(regionsize=10,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP")
+test <- rcoords(regionsize=10,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP")
+test0 <- rep(NA,10)
+any(test0==1)
+any(test0)==1
+any(test0==1,na.rm=T)
+devtools::document()
+test <- rcoords(regionsize=10,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP")
+test <- rcoords(regionsize=10,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP")
+test <- rcoords(regionsize=10,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP")
+test <- rcoords(regionsize=10,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP")
+test <- rcoords(regionsize=20,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP")
+devtools::document()
+test <- rcoords(regionsize=20,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP")
+sample.area.sp <- wnd.sp
+grp.pts <- sp::spsample(sample.area.sp,n=2,type="random")
+devtools::document()
+test <- rcoords(regionsize=20,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP")
+devtools::document()
+test <- rcoords(regionsize=20,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP")
+test <- rcoords(regionsize=20,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP",grp.area.weights=c(5,1))
+test <- rcoords(regionsize=20,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP",grp.area.weights=c(5,1),interactions=c(0,0.5))
+test <- rcoords(regionsize=20,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP",grp.area.weights=c(10,1),interactions=c(0,0.5))
+test <- rcoords(regionsize=20,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP",grp.area.weights=c(10,1),interactions=c(0,0.2))
+test <- rcoords(regionsize=20,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP",grp.area.weights=c(10,1),interactions=c(0,0.05))
+test <- rcoords(regionsize=20,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP",grp.area.weights=c(20,1),interactions=c(0,0.05))
+test <- rcoords(regionsize=20,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP",grp.area.weights=c(20,1),interactions=c(0,0))
+test <- rcoords(regionsize=20,samplesize=100,n.grp=,wnd=Luzon.sp,show.plot=T,return.as="SP",grp.area.weights=c(20,1),grp.n.weights=c(20,1),interactions=c(0,0))
+test <- rcoords(regionsize=20,samplesize=100,n.grp=,wnd=Luzon.sp,show.plot=T,return.as="SP",grp.area.weights=c(20,2),grp.n.weights=c(20,1),interactions=c(0,0))
+test <- rcoords(regionsize=20,samplesize=100,n.grp=,wnd=Luzon.sp,show.plot=T,return.as="SP",grp.area.weights=c(1,1),grp.n.weights=c(20,1),interactions=c(0,0))
+test <- rcoords(regionsize=20,samplesize=100,n.grp=,wnd=Luzon.sp,show.plot=T,return.as="SP",grp.area.weights=c(20,1),grp.n.weights=c(1,1),interactions=c(0,0))
+test <- rcoords(regionsize=20,samplesize=100,n.grp=,wnd=Luzon.sp,show.plot=T,return.as="SP",grp.area.weights=c(20,1),grp.n.weights=NULL,interactions=c(0,0))
+devtools::document()
+test <- rcoords(regionsize=20,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP",grp.area.weights=c(20,1),interactions=c(0,0))
+test <- rcoords(regionsize=20,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP",grp.area.weights=c(20,1),interactions=c(0,0))
+test <- rcoords(regionsize=20,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP",grp.area.weights=c(20,1),interactions=c(0,0))
+test <- rcoords(regionsize=20,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP",grp.area.weights=c(20,1),interactions=c(0,0),grp.n.weights=NULL)
+test <- rcoords(regionsize=20,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP",grp.area.weights=c(20,1),interactions=c(0,0),grp.n.weights=NULL)
+test <- rcoords(regionsize=20,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP",grp.area.weights=c(20,1),interactions=c(0,0),grp.n.weights=c(10,5))
+test <- rcoords(regionsize=20,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP",grp.area.weights=c(20,1),interactions=c(0,0),grp.n.weights=c(10,5))
+test <- rcoords(regionsize=20,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP",grp.area.weights=c(20,1),interactions=c(0,0),grp.n.weights=c(10,5))
+devtools::document()
+test <- rcoords(regionsize=20,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP",grp.area.weights=c(20,1),interactions=c(0,0),grp.n.weights=c(10,5))
+test <- rcoords(regionsize=20,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP",grp.area.weights=c(20,1),interactions=c(0,0),grp.n.weights=c(10,5))
+test <- rcoords(regionsize=20,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP",grp.area.weights=c(20,1),interactions=c(0.01,0.3),grp.n.weights=c(10,5))
+test <- rcoords(regionsize=20,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP",grp.area.weights=c(20,1),interactions=c(0.01,0.3),grp.n.weights=c(10,5))
+test <- rcoords(regionsize=20,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP",grp.area.weights=c(30,1),interactions=c(0.01,0.1),grp.n.weights=c(10,5))
+test <- rcoords(regionsize=20,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP",grp.area.weights=c(30,1),interactions=c(0,0.1),grp.n.weights=c(10,5))
+test <- rcoords(regionsize=20,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP",grp.area.weights=c(30,1),interactions=c(0,0),grp.n.weights=c(10,5))
+test <- rcoords(regionsize=20,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP",grp.area.weights=c(30,1),interactions=c(0,0),grp.n.weights=c(15,5))
+test <- rcoords(regionsize=20,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP",grp.area.weights=c(30,1),interactions=c(0,0),grp.n.weights=c(30,1))
+test <- rcoords(regionsize=20,samplesize=500,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP",grp.area.weights=c(30,1),interactions=c(0,0),grp.n.weights=c(30,1))
+test <- rcoords(regionsize=20,samplesize=500,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP",grp.area.weights=c(30,1),interactions=c(0,0),grp.n.weights=c(30,1))
+test <- rcoords(regionsize=20,samplesize=500,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP",grp.area.weights=c(20,1),interactions=c(0,0),grp.n.weights=c(30,1))
+test <- rcoords(regionsize=20,samplesize=500,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP",grp.area.weights=c(20,1),interactions=c(0,0),grp.n.weights=c(30,1))
+test <- rcoords(regionsize=20,samplesize=500,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP",grp.area.weights=c(20,1),interactions=c(0,0),grp.n.weights=c(30,1))
+test <- rcoords(regionsize=20,samplesize=500,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP",grp.area.weights=c(20,1),interactions=c(0,0),grp.n.weights=c(30,1))
+test <- rcoords(regionsize=20,samplesize=500,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP",grp.area.weights=c(97453,12512),interactions=c(0,0),grp.n.weights=c(30,1))
+test <- rcoords(regionsize=20,samplesize=500,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP",grp.area.weights=c(97453,12512),interactions=c(0,0),grp.n.weights=c(30,1))
 q("no")

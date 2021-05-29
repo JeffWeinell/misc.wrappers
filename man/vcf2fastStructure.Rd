@@ -25,6 +25,3 @@ Convert VCF file/object to fastStructure input file (for SNP data)
 
 Converts a VCF file or vcfR object with SNP data into a fastStructure file.
 }
-\examples{
-library(misc.wrappers)
-}
