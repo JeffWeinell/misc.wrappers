@@ -382,7 +382,7 @@ rcoords <- function(regionsize=0.25, samplesize=100, n.grp=1, grp.n.weights=NULL
 	grp.scaler.start <- grp.scaler
 	#result.temp        <- data.frame(NULL)
 	PASS=FALSE
-	miter <- 100
+	miter <- 1000
 	ctr   <- 0
 	if(length(samplesize)==1){
 		if((n.grp*min.grp.size) > samplesize){
@@ -403,24 +403,43 @@ rcoords <- function(regionsize=0.25, samplesize=100, n.grp=1, grp.n.weights=NULL
 	#		
 	#	}
 	#}
-	
-	
 	if(is(wnd,"matrix")){
 			stop("not yet implemented")
 			### in the future, each row will describe the bounding box of a group
 		} else {
-		if(is(wnd,"numeric")){
-			# rectangular SpatialPolygons object with extent formed by 'wnd' argument.
-			wnd.sp <- as(raster::extent(wnd), "SpatialPolygons")
-			# area of the region bounded by 'wnd', in decimal degrees
-			wnd.sp2 <- wnd.sp
-			#sp::proj4string(wnd.sp2) <- sp::CRS("+proj=longlat +datum=WGS84")
-			raster::crs(wnd.sp2) <- sp::CRS("EPSG:4326")
-			#wnd.area <- attributes(attributes(wnd.sp2)$polygons[[1]])$area
-			wnd.area <- wnd.sp2@polygons[[1]]@Polygons[[1]]@area
-			# area of region spanning all group sampling areas, in decimal degrees
-			regionsize.dd0 <- (regionsize*wnd.area)
-			regionsize.dd  <- (regionsize.dd0*0.25)
+			if(is(wnd,"SpatialPolygons")){
+				if(FALSE){
+					stop("not yet implemented")
+					### In the future, a spatial polygons object can be supplied
+					world.land.sp    <- rnaturalearth::ne_countries(scale=110, returnclass="sp")
+					ph.land10.sp     <- world.land10.sp[which(world.land10.sp[,"sovereignt"][[1]]=="Philippines"),]
+					ph.island.areas  <- sapply(X=1:length(ph.land10.sp@polygons[[1]]@Polygons),FUN=function(x){ph.land10.sp@polygons[[1]]@Polygons[[x]]@area})
+					Luzon.polygon    <- ph.land10.sp@polygons[[1]]@Polygons[[which(ph.island.areas == max(ph.island.areas))]]
+					Luzon.sp         <- sp::SpatialPolygons(list(sp::Polygons(list(Luzon.polygon),1)))
+					# Would set 'wnd' argument to Luzon.sp
+					wnd <- Luzon.sp
+					# wnd.sp is simply wnd
+				}
+				wnd.sp <- wnd
+				raster::crs(wnd.sp)  <- sp::CRS("EPSG:4326")
+				wnd.area             <- wnd.sp@polygons[[1]]@Polygons[[1]]@area
+				regionsize.dd0       <- (regionsize*wnd.area)
+				#regionsize.dd        <- (regionsize.dd0*0.25)
+				regionsize.dd        <- (regionsize.dd0)
+			} else {
+			if(is(wnd,"numeric")){
+				# rectangular SpatialPolygons object with extent formed by 'wnd' argument.
+				wnd.sp <- as(raster::extent(wnd), "SpatialPolygons")
+				# area of the region bounded by 'wnd', in decimal degrees
+				wnd.sp2 <- wnd.sp
+				#sp::proj4string(wnd.sp2) <- sp::CRS("+proj=longlat +datum=WGS84")
+				raster::crs(wnd.sp2) <- sp::CRS("EPSG:4326")
+				#wnd.area <- attributes(attributes(wnd.sp2)$polygons[[1]])$area
+				wnd.area <- wnd.sp2@polygons[[1]]@Polygons[[1]]@area
+				# area of region spanning all group sampling areas, in decimal degrees
+				regionsize.dd0 <- (regionsize*wnd.area)
+				regionsize.dd  <- (regionsize.dd0*0.25)
+			}
 		}
 	}
 	# wnd.sp3              <- sp::spTransform(wnd.sp2,sp::CRS("ESRI:54009"))
@@ -461,27 +480,17 @@ rcoords <- function(regionsize=0.25, samplesize=100, n.grp=1, grp.n.weights=NULL
 				grp.scaler <- (grp.scaler*0.99)
 			}
 			# Random point within wnd.sp to determine subregion within which group centers will occur
-			center.sp <- sp::spsample(wnd.sp,n=1,type="random")
+			center.sp <- suppressWarnings(sp::spsample(wnd.sp, n=1, type="random"))
 			# Length two vector with "x" and "y" entries from sample.center, to pass to spCircle
 			center.xy <- c(sp::coordinates(center.sp)); names(center.xy) <- c("x","y")
-			# Create a circular polygon centered at sample center; in this case 
-			# sample.area.sp <- sampSurf::spCircle(radius=sqrt((regionsize/pi)),centerPoint=center.xy)[[1]]
-			# regionsize2 <- (10^regionsize)
-			# regionsize2 <- regionsize.dd
-			#if(n.grp==1){
-			#regionsize.dd <- (regionsize.dd*grp.scaler*0.5)
-			#}
-			sample.area.sp <- sampSurf::spCircle(radius=sqrt((regionsize.dd/pi)), centerPoint=center.xy)[[1]]
-			#sample.area.sp.area <- attributes(attributes(attributes(sample.area.sp)$polygons[[1]])[[1]][[1]])$area
-			# Check if entire sample.area.sp is within window defined by 'wnd' argument
-	#		area.wnd.diff <- rgeos::gDifference(spgeom1=sample.area.sp,spgeom2=wnd.sp)
-	#		# If area.wnd.diff is not NULL, then part of 'sample.area.sp' falls outside of the sampling window.
-	#		if(!is.null(area.wnd.diff)){
-	#			next
-	#		}
+			if(is(wnd,"SpatialPolygons")){
+				sample.area.sp <- wnd.sp
+			} else {
+				sample.area.sp <- sampSurf::spCircle(radius=sqrt((regionsize.dd/pi)), centerPoint=center.xy)[[1]]
+			}
 			if(n.grp>1){
 				# Sample group sampling-center locations from within sample.area.sp
-				grp.pts <- sp::spsample(sample.area.sp,n=n.grp,type="random")
+				grp.pts <- suppressWarnings(sp::spsample(sample.area.sp,n=n.grp,type="random"))
 				# coordinates extracted from grp.pts
 				grp.pts.mat <- sp::coordinates(grp.pts)
 				colnames(grp.pts.mat) <- c("x","y")
@@ -553,7 +562,6 @@ rcoords <- function(regionsize=0.25, samplesize=100, n.grp=1, grp.n.weights=NULL
 					} else {
 						#int.area.temp <- attributes(attributes(attributes(grp.int)$"polygons"[[1]])[[1]][[1]])$area
 						int.area.temp <- grp.int@polygons[[1]]@Polygons[[1]]@area
-
 					}
 					# Area of the region of group 1 that does not intersect group 2 (for this pair of groups).
 					if(is.null(grp.diff1)){
@@ -610,8 +618,14 @@ rcoords <- function(regionsize=0.25, samplesize=100, n.grp=1, grp.n.weights=NULL
 		if(over.land){
 			nsamp <- (grp.sizes*4)
 			samples.sp.temp  <- lapply(X=1:n.grp,FUN=function(x){sp::spsample(x=grp.areas.sp[[x]], n= nsamp[x], type="random")})
+			for(i in 1:length(samples.sp.temp)){
+				raster::crs(samples.sp.temp[[i]]) <- sp::CRS("EPSG:4326")
+			}
 		} else {
 			samples.sp.temp  <- lapply(X=1:n.grp,FUN=function(x) {sp::spsample(x= grp.areas.sp[[x]],n=grp.sizes[x], type="random")})
+			for(i in 1:length(samples.sp.temp)){
+				raster::crs(samples.sp.temp[[i]]) <- sp::CRS("EPSG:4326")
+			}
 		}
 		samples.mat.temp <- lapply(X=1:n.grp,FUN=function(x){sp::coordinates(samples.sp.temp[[x]])})
 		### Hold sampled coordinates as a list of data frames, and include a column in each data frame to indicate group assignment
@@ -619,10 +633,10 @@ rcoords <- function(regionsize=0.25, samplesize=100, n.grp=1, grp.n.weights=NULL
 		
 		# Filtering samples outside of 'wnd'; 1=sample is within wnd; NA=sample is outside of wnd
 		samples.in.wnd <- unlist(lapply(1:n.grp,function(x) over(samples.sp.temp[[x]],wnd.sp)))
-		if(any(samples.in.wnd)==1){
+		#return(samples.in.wnd)
+		if(any(samples.in.wnd==1,na.rm=TRUE)){
 			samples.df.temp <- samples.df.temp[which(samples.in.wnd==1),]
 		}
-		
 		### Hold sampled coordinates as a list of data frames, and include a column in each data frame to indicate group assignment
 #		samples.df.temp <- lapply(X=1:n.grp,FUN=function(x){data.frame(X=samples.mat.temp[[x]][,1],Y=samples.mat.temp[[x]][,2],group=x)})
 		####### PAUSED HERE ##########
