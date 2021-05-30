@@ -17,7 +17,8 @@
 #' @param ploidy Integer ≥ 1 indicating ploidy, or NULL (the default), in which case ploidy is determined automatically from the input data (only works if 'format' = "VCF" or "vcfR").
 #' @param missing Integer used to code missing alleles, or NULL (the default), in which case missing data is identified automatically from the input file (only works if 'format' = "VCF" or "vcfR").
 #' @param onerowperind Logical indicating if the input data file codes individuals on a single or multiple rows. Default is NULL (only works if 'format' = "VCF" or "vcfR"), in which case a temporary structure file is created and onerowperind is coerced to TRUE.
-#' @param save.as Where to save the output PDF. Default is NULL.
+##' @param save.as Where to save the output PDF. Default is NULL.
+#' @param save.in Character string with path to directory where output files should be saved. The directory will be created and should not already exist. Default is NULL, in which case output is saved to a new folder (name randomly generated) in the current directory.
 ##' @param tolerance Tolerance for convergence, i.e., the change in marginal likelihood required to continue.
 ##' @param prior Type of prior to use. Default "simple"
 ##' @param full Whether or not to generate output files holding variation of Q, P, and marginal likelihood, in addition to the files holding means. Default FALSE.
@@ -30,7 +31,7 @@
 #' @param ... Additional arguments passed to STRUCTURE. Not yet implemented in the future may include 'LABEL', 'POPDATA', 'POPFLAG', 'LOCDATA', 'PHENOTYPE', 'EXTRACOLS', 'MARKERNULLMES', 'RECESSIVEALLELES', 'MAPDISTANCES', 'PHASED', 'PHASEINFO', 'MARKOVPHASE', and 'NOTAMBIGUOUS'
 #' @return List of plots
 #' @export run_structure
-run_structure <- function(x, format="VCF", coords=NULL, mainparams.path=NULL, extraparams.path=NULL, burnin=1000, kmax=10, numreps=10000, runs=5, ploidy=NULL, missing=NULL, onerowperind=NULL, save.as=NULL, structure.path=NULL, samplenames=NULL, cleanup=TRUE, include.out=c(".pdf",".Qlog",".margLlog"), debug=FALSE, ...){
+run_structure <- function(x, format="VCF", coords=NULL, mainparams.path=NULL, extraparams.path=NULL, burnin=1000, kmax=10, numreps=10000, runs=5, ploidy=NULL, missing=NULL, onerowperind=NULL, save.in=NULL, structure.path=NULL, samplenames=NULL, cleanup=TRUE, include.out=c(".pdf",".Qlog",".margLlog"), debug=FALSE, ...){
 	# list with user-specified arguments
 	argslist <- list(...)
 	if(length(argslist)>0){
@@ -47,11 +48,11 @@ run_structure <- function(x, format="VCF", coords=NULL, mainparams.path=NULL, ex
 		# derived from save.as
 		OUTFILE
 	}
-	if(is.null(save.as)){
-		save.as <- file.path(getwd(),"result_structure.pdf")
+	if(is.null(save.in)){
+		save.in <- file.path(getwd(),paste(sample(c(letters,LETTERS,rep(0:9,3)),10,replace=T),collapse=""))
 	}
-	if(file.exists(save.as)){
-		stop("Output file already exists. Use a different name for 'save.as' argument.")
+	if(dir.exists(save.in)){
+		stop("Output directory should not already exist. Use a different name for 'save.in' argument.")
 	}
 	Krange=1:kmax
 	if(format=="VCF" | is(x,"vcfR")){
@@ -156,7 +157,7 @@ run_structure <- function(x, format="VCF", coords=NULL, mainparams.path=NULL, ex
 	kmax <- max(Krange)
 	##### Define/create output directory and define output files.
 	if(debug) message("step 2")
-	outdir.temp <- file.path(dirname(save.as),paste(sample(c(letters,LETTERS,rep(0:9,3)),10,replace=T),collapse=""))
+	outdir.temp <- save.in
 	dir.create(outdir.temp)
 	outfile.temp  <- file.path(outdir.temp,"structure.log")
 	### Move the structure file into outdir.temp
@@ -271,7 +272,7 @@ run_structure <- function(x, format="VCF", coords=NULL, mainparams.path=NULL, ex
 		# 'sitebysite' is applicable only when 'linkage' is TRUE
 		logicaloutputoptions   <- c(printnet=1, printlambda=0, printqsum=0, sitebysite=0, printqhat=1, printlikes=0, echodata=0, ancestdist=1)
 		# You may want to set 'intermedsave' to a value 5-10, to get intermediate results before numreps is reached.
-		integeroutputoptions   <- c(updatefreq=0, intermedsave=5)
+		integeroutputoptions   <- c(updatefreq=0, intermedsave=0)
 		numericaloutputoptions <- c(ancestpint=0.9, numboxes=0.01)
 		### Miscellaneous options
 		logicalmisc   <- c(computeprob=1, startatpopinfo=0, randomize=1, reporthitrate=1)
@@ -471,7 +472,6 @@ run_structure <- function(x, format="VCF", coords=NULL, mainparams.path=NULL, ex
 	#### Save the PDF
 	if(debug) message("step 9")
 	if(".pdf" %in% include.out){
-	#if(!is.null(save.as)){
 		pdf(height=6,width=10,file=save.as,onefile=TRUE)
 		lapply(X=result,FUN=print)
 		dev.off()

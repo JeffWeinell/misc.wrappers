@@ -22,7 +22,7 @@ run_structure(
   ploidy = NULL,
   missing = NULL,
   onerowperind = NULL,
-  save.as = NULL,
+  save.in = NULL,
   structure.path = NULL,
   samplenames = NULL,
   cleanup = TRUE,
@@ -56,7 +56,7 @@ run_structure(
 
 \item{onerowperind}{Logical indicating if the input data file codes individuals on a single or multiple rows. Default is NULL (only works if 'format' = "VCF" or "vcfR"), in which case a temporary structure file is created and onerowperind is coerced to TRUE.}
 
-\item{save.as}{Where to save the output PDF. Default is NULL.}
+\item{save.in}{Character string with path to directory where output files should be saved. The directory will be created and should not already exist. Default is NULL, in which case output is saved to a new folder (name randomly generated) in the current directory.}
 
 \item{structure.path}{Character string with path to folder containing the structure executable called 'structure.py'}
 
@@ -69,6 +69,8 @@ run_structure(
 \item{debug}{Logical indicating whether or not to print messages indicating the internal step of the function. Default FALSE. Typically only used for development.}
 
 \item{...}{Additional arguments passed to STRUCTURE. Not yet implemented in the future may include 'LABEL', 'POPDATA', 'POPFLAG', 'LOCDATA', 'PHENOTYPE', 'EXTRACOLS', 'MARKERNULLMES', 'RECESSIVEALLELES', 'MAPDISTANCES', 'PHASED', 'PHASEINFO', 'MARKOVPHASE', and 'NOTAMBIGUOUS'}
+
+\item{save.as}{Where to save the output PDF. Default is NULL.}
 
 \item{tolerance}{Tolerance for convergence, i.e., the change in marginal likelihood required to continue.}
 
