@@ -58,7 +58,7 @@ run_structure <- function(x, format="VCF", coords=NULL, mainparams.path=NULL, ex
 			vcf.obj <- vcf <- x
 		} else {
 			vcf <- x
-			vcf.obj     <- vcfR::read.vcfR(vcf,verbose=F,checkFile=F)
+			vcf.obj     <- vcfR::read.vcfR(vcf,verbose=F,checkFile=F,convertNA=FALSE)
 		}
 		gt.mat      <- gsub(":.+","",vcf.obj@gt[,-1])
 		# Detect ploidy from genotype matrix of vcf
@@ -569,7 +569,7 @@ vcf2structure <- function(vcf, IndvNames=TRUE, OneRowPerIndv=TRUE, MarkerNames=T
 	} else {
 		if(is(vcf,"character")){
 			# read VCF file into R as a vcfR object
-			vcf.obj     <- vcfR::read.vcfR(vcf)
+			vcf.obj     <- vcfR::read.vcfR(file=vcf,convertNA=FALSE)
 		} else {
 			stop("vcf argument must be eith a character string with path to VCF file, or a vcfR object")
 		}
