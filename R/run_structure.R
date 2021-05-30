@@ -272,7 +272,7 @@ run_structure <- function(x, format="VCF", coords=NULL, mainparams.path=NULL, ex
 		# 'sitebysite' is applicable only when 'linkage' is TRUE
 		logicaloutputoptions   <- c(printnet=1, printlambda=0, printqsum=0, sitebysite=0, printqhat=1, printlikes=0, echodata=0, ancestdist=1)
 		# You may want to set 'intermedsave' to a value 5-10, to get intermediate results before numreps is reached.
-		integeroutputoptions   <- c(updatefreq=0, intermedsave=0)
+		integeroutputoptions   <- c(updatefreq=0, intermedsave=5)
 		numericaloutputoptions <- c(ancestpint=0.9, numboxes=0.01)
 		### Miscellaneous options
 		logicalmisc   <- c(computeprob=1, startatpopinfo=0, randomize=1, reporthitrate=1)
@@ -351,7 +351,16 @@ run_structure <- function(x, format="VCF", coords=NULL, mainparams.path=NULL, ex
 	}
 	#### Make Evanno Plots. Once the other functions for plotting are made I'll change save.as to NULL.
 	ggEvanno <- EvannoPlots(input.dir=outdir.temp,save.as=file.path(outdir.temp,"EvannoPlots.pdf"))
-	
+	## Remove 0-byte files in outdir.temp, if they exist
+	outfiles       <- list.files(outdir.temp,full.names=T)
+	outfileinfo.df <- file.info(outfiles,extra_cols = FALSE)
+	if(any(outfileinfo.df[,"size"]==0)){
+		doremoval <- file.remove(outfiles[which(outfileinfo.df[,"size"]==0)])
+	}
+	#### Close any open graphics windows, if they exist
+	if(!is.null(dev.list())){
+		graphics.off()
+	}
 	return(NULL)
 	stop("function not ready for implementation")
 	### Make Barplots
@@ -803,14 +812,21 @@ EvannoPlots <- function(input.dir=getwd(),save.as="EvannoPlots.pdf"){
 	# Define K as a factor
 	evStr.df[,"k"]    <- factor(evStr.df[,"k"], levels=c(1:nrow(evStr.df)))
 	# ln probability of the data
-	elpdmean.plot <-  ggplot2::ggplot() + ggplot2::geom_boxplot(data=evStr.df, ggplot2::aes(x=k, y=elpdmean), fill='lightgray', outlier.colour="black", outlier.shape=16,outlier.size=2, notch=FALSE) + ggplot2::theme_classic() + ggplot2::labs(title= paste0("A"), x="K", y = "L(K)") + ggplot2::xlim(levels(evStr.df$k))
+	#elpdmean.plot0 <-  ggplot2::ggplot() + ggplot2::geom_boxplot(data=evStr.df, ggplot2::aes(x=k, y=elpdmean), fill='lightgray', outlier.colour="black", outlier.shape=16,outlier.size=2, notch=FALSE) + ggplot2::theme_classic() + ggplot2::labs(title= paste0("A"), x="K", y = "L(K)") + ggplot2::xlim(levels(evStr.df$k))
+	elpdmean.plot0 <-  ggplot2::ggplot() + ggplot2::geom_point(data=evStr.df, ggplot2::aes(x=k, y=elpdmean), fill='black',color='black',shape=21) + ggplot2::theme_classic() + ggplot2::labs(title= paste0("A"), x="K", y = "L(K)") + ggplot2::xlim(levels(evStr.df$k))
+	elpdmean.plot  <-  elpdmean.plot0    + ggplot2::geom_segment(data=evStr.df,ggplot2::aes(x=k, y=elpdmin, xend=k, yend=elpdmax),arrow=grid::arrow(angle=90,ends="both",length=grid::unit(0.1, "inches")))
 	# first derivative
-	lnk1.plot     <-  ggplot2::ggplot() + ggplot2::geom_boxplot(data=evStr.df[2:nrow(evStr.df),], ggplot2::aes(x=k, y=lnk1), fill='lightgray', outlier.colour="black", outlier.shape=16,outlier.size=2, notch=FALSE) + ggplot2::theme_classic() + ggplot2::labs(title= paste0("B"), x="K", y = "L'(K)") + ggplot2::xlim(levels(evStr.df$k))
+	#lnk1.plot     <-  ggplot2::ggplot() + ggplot2::geom_boxplot(data=evStr.df[2:nrow(evStr.df),], ggplot2::aes(x=k, y=lnk1), fill='lightgray', outlier.colour="black", outlier.shape=16,outlier.size=2, notch=FALSE) + ggplot2::theme_classic() + ggplot2::labs(title= paste0("B"), x="K", y = "L'(K)") + ggplot2::xlim(levels(evStr.df$k))
+	lnk1.plot0     <-  ggplot2::ggplot() + ggplot2::geom_point(data=evStr.df[2:nrow(evStr.df),], ggplot2::aes(x=k, y=lnk1), fill='black',color='black',shape=21) + ggplot2::theme_classic() + ggplot2::labs(title= paste0("B"), x="K", y = "L'(K)") + ggplot2::xlim(levels(evStr.df$k))
+	lnk1.plot      <-  lnk1.plot0 + ggplot2::geom_segment(data=evStr.df[2:nrow(evStr.df),],ggplot2::aes(x=k, y=lnk1min, xend=k, yend=lnk1max),arrow=grid::arrow(angle=90,ends="both",length=grid::unit(0.1, "inches")))
 	# second derivative
-	lnk2.plot     <-  ggplot2::ggplot() + ggplot2::geom_boxplot(data=evStr.df[2:(nrow(evStr.df)-1),], ggplot2::aes(x=k, y=lnk2), fill='lightgray', outlier.colour="black", outlier.shape=16,outlier.size=2, notch=FALSE) + ggplot2::theme_classic() + ggplot2::labs(title= paste0("C"), x="K", y = "|L''(K)|") + ggplot2::xlim(levels(evStr.df$k))
+	#lnk2.plot     <-  ggplot2::ggplot() + ggplot2::geom_boxplot(data=evStr.df[2:(nrow(evStr.df)-1),], ggplot2::aes(x=k, y=lnk2), fill='lightgray', outlier.colour="black", outlier.shape=16,outlier.size=2, notch=FALSE) + ggplot2::theme_classic() + ggplot2::labs(title= paste0("C"), x="K", y = "|L''(K)|") + ggplot2::xlim(levels(evStr.df$k))
+	lnk2.plot0     <-  ggplot2::ggplot() + ggplot2::geom_point(data=evStr.df[2:(nrow(evStr.df)-1),], ggplot2::aes(x=k, y=lnk2), fill='black',color='black',shape=21) + ggplot2::theme_classic() + ggplot2::labs(title= paste0("C"), x="K", y = "|L''(K)|") + ggplot2::xlim(levels(evStr.df$k))
+	lnk2.plot      <-  lnk2.plot0 + ggplot2::geom_segment(data=evStr.df[2:(nrow(evStr.df)-1),], ggplot2::aes(x=k, y=lnk2min, xend=k, yend=lnk2max),arrow=grid::arrow(angle=90,ends="both",length=grid::unit(0.1, "inches")))
 	# delta K
 	if(!all(is.na(evStr.df[,"deltaK"]))){
-		deltaK.plot <-  ggplot2::ggplot(data=evStr.df[!which(is.na(evStr.df[,"deltaK"])),], ggplot2::aes(x=k, y=deltaK, na.rm = TRUE)) + ggplot2::geom_boxplot(fill='lightgray', outlier.colour="black", outlier.shape=16,outlier.size=2, notch=FALSE) + ggplot2::theme_classic() + ggplot2::labs(title= paste0("D"), x="K", y = "delta K") + ggplot2::xlim(levels(evStr.df$k))
+		# deltaK.plot <-  ggplot2::ggplot(data=evStr.df[!is.na(evStr.df[,"deltaK"]),], ggplot2::aes(x=k, y=deltaK, na.rm = TRUE)) + ggplot2::geom_boxplot(fill='lightgray', outlier.colour="black", outlier.shape=16,outlier.size=2, notch=FALSE) + ggplot2::theme_classic() + ggplot2::labs(title= paste0("D"), x="K", y = "delta K") + ggplot2::xlim(levels(evStr.df$k))
+		deltaK.plot <-  ggplot2::ggplot(data=evStr.df[!is.na(evStr.df[,"deltaK"]),], ggplot2::aes(x=k, y=deltaK, na.rm = TRUE)) + ggplot2::geom_point(fill='black',color='black',shape=21) + ggplot2::theme_classic() + ggplot2::labs(title= paste0("D"), x="K", y = "delta K") + ggplot2::xlim(levels(evStr.df$k))
 	} else {
 		blank.df    <- data.frame(x=c(0,0.5,1),y=c(0,0.5,1),text=c("","delta K is NA for all K",""))
 		deltaK.plot <- ggplot2::ggplot(blank.df,aes(x=x,y=y)) + ggplot2::geom_text(blank.df,mapping=ggplot2::aes(x=x,y=y,label=text)) + ggplot2::labs(title="", x="", y = "") + ggplot2::theme_void()
