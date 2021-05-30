@@ -12,7 +12,8 @@
 #' @param extraparams.path Character string with path to the extraparams file. Default is NULL, in which case the extraparams file is generated from values supplied to arguments of this function.
 #' @param kmax Numerical vector with set of values to use for K. Default 40.
 #' @param burnin Integer with how many initial MCMC samples to ignore. Default is 1000. NEED TO CHECK IF THIS IS REASONABLE. If this argument is NULL, then BURNIN must be defined in the file mainparams file and 'mainparams.path' must not be NULL.
-#' @param reps Number of repititions. Default 100.
+#' @param numreps Chain length. Default 10000.
+#' @param runs Number of times to repeat the mcmc analysis . Default 5.
 #' @param ploidy Integer ≥ 1 indicating ploidy, or NULL (the default), in which case ploidy is determined automatically from the input data (only works if 'format' = "VCF" or "vcfR").
 #' @param missing Integer used to code missing alleles, or NULL (the default), in which case missing data is identified automatically from the input file (only works if 'format' = "VCF" or "vcfR").
 #' @param onerowperind Logical indicating if the input data file codes individuals on a single or multiple rows. Default is NULL (only works if 'format' = "VCF" or "vcfR"), in which case a temporary structure file is created and onerowperind is coerced to TRUE.
@@ -29,7 +30,7 @@
 #' @param ... Additional arguments passed to STRUCTURE. Not yet implemented in the future may include 'LABEL', 'POPDATA', 'POPFLAG', 'LOCDATA', 'PHENOTYPE', 'EXTRACOLS', 'MARKERNULLMES', 'RECESSIVEALLELES', 'MAPDISTANCES', 'PHASED', 'PHASEINFO', 'MARKOVPHASE', and 'NOTAMBIGUOUS'
 #' @return List of plots
 #' @export run_structure
-run_structure <- function(x, format="VCF", coords=NULL, mainparams.path=NULL, extraparams.path=NULL, burnin=1000, kmax=10, reps=10000, ploidy=NULL,missing=NULL, onerowperind=NULL, save.as=NULL, structure.path=NULL, samplenames=NULL, cleanup=TRUE, include.out=c(".pdf",".Qlog",".margLlog"), debug=FALSE,...){
+run_structure <- function(x, format="VCF", coords=NULL, mainparams.path=NULL, extraparams.path=NULL, burnin=1000, kmax=10, numreps=10000, runs=5, ploidy=NULL, missing=NULL, onerowperind=NULL, save.as=NULL, structure.path=NULL, samplenames=NULL, cleanup=TRUE, include.out=c(".pdf",".Qlog",".margLlog"), debug=FALSE, ...){
 	# list with user-specified arguments
 	argslist <- list(...)
 	if(length(argslist)>0){
@@ -169,7 +170,7 @@ run_structure <- function(x, format="VCF", coords=NULL, mainparams.path=NULL, ex
 	mainparams.df1["INFILE","values"]   <- infile.temp1
 	mainparams.df1["OUTFILE","values"]  <- outfile.temp
 	mainparams.df1["BURNIN","values"]   <- burnin
-	mainparams.df1["NUMREPS","values"]  <- reps
+	mainparams.df1["NUMREPS","values"]  <- numreps
 	mainparams.df1["NUMINDS","values"]  <- numind
 	#mainparams.df["NUMLOCI","values"] <- 
 	mainparams.df1["PLOIDY","values"]   <- ploidy
@@ -338,15 +339,38 @@ run_structure <- function(x, format="VCF", coords=NULL, mainparams.path=NULL, ex
 		# copies extraparams into the output directory
 		file.copy(from=extraparams.path,to=file.path(outdir.temp,"extraparams"))
 	}
-	for(K in Krange){
-		outfile.K <- paste0(tools::file_path_sans_ext(outfile.temp),"_K",K,".log")
-		### Modify command1 for STRUCTURE arguments
-		# command1     <- paste0(structure.path," -K ",K," --input=",str.path," --prior=",prior,full,seed," --format=str --output=", outfile.temp.i)
-		command1     <- paste0(structure.path," -K ",K," -m ",mainparams.path," -e ",extraparams.path," -o ",outfile.K)
-		run.command1 <- system(command1)
+	for(i in 1:runs){
+		for(K in Krange){
+			outfile.K <- paste0(tools::file_path_sans_ext(outfile.temp),"_K",K,"_run",i,".log")
+			### Modify command1 for STRUCTURE arguments
+			# command1     <- paste0(structure.path," -K ",K," --input=",str.path," --prior=",prior,full,seed," --format=str --output=", outfile.temp.i)
+			command1     <- paste0(structure.path," -K ",K," -m ",mainparams.path," -e ",extraparams.path," -o ",outfile.K)
+			run.command1 <- system(command1)
+		}
 	}
+	#### Make Evanno Plots. Once the other functions for plotting are made I'll change save.as to NULL.
+	ggEvanno <- EvannoPlots(input.dir=outdir.temp,save.as=file.path(outdir.temp,"EvannoPlots.pdf"))
+	
 	return(NULL)
 	stop("function not ready for implementation")
+	### Make Barplots
+
+	### Make Assignment plots
+
+	### Make interpolated-assignment maps if coords is not null
+
+	if(FALSE){
+		# Character vector with paths to output structure files
+		qfiles <- list.files(outdir.temp, full.names=T, pattern="log_f$")
+		# Read qfiles into R
+		qlist  <- pophelper::readQ(files=qfiles)
+		# Set rownames of each matrix in qlist as the names of samples
+		qlist2 <- lapply(X=1:length(qlist), FUN=function(x) {A=qlist[[x]]; rownames(A)=samplenames;A})
+		# Aligned qlist
+		aqlist <- pophelper::alignK(qlist)
+		# Barplots; probably better to use the ggplot method
+#		qplots <- pophelper::plotQ(qlist=aqlist, exportpath=outdir.temp)
+	}
 	##### CODE BELOW HERE NOT UPDATED #####
 	#### Load the marginal likelihood scores (the metric of fit for each K)
 	logpaths <- list.files(outdir.temp,pattern="^.+\\.log$",full.names=TRUE)
@@ -361,18 +385,18 @@ run_structure <- function(x, format="VCF", coords=NULL, mainparams.path=NULL, ex
 	### Matrix with marginal likelihood from each rep and each K
 	margL.mat <- do.call(rbind,lapply(Krange,FUN=function(x){A=unlist(loglines[which(KLogs==x)]);B=A[grep("^Marginal Likelihood = .+",A)]; as.numeric(gsub("Marginal Likelihood = ","",B,fixed=T))}))
 	rownames(margL.mat) <- paste0("K",Krange)
-	colnames(margL.mat) <- paste0("rep",1:reps)
+	colnames(margL.mat) <- paste0("rep",1:numreps)
 	mean.margL      <- apply(margL.mat,MARGIN=1,FUN=mean,na.rm=TRUE)
 	range.margL.mat <- do.call(rbind,lapply(X=1:nrow(margL.mat),FUN=function(x){range(margL.mat[x,],na.rm=TRUE)}))
 	if(debug) message("step 3")
-	margL.df      <- data.frame(marginalLikelihood=unname(unlist(c(margL.mat))),Kval=rep(Krange,reps))
+	margL.df      <- data.frame(marginalLikelihood=unname(unlist(c(margL.mat))),Kval=rep(Krange, numreps))
 	margL.df$Kval <- factor(margL.df$Kval, levels=c(1:nrow(margL.df)))
-	margLPlot     <- ggplot2::ggplot(margL.df, ggplot2::aes(x=Kval, y=marginalLikelihood)) + ggplot2::geom_boxplot(fill='lightgray', outlier.colour="black", outlier.shape=16,outlier.size=2, notch=FALSE) + ggplot2::theme_classic() + ggplot2::labs(title= paste0("marginal likelihood (",reps," replicates) vs. number of ancestral populations (K)"), x="Number of ancestral populations", y = "marginalLikelihood") + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) # + ggplot2::geom_vline(xintercept=bestK, linetype=2, color="black", size=0.25)
+	margLPlot     <- ggplot2::ggplot(margL.df, ggplot2::aes(x=Kval, y=marginalLikelihood)) + ggplot2::geom_boxplot(fill='lightgray', outlier.colour="black", outlier.shape=16,outlier.size=2, notch=FALSE) + ggplot2::theme_classic() + ggplot2::labs(title= paste0("marginal likelihood (",numreps," replicates) vs. number of ancestral populations (K)"), x="Number of ancestral populations", y = "marginalLikelihood") + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) # + ggplot2::geom_vline(xintercept=bestK, linetype=2, color="black", size=0.25)
 	if(debug) message("step 4")
 	#### Load the Q matrices
 	qpaths          <- list.files(outdir.temp,pattern="^.+\\.meanQ$",full.names=TRUE)
 	qmats.list      <- lapply(qpaths,read.table)
-	qfiles          <- basename(qpaths)
+	qfiles   <- basename(qpaths)
 	### K value associated with each q matrix
 	KQmats          <- sapply(qmats.list,ncol)
 	### replicate of K associated with each q matrix
@@ -758,4 +782,54 @@ vcf2structure <- function(vcf, IndvNames=TRUE, OneRowPerIndv=TRUE, MarkerNames=T
 }
 #' @examples
 #' library(misc.wrappers)
+
+#' @title Generate Evanno Method Plots
+#'
+#' This function uses functions from pophelper and ggplot2 to generate a pdf with the four Evanno Method Plots.
+#' 
+#' @param input.dir directory with output files of STRUCTURE analysis. Default is the current directory.
+#' @param save.as Where to save the output PDF. Default is "evannoPlots.pdf" in the current directory.
+#' @return g table with gpplots arranged in a 2x2 grid
+#' @export EvannoPlots
+EvannoPlots <- function(input.dir=getwd(),save.as="EvannoPlots.pdf"){
+	# Character vector with paths to output structure files
+	qfiles <- list.files(input.dir, full.names=T, pattern="log_f$")
+	# Read qfiles into R
+	qlist  <- pophelper::readQ(files=qfiles)
+	# tabulate structure results in a data frame
+	tr1   <- pophelper::tabulateQ(qlist)
+	sr1   <- pophelper::summariseQ(tr1)
+	evStr.df <- suppressWarnings(pophelper::evannoMethodStructure(sr1))
+	# Define K as a factor
+	evStr.df[,"k"]    <- factor(evStr.df[,"k"], levels=c(1:nrow(evStr.df)))
+	# ln probability of the data
+	elpdmean.plot <-  ggplot2::ggplot() + ggplot2::geom_boxplot(data=evStr.df, ggplot2::aes(x=k, y=elpdmean), fill='lightgray', outlier.colour="black", outlier.shape=16,outlier.size=2, notch=FALSE) + ggplot2::theme_classic() + ggplot2::labs(title= paste0("A"), x="K", y = "L(K)") + ggplot2::xlim(levels(evStr.df$k))
+	# first derivative
+	lnk1.plot     <-  ggplot2::ggplot() + ggplot2::geom_boxplot(data=evStr.df[2:nrow(evStr.df),], ggplot2::aes(x=k, y=lnk1), fill='lightgray', outlier.colour="black", outlier.shape=16,outlier.size=2, notch=FALSE) + ggplot2::theme_classic() + ggplot2::labs(title= paste0("B"), x="K", y = "L'(K)") + ggplot2::xlim(levels(evStr.df$k))
+	# second derivative
+	lnk2.plot     <-  ggplot2::ggplot() + ggplot2::geom_boxplot(data=evStr.df[2:(nrow(evStr.df)-1),], ggplot2::aes(x=k, y=lnk2), fill='lightgray', outlier.colour="black", outlier.shape=16,outlier.size=2, notch=FALSE) + ggplot2::theme_classic() + ggplot2::labs(title= paste0("C"), x="K", y = "|L''(K)|") + ggplot2::xlim(levels(evStr.df$k))
+	# delta K
+	if(!all(is.na(evStr.df[,"deltaK"]))){
+		deltaK.plot <-  ggplot2::ggplot(data=evStr.df[!which(is.na(evStr.df[,"deltaK"])),], ggplot2::aes(x=k, y=deltaK, na.rm = TRUE)) + ggplot2::geom_boxplot(fill='lightgray', outlier.colour="black", outlier.shape=16,outlier.size=2, notch=FALSE) + ggplot2::theme_classic() + ggplot2::labs(title= paste0("D"), x="K", y = "delta K") + ggplot2::xlim(levels(evStr.df$k))
+	} else {
+		blank.df    <- data.frame(x=c(0,0.5,1),y=c(0,0.5,1),text=c("","delta K is NA for all K",""))
+		deltaK.plot <- ggplot2::ggplot(blank.df,aes(x=x,y=y)) + ggplot2::geom_text(blank.df,mapping=ggplot2::aes(x=x,y=y,label=text)) + ggplot2::labs(title="", x="", y = "") + ggplot2::theme_void()
+	}
+	# Define viewport for saving
+	vp           <- grid::viewport(height=grid::unit(0.95,"npc"),width=grid::unit(0.95,"npc"))
+	# hold plots as a list of arranged grobs
+	evannoPlots0 <- lapply(X=lapply(list(elpdmean.plot,lnk1.plot,lnk2.plot,deltaK.plot), FUN=ggplot2::ggplotGrob), FUN=gridExtra::arrangeGrob,vp=vp)
+	# arrange the plots in a 2x2 grid
+	evannoPlots  <- gridExtra::arrangeGrob(grobs=evannoPlots0,layout_matrix=rbind(c(1,2),c(3,4)),respect=TRUE,top="Evanno Method Plots")
+	# grid::grid.newpage(); grid::grid.draw(evannoPlots)
+	# Save pdf
+	if(!is.null(save.as)){
+		pdf(height=6,width=8,file=save.as,onefile=TRUE)
+			grid::grid.draw(evannoPlots)
+		dev.off()
+	}
+	evannoPlots
+}
+
+
 

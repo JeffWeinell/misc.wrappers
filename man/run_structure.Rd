@@ -17,7 +17,8 @@ run_structure(
   extraparams.path = NULL,
   burnin = 1000,
   kmax = 10,
-  reps = 10000,
+  numreps = 10000,
+  runs = 5,
   ploidy = NULL,
   missing = NULL,
   onerowperind = NULL,
@@ -45,7 +46,9 @@ run_structure(
 
 \item{kmax}{Numerical vector with set of values to use for K. Default 40.}
 
-\item{reps}{Number of repititions. Default 100.}
+\item{numreps}{Chain length. Default 10000.}
+
+\item{runs}{Number of times to repeat the mcmc analysis . Default 5.}
 
 \item{ploidy}{Integer ≥ 1 indicating ploidy, or NULL (the default), in which case ploidy is determined automatically from the input data (only works if 'format' = "VCF" or "vcfR").}
 
