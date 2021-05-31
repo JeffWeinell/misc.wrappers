@@ -347,17 +347,14 @@ run_structure <- function(x, format="VCF", coords=NULL, mainparams.path=NULL, ex
 	#for(i in 1:runs){
 	#	for(K in Krange){
 	#		outfile.K <- paste0(tools::file_path_sans_ext(outfile.temp),"_K",K,"_run",i,".log")
-	#		### Modify command1 for STRUCTURE arguments
-	#		# command1     <- paste0(structure.path," -K ",K," --input=",str.path," --prior=",prior,full,seed," --format=str --output=", outfile.temp.i)
 	#		command1     <- paste0(structure.path," -K ",K," -m ",mainparams.path," -e ",extraparams.path," -o ",outfile.K)
 	#		run.command1 <- system(command1)
 	#	}
 	#}
 	for(i in 1:runs){
 		for(K in Krange){
-			outfile.K <- paste0(tools::file_path_sans_ext(outfile.temp),"_K",K,".log")
-			### Modify command1 for STRUCTURE arguments
-			# command1     <- paste0(structure.path," -K ",K," --input=",str.path," --prior=",prior,full,seed," --format=str --output=", outfile.temp.i)
+			outfile.K <- paste0(tools::file_path_sans_ext(outfile.temp),"_K",K,"r",i,".log")
+	#		outfile.K <- paste0(tools::file_path_sans_ext(outfile.temp),"_K",K,".log")
 			command1     <- paste0(structure.path," -K ",K," -m ",mainparams.path," -e ",extraparams.path," -o ",outfile.K)
 			run.command1 <- system(command1)
 		}
