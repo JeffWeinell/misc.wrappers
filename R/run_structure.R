@@ -75,7 +75,7 @@ run_structure <- function(x, format="VCF", coords=NULL, mainparams.path=NULL, ex
 		strconvert      <- vcf2structure(vcf=vcf.obj,out=outstr,OneRowPerIndv=FALSE)
 		str.path0       <- strconvert[[1]]
 		str.path        <- tools::file_path_sans_ext(str.path0)
-		mainparams.df0 <- strconvert[[2]]
+		mainparams.df0  <- strconvert[[2]]
 	} else {
 		if(format=="structure"){
 			str.path0       <- x
@@ -164,6 +164,10 @@ run_structure <- function(x, format="VCF", coords=NULL, mainparams.path=NULL, ex
 	infile.temp0 <- file.path(getwd(),mainparams.df1["INFILE","values"])
 	infile.temp1 <- file.path(outdir.temp,mainparams.df1["INFILE","values"])
 	file.rename(infile.temp0,infile.temp1)
+	### Move the file with IDs and samplenames into outdir.temp
+	IDs.mat.temp0 <- gsub(".str$","_sampleIDs.txt",infile.temp0)
+	IDs.mat.temp1 <- gsub(".str$","_sampleIDs.txt",infile.temp1)
+	file.rename(IDs.mat.temp0,IDs.mat.temp1)
 	###### Defining other settings for structure
 	if(debug) message("step 1")
 	##### Updating the mainparams file
@@ -727,6 +731,12 @@ vcf2structure <- function(vcf, IndvNames=TRUE, OneRowPerIndv=TRUE, MarkerNames=T
 	} else {
 		ExtraCols <- 0
 	}
+	
+	### Replace each individual name with an integer ID and save a two-column table that translates from integer ID to full name
+	IntIDs     <- 1:length(IndvNames)
+	IntIDs.mat <- cbind(IntIDs,IndvNames)
+	write.table(IntIDs.mat,paste0(tools::file_path_sans_ext(out),"_sampleIDs.txt"),sep="\t",quote=FALSE,col.names=TRUE,row.names=FALSE)
+	
 	if(OneRowPerIndv){
 		### Transpose the genotype matrix
 		t.gt.mat <- t(gt.mat)
@@ -744,15 +754,16 @@ vcf2structure <- function(vcf, IndvNames=TRUE, OneRowPerIndv=TRUE, MarkerNames=T
 		mat.temp1 <- gsub(".",MissingData,mat.temp0,fixed=TRUE)
 		#### at this point the structure genotype matrix (mat.temp1) is in the correct format but columns and rows are not named. Now the other optional information rows and columns need to be considered for inclusion on output.
 		# Repeat each value for the non-genotype columns twice 
-		IndvNames   <- rep(IndvNames,ploidy,each=T)
-		PopData     <- rep(PopData,ploidy,each=T)
-		PopFlag     <- rep(PopFlag,ploidy,each=T)
-		LocData     <- rep(LocData,ploidy,each=T)
-		Phenotype   <- rep(Phenotype,ploidy,each=T)
-		OtherData   <- rep(OtherData,ploidy,each=T)
+		IntIDs      <- rep(IntIDs,each=ploidy)
+		PopData     <- rep(PopData,each=ploidy)
+		PopFlag     <- rep(PopFlag,each=ploidy)
+		LocData     <- rep(LocData,each=ploidy)
+		Phenotype   <- rep(Phenotype,each=ploidy)
+		OtherData   <- rep(OtherData,each=ploidy)
 	}
+	
 	### Individual/Genotype matrix
-	indv.gt.mat      <- cbind(IndvNames,PopData,PopFlag,LocData,Phenotype,OtherData,mat.temp1)
+	indv.gt.mat      <- cbind(IntIDs,PopData,PopFlag,LocData,Phenotype,OtherData,mat.temp1)
 	### Converting each row of the Individual/Genotype matrix into a space-delineated character string
 	indv.gt.strings  <- unlist(lapply(1:nrow(indv.gt.mat),FUN=function(x){paste(indv.gt.mat[x,],collapse="\t")}))
 	### Collapsing each of MarkerNames, RecessiveAlleles, InterMarkerDists, and PhaseInfo into a space-delineated character string
