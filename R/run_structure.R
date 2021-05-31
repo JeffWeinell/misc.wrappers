@@ -849,7 +849,7 @@ EvannoPlots <- function(input.dir=getwd(),save.as="EvannoPlots.pdf"){
 		deltaK.plot <-  ggplot2::ggplot(data=evStr.df[!is.na(evStr.df[,"deltaK"]),], ggplot2::aes(x=k, y=deltaK, na.rm = TRUE)) + ggplot2::geom_point(fill='black',color='black',shape=21) + ggplot2::theme_classic() + ggplot2::labs(title= paste0("D"), x="K", y = "delta K") + ggplot2::xlim(levels(evStr.df$k))
 	} else {
 		blank.df    <- data.frame(x=c(0,0.5,1),y=c(0,0.5,1),text=c("","delta K is NA for all K",""))
-		deltaK.plot <- ggplot2::ggplot(blank.df,aes(x=x,y=y)) + ggplot2::geom_text(blank.df,mapping=ggplot2::aes(x=x,y=y,label=text)) + ggplot2::labs(title="", x="", y = "") + ggplot2::theme_void()
+		deltaK.plot <- ggplot2::ggplot(blank.df,ggplot2::aes(x=x,y=y)) + ggplot2::geom_text(blank.df,mapping=ggplot2::aes(x=x,y=y,label=text)) + ggplot2::labs(title="", x="", y = "") + ggplot2::theme_void()
 	}
 	# Define viewport for saving
 	vp           <- grid::viewport(height=grid::unit(0.95,"npc"),width=grid::unit(0.95,"npc"))
