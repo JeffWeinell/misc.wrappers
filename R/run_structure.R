@@ -344,9 +344,18 @@ run_structure <- function(x, format="VCF", coords=NULL, mainparams.path=NULL, ex
 		# copies extraparams into the output directory
 		file.copy(from=extraparams.path,to=file.path(outdir.temp,"extraparams"))
 	}
+	#for(i in 1:runs){
+	#	for(K in Krange){
+	#		outfile.K <- paste0(tools::file_path_sans_ext(outfile.temp),"_K",K,"_run",i,".log")
+	#		### Modify command1 for STRUCTURE arguments
+	#		# command1     <- paste0(structure.path," -K ",K," --input=",str.path," --prior=",prior,full,seed," --format=str --output=", outfile.temp.i)
+	#		command1     <- paste0(structure.path," -K ",K," -m ",mainparams.path," -e ",extraparams.path," -o ",outfile.K)
+	#		run.command1 <- system(command1)
+	#	}
+	#}
 	for(i in 1:runs){
 		for(K in Krange){
-			outfile.K <- paste0(tools::file_path_sans_ext(outfile.temp),"_K",K,"_run",i,".log")
+			outfile.K <- paste0(tools::file_path_sans_ext(outfile.temp),"_K",K,".log")
 			### Modify command1 for STRUCTURE arguments
 			# command1     <- paste0(structure.path," -K ",K," --input=",str.path," --prior=",prior,full,seed," --format=str --output=", outfile.temp.i)
 			command1     <- paste0(structure.path," -K ",K," -m ",mainparams.path," -e ",extraparams.path," -o ",outfile.K)
@@ -745,7 +754,7 @@ vcf2structure <- function(vcf, IndvNames=TRUE, OneRowPerIndv=TRUE, MarkerNames=T
 		### Replace VCF missing data value "." with value supplied by MissingData argument.
 		mat.temp1 <- gsub(".",MissingData,mat.temp0,fixed=TRUE)
 		###
-		# MarkerNames <- rep(MarkerNames,ploidy,each=T)
+		# MarkerNames <- rep(MarkerNames,each=ploidy)
 		# 
 	} else {
 		### split genotype strings by VCF haplotype separators ("/" or "|") and then reorganize into matrix with n columns per individual for n-ploidy individuals.
