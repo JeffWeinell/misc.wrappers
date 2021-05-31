@@ -161,92 +161,96 @@ run_DAPC <- function(x, format="VCF", kmax=40, coords=NULL, samplenames=NULL,rep
 	#######
 	## List with two data frames with combinations of K and DF, or K and PC, respectively, for which density can be plotted.
 	plottable   <- plottable.dapc(dapc.list)
-	K.plottable <- as.numeric(rownames(plottable$DF))
-	#layout.da <- plottable$DF
-	#layout.da[plottable$DF]  <- which(plottable$DF)
-	#layout.da[!plottable$DF] <- NA
-	### Creating plottable matrices for biplots
-	# if(any(Ks.n.da>2)){
-	# 	pairs <- lapply(X=apply(X=plottable$DF[apply(plottable$DF,MARGIN=1,FUN=function(x){length(which(x))>2}),], MARGIN=1, FUN=which),FUN=pset,min.length=2,max.length=2)
-	#}
-	#layout.pc <- plottable$PC
-	#layout.pc[plottable$PC]  <- which(plottable$PC)
-	#layout.pc[!plottable$PC] <- NA
-	#indexmat.da <- matrix(1:length(plottable$DF),ncol=ncol(plottable$DF))
-	#indexmat.pc <- matrix(1:length(plottable$PC),ncol=ncol(plottable$PC))
-	## plots should be added by column, from bottom to top of the gtable.
-	indexmat0.da <- matrix(1:length(plottable$DF),ncol=ncol(plottable$DF))
-	indexmat0.pc <- matrix(1:length(plottable$PC),ncol=ncol(plottable$PC))
-	if(nrow(indexmat0.da)>1){
-		indexmat.da <- apply(indexmat0.da,2,rev)
-	} else {
-		indexmat.da <- indexmat0.da
-	}
-	if(nrow(indexmat0.pc)>1){
-		indexmat.pc <- apply(indexmat0.pc,2,rev)
-	} else {
-		indexmat.pc <- indexmat0.pc
-	}
-
-	### Matrices to hold row and colnames of the da and pca gtables that will be produced below.
-	emptymat.da  <- matrix(data=rep("",length(plottable$DF)),ncol=ncol(plottable$DF))
-	emptymat.pca <- matrix(data=rep("",length(plottable$PC)),ncol=ncol(plottable$PC))
-	left.mat.da  <- bottom.mat.da  <- right.mat.da  <- top.mat.da  <-emptymat.da
-	left.mat.pca <- bottom.mat.pca <- right.mat.pca <- top.mat.pca <-emptymat.pca
-	left.mat.da[,1]  <- left.mat.pca[,1] <- rev(paste0("K",K.plottable))
-	right.mat.da[,ncol(plottable$DF)] <- right.mat.pca[,ncol(plottable$PC)] <- rev(paste0("K",K.plottable))
-	bottom.mat.da[nrow(plottable$DF),]  <- colnames(plottable$DF)
-	bottom.mat.pca[nrow(plottable$PC),] <- colnames(plottable$PC)
-	top.mat.da[1,]  <- colnames(plottable$DF)
-	top.mat.pca[1,] <- colnames(plottable$PC)
-	#### Generate DF density plots.
-	df.plots.list <- list(); length(df.plots.list) <- length(plottable$DF)
-	ctr <- 0
-	for(j in 1:ncol(plottable$DF)){
-		for(i in 1:nrow(plottable$DF) ){
-			ctr <- ctr+1
-			if(!plottable$DF[i,j]){
-			#	next
-				plot.ij  <- grid::rectGrob(gp=grid::gpar(col=NA))
-				
-			} else {
-			#	ctr <- ctr+1
-				plot.ij  <- ggplot2::ggplotGrob(ggscatter.dapc(dapc.list[[(K.plottable[i]-1)]], vartype="df", xax=j, yax=j, col=myCols, legend=F, show.title=F, hideperimeter=T))
-			}
-			df.plots.list[[ctr]]        <- plot.ij
-			names(df.plots.list)[[ctr]] <- paste0("K",K.plottable[i],".DF",j)
+	if(!is.null(plottable)){
+		K.plottable <- as.numeric(rownames(plottable$DF))
+		#layout.da <- plottable$DF
+		#layout.da[plottable$DF]  <- which(plottable$DF)
+		#layout.da[!plottable$DF] <- NA
+		### Creating plottable matrices for biplots
+		# if(any(Ks.n.da>2)){
+		# 	pairs <- lapply(X=apply(X=plottable$DF[apply(plottable$DF,MARGIN=1,FUN=function(x){length(which(x))>2}),], MARGIN=1, FUN=which),FUN=pset,min.length=2,max.length=2)
+		#}
+		#layout.pc <- plottable$PC
+		#layout.pc[plottable$PC]  <- which(plottable$PC)
+		#layout.pc[!plottable$PC] <- NA
+		#indexmat.da <- matrix(1:length(plottable$DF),ncol=ncol(plottable$DF))
+		#indexmat.pc <- matrix(1:length(plottable$PC),ncol=ncol(plottable$PC))
+		## plots should be added by column, from bottom to top of the gtable.
+		indexmat0.da <- matrix(1:length(plottable$DF),ncol=ncol(plottable$DF))
+		indexmat0.pc <- matrix(1:length(plottable$PC),ncol=ncol(plottable$PC))
+		if(nrow(indexmat0.da)>1){
+			indexmat.da <- apply(indexmat0.da,2,rev)
+		} else {
+			indexmat.da <- indexmat0.da
 		}
-	}
-	da.arranged0   <- lapply(X=1:length(df.plots.list),FUN=function(x){gridExtra::arrangeGrob(df.plots.list[[x]],left=left.mat.da[indexmat.da[x]],right=right.mat.da[indexmat.da[x]],bottom=bottom.mat.da[indexmat.da[x]],top=top.mat.da[indexmat.da[x]])})
-	da.arranged    <- gridExtra::arrangeGrob(grobs=da.arranged0,layout_matrix=indexmat.da,respect=TRUE)
-	vp             <- grid::viewport(height=grid::unit(0.9,"npc"),width=grid::unit(0.9,"npc"))
-	pdf(file=paste0(tools::file_path_sans_ext(save.as),"_densityPlots_DF.pdf"), height=(nrow(indexmat.da)*3),width=(ncol(indexmat.da)*3))
-	grid::grid.draw(da.arranged)
-	dev.off()
-	#### Generate PC density plots.
-	pc.plots.list <- list(); length(pc.plots.list) <- length(plottable$PC)
-	ctr <- 0
-	for(j in 1:ncol(plottable$PC)){
-		for(i in 1:nrow(plottable$PC) ){
-			ctr <- ctr+1
-			if(!plottable$PC[i,j]){
-			#	next
-				plot.ij  <- grid::rectGrob(gp=grid::gpar(col=NA))
-				
-			} else {
-			#	ctr <- ctr+1
-				plot.ij  <- ggplot2::ggplotGrob(ggscatter.dapc(dapc.list[[(K.plottable[i]-1)]], vartype="pc", xax=j, yax=j, col=myCols, legend=F, show.title=F, hideperimeter=T))
-			}
-			pc.plots.list[[ctr]]        <- plot.ij
-			names(pc.plots.list)[[ctr]] <- paste0("K",K.plottable[i],".PC",j)
+		if(nrow(indexmat0.pc)>1){
+			indexmat.pc <- apply(indexmat0.pc,2,rev)
+		} else {
+			indexmat.pc <- indexmat0.pc
 		}
+		### Matrices to hold row and colnames of the da and pca gtables that will be produced below.
+		emptymat.da  <- matrix(data=rep("",length(plottable$DF)),ncol=ncol(plottable$DF))
+		emptymat.pca <- matrix(data=rep("",length(plottable$PC)),ncol=ncol(plottable$PC))
+		left.mat.da  <- bottom.mat.da  <- right.mat.da  <- top.mat.da  <-emptymat.da
+		left.mat.pca <- bottom.mat.pca <- right.mat.pca <- top.mat.pca <-emptymat.pca
+		left.mat.da[,1]  <- left.mat.pca[,1] <- rev(paste0("K",K.plottable))
+		right.mat.da[,ncol(plottable$DF)] <- right.mat.pca[,ncol(plottable$PC)] <- rev(paste0("K",K.plottable))
+		bottom.mat.da[nrow(plottable$DF),]  <- colnames(plottable$DF)
+		bottom.mat.pca[nrow(plottable$PC),] <- colnames(plottable$PC)
+		top.mat.da[1,]  <- colnames(plottable$DF)
+		top.mat.pca[1,] <- colnames(plottable$PC)
+		
+		#### Generate DF density plots.
+		df.plots.list <- list(); length(df.plots.list) <- length(plottable$DF)
+		ctr <- 0
+		for(j in 1:ncol(plottable$DF)){
+			for(i in 1:nrow(plottable$DF) ){
+				ctr <- ctr+1
+				if(!plottable$DF[i,j]){
+				#	next
+					plot.ij  <- grid::rectGrob(gp=grid::gpar(col=NA))
+					
+				} else {
+				#	ctr <- ctr+1
+					plot.ij  <- ggplot2::ggplotGrob(ggscatter.dapc(dapc.list[[(K.plottable[i]-1)]], vartype="df", xax=j, yax=j, col=myCols, legend=F, show.title=F, hideperimeter=T))
+				}
+				df.plots.list[[ctr]]        <- plot.ij
+				names(df.plots.list)[[ctr]] <- paste0("K",K.plottable[i],".DF",j)
+			}
+		}
+		da.arranged0   <- lapply(X=1:length(df.plots.list),FUN=function(x){gridExtra::arrangeGrob(df.plots.list[[x]],left=left.mat.da[indexmat.da[x]],right=right.mat.da[indexmat.da[x]],bottom=bottom.mat.da[indexmat.da[x]],top=top.mat.da[indexmat.da[x]])})
+		da.arranged    <- gridExtra::arrangeGrob(grobs=da.arranged0,layout_matrix=indexmat.da,respect=TRUE)
+		vp             <- grid::viewport(height=grid::unit(0.9,"npc"),width=grid::unit(0.9,"npc"))
+		pdf(file=paste0(tools::file_path_sans_ext(save.as),"_densityPlots_DF.pdf"), height=(nrow(indexmat.da)*3),width=(ncol(indexmat.da)*3))
+		grid::grid.draw(da.arranged)
+		dev.off()
+		
+		#### Generate PC density plots.
+		pc.plots.list <- list(); length(pc.plots.list) <- length(plottable$PC)
+		ctr <- 0
+		for(j in 1:ncol(plottable$PC)){
+			for(i in 1:nrow(plottable$PC) ){
+				ctr <- ctr+1
+				if(!plottable$PC[i,j]){
+				#	next
+					plot.ij  <- grid::rectGrob(gp=grid::gpar(col=NA))
+					
+				} else {
+				#	ctr <- ctr+1
+					plot.ij  <- ggplot2::ggplotGrob(ggscatter.dapc(dapc.list[[(K.plottable[i]-1)]], vartype="pc", xax=j, yax=j, col=myCols, legend=F, show.title=F, hideperimeter=T))
+				}
+				pc.plots.list[[ctr]]        <- plot.ij
+				names(pc.plots.list)[[ctr]] <- paste0("K",K.plottable[i],".PC",j)
+			}
+		}
+		pc.arranged0   <- lapply(X=1:length(pc.plots.list),FUN=function(x){gridExtra::arrangeGrob(pc.plots.list[[x]],left=left.mat.pca[indexmat.pc[x]],right=right.mat.pca[indexmat.pc[x]],bottom=bottom.mat.pca[indexmat.pc[x]],top=top.mat.pca[indexmat.pc[x]])})
+		pc.arranged    <- gridExtra::arrangeGrob(grobs=pc.arranged0,layout_matrix=indexmat.pc,respect=TRUE)
+		vp             <- grid::viewport(height=grid::unit(0.9,"npc"),width=grid::unit(0.9,"npc"))
+		pdf(file=paste0(tools::file_path_sans_ext(save.as),"_densityPlots_PC.pdf"), height=(nrow(indexmat.pc)*3),width=(ncol(indexmat.pc)*3))
+		grid::grid.draw(pc.arranged)
+		dev.off()
+	
 	}
-	pc.arranged0   <- lapply(X=1:length(pc.plots.list),FUN=function(x){gridExtra::arrangeGrob(pc.plots.list[[x]],left=left.mat.pca[indexmat.pc[x]],right=right.mat.pca[indexmat.pc[x]],bottom=bottom.mat.pca[indexmat.pc[x]],top=top.mat.pca[indexmat.pc[x]])})
-	pc.arranged    <- gridExtra::arrangeGrob(grobs=pc.arranged0,layout_matrix=indexmat.pc,respect=TRUE)
-	vp             <- grid::viewport(height=grid::unit(0.9,"npc"),width=grid::unit(0.9,"npc"))
-	pdf(file=paste0(tools::file_path_sans_ext(save.as),"_densityPlots_PC.pdf"), height=(nrow(indexmat.pc)*3),width=(ncol(indexmat.pc)*3))
-	grid::grid.draw(pc.arranged)
-	dev.off()
 	#######
 	## Bi-component plots
 	#######
@@ -270,168 +274,163 @@ run_DAPC <- function(x, format="VCF", kmax=40, coords=NULL, samplenames=NULL,rep
 			damats2[[i]][!is.na(damats2[[i]])] <- paste0("bp",damats2[[i]][!is.na(damats2[[i]])],".da")
 			damats2[[i]] <- t(damats2[[i]])
 		}
-	}
-	if(any(Ks.n.pca>2)){
-		#distmats.pc <- lapply(apply(plottable$PC[apply(plottable$PC,MARGIN=1,FUN=function(x){length(which(x))>2}),],MARGIN=1,FUN=which), FUN=function(y){dist(y)})
-		distmats.pc <- lapply(X=Ks.n.pca[which(Ks.n.pca>1)], FUN=function(x){dist(table(paste0("DF",c(1:x))))})
-		distlabs.pc <- lapply(distmats.pc,FUN=function(x){gtools::mixedsort(attributes(x)$Labels)})
-		#pcmats0  <- lapply(apply(plottable$PC[apply(plottable$PC,MARGIN=1,FUN=function(x){length(which(x))>2}),],MARGIN=1,FUN=which), FUN=function(y){lower.tri(dist(y))})
-		pcmats0  <- lapply(distmats.pc,lower.tri)
-		pcvals   <- lapply(pcmats0,FUN=function(x){1:length(which(x))})
-		pcmats1  <- pcmats0
-		for(i in 1:length(pcmats1)){
-			pcmats1[[i]][pcmats0[[i]]]  <- pcvals[[i]]
-			pcmats1[[i]][!pcmats0[[i]]] <- NA
-			pcmats1[[i]] <- pcmats1[[i]]   # [-c(1),-c(ncol(pcmats1[[i]]))]
-			rownames(pcmats1[[i]]) <- distlabs.pc[[i]]  #[-1]
-			colnames(pcmats1[[i]]) <- distlabs.pc[[i]]  # [-c(lengths(distlabs.pc)[i])]
-		}
-		pcmats2 <- pcmats1
-		for(i in 1:length(pcmats2)){
-			pcmats2[[i]][!is.na(pcmats2[[i]])] <- paste0("bp",pcmats2[[i]][!is.na(pcmats2[[i]])],".pc")
-		}
-	}
-	dapc.mats <- pcmats2
-	
-	unionKs <- union(names(pcmats2),names(damats2))
-
-	### The value of dapc.mats mostly portrays the desired plotting layout.
-	for(i in 1:length(dapc.mats)){
-		if(unionKs[i] %in% names(pcmats2) & unionKs[i] %in% names(damats2)){
-			j.pca <- which(unionKs[i] == names(pcmats2))
-			j.da  <- which(unionKs[i] == names(damats2))
-			dapc.mats[[i]][which(is.na(pcmats2[[j.pca]]))[1:length(c(damats2[[j.da]][!lower.tri(damats2[[j.da]])]))]] <- c(damats2[[j.da]][!lower.tri(damats2[[j.da]])])
-		}
-		if( (unionKs[i] %in% names(pcmats2)) & (!(unionKs[i] %in% names(damats2)))){
-			j.pca <- which(unionKs[i] == names(pcmats2))
-			dapc.mats[[i]] <- pcmats2[[j.pca]]
-		}
-		if((!(unionKs[i] %in% names(pcmats2))) & (unionKs[i] %in% names(damats2))){
-			j.da  <- which(unionKs[i] == names(damats2))
-			dapc.mats[[i]] <- damats2[[j.da]]
-		}
-		colnames(dapc.mats[[i]]) <- 1:ncol(dapc.mats[[i]])
-		# which(is.na(pcmats2[[i]])) [1:length(c(damats2[[i]] [!lower.tri(damats2[[i]])]))]
-	}
-
-	## Row m of matrix in da.psets2 contains the dimensions to of the mth da biplot to generate.
-	da.psets  <- lapply(X=1:length(Ks.n.da),FUN=function(x){do.call(rbind, pset(x=1:Ks.n.da[x], min.length=2, max.length=2))})
-	da.psets2 <- lapply(which(lengths(da.psets)>0), FUN=function(x){da.psets[[x]][order(c(da.psets[[x]][,1]),c( da.psets[[x]][,2])),]})
-	names(da.psets2) <- which(lengths(da.psets)>0)+1
-
-	### Row m of matrix in pca.psets2 contains the dimensions to of the mth pca biplot to generate.
-	pca.psets <- lapply(X=1:length(Ks.n.pca),FUN=function(x){ do.call(rbind, pset(x=1:Ks.n.pca[x], min.length=2, max.length=2))})
-	pca.psets2 <- lapply(which(lengths(pca.psets)>0), FUN=function(x){pca.psets[[x]][order(c(pca.psets[[x]][,1]),c( pca.psets[[x]][,2])),]})
-	names(pca.psets2) <- which(lengths(pca.psets)>0)+1
-
-	#### Generate DF biplots.
-	df.biplots.list <- list(); length(df.biplots.list) <- length(da.psets2)
-	for(i in 1:length(da.psets2)){
-		K <- as.numeric(names(da.psets2))[i]
-		df.biplots.list[[i]] <- lapply(X=1:nrow(rbind(da.psets2[[i]])), FUN=function(x){ggplot2::ggplotGrob(ggscatter.dapc(dapc.list[[(K-1)]], vartype="df", xax= rbind(da.psets2[[i]]) [x,1], yax=rbind(da.psets2[[i]])[x,2], col=myCols, legend=F, show.title=F, hideperimeter=T,cellipse=0))})
-		# Names matching those used in 'dapc.mats'
-		names(df.biplots.list[[i]]) <- c(t(damats2[[i]]))[!is.na(c(t(damats2[[i]])))]
-	}
-	#### Generate PC biplots.
-	pc.biplots.list <- list(); length(pc.biplots.list) <- length(pca.psets2)
-	for(i in 1:length(pca.psets2)){
-		K <- as.numeric(names(pca.psets2))[i]
-		pc.biplots.list[[i]] <- lapply(X=1:nrow(rbind(pca.psets2[[i]])), FUN=function(x){ggplot2::ggplotGrob(ggscatter.dapc(dapc.list[[(K-1)]], vartype="pc", xax=rbind(pca.psets2[[i]])[x,1], yax=rbind(pca.psets2[[i]])[x,2], col=myCols, legend=F, show.title=F, hideperimeter=T,cellipse=0))})
-		names(pc.biplots.list[[i]]) <- c(pcmats2[[i]])[!is.na(c(pcmats2[[i]]))]
-	}
-	### Reverse the order of rows so that axis labels (DF and PC components) start at lower left.
-	dapc.mats2 <- lapply(dapc.mats,apply,2,rev)
-	### Emptry matrices
-	empty.bi <- lapply(1:length(dapc.mats2), FUN=function(x){matrix(data=rep("",length(dapc.mats2[[x]])), ncol=ncol(dapc.mats2[[x]]))})
-	### Arrange the biplots into a gtable for each K
-	Ks.n.da.bi  <- Ks.n.da[which(Ks.n.da>1)]
-	Ks.n.pca.bi <- Ks.n.pca[which(Ks.n.pca>1)]
-	# initializing lists of matrices that will hold the names along axes
-	left.mat.bi <- right.mat.bi <- bottom.mat.bi <- top.mat.bi <- empty.bi
-	for(i in 1:length(dapc.mats2)){
-		if(unionKs[i] %in% names(pcmats2) & unionKs[i] %in% names(damats2)){
-			j.pca <- which(unionKs[i] == names(pcmats2))
-			j.da  <- which(unionKs[i] == names(damats2))
-			left.mat.bi[[i]][,1]   <- rev(c("",paste0("PC",2:Ks.n.pca.bi[j.pca])))
-			right.mat.bi[[i]][,ncol(right.mat.bi[[i]])]  <- rev(c(paste0("DF", 1:(Ks.n.da.bi[j.da]-1)),rep("",(nrow(right.mat.bi[[i]])-(Ks.n.da.bi[j.da]-1)))))
-			bottom.mat.bi[[i]][nrow(bottom.mat.bi[[i]]),] <- c(rep("",(ncol(bottom.mat.bi[[i]])- (Ks.n.da.bi[j.da]-1) )),paste0("DF",2:(Ks.n.da.bi[j.da])))
-			top.mat.bi[[i]][1,]  <- c(paste0("PC", (1:(Ks.n.pca.bi[j.pca]-1))), rep("",(ncol(top.mat.bi[[i]])-(Ks.n.pca.bi[j.pca]-1))))
-		}
-		if((unionKs[i] %in% names(pcmats2)) & (!(unionKs[i] %in% names(damats2)))){
-			j.pca <- which(unionKs[i] == names(pcmats2))
-			left.mat.bi[[i]][,1]   <- rev(c("",paste0("PC",2:Ks.n.pca.bi[j.pca])))
-			top.mat.bi[[i]][1,]  <- c(paste0("PC", (1:(Ks.n.pca.bi[j.pca]-1))), rep("",(ncol(top.mat.bi[[i]])-(Ks.n.pca.bi[j.pca]-1))))
-		}
-		if((!(unionKs[i] %in% names(pcmats2))) & (unionKs[i] %in% names(damats2))){
-			j.da  <- which(unionKs[i] == names(damats2))
-			right.mat.bi[[i]][,ncol(right.mat.bi[[i]])]  <- rev(c(paste0("DF", 1:(Ks.n.da.bi[j.da]-1)),rep("",(nrow(right.mat.bi[[i]])-(Ks.n.da.bi[j.da]-1)))))
-			bottom.mat.bi[[i]][nrow(bottom.mat.bi[[i]]),] <- c(rep("",(ncol(bottom.mat.bi[[i]])- (Ks.n.da.bi[j.da]-1) )),paste0("DF",2:(Ks.n.da.bi[j.da])))
-		}
-	}
-	### Removes rows and columns that are completely filled with NAs
-	dapc.mats3 <- dapc.mats2
-	for(i in 1:length(dapc.mats2)){
-		#dapc.mats3[[i]] <- unname(dapc.mats2[[i]][!apply(dapc.mats2[[i]],MARGIN=1,FUN=function(x){all(is.na(x))}),!apply(dapc.mats2[[i]],MARGIN=2,FUN=function(x){all(is.na(x))})])
-		rowskeep <- !apply(dapc.mats2[[i]],MARGIN=1,FUN=function(x){all(is.na(x))})
-		colskeep <- !apply(dapc.mats2[[i]],MARGIN=2,FUN=function(x){all(is.na(x))})
-		dapc.mats3[[i]]    <- unname(dapc.mats2[[i]][rowskeep,colskeep])
-		left.mat.bi[[i]]   <- left.mat.bi[[i]][rowskeep,colskeep]
-		right.mat.bi[[i]]  <- right.mat.bi[[i]][rowskeep,colskeep]
-		bottom.mat.bi[[i]] <- bottom.mat.bi[[i]][rowskeep,colskeep]
-		top.mat.bi[[i]]    <- top.mat.bi[[i]][rowskeep,colskeep]
-	}
-	### Index matrix
-	index.bi <- lapply(1:length(dapc.mats3), FUN=function(x){apply(matrix(data=c(1:length(dapc.mats3[[x]])) ,ncol=ncol(dapc.mats3[[x]])),2,rev)})
-	
-	bi.arranged0 <- list(); length(bi.arranged0) <- length(dapc.mats3)
-	bi.arranged  <- list(); length(bi.arranged) <- length(dapc.mats3)
-	
-	### In this loop, i= table of plots for a specific K, and j=the index number in the matrix 'index.bi'.
-	for(i in 1:length(dapc.mats3)){
-		if(unionKs[i] %in% names(pcmats2)){
-			x.pca <- which(unionKs[i] == names(pcmats2))
-		} else {
-			x.pca <- NULL
-		}
-		if(unionKs[i] %in% names(damats2)){
-			x.da  <- which(unionKs[i] == names(damats2))
-		} else {
-			x.da  <- NULL
-		}
-		for(j in 1:length(dapc.mats3[[i]])){
-			plot.name <- dapc.mats3[[i]][which(index.bi[[i]]==j)]
-			if(is.na(plot.name)){
-				plot.ij <- grid::rectGrob(gp=grid::gpar(col=NA))
-			} else {
-				if(!is.null(x.pca)){
-					if(plot.name %in% names(pc.biplots.list[[x.pca]])){
-						plot.ij <- pc.biplots.list[[x.pca]][plot.name][[1]]
+		if(any(Ks.n.pca>2)){
+			#distmats.pc <- lapply(apply(plottable$PC[apply(plottable$PC,MARGIN=1,FUN=function(x){length(which(x))>2}),],MARGIN=1,FUN=which), FUN=function(y){dist(y)})
+			distmats.pc <- lapply(X=Ks.n.pca[which(Ks.n.pca>1)], FUN=function(x){dist(table(paste0("DF",c(1:x))))})
+			distlabs.pc <- lapply(distmats.pc,FUN=function(x){gtools::mixedsort(attributes(x)$Labels)})
+			#pcmats0  <- lapply(apply(plottable$PC[apply(plottable$PC,MARGIN=1,FUN=function(x){length(which(x))>2}),],MARGIN=1,FUN=which), FUN=function(y){lower.tri(dist(y))})
+			pcmats0  <- lapply(distmats.pc,lower.tri)
+			pcvals   <- lapply(pcmats0,FUN=function(x){1:length(which(x))})
+			pcmats1  <- pcmats0
+			for(i in 1:length(pcmats1)){
+				pcmats1[[i]][pcmats0[[i]]]  <- pcvals[[i]]
+				pcmats1[[i]][!pcmats0[[i]]] <- NA
+				pcmats1[[i]] <- pcmats1[[i]]   # [-c(1),-c(ncol(pcmats1[[i]]))]
+				rownames(pcmats1[[i]]) <- distlabs.pc[[i]]  #[-1]
+				colnames(pcmats1[[i]]) <- distlabs.pc[[i]]  # [-c(lengths(distlabs.pc)[i])]
+			}
+			pcmats2 <- pcmats1
+			for(i in 1:length(pcmats2)){
+				pcmats2[[i]][!is.na(pcmats2[[i]])] <- paste0("bp",pcmats2[[i]][!is.na(pcmats2[[i]])],".pc")
+			}
+			dapc.mats <- pcmats2
+			unionKs <- union(names(pcmats2),names(damats2))
+			### The value of dapc.mats mostly portrays the desired plotting layout.
+			for(i in 1:length(dapc.mats)){
+				if(unionKs[i] %in% names(pcmats2) & unionKs[i] %in% names(damats2)){
+					j.pca <- which(unionKs[i] == names(pcmats2))
+					j.da  <- which(unionKs[i] == names(damats2))
+					dapc.mats[[i]][which(is.na(pcmats2[[j.pca]]))[1:length(c(damats2[[j.da]][!lower.tri(damats2[[j.da]])]))]] <- c(damats2[[j.da]][!lower.tri(damats2[[j.da]])])
+				}
+				if( (unionKs[i] %in% names(pcmats2)) & (!(unionKs[i] %in% names(damats2)))){
+					j.pca <- which(unionKs[i] == names(pcmats2))
+					dapc.mats[[i]] <- pcmats2[[j.pca]]
+				}
+				if((!(unionKs[i] %in% names(pcmats2))) & (unionKs[i] %in% names(damats2))){
+					j.da  <- which(unionKs[i] == names(damats2))
+					dapc.mats[[i]] <- damats2[[j.da]]
+				}
+				colnames(dapc.mats[[i]]) <- 1:ncol(dapc.mats[[i]])
+				# which(is.na(pcmats2[[i]])) [1:length(c(damats2[[i]] [!lower.tri(damats2[[i]])]))]
+			}
+			## Row m of matrix in da.psets2 contains the dimensions to of the mth da biplot to generate.
+			da.psets  <- lapply(X=1:length(Ks.n.da),FUN=function(x){do.call(rbind, pset(x=1:Ks.n.da[x], min.length=2, max.length=2))})
+			da.psets2 <- lapply(which(lengths(da.psets)>0), FUN=function(x){da.psets[[x]][order(c(da.psets[[x]][,1]),c( da.psets[[x]][,2])),]})
+			names(da.psets2) <- which(lengths(da.psets)>0)+1
+			### Row m of matrix in pca.psets2 contains the dimensions to of the mth pca biplot to generate.
+			pca.psets <- lapply(X=1:length(Ks.n.pca),FUN=function(x){ do.call(rbind, pset(x=1:Ks.n.pca[x], min.length=2, max.length=2))})
+			pca.psets2 <- lapply(which(lengths(pca.psets)>0), FUN=function(x){pca.psets[[x]][order(c(pca.psets[[x]][,1]),c( pca.psets[[x]][,2])),]})
+			names(pca.psets2) <- which(lengths(pca.psets)>0)+1
+			#### Generate DF biplots.
+			df.biplots.list <- list(); length(df.biplots.list) <- length(da.psets2)
+			for(i in 1:length(da.psets2)){
+				K <- as.numeric(names(da.psets2))[i]
+				df.biplots.list[[i]] <- lapply(X=1:nrow(rbind(da.psets2[[i]])), FUN=function(x){ggplot2::ggplotGrob(ggscatter.dapc(dapc.list[[(K-1)]], vartype="df", xax= rbind(da.psets2[[i]]) [x,1], yax=rbind(da.psets2[[i]])[x,2], col=myCols, legend=F, show.title=F, hideperimeter=T,cellipse=0))})
+				# Names matching those used in 'dapc.mats'
+				names(df.biplots.list[[i]]) <- c(t(damats2[[i]]))[!is.na(c(t(damats2[[i]])))]
+			}
+			#### Generate PC biplots.
+			pc.biplots.list <- list(); length(pc.biplots.list) <- length(pca.psets2)
+			for(i in 1:length(pca.psets2)){
+				K <- as.numeric(names(pca.psets2))[i]
+				pc.biplots.list[[i]] <- lapply(X=1:nrow(rbind(pca.psets2[[i]])), FUN=function(x){ggplot2::ggplotGrob(ggscatter.dapc(dapc.list[[(K-1)]], vartype="pc", xax=rbind(pca.psets2[[i]])[x,1], yax=rbind(pca.psets2[[i]])[x,2], col=myCols, legend=F, show.title=F, hideperimeter=T,cellipse=0))})
+				names(pc.biplots.list[[i]]) <- c(pcmats2[[i]])[!is.na(c(pcmats2[[i]]))]
+			}
+			### Reverse the order of rows so that axis labels (DF and PC components) start at lower left.
+			dapc.mats2 <- lapply(dapc.mats,apply,2,rev)
+			### Emptry matrices
+			empty.bi <- lapply(1:length(dapc.mats2), FUN=function(x){matrix(data=rep("",length(dapc.mats2[[x]])), ncol=ncol(dapc.mats2[[x]]))})
+			### Arrange the biplots into a gtable for each K
+			Ks.n.da.bi  <- Ks.n.da[which(Ks.n.da>1)]
+			Ks.n.pca.bi <- Ks.n.pca[which(Ks.n.pca>1)]
+			# initializing lists of matrices that will hold the names along axes
+			left.mat.bi <- right.mat.bi <- bottom.mat.bi <- top.mat.bi <- empty.bi
+			for(i in 1:length(dapc.mats2)){
+				if(unionKs[i] %in% names(pcmats2) & unionKs[i] %in% names(damats2)){
+					j.pca <- which(unionKs[i] == names(pcmats2))
+					j.da  <- which(unionKs[i] == names(damats2))
+					left.mat.bi[[i]][,1]   <- rev(c("",paste0("PC",2:Ks.n.pca.bi[j.pca])))
+					right.mat.bi[[i]][,ncol(right.mat.bi[[i]])]  <- rev(c(paste0("DF", 1:(Ks.n.da.bi[j.da]-1)),rep("",(nrow(right.mat.bi[[i]])-(Ks.n.da.bi[j.da]-1)))))
+					bottom.mat.bi[[i]][nrow(bottom.mat.bi[[i]]),] <- c(rep("",(ncol(bottom.mat.bi[[i]])- (Ks.n.da.bi[j.da]-1) )),paste0("DF",2:(Ks.n.da.bi[j.da])))
+					top.mat.bi[[i]][1,]  <- c(paste0("PC", (1:(Ks.n.pca.bi[j.pca]-1))), rep("",(ncol(top.mat.bi[[i]])-(Ks.n.pca.bi[j.pca]-1))))
+				}
+				if((unionKs[i] %in% names(pcmats2)) & (!(unionKs[i] %in% names(damats2)))){
+					j.pca <- which(unionKs[i] == names(pcmats2))
+					left.mat.bi[[i]][,1]   <- rev(c("",paste0("PC",2:Ks.n.pca.bi[j.pca])))
+					top.mat.bi[[i]][1,]  <- c(paste0("PC", (1:(Ks.n.pca.bi[j.pca]-1))), rep("",(ncol(top.mat.bi[[i]])-(Ks.n.pca.bi[j.pca]-1))))
+				}
+				if((!(unionKs[i] %in% names(pcmats2))) & (unionKs[i] %in% names(damats2))){
+					j.da  <- which(unionKs[i] == names(damats2))
+					right.mat.bi[[i]][,ncol(right.mat.bi[[i]])]  <- rev(c(paste0("DF", 1:(Ks.n.da.bi[j.da]-1)),rep("",(nrow(right.mat.bi[[i]])-(Ks.n.da.bi[j.da]-1)))))
+					bottom.mat.bi[[i]][nrow(bottom.mat.bi[[i]]),] <- c(rep("",(ncol(bottom.mat.bi[[i]])- (Ks.n.da.bi[j.da]-1) )),paste0("DF",2:(Ks.n.da.bi[j.da])))
+				}
+			}
+			### Removes rows and columns that are completely filled with NAs
+			dapc.mats3 <- dapc.mats2
+			for(i in 1:length(dapc.mats2)){
+				#dapc.mats3[[i]] <- unname(dapc.mats2[[i]][!apply(dapc.mats2[[i]],MARGIN=1,FUN=function(x){all(is.na(x))}),!apply(dapc.mats2[[i]],MARGIN=2,FUN=function(x){all(is.na(x))})])
+				rowskeep <- !apply(dapc.mats2[[i]],MARGIN=1,FUN=function(x){all(is.na(x))})
+				colskeep <- !apply(dapc.mats2[[i]],MARGIN=2,FUN=function(x){all(is.na(x))})
+				dapc.mats3[[i]]    <- unname(dapc.mats2[[i]][rowskeep,colskeep])
+				left.mat.bi[[i]]   <- left.mat.bi[[i]][rowskeep,colskeep]
+				right.mat.bi[[i]]  <- right.mat.bi[[i]][rowskeep,colskeep]
+				bottom.mat.bi[[i]] <- bottom.mat.bi[[i]][rowskeep,colskeep]
+				top.mat.bi[[i]]    <- top.mat.bi[[i]][rowskeep,colskeep]
+			}
+			### Index matrix
+			index.bi <- lapply(1:length(dapc.mats3), FUN=function(x){apply(matrix(data=c(1:length(dapc.mats3[[x]])) ,ncol=ncol(dapc.mats3[[x]])),2,rev)})
+			
+			bi.arranged0 <- list(); length(bi.arranged0) <- length(dapc.mats3)
+			bi.arranged  <- list(); length(bi.arranged) <- length(dapc.mats3)
+			
+			### In this loop, i= table of plots for a specific K, and j=the index number in the matrix 'index.bi'.
+			for(i in 1:length(dapc.mats3)){
+				if(unionKs[i] %in% names(pcmats2)){
+					x.pca <- which(unionKs[i] == names(pcmats2))
+				} else {
+					x.pca <- NULL
+				}
+				if(unionKs[i] %in% names(damats2)){
+					x.da  <- which(unionKs[i] == names(damats2))
+				} else {
+					x.da  <- NULL
+				}
+				for(j in 1:length(dapc.mats3[[i]])){
+					plot.name <- dapc.mats3[[i]][which(index.bi[[i]]==j)]
+					if(is.na(plot.name)){
+						plot.ij <- grid::rectGrob(gp=grid::gpar(col=NA))
 					} else {
-						if(!is.null(x.da)){
-							if(plot.name %in% names(df.biplots.list[[x.da]])){
-								plot.ij <- df.biplots.list[[x.da]][plot.name][[1]]
+						if(!is.null(x.pca)){
+							if(plot.name %in% names(pc.biplots.list[[x.pca]])){
+								plot.ij <- pc.biplots.list[[x.pca]][plot.name][[1]]
+							} else {
+								if(!is.null(x.da)){
+									if(plot.name %in% names(df.biplots.list[[x.da]])){
+										plot.ij <- df.biplots.list[[x.da]][plot.name][[1]]
+									}
+								}
 							}
 						}
 					}
+					bi.arranged0[[i]][[j]] <- gridExtra::arrangeGrob(plot.ij,left=left.mat.bi[[i]][which(index.bi[[i]]==j)],right=right.mat.bi[[i]][which(index.bi[[i]]==j)],bottom=bottom.mat.bi[[i]][which(index.bi[[i]]==j)],top=top.mat.bi[[i]][which(index.bi[[i]]==j)])
+				}
+				bi.arranged[[i]] <- gridExtra::arrangeGrob(grobs=bi.arranged0[[i]],layout_matrix=index.bi[[i]],respect=TRUE)
+			}
+			#pc.biplots.list[[3]]["bp1.pc"][[1]]
+			#pc.arranged0[[i]]   <- lapply(X=1:length(dapc.mats3[[i]]),FUN=function(x){gridExtra::arrangeGrob(dapc.mats3[[i]][],left=left.mat.pca[indexmat.pc[x]],right=right.mat.pca[indexmat.pc[x]],bottom=bottom.mat.pca[indexmat.pc[x]],top=top.mat.pca[indexmat.pc[x]])})
+			#pc.arranged    <- gridExtra::arrangeGrob(grobs=pc.arranged0,layout_matrix=indexmat.pc,respect=TRUE)
+			vp             <- grid::viewport(height=grid::unit(0.95,"npc"),width=grid::unit(0.95,"npc"))
+			pdf(file=paste0(tools::file_path_sans_ext(save.as),"_BiPlots.pdf"), height=(max(sapply(dapc.mats3,nrow))*3),width=(max(sapply(dapc.mats3,ncol))*3))
+			for(i in 1:length(dapc.mats3)){
+				grid::grid.draw(bi.arranged[[i]])
+				if(i < length(dapc.mats3)){
+					grid::grid.newpage()
 				}
 			}
-			bi.arranged0[[i]][[j]] <- gridExtra::arrangeGrob(plot.ij,left=left.mat.bi[[i]][which(index.bi[[i]]==j)],right=right.mat.bi[[i]][which(index.bi[[i]]==j)],bottom=bottom.mat.bi[[i]][which(index.bi[[i]]==j)],top=top.mat.bi[[i]][which(index.bi[[i]]==j)])
+			dev.off()
 		}
-		bi.arranged[[i]] <- gridExtra::arrangeGrob(grobs=bi.arranged0[[i]],layout_matrix=index.bi[[i]],respect=TRUE)
 	}
 
-	#pc.biplots.list[[3]]["bp1.pc"][[1]]
-	#pc.arranged0[[i]]   <- lapply(X=1:length(dapc.mats3[[i]]),FUN=function(x){gridExtra::arrangeGrob(dapc.mats3[[i]][],left=left.mat.pca[indexmat.pc[x]],right=right.mat.pca[indexmat.pc[x]],bottom=bottom.mat.pca[indexmat.pc[x]],top=top.mat.pca[indexmat.pc[x]])})
-	#pc.arranged    <- gridExtra::arrangeGrob(grobs=pc.arranged0,layout_matrix=indexmat.pc,respect=TRUE)
-	vp             <- grid::viewport(height=grid::unit(0.95,"npc"),width=grid::unit(0.95,"npc"))
-	pdf(file=paste0(tools::file_path_sans_ext(save.as),"_BiPlots.pdf"), height=(max(sapply(dapc.mats3,nrow))*3),width=(max(sapply(dapc.mats3,ncol))*3))
-	for(i in 1:length(dapc.mats3)){
-		grid::grid.draw(bi.arranged[[i]])
-		if(i < length(dapc.mats3)){
-			grid::grid.newpage()
-		}
-	}
-	dev.off()
 	if(debug) message("step 3")
 	#density.stop<-FALSE
 	for(K in 2:max.clusters){
@@ -474,6 +473,7 @@ run_DAPC <- function(x, format="VCF", kmax=40, coords=NULL, samplenames=NULL,rep
 		}
 		if(debug) message(cat("\r",paste0("K=",K," step 3.9")))
 	} ### END OF LOOP
+	
 	if(debug) message("step 10.0")
 	### Defining the viewport size and creating lists of plots
 	vp                  <- grid::viewport(height=grid::unit(0.95,"npc"),width=grid::unit(0.95,"npc"))
@@ -1943,20 +1943,37 @@ sim.vcf <- function(x=NULL, save.as=NULL, RA.probs=NULL, n.ind=NULL, n.snps=NULL
 	### Perform simulation
 #	simK2 <- adegenet::glSim(n.ind=n.ind,n.snp.nonstruc=n.snp.nonstruc,ploidy=ploidy,K=K,args)
 #	sim <- adegenet::glSim(n.ind=n.ind, n.snp.nonstruc=n.snp.nonstruc, n.snp.struc=n.snp.struc, ploidy=ploidy, k=K, LD=LD, block.minsize = block.minsize, block.maxsize = block.maxsize, sort.pop=TRUE,...)
-	glSim      <- adegenet::glSim
+	# glSim      <- adegenet::glSim
 	#glSim.args <- list(n.ind=n.ind,n.snp.nonstruc=n.snp.nonstruc, n.snp.struc=n.snp.struc, ploidy=ploidy, LD=LD, block.minsize = block.minsize) # , block.maxsize = block.maxsize)
 	#names(...) %in% names(supplied)
 	# sim   <- evalfun(fun.name="glSim", n.ind=n.ind, n.snp.nonstruc=n.snp.nonstruc, n.snp.struc=n.snp.struc, ploidy=ploidy, k=K, LD=LD, block.minsize = block.minsize, block.maxsize = block.maxsize, sort.pop=TRUE)
 	#sim   <- evalfun(fun.name="glSim", supplied.list=glSim.args, k=K, sort.pop=TRUE)
-	sim0   <- evalfun(fun.name="glSim", k=K, sort.pop=TRUE,n.ind=(n.ind*K),n.snp.nonstruc=n.snp.nonstruc, n.snp.struc=n.snp.struc, ploidy=ploidy, LD=LD)
+#	sim0   <- evalfun(fun.name="glSim", k=K, sort.pop=TRUE,n.ind=(n.ind*K),n.snp.nonstruc=n.snp.nonstruc, n.snp.struc=n.snp.struc, ploidy=ploidy, LD=LD)
+	K.weights <- rep(1, K)
+	K.sizes   <- table(sample(1:K,size=n.ind,replace=T,prob=K.weights))
+	while(length(K.sizes) < K){
+		K.sizes   <- table(sample(1:K,size=n.ind,replace=T,prob=K.weights))
+	}
+	PASS <- FALSE
+	while(!PASS){
+		### The glSim function requires each simulated population to have at least 10 individuals.
+		sim0   <- adegenet::glSim(k=K, sort.pop=TRUE, n.ind=(n.ind*K*10), n.snp.nonstruc=n.snp.nonstruc, n.snp.struc=n.snp.struc, ploidy=ploidy, LD=LD)
+		indvs.pops <- c(sim0@other$ancestral.pops)
+		if(length(table(indvs.pops)) != K){
+			next
+		}
+		if(any(table(indvs.pops) < K.sizes)){
+			next
+		}
+		ind.keep  <- unlist(lapply(X=1:K,FUN=function(x) grep(x,indvs.pops)[1:K.sizes[x]]))
+		sim       <- sim0[ind.keep]
+		PASS <- TRUE
+	}
 	#sim   <- adegenet::glSim(k=K, sort.pop=TRUE, n.ind=(n.ind*K), n.snp.nonstruc=n.snp.nonstruc, n.snp.struc=n.snp.struc, ploidy=ploidy, LD=LD)
 	#return(sim)
-
-	pops.index.mat <- matrix(data=1:(n.ind*K),ncol=K)
-	K.weights      <- rep(1, K)
-	K.sizes        <- table(sample(1:K,size=n.ind,replace=T,prob=K.weights))
-	ind.keep       <- sort(unlist(lapply(1:K,FUN=function(x){sample(pops.index.mat[,x],size=K.sizes[x],replace=F)})))
-	sim <- sim0[ind.keep]
+	# sim5   <- adegenet::glSim(k=K, sort.pop=TRUE, n.ind=(n.ind*K), n.snp.nonstruc=n.snp.nonstruc, n.snp.struc=n.snp.struc, ploidy=ploidy, LD=LD)
+	# pops.index.mat <- matrix(data=1:nrow(sim0), ncol=K)
+	# ind.keep  <- sort(unlist(lapply(1:K,FUN=function(x){sample(pops.index.mat[,x],size=K.sizes[x],replace=F)})))
 	### Ancestral population assignments of simulated samples
 	anc.pops <- gsub(".", "", as.character(sim@other$ancestral.pops), fixed=T)
 	### Genotype matrix of simulated dataset
