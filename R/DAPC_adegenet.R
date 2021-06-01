@@ -1833,7 +1833,7 @@ sim.vcf <- function(x=NULL, save.as=NULL, RA.probs=NULL, n.ind=NULL, n.snps=NULL
 	# additional.args  <- list(...)
 	RA.pairnames <- c("AC","AG","AT","CA","CG","CT","GA","GC","GT","TA","TC","TG")
 	if(!is.null(x)){
-		vcf   <- vcfR::read.vcfR(x,verbose=F,checkFile=F)
+		vcf   <- vcfR::read.vcfR(x,verbose=F,checkFile=F,convertNA=FALSE)
 		# genotype matrix
 		gt    <- vcf@gt
 		### genotype matrix without format column or extra (non-genotype) information.
@@ -1887,7 +1887,9 @@ sim.vcf <- function(x=NULL, save.as=NULL, RA.probs=NULL, n.ind=NULL, n.snps=NULL
 		} else {
 			indv.pMD <- rep(0,n.ind)
 		}
-		
+		if(tnMD==0 & is.null(fMD)){
+			include.missing=FALSE
+		}
 		# whether or not any snps in the input dataset are on different linkage blocks.
 		if(length(chr) == length(uchr)){
 			LDx <- FALSE
