@@ -159,7 +159,7 @@ run_DAPC <- function(x, format="VCF", kmax=40, coords=NULL, samplenames=NULL,rep
 	
 	#####
 	## Density Plots section still produces errors under some scenarios.
-	if(FALSE){
+	if(plot.components){
 		#######
 		## Density plots
 		#######
