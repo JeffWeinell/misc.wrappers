@@ -379,7 +379,13 @@ run_structure <- function(x, format="VCF", coords=NULL, mainparams.path=NULL, ex
 
 	### Make interpolated-assignment maps if coords is not null
 
+	#### Turn this into a function for plotting admixture barpots
 	if(FALSE){
+		names.df.path  <- list.files(outdir.temp, full.names=T, pattern="_sampleIDs.txt$")
+		samplenames.df <- read.table(names.df.path, header=T)
+		samplenames    <- samplenames.df$IndvNames
+		numind         <- length(samplenames)
+		label.size     <- min((288/numind),7)
 		# Character vector with paths to output structure files
 		qfiles <- list.files(outdir.temp, full.names=T, pattern="log_f$")
 		# Read qfiles into R
@@ -388,9 +394,38 @@ run_structure <- function(x, format="VCF", coords=NULL, mainparams.path=NULL, ex
 		qlist2 <- lapply(X=1:length(qlist), FUN=function(x) {A=qlist[[x]]; rownames(A)=samplenames;A})
 		# Aligned qlist
 		aqlist <- pophelper::alignK(qlist)
-		# Barplots; probably better to use the ggplot method
-#		qplots <- pophelper::plotQ(qlist=aqlist, exportpath=outdir.temp)
+		# List of aligned q matrices with rownames as samplenames
+		aqlist2 <- lapply(X=1:length(aqlist), FUN=function(x) {A=aqlist[[x]]; rownames(A)=samplenames; A})
+		# List of aligned q matrices for first run of each K
+		slist <- aqlist2[match(1:kmax,sapply(aqlist2,ncol))]
+		Krange      <- 1:length(slist)
+		Krange.plot <- setdiff(Krange,1)
+		kmax        <- max(Krange)
+		admixturePlot <- list(); length(admixturePlot)   <- length(Krange.plot)
+		for(K in 2:kmax){
+			i=(K-1)
+			if(K <= 15){
+				myCols          <- goodcolors2(n=K)
+			}
+			if(K>15){
+				myCols          <- c(goodcolors2(n=15), sample(adegenet::funky(100), size=K-15))
+			}
+			
+			q.matrix  <- slist[[K]]
+			indv.pop           <- apply(X=q.matrix, MARGIN=1, FUN=function(x){which(x==max(x))})
+			posterior.df       <- data.frame(indv=rep(rownames(q.matrix),ncol(q.matrix)), pop=rep(colnames(q.matrix),each=nrow(q.matrix)), assignment=c(unlist(unname(q.matrix))))
+			posterior.df$indv  <- factor(posterior.df$indv, levels = names(sort(indv.pop)))
+			if(debug) message(cat("\r",paste0("K=",K," step 7.3")))
+			posterior.gg        <- ggplot2::ggplot(posterior.df, ggplot2::aes(fill= pop, x= assignment, y=indv)) + ggplot2::geom_bar(position="stack", stat="identity") + ggplot2::theme_classic() + ggplot2::theme(axis.text.y = ggplot2::element_text(size = label.size), panel.grid.major = ggplot2::element_blank(), panel.grid.minor = ggplot2::element_blank(), panel.background = ggplot2::element_blank()) + ggplot2::labs(x = "Admixture Proportion",y="",fill="Cluster",title=paste0("K = ",K)) + ggplot2::scale_fill_manual(values=myCols[1:K])
+			admixturePlot[[i]]  <- posterior.gg
+		}
+		pdf(height=6,width=10,file=save.as,onefile=TRUE)
+			lapply(X=admixturePlot,FUN=print)
+		dev.off()
 	}
+	
+		# Barplots; probably better to use the ggplot method
+		# qplots <- pophelper::plotQ(qlist=aqlist, exportpath=outdir.temp)
 	##### CODE BELOW HERE NOT UPDATED #####
 	#### Load the marginal likelihood scores (the metric of fit for each K)
 	logpaths <- list.files(outdir.temp,pattern="^.+\\.log$",full.names=TRUE)
@@ -863,6 +898,74 @@ EvannoPlots <- function(input.dir=getwd(),save.as="EvannoPlots.pdf"){
 	}
 	evannoPlots
 }
+
+
+#' @title Generate a pdf with admixture plots for each K
+#' 
+#' Takes as input the output files from strucutre runs and generates a pdf with plots of admixture
+#' 
+#' @param x Character vector with input files containing q-matrices. For method='structure', the files must be those ending in 'log_f'.
+#' @param labels Character vector with names of individuals. Default NULL.
+#' @param method Character string. For now, must be "structure".
+#' @param save.as Character string with path/name to use for the output PDF file. Default is to save the output in the current directory with the name "admixturePlots.pdf".
+#' @return NULL; generates pdf with a barplot of admixture for each K
+#' @export admixturePlots
+admixturePlots <- function(x, labels=NULL, method="structure", save.as=file.path(getwd(),"admixturePlots.pdf")){
+		qfiles <- x
+		# Read qfiles into R
+		qlist  <- pophelper::readQ(files=qfiles)
+		numind <- nrow(qlist[[1]])
+		label.size <- min((288/numind),7)
+		if(!is.null(labels)){
+			samplenames <- labels
+		} else {
+			samplenames <- 1:numind
+		}
+		# Set rownames of each matrix in qlist as the names of samples
+		#qlist2 <- lapply(X=1:length(qlist), FUN=function(x) {A=qlist[[x]]; rownames(A)=samplenames; A})
+		# Aligned qlist
+		aqlist <- pophelper::alignK(qlist)
+		# List of aligned q matrices with rownames as samplenames
+		aqlist2   <- lapply(X=1:length(aqlist), FUN=function(x) {A=aqlist[[x]]; rownames(A)=samplenames; A})
+		aqlist2.K <- sapply(aqlist2, ncol)
+		kmax      <- max(aqlist2.K)
+		# List of aligned q matrices for first run of each K. Will edit this to use instead the mean across runs.
+		slist       <- aqlist2[match(1:kmax, sapply(aqlist2, ncol))]
+		Krange      <- 1:length(slist)
+		Krange.plot <- setdiff(Krange,1)
+		# empty list to hold admixture plots
+		admixturePlot <- list(); length(admixturePlot)   <- length(Krange.plot)
+		for(K in 2:kmax){
+			i=(K-1)
+			if(K <= 15){
+				myCols          <- goodcolors2(n=K)
+			}
+			if(K>15){
+				myCols          <- c(goodcolors2(n=15), sample(adegenet::funky(100), size=K-15))
+			}
+			q.matrix  <- slist[[K]]
+			indv.pop           <- apply(X=q.matrix, MARGIN=1, FUN=function(x){which(x==max(x))})
+			posterior.df       <- data.frame(indv=rep(rownames(q.matrix),ncol(q.matrix)), pop=rep(colnames(q.matrix),each=nrow(q.matrix)), assignment=c(unlist(unname(q.matrix))))
+			posterior.df$indv  <- factor(posterior.df$indv, levels = names(sort(indv.pop)))
+			#if(debug) message(cat("\r",paste0("K=",K," step 7.3")))
+			posterior.gg        <- ggplot2::ggplot(posterior.df, ggplot2::aes(fill= pop, x= assignment, y=indv)) + ggplot2::geom_bar(position="stack", stat="identity") + ggplot2::theme_classic() + ggplot2::theme(axis.text.y = ggplot2::element_text(size = label.size), panel.grid.major = ggplot2::element_blank(), panel.grid.minor = ggplot2::element_blank(), panel.background = ggplot2::element_blank()) + ggplot2::labs(x = "Admixture Proportion",y="",fill="Cluster",title=paste0("K = ",K)) + ggplot2::scale_fill_manual(values=myCols[1:K])
+			admixturePlot[[i]]  <- posterior.gg
+		}
+		pdf(height=6,width=10,file=save.as,onefile=TRUE)
+			lapply(X=admixturePlot, FUN=print)
+		dev.off()
+}
+#' @examples
+#' outdir.temp    <- "PATH/TO/STRUCTURE/OUTPUT"
+#' names.df.path  <- list.files(outdir.temp, full.names=T, pattern="_sampleIDs.txt$")
+#' samplenames.df <- read.table(names.df.path, header=T)
+#' samplenames    <- samplenames.df$IndvNames
+#' # Character vector with paths to output structure files
+#' qfiles         <- list.files(outdir.temp, full.names=T, pattern="log_f$")
+#' admixturePlots(x=qfiles,labels=samplenames)
+
+
+
 
 
 
