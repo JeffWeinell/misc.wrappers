@@ -397,7 +397,8 @@ run_structure <- function(x, format="VCF", coords=NULL, mainparams.path=NULL, ex
 		# List of aligned q matrices with rownames as samplenames
 		aqlist2 <- lapply(X=1:length(aqlist), FUN=function(x) {A=aqlist[[x]]; rownames(A)=samplenames; A})
 		# List of aligned q matrices for first run of each K
-		slist <- aqlist2[match(1:kmax,sapply(aqlist2,ncol))]
+	#	slist <- aqlist2[match(1:kmax,sapply(aqlist2,ncol))]
+		slist <- aqlist[match(1:kmax,sapply(aqlist,ncol))]
 		Krange      <- 1:length(slist)
 		Krange.plot <- setdiff(Krange,1)
 		kmax        <- max(Krange)
@@ -922,15 +923,20 @@ admixturePlots <- function(x, labels=NULL, method="structure", save.as=file.path
 			samplenames <- 1:numind
 		}
 		# Set rownames of each matrix in qlist as the names of samples
-		#qlist2 <- lapply(X=1:length(qlist), FUN=function(x) {A=qlist[[x]]; rownames(A)=samplenames; A})
+		qlist2 <- lapply(X=1:length(qlist), FUN=function(x) {A=qlist[[x]]; rownames(A)=samplenames; A})
 		# Aligned qlist
 		aqlist <- pophelper::alignK(qlist)
 		# List of aligned q matrices with rownames as samplenames
 		aqlist2   <- lapply(X=1:length(aqlist), FUN=function(x) {A=aqlist[[x]]; rownames(A)=samplenames; A})
 		aqlist2.K <- sapply(aqlist2, ncol)
 		kmax      <- max(aqlist2.K)
+		#for(i in 1:unique(aqlist2.K)){
+		#	aqlist.i <- do.call(cbind,aqlist2[aqlist2.K == i])
+		#	margin()
+		#}
 		# List of aligned q matrices for first run of each K. Will edit this to use instead the mean across runs.
-		slist       <- aqlist2[match(1:kmax, sapply(aqlist2, ncol))]
+	#	slist       <- aqlist2[match(1:kmax, sapply(aqlist2, ncol))]
+		slist       <- qlist2[match(1:kmax,sapply(qlist2,ncol))]
 		Krange      <- 1:length(slist)
 		Krange.plot <- setdiff(Krange,1)
 		# empty list to hold admixture plots
