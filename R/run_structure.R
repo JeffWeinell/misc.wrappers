@@ -29,9 +29,10 @@
 #' @param include.out Character vector indicating which type of files should be included as output. Default is c(".pdf",".Qlog",".margLlog"). An additional file ".Plog" can be included but can be very large.
 #' @param debug Logical indicating whether or not to print messages indicating the internal step of the function. Default FALSE. Typically only used for development.
 #' @param ... Additional arguments passed to STRUCTURE. Not yet implemented in the future may include 'LABEL', 'POPDATA', 'POPFLAG', 'LOCDATA', 'PHENOTYPE', 'EXTRACOLS', 'MARKERNULLMES', 'RECESSIVEALLELES', 'MAPDISTANCES', 'PHASED', 'PHASEINFO', 'MARKOVPHASE', and 'NOTAMBIGUOUS'
+#' @param overwrite Whether or not to overwrite previous results. Default FALSE.
 #' @return List of plots
 #' @export run_structure
-run_structure <- function(x, format="VCF", coords=NULL, mainparams.path=NULL, extraparams.path=NULL, burnin=1000, kmax=10, numreps=10000, runs=5, ploidy=NULL, missing=NULL, onerowperind=NULL, save.in=NULL, structure.path=NULL, samplenames=NULL, cleanup=TRUE, include.out=c(".pdf",".Qlog",".margLlog"), debug=FALSE, ...){
+run_structure <- function(x, format="VCF", coords=NULL, mainparams.path=NULL, extraparams.path=NULL, burnin=1000, kmax=10, numreps=10000, runs=5, ploidy=NULL, missing=NULL, onerowperind=NULL, save.in=NULL, structure.path=NULL, samplenames=NULL, cleanup=TRUE, include.out=c(".pdf",".Qlog",".margLlog"), debug=FALSE, ...,overwrite=FALSE){
 	# list with user-specified arguments
 	argslist <- list(...)
 	if(length(argslist)>0){
@@ -52,7 +53,9 @@ run_structure <- function(x, format="VCF", coords=NULL, mainparams.path=NULL, ex
 		save.in <- file.path(getwd(),paste(sample(c(letters,LETTERS,rep(0:9,3)),10,replace=T),collapse=""))
 	}
 	if(dir.exists(save.in)){
-		stop("Output directory should not already exist. Use a different name for 'save.in' argument.")
+		if(!overwrite){
+			stop("Output directory should not already exist. Use a different name for 'save.in' argument.")
+		}
 	}
 	Krange=1:kmax
 	if(format=="VCF" | is(x,"vcfR")){

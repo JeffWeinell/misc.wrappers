@@ -28,7 +28,8 @@ run_structure(
   cleanup = TRUE,
   include.out = c(".pdf", ".Qlog", ".margLlog"),
   debug = FALSE,
-  ...
+  ...,
+  overwrite = FALSE
 )
 }
 \arguments{
@@ -69,6 +70,8 @@ run_structure(
 \item{debug}{Logical indicating whether or not to print messages indicating the internal step of the function. Default FALSE. Typically only used for development.}
 
 \item{...}{Additional arguments passed to STRUCTURE. Not yet implemented in the future may include 'LABEL', 'POPDATA', 'POPFLAG', 'LOCDATA', 'PHENOTYPE', 'EXTRACOLS', 'MARKERNULLMES', 'RECESSIVEALLELES', 'MAPDISTANCES', 'PHASED', 'PHASEINFO', 'MARKOVPHASE', and 'NOTAMBIGUOUS'}
+
+\item{overwrite}{Whether or not to overwrite previous results. Default FALSE.}
 
 \item{save.as}{Where to save the output PDF. Default is NULL.}
 
