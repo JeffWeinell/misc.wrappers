@@ -442,7 +442,7 @@ run_DAPC <- function(x, format="VCF", kmax=40, coords=NULL, samplenames=NULL, re
 		q.matrix           <- posterior.list[[i]]
 		rownames(q.matrix) <- samplenames
 		colnames(q.matrix) <- paste0("cluster",1:ncol(q.matrix))
-		indv.pop            <- apply(X=q.matrix, MARGIN=1, FUN=function(x){which(x==max(x))})
+		indv.pop            <- apply(X=q.matrix, MARGIN=1, FUN=function(x){which(x==max(x))[1]})
 		posterior.df        <- q.df[q.df$K==K,]
 		#posterior.df$indv   <- factor(posterior.df$indv, levels = names(sort(posterior.df$assignment)))
 		posterior.df$indv  <- factor(posterior.df$indv, levels = names(sort(indv.pop)))
