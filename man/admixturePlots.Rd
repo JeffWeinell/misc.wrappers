@@ -10,7 +10,8 @@ admixturePlots(
   x,
   labels = NULL,
   method = "structure",
-  save.as = file.path(getwd(), "admixturePlots.pdf")
+  save.as = file.path(getwd(), "admixturePlots.pdf"),
+  userun = 1
 )
 }
 \arguments{
@@ -21,6 +22,8 @@ admixturePlots(
 \item{method}{Character string. For now, must be "structure".}
 
 \item{save.as}{Character string with path/name to use for the output PDF file. Default is to save the output in the current directory with the name "admixturePlots.pdf".}
+
+\item{userun}{Number or numerical vector indicating which runs should be used for admixture plots. Default is 1 (the first run). When multiple runs are used, the mean is used across runs after aligning clusters.}
 }
 \value{
 NULL; generates pdf with a barplot of admixture for each K

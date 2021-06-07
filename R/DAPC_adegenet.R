@@ -13,7 +13,7 @@
 #' @param save.as Character string with where to save the output PDF with plots of results. Default is NULL.
 #' @return A list of plots.
 #' @export run_DAPC
-run_DAPC <- function(x, format="VCF", kmax=40, coords=NULL, samplenames=NULL,reps=100,save.as=NULL,plot.components=FALSE,include.out=c(".pdf",".Qlog",".BIClog")){
+run_DAPC <- function(x, format="VCF", kmax=40, coords=NULL, samplenames=NULL, reps=100, save.as=NULL, plot.components=FALSE, include.out=c(".pdf",".Qlog",".BIClog")){
 	debug <- FALSE
 	if(is.null(save.as)){
 		save.as <- file.path(getwd(),"result_DAPC.pdf")
@@ -493,7 +493,7 @@ run_DAPC <- function(x, format="VCF", kmax=40, coords=NULL, samplenames=NULL,rep
 	results1   <- c(resultsA, resultsB)
 	if(debug) message("step 11")
 	if(".pdf" %in% include.out){
-		pdf(height=6,width=10,file=save.as,onefile=TRUE)
+		pdf(height=6,width=10,file=save.as, onefile=TRUE)
 		for(i in 1:length(results1)){
 			grid::grid.draw(results1[[i]])
 			if(i < length(results1)){
