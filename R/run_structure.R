@@ -363,7 +363,13 @@ run_structure <- function(x, format="VCF", coords=NULL, mainparams.path=NULL, ex
 		}
 	}
 	#### Make Evanno Plots. Once the other functions for plotting are made I'll change save.as to NULL.
-	ggEvanno <- EvannoPlots(input.dir=outdir.temp,save.as=file.path(outdir.temp,"EvannoPlots.pdf"))
+	ggEvanno <- EvannoPlots(input.dir=outdir.temp, save.as=file.path(outdir.temp, "EvannoPlots.pdf"))
+	#### Admixture barplots
+	admixture.barplot <- admixturePlots(xdir=outdir.temp, userun=c(1:runs))
+	#### For each K, generate a popfile that can be used by easysfs
+	for(i in 1:kmax){
+		create_popfile(xdir=outdir.temp, K=i)
+	}
 	## Remove 0-byte files in outdir.temp, if they exist
 	outfiles       <- list.files(outdir.temp,full.names=T)
 	outfileinfo.df <- file.info(outfiles,extra_cols = FALSE)
@@ -380,11 +386,10 @@ run_structure <- function(x, format="VCF", coords=NULL, mainparams.path=NULL, ex
 
 	### Make interpolated-assignment maps if coords is not null
 
-	#### Turn this into a function for plotting admixture barpots
-	if(FALSE){
-		qfiles         <- list.files(outdir.temp, full.names=T, pattern="log_f$")
-		admixture.plot <- admixturePlots(x=qfiles, labels=samplenames)
-	}
+	#qfiles         <- list.files(outdir.temp, full.names=T, pattern="log_f$")
+	#admixture.plot <- admixturePlots(x=qfiles, labels=samplenames)
+	
+	
 	# Barplots; probably better to use the ggplot method
 	# qplots <- pophelper::plotQ(qlist=aqlist, exportpath=outdir.temp)
 	##### CODE BELOW HERE NOT UPDATED #####
@@ -981,49 +986,57 @@ admixturePlots <- function(x, xdir=NULL,labels=NULL, method="structure", save.as
 #' @return NULL; generates pdf with a barplot of admixture for each K
 #' @export create_popfile
 create_popfile <- function(xdir=NULL, K=2){
-		names.df.path  <- list.files(xdir, full.names=T, pattern="_sampleIDs.txt$")
-		samplenames.df <- read.table(names.df.path, header=T)
-		samplenames    <- samplenames.df$IndvNames
-		# Character vector with paths to output structure files
-		qfiles         <- list.files(xdir, full.names=T, pattern="log_f$")
-		save.as        <- file.path(xdir,paste0("popfile_K",K,"_from_structure.txt"))
-		# Read qfiles into R
-		qlist      <- pophelper::readQ(files=qfiles)
-		numind     <- nrow(qlist[[1]])
-		# Set rownames of each matrix in qlist as the names of samples
-		qlist2 <- lapply(X=1:length(qlist), FUN=function(x) {A=qlist[[x]]; rownames(A)=samplenames; A})
-		# Aligned qlist
-		aqlist    <- pophelper::alignK(qlist)
-		# List of aligned q matrices with rownames as samplenames
-		aqlist2   <- lapply(X=1:length(aqlist), FUN=function(x) {A=aqlist[[x]]; rownames(A)=samplenames; A})
-		aqlist2.K <- sapply(aqlist2, ncol)
-		kmax      <- max(aqlist2.K)
-		numruns   <- length(qlist)/kmax
-		slist.list <- list(); length(slist.list) <- numruns
-		for(i in 1:numruns){
-			slist.list[[i]] <- aqlist2[match(1:kmax,sapply(aqlist2, ncol)) + (i-1)]
+	names.df.path  <- list.files(xdir, full.names=T, pattern="_sampleIDs.txt$")
+	samplenames.df <- read.table(names.df.path, header=T)
+	samplenames    <- samplenames.df$IndvNames
+	# Character vector with paths to output structure files
+	qfiles         <- list.files(xdir, full.names=T, pattern="log_f$")
+	# Read qfiles into R
+	qlist      <- pophelper::readQ(files=qfiles)
+	numind     <- nrow(qlist[[1]])
+	# Set rownames of each matrix in qlist as the names of samples
+	qlist2 <- lapply(X=1:length(qlist), FUN=function(x) {A=qlist[[x]]; rownames(A)=samplenames; A})
+	# Aligned qlist
+	aqlist    <- pophelper::alignK(qlist)
+	# List of aligned q matrices with rownames as samplenames
+	aqlist2   <- lapply(X=1:length(aqlist), FUN=function(x) {A=aqlist[[x]]; rownames(A)=samplenames; A})
+	aqlist2.K <- sapply(aqlist2, ncol)
+	kmax      <- max(aqlist2.K)
+	numruns   <- length(qlist)/kmax
+	slist.list <- list(); length(slist.list) <- numruns
+	for(i in 1:numruns){
+		slist.list[[i]] <- aqlist2[match(1:kmax,sapply(aqlist2, ncol)) + (i-1)]
+	}
+	slist2 <- list(); length(slist2) <- kmax
+	if(length(slist.list)>1){
+		### Average across runs
+		for(i in 1:kmax){
+			X    <- lapply(X=slist.list, FUN=function(x){ c(t(x[[i]])) })
+			Y    <- do.call(rbind, X)
+			Z    <- colMeans(Y)
+			zmat <- matrix(Z,ncol=i,byrow=T)
+			rownames(zmat) <- samplenames
+			colnames(zmat) <- paste0("Cluster",1:ncol(zmat))
+			zdf            <- as.data.frame(zmat)
+			slist2[[i]]    <- zdf
 		}
-		slist2 <- list(); length(slist2) <- kmax
-		if(length(slist.list)>1){
-			### Average across runs
-			for(i in 1:kmax){
-				X    <- lapply(X=slist.list, FUN=function(x){ c(t(x[[i]])) })
-				Y    <- do.call(rbind, X)
-				Z    <- colMeans(Y)
-				zmat <- matrix(Z,ncol=i,byrow=T)
-				rownames(zmat) <- samplenames
-				colnames(zmat) <- paste0("Cluster",1:ncol(zmat))
-				zdf            <- as.data.frame(zmat)
-				slist2[[i]]    <- zdf
-			}
-		} else {
-			slist2    <- slist.list[[1]]
-		}
-		q.matrix  <- slist2[[K]]
+	} else {
+		slist2    <- slist.list[[1]]
+	}
+	result.list <- list(); length(result.list) <- length(K)
+	for(i in K){
+		save.as      <- file.path(xdir,paste0("popfile_K",i,"_from_structure.txt"))
+		q.matrix     <- slist2[[i]]
 		indv.pop     <- apply(X=q.matrix, MARGIN=1, FUN=function(x){which(x==max(x))[1]})
+		if(length(unique(indv.pop)) < i){
+			warning(paste0("For K=",i," some populations are represented only as a minority in admixed individuals. skipping this K."))
+			next
+		}
 		result       <- data.frame(indv=names(indv.pop),assignment=paste0("pop",indv.pop))
 		write.table(x=result,file=save.as,col.names=F,row.names=F,quote=F,sep="\t")
-		result
+		result.list[[i]] <- result
+	}
+	result.list
 }
 #' @examples
 #' create_popfile(xdir="PATH/TO/STRUCTURE/OUTPUT",K=2)

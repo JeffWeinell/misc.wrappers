@@ -12,10 +12,11 @@
 #' @param project Defualt 'new'
 #' @param iter Default 500
 #' @param save.as Character string with where to save the output PDF with plots of results. Default is NULL.
+#' @param include.out Character strings indicating what output files should be generated. If "entropy.mat" is provided, the function writes the crossentropy matrix and is done.
 #' @param ... Additional arguments passed to 'snmf' function of LEA package
 #' @return List of plots
 #' @export run_sNMF
-run_sNMF <- function(x,format="VCF",coords=NULL,samplenames=NULL,kmax=40,reps=100,entropy=TRUE,project="new",iter=500,save.as=NULL, ...){
+run_sNMF <- function(x,format="VCF",coords=NULL,samplenames=NULL,kmax=40,reps=100,entropy=TRUE,project="new",iter=500,save.as=NULL,include.out=c("entropy.mat"), ...){
 	#if(is.null(save.as)){
 	#	save.as <- file.path(getwd(),"result_LEA-sNMF.pdf")
 	#}
@@ -83,6 +84,12 @@ run_sNMF <- function(x,format="VCF",coords=NULL,samplenames=NULL,kmax=40,reps=10
 	crossentropy.mat <- t(do.call(cbind, lapply(X=Krange, FUN=function(x){LEA::cross.entropy(snmf.obj,K = x)})))
 	rownames(crossentropy.mat) <- Krange
 	colnames(crossentropy.mat) <- paste0("rep", 1:reps)
+	if(length(include.out) == 1){
+		if(include.out=="entropy.mat"){
+			write.table(x=crossentropy.mat,file=file.path(dirname(save.as),"crossentropy.txt"),row.names=T,col.names=T,quote=F,sep="\t")
+			return(crossentropy.mat)
+		}
+	}
 	mean.entropy   <- apply(crossentropy.mat, MARGIN=1,FUN=mean, na.rm=TRUE)
 	if(any(diff(mean.entropy)>0)){
 		bestK <- unname(which(diff(mean.entropy)>0)[1])
@@ -94,6 +101,8 @@ run_sNMF <- function(x,format="VCF",coords=NULL,samplenames=NULL,kmax=40,reps=10
 #	mode(crossentropy.df$Kval) <- "character"
 	crossentropy.df$Kval <- factor(crossentropy.df$Kval, levels=c(1:nrow(crossentropy.df)))
 	entropyPlot <- ggplot2::ggplot(crossentropy.df, ggplot2::aes(x=Kval, y=crossentropy)) + ggplot2::geom_boxplot(fill='lightgray', outlier.colour="black", outlier.shape=16,outlier.size=2, notch=FALSE) + ggplot2::theme_classic() + ggplot2::labs(title= paste0("Cross-entropy (",reps," replicates) vs. number of ancestral populations (K)"), x="Number of ancestral populations", y = "Cross-entropy") + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) # + ggplot2::geom_vline(xintercept=bestK, linetype=2, color="black", size=0.25)
+
+	# q.matrices <- lapply(X=1:Krange,FUN=function(x){LEA::Q(snmf.obj,K=x,run=which.min(LEA::cross.entropy(snmf.obj,K=x)))})
 #	boxplot(t(crossentropy.mat))
 #	plot(Krange,mean.entropy,pch=21,col="blue",xlab="",ylab="",xlim=range(Krange), ylim=range(range.entropy.mat))
 #	arrows(x0=Krange,y0=range.entropy.mat[,1],y1=range.entropy.mat[,2],length=0.07,col="black",angle=90,code=3)

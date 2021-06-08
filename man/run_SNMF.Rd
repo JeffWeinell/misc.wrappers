@@ -17,6 +17,7 @@ run_sNMF(
   project = "new",
   iter = 500,
   save.as = NULL,
+  include.out = c("entropy.mat"),
   ...
 )
 }
@@ -40,6 +41,8 @@ run_sNMF(
 \item{iter}{Default 500}
 
 \item{save.as}{Character string with where to save the output PDF with plots of results. Default is NULL.}
+
+\item{include.out}{Character strings indicating what output files should be generated. If "entropy.mat" is provided, the function writes the crossentropy matrix and is done.}
 
 \item{...}{Additional arguments passed to 'snmf' function of LEA package}
 }

@@ -14,7 +14,7 @@
 #' @param reps Number of repititions. Default 100.
 #' @param save.as Where to save the output PDF. Default is NULL.
 #' @param tolerance Tolerance for convergence, i.e., the change in marginal likelihood required to continue.
-#' @param prior Type of prior to use. Default "simple"
+#' @param prior Type of prior to use. Default "simple".
 #' @param full Whether or not to generate output files holding variation of Q, P, and marginal likelihood, in addition to the files holding means. Default FALSE.
 #' @param seed Value to use as a seed for reproducing results. Default NULL.
 #' @param python.path Character string with path to python 2 with fastStructure dependencies Numpy, Scipy, Cython, GNU Scientific Library
