@@ -127,7 +127,7 @@ runeems_snps_setup <- function(x, coords,save.in, outer=NULL, exe.path=NULL, n.s
 			if(grep("VCF",first.line)==1){
 				vcf.data   <- vcfR::read.vcfR(input.data)
 				gt.mat <- vcf.data@gt[,-1]
-				n.ind  <- ncol(gt.mat)
+				n.indv <- ncol(gt.mat)
 				#n.indv <- (length(colnames(attributes(vcf.data)[[3]]))-1)
 				if(n.coords!=n.indv){
 					stop(paste(n.coords,"individuals with coordinates but",n.indv,"individuals with snps"))
