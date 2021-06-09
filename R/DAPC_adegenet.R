@@ -31,7 +31,7 @@ run_DAPC <- function(x, format="VCF", kmax=10, coords=NULL, samplenames=NULL, re
 			save.as.Qlog <- NULL
 		}
 		if(".BIClog" %in% include.out){
-			save.as.BIClog <- file.path(save.in,"DAPC.BICLog")
+			save.as.BIClog <- file.path(save.in,"DAPC.BIClog")
 		} else {
 			save.as.BIClog <- NULL
 		}
