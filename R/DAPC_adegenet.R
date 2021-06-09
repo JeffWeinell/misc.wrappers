@@ -31,15 +31,15 @@ run_DAPC <- function(x, format="VCF", kmax=10, coords=NULL, samplenames=NULL, re
 			save.as.Qlog <- NULL
 		}
 		if(".BIClog" %in% include.out){
-			save.as.BICLog <- file.path(save.in,"DAPC.BICLog")
+			save.as.BIClog <- file.path(save.in,"DAPC.BICLog")
 		} else {
-			save.as.BICLog <- NULL
+			save.as.BIClog <- NULL
 		}
 	} else {
-		save.as.pdf <- save.as.Qlog <- save.as.BICLog  <- NULL
+		save.as.pdf <- save.as.Qlog <- save.as.BIClog  <- NULL
 	}
 	if(!overwrite){
-		files.to.check <- c(save.as.pdf,save.as.Qlog,save.as.BICLog)
+		files.to.check <- c(save.as.pdf,save.as.Qlog,save.as.BIClog)
 		if(!is.null(files.to.check)){
 			if(any(files.to.check %in% save.in)){
 				stop("One or more output files already exist in directory indicated by 'save.in'. Choose a different output directory or change 'overwrite' to TRUE")

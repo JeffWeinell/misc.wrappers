@@ -110,7 +110,7 @@ runtess <- function(x, format="VCF", coords, samplenames=NULL, kmax=10, reps=30,
 	crossentropy.df <- data.frame(crossentropy=unname(unlist(c(crossentropy.mat))),K=rep(Krange,reps),replicate=rep(1:reps, each=kmax))
 	if(!is.null(include.out)){
 		if(".entropyLog" %in% include.out){
-			write.table(x=crossentropy.df, file=save.as.entropyLog, row.names=T, col.names=T, quote=F, sep="\t")
+			write.table(x=crossentropy.df, file=save.as.entropyLog, row.names=F, col.names=T, quote=F, sep="\t")
 		}
 	}
 	## List holding population assignment probabilities for each K
