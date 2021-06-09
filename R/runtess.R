@@ -135,6 +135,8 @@ runtess <- function(x, format="VCF", coords, samplenames=NULL, kmax=10, reps=30,
 			admixturePlot  <- admixturePlots(xdir=save.in,userun=1:reps)
 			assignmentPlot <- assignmentPlots(xdir=save.in,userun=1:reps)
 			mapplot        <- admixtureMap(xdir=save.in,coords=coords,userun=1:reps)
+			result         <- c(list(entropyPlot), admixturePlot, assignmentPlot, mapplot)
+			return(result)
 		} else {
 			### Do things as before...
 			Krange.plot    <- setdiff(Krange,1)
@@ -182,9 +184,9 @@ runtess <- function(x, format="VCF", coords, samplenames=NULL, kmax=10, reps=30,
 					lapply(X=result,FUN=print)
 				dev.off()
 			}
+			result <- c(list(entropyPlot), admixturePlot, assignmentPlot, mapplot)
+			return(result)
 		}
-		result <- c(list(entropyPlot), admixturePlot, assignmentPlot, mapplot)
-		return(result)
 	} else {
 		return(NULL)
 	}
