@@ -1156,7 +1156,7 @@ assignmentPlots <- function(x, xdir=NULL, labels=NULL, save.as=file.path(getwd()
 		assignmentPlot[[i]]  <- ggplot2::ggplot(data=posterior.df, ggplot2::aes(x= pop, y=indv, fill=assignment)) + ggplot2::geom_tile(color="gray") + ggplot2::theme_classic() + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5), axis.text.y = ggplot2::element_text(size = label.size), panel.grid.major = ggplot2::element_blank(), panel.grid.minor = ggplot2::element_blank(), panel.background = ggplot2::element_blank(), legend.position = "none", ) + ggplot2::labs(title = paste0("K = ",K), x="Clusters", y="") + ggplot2::scale_fill_gradient2(low = "white", mid = "yellow", high = "red", midpoint = 0.5) + ggplot2::geom_text(label=labels)
 	}
 	pdf(height=6,width=10,file=save.as,onefile=TRUE)
-		lapply(X=admixturePlot, FUN=print)
+		lapply(X=assignmentPlot, FUN=print)
 	dev.off()
 	assignmentPlot
 }
