@@ -22,19 +22,22 @@ create.outer <- function(coords,method=2,buffer.adj=0,coords.radius=0.01,max.fra
 	input.coords           <- unname(coords)
 	### Check which type of object is being supplied to coords and define coords accordingly
 	if(is(input.coords,"character")){
-		coords   <- data.matrix(read.table(input.coords,header=F))
+		coords <- data.matrix(read.table(paste0(input.dirpath,"/data.coord")))
+		if(!is.numeric(coords[1,1])){
+			coords   <- data.matrix(read.table(input.coords,header=F))
+		}
 	}
 	if(is(input.coords,"matrix") | is(input.coords,"data.frame")){
 		coords       <- data.matrix(input.coords)
 		mode(coords) <- "numeric"
 	}
-	colnames(input.coords) <- c("latitude","longitude")
+	#colnames(input.coords) <- c("latitude","longitude")
 	### Data frame copy of coords
 	coords.df <- data.frame(X=coords[,1],Y=coords[,2])
 	### SpatialPoints object holding coords
-	points.sp <- sp::SpatialPoints(coords)
+	points.sp <- sp::SpatialPoints(coords.df)
 	### SpatialPolygons object holding circles with centerpoints at coords
-	circles.poly <- coords2sp.poly(coords.mat=coords,r=coords.radius)
+	circles.poly <- coords2sp.poly(coords.mat=coords.df,r=coords.radius)
 	### coordinate reference system to use for all spatial objects.
 	crs.string <- "+init=EPSG:4326"
 	## High resolution global map of political regions.

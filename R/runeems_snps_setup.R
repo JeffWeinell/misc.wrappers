@@ -28,7 +28,7 @@
 #' @param ... Arguments to pass to create.outer. See ?create.outer() for possible arguments.
 #' @return Nothing is returned.
 #' @export runeems_snps_setup
-runeems_snps_setup <- function(x, coords,save.in, outer=NULL, exe.path=NULL, n.sites=NULL, pl=2, nDemes=300, numMCMCIter = 10000000, numBurnIter = 1000000, numThinIter = 9999, nchains=3,...){
+runeems_snps_setup <- function(x, coords, save.in, outer=NULL, exe.path=NULL, n.sites=NULL, pl=2, nDemes=300, numMCMCIter = 10000000, numBurnIter = 1000000, numThinIter = 9999, nchains=3,...){
  # data.dirname <- paste0(sample(c(letters,LETTERS,0:9),size=10,replace=T),collapse="")
  # data.dirpath <- paste0(tempdir(),"/",data.dirname)
  # dir.create(data.dirpath)
@@ -95,12 +95,13 @@ runeems_snps_setup <- function(x, coords,save.in, outer=NULL, exe.path=NULL, n.s
 	params.path <- paste0(save.in,"/params")
 	dir.create(params.path)
 	# Copy *.coord file to input.dirpath and rename as "data.coord"
-	system(paste("cp",coords,paste0(input.dirpath,"/data.coord")))
+	system(paste("cp",coords, paste0(input.dirpath,"/data.coord")))
 	# Load coordinates matrix and determine number of individuals 
 	coords.df <- read.table(paste0(input.dirpath,"/data.coord"))
 	if(!is.numeric(coords.df[1,1])){
 		coords.df <- read.table(paste0(input.dirpath,"/data.coord"),header=F)
 	}
+	coords.df <- coords.df[,1:2]
 	n.coords  <- nrow(coords.df)
 	### Check if input.data is an object of class vcfR
 	if(is(input.data,"vcfR")){
@@ -126,8 +127,8 @@ runeems_snps_setup <- function(x, coords,save.in, outer=NULL, exe.path=NULL, n.s
 			first.line <- readLines(input.data,n=1)
 			if(grep("VCF",first.line)==1){
 				vcf.data   <- vcfR::read.vcfR(input.data)
-				gt.mat <- vcf.data@gt[,-1]
-				n.indv <- ncol(gt.mat)
+				gt.mat     <- vcf.data@gt[,-1]
+				n.indv     <- ncol(gt.mat)
 				#n.indv <- (length(colnames(attributes(vcf.data)[[3]]))-1)
 				if(n.coords!=n.indv){
 					stop(paste(n.coords,"individuals with coordinates but",n.indv,"individuals with snps"))
@@ -163,7 +164,7 @@ runeems_snps_setup <- function(x, coords,save.in, outer=NULL, exe.path=NULL, n.s
 	}
 	# If path to the outer file is NULL, generate one automatically, otherwise copy it to input.dirpath and rename as "data.outer"
 	if(is.null(outer)){
-		data_outer <- misc.wrappers::create.outer(coords=coords, output.path=paste0(input.dirpath,"/data.outer"), plot.output.path=paste0(save.in,"/habitat_outer.pdf"),...)
+		data_outer <- create.outer(coords=coords.df, output.path=paste0(input.dirpath,"/data.outer"), plot.output.path=paste0(save.in,"/habitat_outer.pdf"),...)
 	} else {
 		system(paste("cp",outer,paste0(input.dirpath,"/data.outer")))
 	}
@@ -191,7 +192,7 @@ runeems_snps_setup <- function(x, coords,save.in, outer=NULL, exe.path=NULL, n.s
 	}
 	# command.write <- c("#!/bin/bash",paste(exe.path,"--params",params.files.path))
 	# writeLines(command.write,paste0(save.in,"/runeems_snps.sh"))
-	#if(!setup.only){
+	# if(!setup.only){
 	#	print(paste0("Analysis setup complete. To begin, run bash scripts: '",save.in,"/runeems_snps_chain",1:nchains,".sh'"))
 	#	#command.exe   <- gsub(" & $","",paste(command.write,collapse=" & "))
 	#	#system(command.exe)
