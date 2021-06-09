@@ -16,8 +16,8 @@ run_fastStructure(
   coords = NULL,
   samplenames = NULL,
   kmax = 40,
+  save.in = NULL,
   reps = 100,
-  save.as = NULL,
   tolerance = 1e-05,
   prior = "simple",
   full = FALSE,
@@ -26,7 +26,8 @@ run_fastStructure(
   fastStructure.path = NULL,
   cleanup = TRUE,
   include.out = c(".pdf", ".Qlog", ".margLlog"),
-  debug = FALSE
+  debug = FALSE,
+  overwrite = FALSE
 )
 }
 \arguments{
@@ -40,13 +41,13 @@ run_fastStructure(
 
 \item{kmax}{Numerical vector with set of values to use for K. Default 40.}
 
-\item{reps}{Number of repititions. Default 100.}
+\item{save.in}{Character string with path to directory where output files should be saved.}
 
-\item{save.as}{Where to save the output PDF. Default is NULL.}
+\item{reps}{Number of repititions. Default 100.}
 
 \item{tolerance}{Tolerance for convergence, i.e., the change in marginal likelihood required to continue.}
 
-\item{prior}{Type of prior to use. Default "simple"}
+\item{prior}{Type of prior to use. Default "simple".}
 
 \item{full}{Whether or not to generate output files holding variation of Q, P, and marginal likelihood, in addition to the files holding means. Default FALSE.}
 
@@ -61,6 +62,10 @@ run_fastStructure(
 \item{include.out}{Character vector indicating which type of files should be included as output. Default is c(".pdf",".Qlog",".margLlog"). An additional file ".Plog" can be included but can be very large.}
 
 \item{debug}{Logical indicating whether or not to print messages indicating the internal step of the function.}
+
+\item{overwrite}{Logical indicating whether or not to allow new output files to overwrite existing ones. Default FALSE.}
+
+\item{save.as}{Where to save the output PDF. Default is NULL.}
 }
 \value{
 List of plots

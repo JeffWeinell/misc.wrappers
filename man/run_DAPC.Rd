@@ -15,8 +15,10 @@ run_DAPC(
   samplenames = NULL,
   reps = 100,
   save.as = NULL,
+  save.in = NULL,
   plot.components = FALSE,
-  include.out = c(".pdf", ".Qlog", ".BIClog")
+  include.out = c(".pdf", ".Qlog", ".BIClog"),
+  overwrite = FALSE
 )
 }
 \arguments{
@@ -32,9 +34,13 @@ run_DAPC(
 
 \item{save.as}{Character string with where to save the output PDF with plots of results. Default is NULL.}
 
+\item{save.in}{Character string with path to directory where output files should be saved.}
+
 \item{plot.components}{FALSE. This is still in development.}
 
 \item{include.out}{Character vector indicating which type of files should be included as output. Default is c(".pdf",".Qlog",".BIClog").}
+
+\item{overwrite}{Logical indicating whether or not to allow new output files to overwrite existing ones. Default FALSE.}
 }
 \value{
 A list of plots.

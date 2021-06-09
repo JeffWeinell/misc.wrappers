@@ -26,7 +26,7 @@ run_structure(
   structure.path = NULL,
   samplenames = NULL,
   cleanup = TRUE,
-  include.out = c(".pdf", ".Qlog", ".margLlog"),
+  include.out = c(".pdf", "popfiles"),
   debug = FALSE,
   ...,
   overwrite = FALSE
@@ -65,7 +65,7 @@ run_structure(
 
 \item{cleanup}{Whether or not the original output files should be deleted/replaced with one, simple table holding all of the information usually spread across multiple files and tables. Default TRUE.}
 
-\item{include.out}{Character vector indicating which type of files should be included as output. Default is c(".pdf",".Qlog",".margLlog"). An additional file ".Plog" can be included but can be very large.}
+\item{include.out}{Character vector indicating which type of files should be included as output in addition to the usual structure output. Default is c(".pdf","popfiles"). ".pdf" generates EvannoPlots and admixture barplots, and "popfiles" generates an easySFS-format popfile with individual assignments to populations for each K.}
 
 \item{debug}{Logical indicating whether or not to print messages indicating the internal step of the function. Default FALSE. Typically only used for development.}
 

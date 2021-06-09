@@ -11,9 +11,11 @@
 #' @param include.out Character vector indicating which type of files should be included as output. Default is c(".pdf",".Qlog",".BIClog").
 #' @param plot.components FALSE. This is still in development.
 #' @param save.as Character string with where to save the output PDF with plots of results. Default is NULL.
+#' @param save.in Character string with path to directory where output files should be saved.
+#' @param overwrite Logical indicating whether or not to allow new output files to overwrite existing ones. Default FALSE.
 #' @return A list of plots.
 #' @export run_DAPC
-run_DAPC <- function(x, format="VCF", kmax=40, coords=NULL, samplenames=NULL, reps=100, save.as=NULL, plot.components=FALSE, include.out=c(".pdf",".Qlog",".BIClog")){
+run_DAPC <- function(x, format="VCF", kmax=40, coords=NULL, samplenames=NULL, reps=100, save.as=NULL,save.in=NULL, plot.components=FALSE, include.out=c(".pdf",".Qlog",".BIClog"),overwrite=FALSE){
 	debug <- FALSE
 	if(is.null(save.as)){
 		save.as <- file.path(getwd(),"result_DAPC.pdf")
@@ -21,6 +23,43 @@ run_DAPC <- function(x, format="VCF", kmax=40, coords=NULL, samplenames=NULL, re
 	if(file.exists(save.as)){
 		stop("Output file already exists. Use a different name for 'save.as' argument.")
 	}
+
+	if(is.null(save.in)){
+		save.in <- getwd()
+	}
+	if(!is.null(include.out)){
+		if(".pdf" %in% include.out){
+			save.as.pdf <- file.path(save.in,"result_dapc.pdf")
+		} else {
+			save.as.pdf <- NULL
+		}
+		if(".Qlog" %in% include.out){
+			save.as.Qlog <- file.path(save.in,"result_dapc.Qlog")
+		} else {
+			save.as.Qlog <- NULL
+		}
+		if(".BIClog" %in% include.out){
+			save.as.BICLog <- file.path(save.in,"result_dapc.BICLog")
+		} else {
+			save.as.BICLog <- NULL
+		}
+	} else {
+		save.as.pdf <- save.as.Qlog <- save.as.BICLog  <- NULL
+	}
+	if(!overwrite){
+		files.to.check <- c(save.as.pdf,save.as.Qlog,save.as.BICLog)
+		if(!is.null(files.to.check)){
+			if(any(files.to.check %in% save.in)){
+				stop("One or more output files already exist in directory indicated by 'save.in'. Choose a different output directory or change 'overwrite' to TRUE")
+			}
+		}
+	}
+	
+
+
+
+
+
 	if(format=="VCF" | is(x,"vcfR")){
 		if(is(x,"vcfR")){
 			vcf.obj <- vcf <- x
@@ -75,7 +114,7 @@ run_DAPC <- function(x, format="VCF", kmax=40, coords=NULL, samplenames=NULL, re
 	
 	### Defining colors to use
 	if(max.clusters <= 15){
-			myCols  <- goodcolors2(n=max.clusters)
+			myCols  <- goodcolors2(n=15)[1:max.clusters]
 		}
 		if(max.clusters>15){
 			myCols  <- c(goodcolors2(n=15), sample(adegenet::funky(100), size=max.clusters-15))
@@ -100,10 +139,10 @@ run_DAPC <- function(x, format="VCF", kmax=40, coords=NULL, samplenames=NULL, re
 	}
 	Kbest.criteria1   <- bestK
 	### Construct data frame holding BIC scores for each replicate of each K
-	BIC.df      <- data.frame(BIC=unname(unlist(c(BIC.mat))),K=rep(Krange,reps),replicate=rep(1:reps,each=length(Krange)))
+	BIC.df      <- data.frame(BIC=unname(unlist(c(BIC.mat))), K=rep(Krange,reps), replicate=rep(1:reps,each=length(Krange)))
 	### save a copy of BIC scores
 	if(".BIClog" %in% include.out){
-		write.table(x=BIC.df,file=paste0(tools::file_path_sans_ext(save.as),".BIClog"),row.names=FALSE,col.names=TRUE,quote=FALSE,sep="\t")
+		write.table(x=BIC.df, file=paste0(tools::file_path_sans_ext(save.as),".BIClog"), row.names=FALSE, col.names=TRUE, quote=FALSE, sep="\t")
 	}
 	#BIC.df <- BIC.df[order(BIC.df.temp[,"Kval"]),]
 	#mode(BIC.df$Kval) <- "character"

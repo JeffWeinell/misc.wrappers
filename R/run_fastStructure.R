@@ -12,7 +12,8 @@
 #' @param samplenames NULL or a character string vector with names of samples in the input data, and coords file if supplied. If NULL (the default), sample names are extracted from the SNPs datafile.
 #' @param kmax Numerical vector with set of values to use for K. Default 40.
 #' @param reps Number of repititions. Default 100.
-#' @param save.as Where to save the output PDF. Default is NULL.
+##' @param save.as Where to save the output PDF. Default is NULL.
+#' @param save.in Character string with path to directory where output files should be saved.
 #' @param tolerance Tolerance for convergence, i.e., the change in marginal likelihood required to continue.
 #' @param prior Type of prior to use. Default "simple".
 #' @param full Whether or not to generate output files holding variation of Q, P, and marginal likelihood, in addition to the files holding means. Default FALSE.
@@ -22,15 +23,52 @@
 #' @param cleanup Whether or not the original fastStructure output files (*.log, *.meanQ, *meanP file for each replicate of each K) should be deleted after the data from those files are compiled and saved in three tables. Default TRUE.
 #' @param include.out Character vector indicating which type of files should be included as output. Default is c(".pdf",".Qlog",".margLlog"). An additional file ".Plog" can be included but can be very large.
 #' @param debug Logical indicating whether or not to print messages indicating the internal step of the function.
+#' @param overwrite Logical indicating whether or not to allow new output files to overwrite existing ones. Default FALSE.
 #' @return List of plots
 #' @export run_fastStructure
-run_fastStructure <- function(x,format="VCF",coords=NULL,samplenames=NULL,kmax=40,reps=100,save.as=NULL,tolerance=10e-6,prior="simple",full=FALSE,seed=NULL,python.path=NULL,fastStructure.path=NULL,cleanup=TRUE,include.out=c(".pdf",".Qlog",".margLlog"), debug=FALSE){
-	if(is.null(save.as)){
-		save.as <- file.path(getwd(),"result_fastStructure.pdf")
+run_fastStructure <- function(x,format="VCF",coords=NULL,samplenames=NULL,kmax=40,save.in=NULL,reps=100,tolerance=10e-6,prior="simple",full=FALSE,seed=NULL,python.path=NULL,fastStructure.path=NULL,cleanup=TRUE,include.out=c(".pdf",".Qlog",".margLlog"), debug=FALSE,overwrite=FALSE){
+	#if(is.null(save.as)){
+	#	save.as <- file.path(getwd(),"result_fastStructure.pdf")
+	#}
+	if(is.null(save.in)){
+		save.in <- getwd()
 	}
-	if(file.exists(save.as)){
-		stop("Output file already exists. Use a different name for 'save.as' argument.")
+	
+	if(!is.null(include.out)){
+		if(".pdf" %in% include.out){
+			save.as.pdf <- file.path(save.in,"result_fastStructure.pdf")
+		} else {
+			save.as.pdf <- NULL
+		}
+		if(".Qlog" %in% include.out){
+			save.as.Qlog <- file.path(save.in,"result_fastStructure.Qlog")
+		} else {
+			save.as.Qlog <- NULL
+		}
+		if(".margLlog" %in% include.out){
+			save.as.margLlog <- file.path(save.in,"result_fastStructure.margLlog")
+		} else {
+			save.as.margLlog <- NULL
+		}
+		if(".Plog" %in% include.out){
+			save.as.Plog <- file.path(save.in,"result_fastStructure.Plog")
+		} else {
+			save.as.Plog <- NULL
+		}
+	} else {
+		save.as.pdf <- save.as.Qlog <- save.as.margLlog <- save.as.Plog <- NULL
 	}
+	if(!overwrite){
+		files.to.check <- c(save.as.pdf,save.as.Qlog,save.as.margLlog,save.as.Plog)
+		if(!is.null(files.to.check)){
+			if(any(files.to.check %in% save.in)){
+				stop("One or more output files already exist in directory indicated by 'save.in'. Choose a different output directory or change 'overwrite' to TRUE")
+			}
+		}
+	}
+	#if(file.exists(save.as)){
+	#	stop("One or more output files already exists. Use a different name for 'save.as' argument.")
+	#}
 	Krange=1:kmax
 	if(format=="VCF" | is(x,"vcfR")){
 		if(is(x,"vcfR")){
@@ -130,7 +168,8 @@ run_fastStructure <- function(x,format="VCF",coords=NULL,samplenames=NULL,kmax=4
 		seed <- NULL
 	}
 	if(debug) message("step 1")
-	outdir.temp <- file.path(dirname(save.as),paste(sample(c(letters,LETTERS,rep(0:9,3)),10,replace=T),collapse=""))
+	outdir.temp  <- file.path(save.in,paste(sample(c(letters,LETTERS,rep(0:9,3)),10,replace=T),collapse=""))
+	#outdir.temp <- file.path(dirname(save.as),paste(sample(c(letters,LETTERS,rep(0:9,3)),10,replace=T),collapse=""))
 	dir.create(outdir.temp)
 	for(i in 1:reps){
 		outfile.temp.i <- file.path(outdir.temp,paste0("rep",i))
@@ -203,7 +242,7 @@ run_fastStructure <- function(x,format="VCF",coords=NULL,samplenames=NULL,kmax=4
 		if(debug) message(paste0("K=",K," step 7.1"))
 		i=(K-1)
 		if(K <= 15){
-			myCols          <- goodcolors2(n=K)
+			myCols          <- goodcolors2(n=15)[1:K]
 		}
 		if(K>15){
 			myCols          <- c(goodcolors2(n=15), sample(adegenet::funky(100), size=K-15))
@@ -242,9 +281,9 @@ run_fastStructure <- function(x,format="VCF",coords=NULL,samplenames=NULL,kmax=4
 	result <- c(list(margLPlot),admixturePlot,assignmentPlot,mapplot)
 	#### Save the PDF
 	if(debug) message("step 9")
+	
 	if(".pdf" %in% include.out){
-	#if(!is.null(save.as)){
-		pdf(height=6,width=10,file=save.as,onefile=TRUE)
+		pdf(height=6,width=10,file=save.as.pdf,onefile=TRUE)
 		lapply(X=result,FUN=print)
 		dev.off()
 	}
@@ -255,7 +294,6 @@ run_fastStructure <- function(x,format="VCF",coords=NULL,samplenames=NULL,kmax=4
 			remove.str <- file.remove(str.path0)
 		}
 	}
-	
 	if(debug) message("step 11")
 	#### Generate compiled output files so that the other output files can be deleted.
 	if(".margLlog" %in% include.out){
@@ -276,7 +314,7 @@ run_fastStructure <- function(x,format="VCF",coords=NULL,samplenames=NULL,kmax=4
 			log.i.df <- data.frame(K_Replicate_Iteration=paste(logmat2.i[,"K"],logmat2.i[,"replicate"],logmat2.i[,"Iteration"],sep=":"), MarginalLikelihood=logmat2.i[,"Marginal_Likelihood"],deltaMarginalLikelihood=logmat2.i[,"delta_Marginal_Likelihood"], IterationTime.seconds = logmat2.i[,"Iteration_Time_secs"])
 			log.df <- rbind(log.df,log.i.df)
 		}
-		write.table(x=log.df,file=paste0(tools::file_path_sans_ext(save.as),".margLlog"),row.names=F,col.names=T,quote=F,sep="\t")
+		write.table(x=log.df, file=save.as.margLlog, row.names=F, col.names=T, quote=F, sep="\t")
 	}
 	if(debug) message("step 12")
 	if(".Qlog" %in% include.out){
@@ -286,11 +324,11 @@ run_fastStructure <- function(x,format="VCF",coords=NULL,samplenames=NULL,kmax=4
 			qmatrix.i    <- qmats.list[[i]]
 			rownames(qmatrix.i) <- samplenames
 			colnames(qmatrix.i) <- paste0("cluster",1:ncol(qmatrix.i))
-			q.i.df <- data.frame(individual=rep(rownames(qmatrix.i),ncol(qmatrix.i)), cluster=as.numeric(gsub("^cluster","",rep(colnames(qmatrix.i),each=nrow(qmatrix.i)))), assignment=c(unlist(unname(qmatrix.i))),K=rep(KQmats[i],(KQmats[i]*numind)),replicate=rep(repsQmats[i],(KQmats[i]*numind)))
+			q.i.df <- data.frame(individual=rep(rownames(qmatrix.i),ncol(qmatrix.i)), cluster=as.numeric(gsub("^cluster","",rep(colnames(qmatrix.i),each=nrow(qmatrix.i)))), assignment=c(unlist(unname(qmatrix.i))), K=rep(KQmats[i],(KQmats[i]*numind)), replicate=rep(repsQmats[i], (KQmats[i]*numind)))
 			# posterior.df <- data.frame(indv=rep(rownames(qmatrix.i),ncol(qmatrix.i)), pop=rep(colnames(qmatrix.i),each=nrow(qmatrix.i)), assignment=c(unlist(unname(qmatrix.i))),replicate=rep(repsQmats[i],(KQmats[i]*numind)))
 			q.df <- rbind(q.df,q.i.df)
 		}
-		write.table(x=q.df,file=paste0(tools::file_path_sans_ext(save.as),".Qlog"),row.names=F,col.names=T,quote=F,sep="\t")
+		write.table(x=q.df,file=save.as.Qlog,row.names=F,col.names=T,quote=F,sep="\t")
 	}
 	if(debug) message("step 13")
 	if(".Plog" %in% include.out){
@@ -312,7 +350,7 @@ run_fastStructure <- function(x,format="VCF",coords=NULL,samplenames=NULL,kmax=4
 				# posterior.df <- data.frame(indv=rep(rownames(qmatrix.i),ncol(qmatrix.i)), pop=rep(colnames(qmatrix.i),each=nrow(qmatrix.i)), assignment=c(unlist(unname(qmatrix.i))),replicate=rep(repsQmats[i],(KQmats[i]*numind)))
 				p.df <- rbind(p.df,p.i.df)
 			}
-			write.table(x=p.df,file=paste0(tools::file_path_sans_ext(save.as),".Plog"),row.names=F,col.names=T,quote=F,sep="\t")
+			write.table(x=p.df,file=save.as.Plog,row.names=F,col.names=T,quote=F,sep="\t")
 		}
 	}
 	# Delete the folder with .log, .meanQ, and .meanP files; the info from these are compiled in a single file.

@@ -11,13 +11,14 @@ run_sNMF(
   format = "VCF",
   coords = NULL,
   samplenames = NULL,
-  kmax = 40,
-  reps = 100,
+  kmax = 10,
+  reps = 30,
   entropy = TRUE,
   project = "new",
   iter = 500,
-  save.as = NULL,
-  include.out = c("entropy.mat"),
+  save.in = NULL,
+  include.out = c(".pdf", ".Qlog", ".entropyLog"),
+  overwrite = FALSE,
   ...
 )
 }
@@ -30,9 +31,9 @@ run_sNMF(
 
 \item{samplenames}{NULL or a character string vector with names of samples (in same order) as data in x and coords. If NULL (the default), sample names are extracted from x.}
 
-\item{kmax}{Number indicating the maximum number of clusters to evaluate. Default is 40, which is converted using kmax = min(kmax, number of individuals-1)}
+\item{kmax}{Number indicating the maximum number of clusters to evaluate. Default is 10, which is converted using kmax = min(kmax, number of individuals-1)}
 
-\item{reps}{Number of repititions. Default 100.}
+\item{reps}{Number of repititions. Default 30.}
 
 \item{entropy}{Default TRUE}
 
@@ -40,11 +41,15 @@ run_sNMF(
 
 \item{iter}{Default 500}
 
-\item{save.as}{Character string with where to save the output PDF with plots of results. Default is NULL.}
+\item{save.in}{Character string with path to directory where output files should be saved.}
 
 \item{include.out}{Character strings indicating what output files should be generated. If "entropy.mat" is provided, the function writes the crossentropy matrix and is done.}
 
+\item{overwrite}{Logical indicating whether or not to allow new output files to overwrite existing ones. Default FALSE.}
+
 \item{...}{Additional arguments passed to 'snmf' function of LEA package}
+
+\item{save.as}{Character string with where to save the output PDF with plots of results. Default is NULL.}
 }
 \value{
 List of plots
