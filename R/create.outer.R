@@ -19,8 +19,7 @@
 #' @export create.outer
 create.outer <- function(coords,method=2,buffer.adj=0,coords.radius=0.01,max.fractal.dimension=1.1,plot.outer=TRUE,ask.use=FALSE,counter.clockwise=TRUE,output.path=NULL,plot.output.path=NULL){
 	usegg <- TRUE
-	input.coords <- unname(coords)
-	colnames(input.coords) <- c("latitude","longitude")
+	input.coords           <- unname(coords)
 	### Check which type of object is being supplied to coords and define coords accordingly
 	if(is(input.coords,"character")){
 		coords   <- data.matrix(read.table(input.coords,header=F))
@@ -29,6 +28,7 @@ create.outer <- function(coords,method=2,buffer.adj=0,coords.radius=0.01,max.fra
 		coords       <- data.matrix(input.coords)
 		mode(coords) <- "numeric"
 	}
+	colnames(input.coords) <- c("latitude","longitude")
 	### Data frame copy of coords
 	coords.df <- data.frame(X=coords[,1],Y=coords[,2])
 	### SpatialPoints object holding coords
