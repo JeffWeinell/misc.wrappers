@@ -10,36 +10,28 @@
 #' @param reps Number indicating the number of replicates of 'find.clusters'. Default 100.
 #' @param include.out Character vector indicating which type of files should be included as output. Default is c(".pdf",".Qlog",".BIClog").
 #' @param plot.components FALSE. This is still in development.
-#' @param save.as Character string with where to save the output PDF with plots of results. Default is NULL.
 #' @param save.in Character string with path to directory where output files should be saved.
 #' @param overwrite Logical indicating whether or not to allow new output files to overwrite existing ones. Default FALSE.
 #' @return A list of plots.
 #' @export run_DAPC
-run_DAPC <- function(x, format="VCF", kmax=40, coords=NULL, samplenames=NULL, reps=100, save.as=NULL,save.in=NULL, plot.components=FALSE, include.out=c(".pdf",".Qlog",".BIClog"),overwrite=FALSE){
+run_DAPC <- function(x, format="VCF", kmax=10, coords=NULL, samplenames=NULL, reps=30, save.in=NULL, plot.components=FALSE, include.out=c(".pdf",".Qlog",".BIClog"),overwrite=FALSE){
 	debug <- FALSE
-	if(is.null(save.as)){
-		save.as <- file.path(getwd(),"result_DAPC.pdf")
-	}
-	if(file.exists(save.as)){
-		stop("Output file already exists. Use a different name for 'save.as' argument.")
-	}
-
 	if(is.null(save.in)){
 		save.in <- getwd()
 	}
 	if(!is.null(include.out)){
 		if(".pdf" %in% include.out){
-			save.as.pdf <- file.path(save.in,"result_dapc.pdf")
+			save.as.pdf <- file.path(save.in,"DAPC.pdf")
 		} else {
 			save.as.pdf <- NULL
 		}
 		if(".Qlog" %in% include.out){
-			save.as.Qlog <- file.path(save.in,"result_dapc.Qlog")
+			save.as.Qlog <- file.path(save.in,"DAPC.Qlog")
 		} else {
 			save.as.Qlog <- NULL
 		}
 		if(".BIClog" %in% include.out){
-			save.as.BICLog <- file.path(save.in,"result_dapc.BICLog")
+			save.as.BICLog <- file.path(save.in,"DAPC.BICLog")
 		} else {
 			save.as.BICLog <- NULL
 		}
@@ -55,11 +47,6 @@ run_DAPC <- function(x, format="VCF", kmax=40, coords=NULL, samplenames=NULL, re
 		}
 	}
 	
-
-
-
-
-
 	if(format=="VCF" | is(x,"vcfR")){
 		if(is(x,"vcfR")){
 			vcf.obj <- vcf <- x
@@ -142,7 +129,7 @@ run_DAPC <- function(x, format="VCF", kmax=40, coords=NULL, samplenames=NULL, re
 	BIC.df      <- data.frame(BIC=unname(unlist(c(BIC.mat))), K=rep(Krange,reps), replicate=rep(1:reps,each=length(Krange)))
 	### save a copy of BIC scores
 	if(".BIClog" %in% include.out){
-		write.table(x=BIC.df, file=paste0(tools::file_path_sans_ext(save.as),".BIClog"), row.names=FALSE, col.names=TRUE, quote=FALSE, sep="\t")
+		write.table(x=BIC.df, file=save.as.BIClog, row.names=FALSE, col.names=TRUE, quote=FALSE, sep="\t")
 	}
 	#BIC.df <- BIC.df[order(BIC.df.temp[,"Kval"]),]
 	#mode(BIC.df$Kval) <- "character"
@@ -193,7 +180,7 @@ run_DAPC <- function(x, format="VCF", kmax=40, coords=NULL, samplenames=NULL, re
 	# Data frame holding assignment probability of each individual in each cluster at each K.
 	q.df           <- do.call(rbind,lapply(X=1:length(dapc.list),FUN=function(x){data.frame(indv=rep(rownames(posterior.list[[x]]),ncol(posterior.list[[x]])), pop=rep(colnames(posterior.list[[x]]),each=nrow(posterior.list[[x]])), assignment=c(posterior.list[[x]]),K=(x+1))}))
 	if(".Qlog" %in% include.out){
-		write.table(x=q.df,file=paste0(tools::file_path_sans_ext(save.as),".Qlog"),row.names=FALSE,col.names=TRUE,quote=FALSE,sep="\t")
+		write.table(x=q.df,file=save.as.Qlog,row.names=FALSE,col.names=TRUE,quote=FALSE,sep="\t")
 	}
 	
 	#####
@@ -264,7 +251,7 @@ run_DAPC <- function(x, format="VCF", kmax=40, coords=NULL, samplenames=NULL, re
 			da.arranged0   <- lapply(X=1:length(df.plots.list),FUN=function(x){gridExtra::arrangeGrob(df.plots.list[[x]],left=left.mat.da[indexmat.da[x]],right=right.mat.da[indexmat.da[x]],bottom=bottom.mat.da[indexmat.da[x]],top=top.mat.da[indexmat.da[x]])})
 			da.arranged    <- gridExtra::arrangeGrob(grobs=da.arranged0,layout_matrix=indexmat.da,respect=TRUE)
 			vp             <- grid::viewport(height=grid::unit(0.9,"npc"),width=grid::unit(0.9,"npc"))
-			pdf(file=paste0(tools::file_path_sans_ext(save.as),"_densityPlots_DF.pdf"), height=(nrow(indexmat.da)*3),width=(ncol(indexmat.da)*3))
+			pdf(file=file.path(save.in,"densityPlots_DF.pdf"), height=(nrow(indexmat.da)*3), width=(ncol(indexmat.da)*3))
 			grid::grid.draw(da.arranged)
 			dev.off()
 			
@@ -289,7 +276,7 @@ run_DAPC <- function(x, format="VCF", kmax=40, coords=NULL, samplenames=NULL, re
 			pc.arranged0   <- lapply(X=1:length(pc.plots.list),FUN=function(x){gridExtra::arrangeGrob(pc.plots.list[[x]],left=left.mat.pca[indexmat.pc[x]],right=right.mat.pca[indexmat.pc[x]],bottom=bottom.mat.pca[indexmat.pc[x]],top=top.mat.pca[indexmat.pc[x]])})
 			pc.arranged    <- gridExtra::arrangeGrob(grobs=pc.arranged0,layout_matrix=indexmat.pc,respect=TRUE)
 			vp             <- grid::viewport(height=grid::unit(0.9,"npc"),width=grid::unit(0.9,"npc"))
-			pdf(file=paste0(tools::file_path_sans_ext(save.as),"_densityPlots_PC.pdf"), height=(nrow(indexmat.pc)*3),width=(ncol(indexmat.pc)*3))
+			pdf(file=file.path(save.in,"densityPlots_PC.pdf"), height=(nrow(indexmat.pc)*3),width=(ncol(indexmat.pc)*3))
 			grid::grid.draw(pc.arranged)
 			dev.off()
 		
@@ -463,7 +450,7 @@ run_DAPC <- function(x, format="VCF", kmax=40, coords=NULL, samplenames=NULL, re
 				#pc.arranged0[[i]]   <- lapply(X=1:length(dapc.mats3[[i]]),FUN=function(x){gridExtra::arrangeGrob(dapc.mats3[[i]][],left=left.mat.pca[indexmat.pc[x]],right=right.mat.pca[indexmat.pc[x]],bottom=bottom.mat.pca[indexmat.pc[x]],top=top.mat.pca[indexmat.pc[x]])})
 				#pc.arranged    <- gridExtra::arrangeGrob(grobs=pc.arranged0,layout_matrix=indexmat.pc,respect=TRUE)
 				vp             <- grid::viewport(height=grid::unit(0.95,"npc"),width=grid::unit(0.95,"npc"))
-				pdf(file=paste0(tools::file_path_sans_ext(save.as),"_BiPlots.pdf"), height=(max(sapply(dapc.mats3,nrow))*3),width=(max(sapply(dapc.mats3,ncol))*3))
+				pdf(file=file.path(save.in,"BiPlots.pdf"), height=(max(sapply(dapc.mats3,nrow))*3),width=(max(sapply(dapc.mats3,ncol))*3))
 				for(i in 1:length(dapc.mats3)){
 					grid::grid.draw(bi.arranged[[i]])
 					if(i < length(dapc.mats3)){
@@ -532,7 +519,7 @@ run_DAPC <- function(x, format="VCF", kmax=40, coords=NULL, samplenames=NULL, re
 	results1   <- c(resultsA, resultsB)
 	if(debug) message("step 11")
 	if(".pdf" %in% include.out){
-		pdf(height=6,width=10,file=save.as, onefile=TRUE)
+		pdf(height=6,width=10,file=save.as.pdf, onefile=TRUE)
 		for(i in 1:length(results1)){
 			grid::grid.draw(results1[[i]])
 			if(i < length(results1)){

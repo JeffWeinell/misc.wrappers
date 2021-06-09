@@ -9,17 +9,52 @@
 #' @param samplenames NULL or a character string vector with names of samples (in same order) as data in x and coords. If NULL (the default), sample names are extracted from x.
 #' @param kmax Numerical vector with set of values to use for K. Default 40.
 #' @param reps Number of repititions. Default 100.
-#' @param save.as Where to save the output PDF. Default is NULL.
+#' @param save.in Where to save output files. Default is NULL.
+#' @param include.out Character vector indicating which type of files should be included as output. Default is c(".pdf",".Qlog", and ".entropyLog").
+#' @param overwrite Logical indicating whether or not to allow new output files to overwrite existing ones. Default FALSE.
 #' @param mask Proportion of input data to mask during each replicate when tess3 function is called. Default 0.05.
 #' @param max.iteration Max iterations. Default 500.
 #' @return List of plots
 #' @export runtess
-runtess <- function(x,format="VCF",coords,samplenames=NULL,kmax=40,reps=100,save.as=NULL,mask=0.05,max.iteration=500){
-	if(is.null(save.as)){
-		save.as <- file.path(getwd(),"result_tess.pdf")
+runtess <- function(x, format="VCF", coords, samplenames=NULL, kmax=10, reps=30, save.in=NULL, mask=0.05, max.iteration=500, include.out=c(".pdf",".Qlog",".entropyLog"), overwrite=FALSE){
+	#if(is.null(save.as)){
+	#	save.as <- file.path(getwd(),"result_tess.pdf")
+	#}
+	#if(file.exists(save.as)){
+	#	stop("Output file already exists. Use a different name for 'save.as' argument.")
+	#}
+	
+
+	if(is.null(save.in)){
+		save.in <- getwd()
 	}
-	if(file.exists(save.as)){
-		stop("Output file already exists. Use a different name for 'save.as' argument.")
+	
+	if(!is.null(include.out)){
+		if(".pdf" %in% include.out){
+			save.as.pdf <- file.path(save.in,"tess.pdf")
+		} else {
+			save.as.pdf <- NULL
+		}
+		if(".Qlog" %in% include.out){
+			save.as.Qlog <- file.path(save.in,"tess.Qlog")
+		} else {
+			save.as.Qlog <- NULL
+		}
+		if(".entropyLog" %in% include.out){
+			save.as.entropyLog <- file.path(save.in,"tess.entropyLog")
+		} else {
+			save.as.entropyLog <- NULL
+		}
+	} else {
+		save.as.pdf <- save.as.Qlog <- save.as.entropyLog  <- NULL
+	}
+	if(!overwrite){
+		files.to.check <- c(save.as.pdf,save.as.Qlog,save.as.entropyLog)
+		if(!is.null(files.to.check)){
+			if(any(files.to.check %in% save.in)){
+				stop("One or more output files already exist in directory indicated by 'save.in'. Choose a different output directory or change 'overwrite' to TRUE")
+			}
+		}
 	}
 	Krange=1:kmax
 	if(format=="VCF" | is(x,"vcfR")){
@@ -60,94 +95,99 @@ runtess <- function(x,format="VCF",coords,samplenames=NULL,kmax=40,reps=100,save
 	if(max(Krange) > maxK){
 		Krange <- 1:maxK
 	}
+	kmax <- max(Krange)
 	tess.obj                   <- tess3r::tess3(X = lfmm.obj, coord = as.matrix(coords), K=Krange, ploidy = ploidy, verbose=FALSE ,mask=mask, rep=reps, max.iteration=max.iteration,keep="all")
 	crossentropy.mat           <- do.call(rbind,lapply(X=1:length(tess.obj),FUN=function(x){matrix(unlist(tess.obj[[x]]["crossentropy"]),nrow=1)}))
 	rownames(crossentropy.mat) <- Krange
 	colnames(crossentropy.mat) <- paste0("rep",1:reps)
-	mean.entropy      <- apply(crossentropy.mat,MARGIN=1,FUN=mean,na.rm=TRUE)
+	mean.entropy      <- apply(crossentropy.mat, MARGIN=1, FUN=mean, na.rm=TRUE)
 	range.entropy.mat <- do.call(rbind,lapply(X=1:nrow(crossentropy.mat),FUN=function(x){range(crossentropy.mat[x,],na.rm=TRUE)}))
 	if(any(diff(mean.entropy)>0)){
 		bestK <- unname(which(diff(mean.entropy)>0)[1])
 	} else {
 		bestK <- unname(Krange[1])
 	}
-	crossentropy.df <- data.frame(crossentropy=unname(unlist(c(crossentropy.mat))),Kval=rep(Krange,reps))
-	crossentropy.df$Kval <- factor(crossentropy.df$Kval, levels=c(1:nrow(crossentropy.df)))
-	entropyPlot <- ggplot2::ggplot(crossentropy.df, ggplot2::aes(x=Kval, y=crossentropy)) + ggplot2::geom_boxplot(fill='lightgray', outlier.colour="black", outlier.shape=16,outlier.size=2, notch=FALSE) + ggplot2::theme_classic() + ggplot2::labs(title= paste0("Cross-entropy (",reps," replicates) vs. number of ancestral populations (K)"), x="Number of ancestral populations", y = "Cross-entropy") + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) #+ ggplot2::geom_vline(xintercept=bestK, linetype=2, color="black", size=0.25)
+	crossentropy.df <- data.frame(crossentropy=unname(unlist(c(crossentropy.mat))),K=rep(Krange,reps),replicate=rep(1:reps, each=kmax))
+	if(!is.null(include.out)){
+		if(".entropyLog" %in% include.out){
+			write.table(x=crossentropy.df, file=save.as.entropyLog, row.names=T, col.names=T, quote=F, sep="\t")
+		}
+	}
 	## List holding population assignment probabilities for each K
-	slist <- lapply(X=Krange,FUN=function(x){as.data.frame(tess3r::qmatrix(tess3=tess.obj, K = x))})
-	Krange.plot    <- setdiff(Krange,1)
-	admixturePlot  <- list(); length(admixturePlot)   <- length(Krange.plot)
-	assignmentPlot <- list(); length(assignmentPlot)  <- length(Krange.plot)
-	mapplot        <- list(); length(mapplot)         <- length(Krange.plot)
-	x.min <- min((coords[,1]-0.5))
-	x.max <- max((coords[,1]+0.5))
-	y.min <- min((coords[,2]-0.5))
-	y.max <- max((coords[,2]+0.5))
-	world_sf      <- rnaturalearth::ne_countries(scale=10,returnclass="sf")[1]
-	world_sp      <- rnaturalearth::ne_countries(scale=10,returnclass="sp")
-#	current_sf    <- sf::st_crop(world_sf,xmin=x.min,xmax=x.max,ymin=y.min,ymax=y.max)
-#	current.gg.sf <- ggplot2::geom_sf(data=current_sf,colour = "black", fill = NA)
-	for(K in Krange.plot){
-		i=(K-1)
-		q.matrix  <- slist[[K]]
-		rownames(q.matrix) <- samplenames
-		colnames(q.matrix) <- paste0("cluster", 1:ncol(q.matrix))
-		indv.pop           <- apply(X=q.matrix, MARGIN=1, FUN=function(x){which(x==max(x))})
-		posterior.df       <- data.frame(indv=rep(rownames(q.matrix),ncol(q.matrix)), pop=rep(colnames(q.matrix),each=nrow(q.matrix)), assignment=c(unlist(unname(q.matrix))))
-		posterior.df$indv  <- factor(posterior.df$indv, levels = names(sort(indv.pop)))
-		if(K <= 15){
-			myCols         <- goodcolors2(n=K)
+	slist <- lapply(X=Krange, FUN=function(x){as.data.frame(tess3r::qmatrix(tess3=tess.obj, K = x))})
+	if(".Qlog" %in% include.out){
+		q.df <- NULL
+		for(K in 2:kmax){
+			i=(K-1)
+			q.matrix           <- slist[[K]]
+			rownames(q.matrix) <- samplenames
+			colnames(q.matrix) <- paste0("cluster", 1:ncol(q.matrix))
+			q.i.df <- data.frame(individual=rep(rownames(q.matrix),ncol(q.matrix)), cluster=as.numeric(gsub("^cluster","",rep(colnames(q.matrix), each=nrow(q.matrix)))), assignment=c(unlist(unname(q.matrix))), K=rep(K,(K*numind)))
+			q.df   <- rbind(q.df, q.i.df)
 		}
-		if(K>15){
-			myCols          <- c(goodcolors2(n=K), sample(adegenet::funky(100), size=K-15))
+		q.df[,"replicate"] <- NA
+		write.table(x=q.df, file=save.as.Qlog, col.names=T, row.names=FALSE, quote=FALSE, sep="\t")
+	}
+	if(".pdf" %in% include.out){
+		crossentropy.df$K <- factor(crossentropy.df$K, levels=c(1:nrow(crossentropy.df)))
+		entropyPlot    <- ggplot2::ggplot(crossentropy.df, ggplot2::aes(x=K, y=crossentropy)) + ggplot2::geom_boxplot(fill='lightgray', outlier.colour="black", outlier.shape=16,outlier.size=2, notch=FALSE) + ggplot2::theme_classic() + ggplot2::labs(title= paste0("Cross-entropy (",reps," replicates) vs. number of ancestral populations (K)"), x="Number of ancestral populations", y = "Cross-entropy") + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) #+ ggplot2::geom_vline(xintercept=bestK, linetype=2, color="black", size=0.25)
+		if(".Qlog" %in% include.out){
+			admixturePlot  <- admixturePlots(xdir=save.in,userun=1:runs)
+			assignmentPlot <- assignmentPlots(xdir=save.in,userun=1:runs)
+			mapplot        <- admixtureMap(xdir=save.in,coords=coords,userun=1:runs)
+		} else {
+			### Do things as before...
+			Krange.plot    <- setdiff(Krange,1)
+			admixturePlot  <- list(); length(admixturePlot)   <- length(Krange.plot)
+			assignmentPlot <- list(); length(assignmentPlot)  <- length(Krange.plot)
+			mapplot        <- list(); length(mapplot)         <- length(Krange.plot)
+			x.min <- min((coords[,1]-0.5))
+			x.max <- max((coords[,1]+0.5))
+			y.min <- min((coords[,2]-0.5))
+			y.max <- max((coords[,2]+0.5))
+			world_sf      <- rnaturalearth::ne_countries(scale=10,returnclass="sf")[1]
+			world_sp      <- rnaturalearth::ne_countries(scale=10,returnclass="sp")
+#			current_sf    <- sf::st_crop(world_sf,xmin=x.min,xmax=x.max,ymin=y.min,ymax=y.max)
+#			current.gg.sf <- ggplot2::geom_sf(data=current_sf,colour = "black", fill = NA)
+			for(K in Krange.plot){
+				i=(K-1)
+				q.matrix           <- slist[[K]]
+				rownames(q.matrix) <- samplenames
+				colnames(q.matrix) <- paste0("cluster", 1:ncol(q.matrix))
+				indv.pop           <- apply(X=q.matrix, MARGIN=1, FUN=function(x){which(x==max(x))})
+				posterior.df       <- data.frame(indv=rep(rownames(q.matrix),ncol(q.matrix)), pop=rep(colnames(q.matrix),each=nrow(q.matrix)), assignment=c(unlist(unname(q.matrix))))
+				posterior.df$indv  <- factor(posterior.df$indv, levels = names(sort(indv.pop)))
+				if(K <= 15){
+					myCols         <- goodcolors2(n=15)[1:K]
+				}
+				if(K>15){
+					myCols          <- c(goodcolors2(n=15), sample(adegenet::funky(100), size=K-15))
+				}
+				# admixture barplots
+				posterior.gg         <- ggplot2::ggplot(posterior.df, ggplot2::aes(fill= pop, x= assignment, y=indv)) + ggplot2::geom_bar(position="stack", stat="identity") + ggplot2::theme_classic() + ggplot2::theme(axis.text.y = ggplot2::element_text(size = label.size), panel.grid.major = ggplot2::element_blank(), panel.grid.minor = ggplot2::element_blank(), panel.background = ggplot2::element_blank()) + ggplot2::labs(x = "Admixture Proportion",y="",fill="Cluster",title=paste0("K = ",K)) + ggplot2::scale_fill_manual(values=myCols[1:K])
+				admixturePlot[[i]]   <- posterior.gg
+				# Best assignment for each individual
+				indv.maxPosterior    <- apply(X=q.matrix, MARGIN=1, FUN=function(x){max(x)})
+				labels               <- rep("",nrow(posterior.df))
+				labels[posterior.df[,"assignment"] %in% indv.maxPosterior] <- "+"
+				assignmentPlot[[i]]  <- ggplot2::ggplot(data=posterior.df, ggplot2::aes(x= pop, y=indv, fill=assignment)) + ggplot2::geom_tile(color="gray") + ggplot2::theme_classic() + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5), axis.text.y = ggplot2::element_text(size = label.size), panel.grid.major = ggplot2::element_blank(), panel.grid.minor = ggplot2::element_blank(), panel.background = ggplot2::element_blank(), legend.position = "none", ) + ggplot2::labs(title = paste0("K = ",K), x="Clusters", y="") + ggplot2::scale_fill_gradient2(low = "white", mid = "yellow", high = "red", midpoint = 0.5) + ggplot2::geom_text(label=labels)
+				### spatially interpolated admixture
+				my.palette    <- tess3r::CreatePalette(myCols, 9)
+				mapplot.i     <- tess3r::ggtess3Q(suppressWarnings(tess3r::as.qmatrix(q.matrix)), as.matrix(coords), interpolation.model = tess3r::FieldsKrigModel(10),resolution = c(500,500), col.palette = my.palette, window=c(x.min,x.max,y.min,y.max),background=TRUE,map.polygon=world_sp)
+				mapplot2.i    <- mapplot.i + ggplot2::theme_classic() + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5), panel.border = ggplot2::element_rect(color = "black", fill=NA, size=1)) + ggplot2::labs(title=paste0("Ancestry coefficients; K=",K), x="latitude", y="longitude") + ggplot2::geom_sf(data=world_sf,colour = "black", fill = NA) + ggplot2::coord_sf(xlim=c(x.min, x.max), ylim=c(y.min, ymax=y.max),expand=FALSE)
+				mapplot[[i]]  <- mapplot2.i + ggplot2::geom_point(data = coords, ggplot2::aes(x = Lon, y = Lat), size = 1, shape = 21, fill = "black")
+			}
+			if(".pdf" %in% include.out){
+				pdf(height=6,width=10,file=save.as.pdf,onefile=TRUE)
+					lapply(X=result,FUN=print)
+				dev.off()
+			}
 		}
-	#	posterior.gg        <- ggplot2::ggplot(posterior.df, ggplot2::aes(fill= pop, x= assignment, y=indv)) + ggplot2::geom_bar(position="stack", stat="identity") + ggplot2::theme_classic() + ggplot2::theme(axis.text.y = ggplot2::element_text(size = label.size), panel.grid.major = ggplot2::element_blank(), panel.grid.minor = ggplot2::element_blank(), panel.background = ggplot2::element_blank()) + ggplot2::labs(x = "Admixture Proportion",y="",fill="Cluster",title=paste0("K = ",K)) + ggplot2::scale_fill_manual(values=myCols[1:K])
-		### same as posterior.gg except rows are sorted by sample name
-	#	posterior.df$indv2 <- factor(posterior.df$indv, levels = gtools::mixedsort(levels(factor(posterior.df$indv))) )
-	#	posterior.gg2      <- ggplot2::ggplot(posterior.df, ggplot2::aes(fill= pop, x= assignment, y=indv2)) + ggplot2::geom_bar(position="stack", stat="identity") + ggplot2::theme_classic() + ggplot2::theme(axis.text.y = ggplot2::element_text(size = label.size), panel.grid.major = ggplot2::element_blank(), panel.grid.minor = ggplot2::element_blank(), panel.background = ggplot2::element_blank()) + ggplot2::labs(x = "Admixture Proportion",y="",fill="Cluster",title=paste0("K = ",K)) + ggplot2::scale_fill_manual(values=myCols[1:K])
-#		### same as posterior.gg except rows are sorted by population assignment
-#		# Best assignment for each individual
-		posterior.gg         <- ggplot2::ggplot(posterior.df, ggplot2::aes(fill= pop, x= assignment, y=indv)) + ggplot2::geom_bar(position="stack", stat="identity") + ggplot2::theme_classic() + ggplot2::theme(axis.text.y = ggplot2::element_text(size = label.size), panel.grid.major = ggplot2::element_blank(), panel.grid.minor = ggplot2::element_blank(), panel.background = ggplot2::element_blank()) + ggplot2::labs(x = "Admixture Proportion",y="",fill="Cluster",title=paste0("K = ",K)) + ggplot2::scale_fill_manual(values=myCols[1:K])
-		admixturePlot[[i]]   <- posterior.gg
-		indv.maxPosterior    <- apply(X=q.matrix, MARGIN=1, FUN=function(x){max(x)})
-		labels               <- rep("",nrow(posterior.df))
-		labels[posterior.df[,"assignment"] %in% indv.maxPosterior] <- "+"
-		assignment.K         <- ggplot2::ggplot(data=posterior.df, ggplot2::aes(x= pop, y=indv, fill=assignment)) + ggplot2::geom_tile(color="gray") + ggplot2::theme_classic() + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5), axis.text.y = ggplot2::element_text(size = label.size), panel.grid.major = ggplot2::element_blank(), panel.grid.minor = ggplot2::element_blank(), panel.background = ggplot2::element_blank(), legend.position = "none", ) + ggplot2::labs(title = paste0("K = ",K), x="Clusters", y="") + ggplot2::scale_fill_gradient2(low = "white", mid = "yellow", high = "red", midpoint = 0.5) + ggplot2::geom_text(label=labels)
-#		assignment.K        <- adegenet::assignplot(dapc.pcabest.K,cex.lab=(label.size/10))
-#		mtext(text=paste0("K = ",K,"; PCs retained = ",best.npca[i]))
-		assignmentPlot[[i]]  <- assignment.K
-		#plot(posterior.gg)
-		#admixturePlot[[i]]   <- recordPlot()
-		my.palette      <- tess3r::CreatePalette(myCols, 9)
-	#	xdist           <- geosphere::distm(x=c(x.min,0),y=c(x.max,0))
-	#	ydist           <- geosphere::distm(x=c(0,y.min),y=c(0,y.max))
-	#	extent.test     <- raster::raster(raster::extent(c(x.min,x.max,y.min,y.max)), ncol = 500, nrow = 500, vals = 1)
-	#	interpol.stack  <- InterpolRaster(coord, Q, raster.grid, interpolation.model)
-	#	mapplot.initial <- plot(suppressWarnings(tess3r::as.qmatrix(q.matrix)), as.matrix(coords), main = "", xlab = "", ylab = "",resolution = c(2,2), col.palette = lapply(X=1:K,FUN=function(x){rep("#FFFFFF",9)}), cex=0,window=c(x.min,x.max,y.min,y.max),asp=xdist/ydist,add=FALSE)
-#		mapplot.i       <- plot(suppressWarnings(tess3r::as.qmatrix(q.matrix)), as.matrix(coords), method = "map.max", interpol = tess3r::FieldsKrigModel(10), main = paste0("Ancestry coefficients; K=",K), xlab = "", ylab = "",resolution = c(500,500), cex = 0.4, col.palette = my.palette, window=par("usr"),asp=xdist/ydist,add=FALSE)
-#		maps::map(add=TRUE)
-		#mapplot.i       <- tess3r::ggtess3Q(suppressWarnings(tess3r::as.qmatrix(q.matrix)), as.matrix(coords), interpolation.model = tess3r::FieldsKrigModel(10),resolution = c(500,500), col.palette = my.palette, window=c(x.min,x.max,y.min,y.max),background=TRUE)
-		mapplot.i       <- tess3r::ggtess3Q(suppressWarnings(tess3r::as.qmatrix(q.matrix)), as.matrix(coords), interpolation.model = tess3r::FieldsKrigModel(10),resolution = c(500,500), col.palette = my.palette, window=c(x.min,x.max,y.min,y.max),background=TRUE,map.polygon=world_sp)
-		#mapplot[[i]]    <- mapplot.i + ggplot2::theme_classic() + ggplot2::labs(title=paste0("Ancestry coefficients; K=",K), x="latitude", y="longitude") + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) + ggplot2::borders(database="world", xlim=c(x.min,x.max), ylim=c(y.min,y.max), colour="black") + ggplot2::geom_point(data = coords, ggplot2::aes(x = Lon, y = Lat), size = 1, shape = 21, fill = "black")
-		#mapplot[[i]]    <- mapplot.i + ggplot2::theme_classic() + ggplot2::labs(title=paste0("Ancestry coefficients; K=",K), x="latitude", y="longitude") + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) + current.gg.sf + ggplot2::geom_point(data = coords, ggplot2::aes(x = Lon, y = Lat), size = 1, shape = 21, fill = "black")
-#		mapplot.initial <- tess3r::ggtess3Q(suppressWarnings(tess3r::as.qmatrix(q.matrix)), as.matrix(coords), interpolation.model = tess3r::FieldsKrigModel(10),resolution = c(100,100), col.palette = my.palette, window=c(x.min,x.max,y.min,y.max),background=TRUE)
-#		plot(mapplot.initial + ggplot2::theme_classic())
-#		map(xlim=c(x.min,x.max),ylim=c(y.min,y.max),mar=c(5.1,4.1,4.1,2.1))
-#		mapplot.i       <- tess3r::ggtess3Q(suppressWarnings(tess3r::as.qmatrix(q.matrix)), as.matrix(coords), interpolation.model = tess3r::FieldsKrigModel(10),resolution = c(500,500), col.palette = my.palette, window=par("usr"),background=TRUE)
-#		plot(mapplot.i + ggplot2::theme_classic())
-		#mapplot[[i]]    <- recordPlot()
-		mapplot2.i    <- mapplot.i + ggplot2::theme_classic() + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5), panel.border = ggplot2::element_rect(color = "black", fill=NA, size=1)) + ggplot2::labs(title=paste0("Ancestry coefficients; K=",K), x="latitude", y="longitude") + ggplot2::geom_sf(data=world_sf,colour = "black", fill = NA) + ggplot2::coord_sf(xlim=c(x.min, x.max), ylim=c(y.min, ymax=y.max),expand=FALSE)
-		mapplot[[i]]  <- mapplot2.i + ggplot2::geom_point(data = coords, ggplot2::aes(x = Lon, y = Lat), size = 1, shape = 21, fill = "black")
-			
+		result <- c(list(entropyPlot), admixturePlot, assignmentPlot, mapplot)
+		return(result)
+	} else {
+		return(NULL)
 	}
-	result <- c(list(entropyPlot), admixturePlot, assignmentPlot, mapplot)
-	if(!is.null(save.as)){
-		pdf(height=6,width=10,file=save.as,onefile=TRUE)
-		lapply(X=result,FUN=print)
-		dev.off()
-	}
-	result
 }
 #' @examples
 #' library(misc.wrappers)

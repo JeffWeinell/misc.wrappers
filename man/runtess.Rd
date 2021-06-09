@@ -12,11 +12,13 @@ runtess(
   format = "VCF",
   coords,
   samplenames = NULL,
-  kmax = 40,
-  reps = 100,
-  save.as = NULL,
+  kmax = 10,
+  reps = 30,
+  save.in = NULL,
   mask = 0.05,
-  max.iteration = 500
+  max.iteration = 500,
+  include.out = c(".pdf", ".Qlog", ".entropyLog"),
+  overwrite = FALSE
 )
 }
 \arguments{
@@ -32,11 +34,15 @@ runtess(
 
 \item{reps}{Number of repititions. Default 100.}
 
-\item{save.as}{Where to save the output PDF. Default is NULL.}
+\item{save.in}{Where to save output files. Default is NULL.}
 
 \item{mask}{Proportion of input data to mask during each replicate when tess3 function is called. Default 0.05.}
 
 \item{max.iteration}{Max iterations. Default 500.}
+
+\item{include.out}{Character vector indicating which type of files should be included as output. Default is c(".pdf",".Qlog", and ".entropyLog").}
+
+\item{overwrite}{Logical indicating whether or not to allow new output files to overwrite existing ones. Default FALSE.}
 }
 \value{
 List of plots

@@ -28,8 +28,8 @@ samplenames.df <- read.table(names.df.path, header=T)
 samplenames    <- samplenames.df$IndvNames
 # Character vector with paths to output structure files
 qfiles         <- list.files(outdir.temp, full.names=T, pattern="log_f$")
-admixturePlots(x=qfiles,labels=samplenames,userun=c(1:5))
+assignmentPlots(x=qfiles,labels=samplenames,userun=c(1:5))
 
-admixturePlots(xdir="PATH/TO/STRUCTURE/OUTPUT",userun=c(1:5))
+assignmentPlots(xdir="PATH/TO/STRUCTURE/OUTPUT",userun=c(1:5))
 
 }

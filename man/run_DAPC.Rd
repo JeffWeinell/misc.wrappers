@@ -10,11 +10,10 @@ If sample coordinates are supplied, this function interpolates cluster membershi
 run_DAPC(
   x,
   format = "VCF",
-  kmax = 40,
+  kmax = 10,
   coords = NULL,
   samplenames = NULL,
-  reps = 100,
-  save.as = NULL,
+  reps = 30,
   save.in = NULL,
   plot.components = FALSE,
   include.out = c(".pdf", ".Qlog", ".BIClog"),
@@ -31,8 +30,6 @@ run_DAPC(
 \item{coords}{Optional character string with path to a table with longitude and latitude of individuals in the vcf file, or a matrix or data frame with longitude and latitude columns. Default is NULL, in which case membership probabilities are not interpolated onto a map.}
 
 \item{reps}{Number indicating the number of replicates of 'find.clusters'. Default 100.}
-
-\item{save.as}{Character string with where to save the output PDF with plots of results. Default is NULL.}
 
 \item{save.in}{Character string with path to directory where output files should be saved.}
 

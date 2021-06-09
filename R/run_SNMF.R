@@ -18,7 +18,7 @@
 #' @param ... Additional arguments passed to 'snmf' function of LEA package
 #' @return List of plots
 #' @export run_sNMF
-run_sNMF <- function(x,format="VCF",coords=NULL,samplenames=NULL,kmax=10,reps=30,entropy=TRUE,project="new",iter=500,save.in=NULL,include.out=c(".pdf",".Qlog",".entropyLog"), overwrite=FALSE, ...){
+run_sNMF <- function(x,format="VCF",coords=NULL, samplenames=NULL, kmax=10, reps=30, entropy=TRUE, project="new", iter=500, save.in=NULL, include.out=c(".pdf",".Qlog",".entropyLog"), overwrite=FALSE, ...){
 	#if(is.null(save.as)){
 	#	save.as <- file.path(getwd(),"result_LEA-sNMF.pdf")
 	#}

@@ -26,7 +26,7 @@
 #' @param overwrite Logical indicating whether or not to allow new output files to overwrite existing ones. Default FALSE.
 #' @return List of plots
 #' @export run_fastStructure
-run_fastStructure <- function(x,format="VCF",coords=NULL,samplenames=NULL,kmax=40,save.in=NULL,reps=100,tolerance=10e-6,prior="simple",full=FALSE,seed=NULL,python.path=NULL,fastStructure.path=NULL,cleanup=TRUE,include.out=c(".pdf",".Qlog",".margLlog"), debug=FALSE,overwrite=FALSE){
+run_fastStructure <- function(x,format="VCF",coords=NULL,samplenames=NULL,kmax=10,save.in=NULL,reps=30,tolerance=10e-6,prior="simple",full=FALSE,seed=NULL,python.path=NULL,fastStructure.path=NULL,cleanup=TRUE,include.out=c(".pdf",".Qlog",".margLlog"), debug=FALSE,overwrite=FALSE){
 	#if(is.null(save.as)){
 	#	save.as <- file.path(getwd(),"result_fastStructure.pdf")
 	#}
