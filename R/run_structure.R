@@ -1176,7 +1176,7 @@ admixtureMap <- function(x=NULL, xdir=NULL, coords, labels=NULL, save.as=file.pa
 	slist      <- aqlist2[match(1:kmax, sapply(aqlist2, ncol))]
 	slist.list <- list(); length(slist.list) <- numruns
 #	slist      <- qlist2[match(1:kmax,sapply(qlist2,ncol))+(userun-1)]
-	#slist2     <- list(); length(slist2) <- length(slist)
+	slist2     <- list(); length(slist2) <- length(slist)
 	for(i in 1:numruns){
 		slist.list[[i]] <- aqlist2[match(1:kmax,sapply(aqlist2, ncol)) + (i-1)]
 	}
