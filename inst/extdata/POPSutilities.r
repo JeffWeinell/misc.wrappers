@@ -36,12 +36,12 @@ defaultPalette <- c(
 
 # plot(1:length(defaultPalette),rep(1,length(defaultPalette)),col=defaultPalette,pch=19,cex=4)
 lColorGradients = list( 
-	c("gray95",brewer.pal(9,"Reds")),
-	c("gray95",brewer.pal(9,"Greens")),
-	c("gray95",brewer.pal(9,"Blues")),
-	c("gray95",brewer.pal(9,"YlOrBr")),
-	c("gray95",brewer.pal(9,"RdPu")),
-	c("gray95",brewer.pal(9,"Greys"))
+	c("gray95",RColorBrewer::brewer.pal(9,"Reds")),
+	c("gray95",RColorBrewer::brewer.pal(9,"Greens")),
+	c("gray95",RColorBrewer::brewer.pal(9,"Blues")),
+	c("gray95",RColorBrewer::brewer.pal(9,"YlOrBr")),
+	c("gray95",RColorBrewer::brewer.pal(9,"RdPu")),
+	c("gray95",RColorBrewer::brewer.pal(9,"Greys"))
 )
 # Use display.brewer.all() to display color gradients provided by RColorBrewer
 
@@ -79,8 +79,6 @@ helpPops = function(){
 	"\n\n"
 	))
 }
-
-
 
 
 #' @title CORRELATION
@@ -279,7 +277,6 @@ createGrid = function(min_long,max_long,min_lat,max_lat,npixels_long,npixels_lat
 	return(grid)
 }
 
-
 #' @title createGridFromAsciiRaster
 #' 
 #' return a grid to use to project clusters on a map
@@ -298,7 +295,6 @@ createGridFromAsciiRaster = function(file){
 	grid=make.surface.grid( list( long.pix,lat.pix))
 	return(grid)
 }
-
 
 # return a matrix with boolean cells
 # cell is set to TRUE if user wants to project on this map's cell
