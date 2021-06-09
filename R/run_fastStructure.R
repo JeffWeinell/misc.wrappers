@@ -26,7 +26,7 @@
 #' @param overwrite Logical indicating whether or not to allow new output files to overwrite existing ones. Default FALSE.
 #' @return List of plots
 #' @export run_fastStructure
-run_fastStructure <- function(x,format="VCF",coords=NULL,samplenames=NULL,kmax=10,save.in=NULL,reps=30,tolerance=10e-6,prior="simple",full=FALSE,seed=NULL,python.path=NULL,fastStructure.path=NULL,cleanup=TRUE,include.out=c(".pdf",".Qlog",".margLlog"), debug=FALSE,overwrite=FALSE){
+run_fastStructure <- function(x,format="VCF",coords=NULL,samplenames=NULL,kmax=10,save.in=NULL,reps=30,tolerance=10e-6,prior="simple",full=FALSE,seed=NULL,python.path=NULL,fastStructure.path=NULL,cleanup=TRUE,include.out=c(".pdf",".Qlog",".margLlog",".extraLog",".Plog"), debug=FALSE,overwrite=FALSE){
 	#if(is.null(save.as)){
 	#	save.as <- file.path(getwd(),"result_fastStructure.pdf")
 	#}
@@ -50,16 +50,21 @@ run_fastStructure <- function(x,format="VCF",coords=NULL,samplenames=NULL,kmax=1
 		} else {
 			save.as.margLlog <- NULL
 		}
+		if(".extraLog" %in% include.out){
+			save.as.extraLog <- file.path(save.in,"result_fastStructure.extraLog")
+		} else {
+			save.as.extraLog <- NULL
+		}
 		if(".Plog" %in% include.out){
 			save.as.Plog <- file.path(save.in,"result_fastStructure.Plog")
 		} else {
 			save.as.Plog <- NULL
 		}
 	} else {
-		save.as.pdf <- save.as.Qlog <- save.as.margLlog <- save.as.Plog <- NULL
+		save.as.pdf <- save.as.Qlog <- save.as.margLlog <- save.as.extraLog <- save.as.Plog <- NULL
 	}
 	if(!overwrite){
-		files.to.check <- c(save.as.pdf,save.as.Qlog,save.as.margLlog,save.as.Plog)
+		files.to.check <- c(save.as.pdf,save.as.Qlog,save.as.extraLog,save.as.margLlog,save.as.Plog)
 		if(!is.null(files.to.check)){
 			if(any(files.to.check %in% save.in)){
 				stop("One or more output files already exist in directory indicated by 'save.in'. Choose a different output directory or change 'overwrite' to TRUE")
@@ -148,7 +153,6 @@ run_fastStructure <- function(x,format="VCF",coords=NULL,samplenames=NULL,kmax=1
 				stop("All individuals in coords file must be in vcf")
 			}
 		}
-		
 		maxK <- min(nrow(unique(coords)),(numind-1))
 	} else {
 		maxK <- (numind-1)
@@ -313,9 +317,17 @@ run_fastStructure <- function(x,format="VCF",coords=NULL,samplenames=NULL,kmax=1
 			logmat2.i    <- cbind(logmat.i,rep(KLogs[i],nrow(logmat.i)),rep(repsLogs[i],nrow(logmat.i)))
 			colnames(logmat2.i) <- c("Iteration", "Marginal_Likelihood", "delta_Marginal_Likelihood", "Iteration_Time_secs","K","replicate")
 			log.i.df <- data.frame(K_Replicate_Iteration=paste(logmat2.i[,"K"],logmat2.i[,"replicate"],logmat2.i[,"Iteration"],sep=":"), MarginalLikelihood=logmat2.i[,"Marginal_Likelihood"],deltaMarginalLikelihood=logmat2.i[,"delta_Marginal_Likelihood"], IterationTime.seconds = logmat2.i[,"Iteration_Time_secs"])
-			log.df <- rbind(log.df,log.i.df)
+			log.df   <- rbind(log.df,log.i.df)
 		}
-		write.table(x=log.df, file=save.as.margLlog, row.names=F, col.names=T, quote=F, sep="\t")
+		if(".extraLog" %in% include.out){
+			write.table(x=log.df, file=save.as.extraLog, row.names=F, col.names=T, quote=F, sep="\t")
+		}
+		
+		marglog.df <- unique(data.frame(MarginalLikelihood=NA, K=logmat2.i[,"K"], replicate=logmat2.i[,"replicate"]))
+		for(i in 1:nrow(marglog.df)){
+			marglog.df[i,"MarginalLikelihood"] <- max(logmat2.i[which(logmat2.i[,"K"]==marglog.df[i,"K"] & logmat2.i[,"replicate"]==marglog.df[i,"replicate"]),"Marginal_Likelihood"])
+		}
+		write.table(x=marglog.df, file=save.as.margLlog, row.names=F, col.names=T, quote=F, sep="\t")
 	}
 	if(debug) message("step 12")
 	if(".Qlog" %in% include.out){

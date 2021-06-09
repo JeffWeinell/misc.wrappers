@@ -118,7 +118,7 @@ runeems_snps_setup <- function(x, coords, save.in, outer=NULL, exe.path=NULL, n.
 		if(n.coords!=n.indv){
 			stop(paste(n.coords,"individuals with coordinates but",n.indv,"individuals with snps"))
 		}
-		data.diffs <- misc.wrappers::genind2diffs(genind.obj=input.data,output.file=paste0(input.dirpath,"/data.diffs"))
+		data.diffs <- genind2diffs(genind.obj=input.data,output.file=paste0(input.dirpath,"/data.diffs"))
 		diffs      <- data.diffs[["diffs"]]
 		nIndiv     <- data.diffs[["nIndiv"]]
 		nSites     <- data.diffs[["nSites"]]
@@ -134,7 +134,7 @@ runeems_snps_setup <- function(x, coords, save.in, outer=NULL, exe.path=NULL, n.
 					stop(paste(n.coords,"individuals with coordinates but",n.indv,"individuals with snps"))
 				}
 				genind     <- vcfR::vcfR2genind(vcf.data)
-				data.diffs <- misc.wrappers::genind2diffs(genind.obj=genind,ploidy=as.numeric(pl),output.file=paste0(input.dirpath,"/data.diffs"))
+				data.diffs <- genind2diffs(genind.obj=genind,ploidy=as.numeric(pl),output.file=paste0(input.dirpath,"/data.diffs"))
 				if(!file.exists(paste0(input.dirpath,"/data.diffs"))){
 					stop("data.diffs does not exist")
 				}

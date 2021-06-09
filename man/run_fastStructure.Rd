@@ -25,7 +25,7 @@ run_fastStructure(
   python.path = NULL,
   fastStructure.path = NULL,
   cleanup = TRUE,
-  include.out = c(".pdf", ".Qlog", ".margLlog"),
+  include.out = c(".pdf", ".Qlog", ".margLlog", ".extraLog", ".Plog"),
   debug = FALSE,
   overwrite = FALSE
 )
