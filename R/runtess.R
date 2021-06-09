@@ -131,10 +131,12 @@ runtess <- function(x, format="VCF", coords, samplenames=NULL, kmax=10, reps=30,
 	if(".pdf" %in% include.out){
 		crossentropy.df$K <- factor(crossentropy.df$K, levels=c(1:nrow(crossentropy.df)))
 		entropyPlot    <- ggplot2::ggplot(crossentropy.df, ggplot2::aes(x=K, y=crossentropy)) + ggplot2::geom_boxplot(fill='lightgray', outlier.colour="black", outlier.shape=16,outlier.size=2, notch=FALSE) + ggplot2::theme_classic() + ggplot2::labs(title= paste0("Cross-entropy (",reps," replicates) vs. number of ancestral populations (K)"), x="Number of ancestral populations", y = "Cross-entropy") + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) #+ ggplot2::geom_vline(xintercept=bestK, linetype=2, color="black", size=0.25)
+		coords.path    <- file.path(save.in,"coords.txt")
+		write.table(x=coords,file=coords.path,sep="\t",quote=F)
 		if(".Qlog" %in% include.out){
 			admixturePlot  <- admixturePlots(xdir=save.in,userun=1:reps)
 			assignmentPlot <- assignmentPlots(xdir=save.in,userun=1:reps)
-			mapplot        <- admixtureMap(xdir=save.in,coords=coords,userun=1:reps)
+			mapplot        <- admixtureMap(xdir=save.in,coords=coords.path,userun=1:reps)
 			result         <- c(list(entropyPlot), admixturePlot, assignmentPlot, mapplot)
 			return(result)
 		} else {
