@@ -26,7 +26,7 @@
 #' @param overwrite Logical indicating whether or not to allow new output files to overwrite existing ones. Default FALSE.
 #' @return List of plots
 #' @export run_fastStructure
-run_fastStructure <- function(x,format="VCF",coords=NULL,samplenames=NULL,kmax=10,save.in=NULL,reps=30,tolerance=10e-6,prior="simple",full=FALSE,seed=NULL,python.path=NULL,fastStructure.path=NULL,cleanup=TRUE,include.out=c(".pdf",".Qlog",".margLlog",".extraLog",".Plog"), debug=FALSE,overwrite=FALSE){
+run_fastStructure <- function(x,format="VCF", coords=NULL,samplenames=NULL,kmax=10,save.in=NULL,reps=30,tolerance=10e-6,prior="simple",full=FALSE,seed=NULL,python.path=NULL,fastStructure.path=NULL,cleanup=TRUE,include.out=c(".pdf",".Qlog",".margLlog",".extraLog",".Plog"), debug=FALSE,overwrite=FALSE){
 	#if(is.null(save.as)){
 	#	save.as <- file.path(getwd(),"result_fastStructure.pdf")
 	#}
@@ -181,10 +181,6 @@ run_fastStructure <- function(x,format="VCF",coords=NULL,samplenames=NULL,kmax=1
 			command1     <- paste0(python.path," ",structure.py.path," -K ",K," --input=",str.path," --tol=",tolerance," --prior=",prior,full,seed," --format=str --output=", outfile.temp.i)
 			run.command1 <- system(command1)
 		}
-		#if(FALSE){
-		#	command2     <- paste0(python.path," ",chooseK.py.path," --input=",outfile.temp.i)
-		#	run.command2 <- system(command2,intern=TRUE)
-		#}
 	}
 	if(debug) message("step 2")
 	#### Load the marginal likelihood scores (the metric of fit for each K)
@@ -205,8 +201,10 @@ run_fastStructure <- function(x,format="VCF",coords=NULL,samplenames=NULL,kmax=1
 	range.margL.mat <- do.call(rbind,lapply(X=1:nrow(margL.mat),FUN=function(x){range(margL.mat[x,],na.rm=TRUE)}))
 	if(debug) message("step 3")
 	margL.df      <- data.frame(marginalLikelihood=unname(unlist(c(margL.mat))),Kval=rep(Krange,reps))
-	margL.df$Kval <- factor(margL.df$Kval, levels=c(1:nrow(margL.df)))
-	margLPlot     <- ggplot2::ggplot(margL.df, ggplot2::aes(x=Kval, y=marginalLikelihood)) + ggplot2::geom_boxplot(fill='lightgray', outlier.colour="black", outlier.shape=16,outlier.size=2, notch=FALSE) + ggplot2::theme_classic() + ggplot2::labs(title= paste0("marginal likelihood (",reps," replicates) vs. number of ancestral populations (K)"), x="Number of ancestral populations", y = "marginalLikelihood") + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) # + ggplot2::geom_vline(xintercept=bestK, linetype=2, color="black", size=0.25)
+	if(".margLlog" %in% include.out){
+		margLlog.df <- data.frame( MarginalLikelihood=margL.df[,"marginalLikelihood"],K=margL.df[,"Kval"], replicate=rep(1:max(Krange),each=reps))
+		write.table(x=margLlog.df, file=save.as.margLlog, row.names=F, col.names=T, quote=F, sep="\t")
+	}
 	
 	if(debug) message("step 4")
 	#### Load the Q matrices
@@ -225,83 +223,8 @@ run_fastStructure <- function(x,format="VCF",coords=NULL,samplenames=NULL,kmax=1
 	# Could also try using the mean among qmatrices, but that could be problematic if cluster1 is treated as cluster2 in another iteration.
 	if(debug) message("step 5")
 	slist          <- qmats.list.best
-	Krange.plot    <- setdiff(Krange,1)
-	admixturePlot  <- list(); length(admixturePlot)   <- length(Krange.plot)
-	assignmentPlot <- list(); length(assignmentPlot)  <- length(Krange.plot)
-	if(debug) message("step 6")
-	if(!is.null(coords)){
-		mapplot        <- list(); length(mapplot)     <- length(Krange.plot)
-		x.min <- min((coords[,1]-0.5))
-		x.max <- max((coords[,1]+0.5))
-		y.min <- min((coords[,2]-0.5))
-		y.max <- max((coords[,2]+0.5))
-		world_sf      <- rnaturalearth::ne_countries(scale=10,returnclass="sf")[1]
-		world_sp      <- rnaturalearth::ne_countries(scale=10,returnclass="sp")
-		#current_sf    <- sf::st_crop(world_sf,xmin=x.min,xmax=x.max,ymin=y.min,ymax=y.max)
-		#current.gg.sf <- ggplot2::geom_sf(data=current_sf,colour = "black", fill = NA)
-	} else {
-		mapplot <- NULL
-	}
-	if(debug) message("step 7")
-	for(K in Krange.plot){
-		if(debug) message(paste0("K=",K," step 7.1"))
-		i=(K-1)
-		if(K <= 15){
-			myCols          <- goodcolors2(n=15)[1:K]
-		}
-		if(K>15){
-			myCols          <- c(goodcolors2(n=15), sample(adegenet::funky(100), size=K-15))
-		}
-		if(debug) message(cat("\r",paste0("K=",K," step 7.2")))
-		q.matrix  <- slist[[K]]
-		rownames(q.matrix) <- samplenames
-		colnames(q.matrix) <- paste0("cluster",1:ncol(q.matrix))
-		indv.pop           <- apply(X=q.matrix, MARGIN=1, FUN=function(x){which(x==max(x))})
-		posterior.df       <- data.frame(indv=rep(rownames(q.matrix),ncol(q.matrix)), pop=rep(colnames(q.matrix),each=nrow(q.matrix)), assignment=c(unlist(unname(q.matrix))))
-		posterior.df$indv  <- factor(posterior.df$indv, levels = names(sort(indv.pop)))
-		if(debug) message(cat("\r",paste0("K=",K," step 7.3")))
-		posterior.gg        <- ggplot2::ggplot(posterior.df, ggplot2::aes(fill= pop, x= assignment, y=indv)) + ggplot2::geom_bar(position="stack", stat="identity") + ggplot2::theme_classic() + ggplot2::theme(axis.text.y = ggplot2::element_text(size = label.size), panel.grid.major = ggplot2::element_blank(), panel.grid.minor = ggplot2::element_blank(), panel.background = ggplot2::element_blank()) + ggplot2::labs(x = "Admixture Proportion",y="",fill="Cluster",title=paste0("K = ",K)) + ggplot2::scale_fill_manual(values=myCols[1:K])
-		admixturePlot[[i]]  <- posterior.gg
-		if(debug) message(cat("\r",paste0("K=",K," step 7.4")))
-		indv.maxPosterior  <- apply(X=q.matrix, MARGIN=1, FUN=function(x){max(x)})
-		labels             <- rep("",nrow(posterior.df))
-		labels[posterior.df[,"assignment"] %in% indv.maxPosterior] <- "+"
-		assignment.K         <- ggplot2::ggplot(data=posterior.df, ggplot2::aes(x= pop, y=indv,fill=assignment)) + ggplot2::geom_tile(color="gray") + ggplot2::theme_classic() + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5), axis.text.y = ggplot2::element_text(size = label.size), panel.grid.major = ggplot2::element_blank(), panel.grid.minor = ggplot2::element_blank(), panel.background = ggplot2::element_blank(), legend.position = "none", ) + ggplot2::labs(title = paste0("K = ",K), x="Clusters", y="") + ggplot2::scale_fill_gradient2(low = "white", mid = "yellow", high = "red", midpoint = 0.5) + ggplot2::geom_text(label=labels)
-		assignmentPlot[[i]]  <- assignment.K
-		if(debug) message(cat("\r",paste0("K=",K," step 7.5")))
-		if(!is.null(coords)){
-			my.palette      <- tess3r::CreatePalette(myCols, 9)
-			if(debug) message(cat("\r",paste0("K=",K," step 7.6")))
-			mapplot.i       <- suppressWarnings(tess3r::ggtess3Q(suppressWarnings(tess3r::as.qmatrix(q.matrix)), as.matrix(coords), interpolation.model = tess3r::FieldsKrigModel(10),resolution = c(500,500), col.palette = my.palette, window=c(x.min,x.max,y.min,y.max),background=TRUE, map.polygon=world_sp))
-			if(debug) message(cat("\r",paste0("K=",K," step 7.7")))
-			mapplot2.i      <- mapplot.i + ggplot2::theme_classic() + ggplot2::labs(title=paste0("Ancestry coefficients; K=",K), x="latitude", y="longitude") + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5), panel.border = ggplot2::element_rect(color = "black", fill=NA, size=1)) + ggplot2::geom_sf(data=world_sf,colour = "black", fill = NA) + ggplot2::coord_sf(xlim=c(x.min, x.max), ylim=c(y.min, ymax=y.max),expand=FALSE)
-			if(debug) message(cat("\r",paste0("K=",K," step 7.8")))
-			mapplot[[i]]    <- mapplot2.i + ggplot2::geom_point(data = coords, ggplot2::aes(x = Lon, y = Lat), size = 1, shape = 21, fill = "black")
-			#mapplot[[i]]    <- mapplot.i + ggplot2::theme_classic() + ggplot2::labs(title=paste0("Ancestry coefficients; K=",K), x="latitude", y="longitude") + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) + current.gg.sf + ggplot2::geom_point(data = coords, ggplot2::aes(x = Lon, y = Lat), size = 1, shape = 21, fill = "black")
-		} else {
-			mapplot[[i]] <- NULL
-		}
-	}
-	if(debug) message("step 8")
-	result <- c(list(margLPlot),admixturePlot,assignmentPlot,mapplot)
-	#### Save the PDF
-	if(debug) message("step 9")
-	
-	if(".pdf" %in% include.out){
-		pdf(height=6,width=10,file=save.as.pdf,onefile=TRUE)
-		lapply(X=result,FUN=print)
-		dev.off()
-	}
-	if(debug) message("step 10")
-	if(format=="VCF"){
-		# Delete the temporary fastStructure file
-		if(file.exists(str.path0)){
-			remove.str <- file.remove(str.path0)
-		}
-	}
-	if(debug) message("step 11")
-	#### Generate compiled output files so that the other output files can be deleted.
-	if(".margLlog" %in% include.out){
+
+	if(".extraLog" %in% include.out){
 		### Organizing a single data frame to hold all data from all "*.log" files generated by fastStructure. This data frame will be written to a single file to replace the many '*.log' files.
 		log.df <- NULL
 		for(i in 1:length(KLogs)){
@@ -319,15 +242,7 @@ run_fastStructure <- function(x,format="VCF",coords=NULL,samplenames=NULL,kmax=1
 			log.i.df <- data.frame(K_Replicate_Iteration=paste(logmat2.i[,"K"],logmat2.i[,"replicate"],logmat2.i[,"Iteration"],sep=":"), MarginalLikelihood=logmat2.i[,"Marginal_Likelihood"],deltaMarginalLikelihood=logmat2.i[,"delta_Marginal_Likelihood"], IterationTime.seconds = logmat2.i[,"Iteration_Time_secs"])
 			log.df   <- rbind(log.df,log.i.df)
 		}
-		if(".extraLog" %in% include.out){
-			write.table(x=log.df, file=save.as.extraLog, row.names=F, col.names=T, quote=F, sep="\t")
-		}
-		
-		marglog.df <- unique(data.frame(MarginalLikelihood=NA, K=logmat2.i[,"K"], replicate=logmat2.i[,"replicate"]))
-		for(i in 1:nrow(marglog.df)){
-			marglog.df[i,"MarginalLikelihood"] <- max(logmat2.i[which(logmat2.i[,"K"]==marglog.df[i,"K"] & logmat2.i[,"replicate"]==marglog.df[i,"replicate"]),"Marginal_Likelihood"])
-		}
-		write.table(x=marglog.df, file=save.as.margLlog, row.names=F, col.names=T, quote=F, sep="\t")
+		write.table(x=log.df, file=save.as.extraLog, row.names=F, col.names=T, quote=F, sep="\t")
 	}
 	if(debug) message("step 12")
 	if(".Qlog" %in% include.out){
@@ -343,6 +258,10 @@ run_fastStructure <- function(x,format="VCF",coords=NULL,samplenames=NULL,kmax=1
 		}
 		write.table(x=q.df,file=save.as.Qlog,row.names=F,col.names=T,quote=F,sep="\t")
 	}
+
+	if(debug) message("step 11")
+	#### Generate compiled output files so that the other output files can be deleted.
+	
 	if(debug) message("step 13")
 	if(".Plog" %in% include.out){
 		### Organizing a single data frame to hold all data from all "*.meanP" files generated by fastStructure. This data frame will be written to a single file to replace the many '*.meanP' files.
@@ -365,6 +284,86 @@ run_fastStructure <- function(x,format="VCF",coords=NULL,samplenames=NULL,kmax=1
 			}
 			write.table(x=p.df,file=save.as.Plog,row.names=F,col.names=T,quote=F,sep="\t")
 		}
+	}
+	if(".pdf" %in% include.out){
+		margL.df$Kval <- factor(margL.df$Kval, levels=c(1:nrow(margL.df)))
+		margLPlot     <- ggplot2::ggplot(margL.df, ggplot2::aes(x=Kval, y=marginalLikelihood)) + ggplot2::geom_boxplot(fill='lightgray', outlier.colour="black", outlier.shape=16,outlier.size=2, notch=FALSE) + ggplot2::theme_classic() + ggplot2::labs(title= paste0("marginal likelihood (",reps," replicates) vs. number of ancestral populations (K)"), x="Number of ancestral populations", y = "marginalLikelihood") + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5))
+		Krange.plot    <- setdiff(Krange,1)
+		admixturePlot  <- list(); length(admixturePlot)   <- length(Krange.plot)
+		assignmentPlot <- list(); length(assignmentPlot)  <- length(Krange.plot)
+		if(debug) message("step 6")
+		if(!is.null(coords)){
+			mapplot        <- list(); length(mapplot)     <- length(Krange.plot)
+			x.min <- min((coords[,1]-0.5))
+			x.max <- max((coords[,1]+0.5))
+			y.min <- min((coords[,2]-0.5))
+			y.max <- max((coords[,2]+0.5))
+			world_sf      <- rnaturalearth::ne_countries(scale=10,returnclass="sf")[1]
+			world_sp      <- rnaturalearth::ne_countries(scale=10,returnclass="sp")
+			#current_sf    <- sf::st_crop(world_sf,xmin=x.min,xmax=x.max,ymin=y.min,ymax=y.max)
+			#current.gg.sf <- ggplot2::geom_sf(data=current_sf,colour = "black", fill = NA)
+		} else {
+			mapplot <- NULL
+		}
+		if(debug) message("step 7")
+		for(K in Krange.plot){
+			if(debug) message(paste0("K=",K," step 7.1"))
+			i=(K-1)
+			if(K <= 15){
+				myCols          <- goodcolors2(n=15)[1:K]
+			}
+			if(K>15){
+				myCols          <- c(goodcolors2(n=15), sample(adegenet::funky(100), size=K-15))
+			}
+			if(debug) message(cat("\r",paste0("K=",K," step 7.2")))
+			q.matrix  <- slist[[K]]
+			rownames(q.matrix) <- samplenames
+			colnames(q.matrix) <- paste0("cluster",1:ncol(q.matrix))
+			indv.pop           <- apply(X=q.matrix, MARGIN=1, FUN=function(x){which(x==max(x))})
+			posterior.df       <- data.frame(indv=rep(rownames(q.matrix),ncol(q.matrix)), pop=rep(colnames(q.matrix),each=nrow(q.matrix)), assignment=c(unlist(unname(q.matrix))))
+			posterior.df$indv  <- factor(posterior.df$indv, levels = names(sort(indv.pop)))
+			if(debug) message(cat("\r",paste0("K=",K," step 7.3")))
+			posterior.gg        <- ggplot2::ggplot(posterior.df, ggplot2::aes(fill= pop, x= assignment, y=indv)) + ggplot2::geom_bar(position="stack", stat="identity") + ggplot2::theme_classic() + ggplot2::theme(axis.text.y = ggplot2::element_text(size = label.size), panel.grid.major = ggplot2::element_blank(), panel.grid.minor = ggplot2::element_blank(), panel.background = ggplot2::element_blank()) + ggplot2::labs(x = "Admixture Proportion",y="",fill="Cluster",title=paste0("K = ",K)) + ggplot2::scale_fill_manual(values=myCols[1:K])
+			admixturePlot[[i]]  <- posterior.gg
+			if(debug) message(cat("\r",paste0("K=",K," step 7.4")))
+			indv.maxPosterior  <- apply(X=q.matrix, MARGIN=1, FUN=function(x){max(x)})
+			labels             <- rep("",nrow(posterior.df))
+			labels[posterior.df[,"assignment"] %in% indv.maxPosterior] <- "+"
+			assignment.K         <- ggplot2::ggplot(data=posterior.df, ggplot2::aes(x= pop, y=indv,fill=assignment)) + ggplot2::geom_tile(color="gray") + ggplot2::theme_classic() + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5), axis.text.y = ggplot2::element_text(size = label.size), panel.grid.major = ggplot2::element_blank(), panel.grid.minor = ggplot2::element_blank(), panel.background = ggplot2::element_blank(), legend.position = "none", ) + ggplot2::labs(title = paste0("K = ",K), x="Clusters", y="") + ggplot2::scale_fill_gradient2(low = "white", mid = "yellow", high = "red", midpoint = 0.5) + ggplot2::geom_text(label=labels)
+			assignmentPlot[[i]]  <- assignment.K
+			if(debug) message(cat("\r",paste0("K=",K," step 7.5")))
+			if(!is.null(coords)){
+				my.palette      <- tess3r::CreatePalette(myCols, 9)
+				if(debug) message(cat("\r",paste0("K=",K," step 7.6")))
+				mapplot.i       <- suppressWarnings(tess3r::ggtess3Q(suppressWarnings(tess3r::as.qmatrix(q.matrix)), as.matrix(coords), interpolation.model = tess3r::FieldsKrigModel(10),resolution = c(500,500), col.palette = my.palette, window=c(x.min,x.max,y.min,y.max),background=TRUE, map.polygon=world_sp))
+				if(debug) message(cat("\r",paste0("K=",K," step 7.7")))
+				mapplot2.i      <- mapplot.i + ggplot2::theme_classic() + ggplot2::labs(title=paste0("Ancestry coefficients; K=",K), x="latitude", y="longitude") + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5), panel.border = ggplot2::element_rect(color = "black", fill=NA, size=1)) + ggplot2::geom_sf(data=world_sf,colour = "black", fill = NA) + ggplot2::coord_sf(xlim=c(x.min, x.max), ylim=c(y.min, ymax=y.max),expand=FALSE)
+				if(debug) message(cat("\r",paste0("K=",K," step 7.8")))
+				mapplot[[i]]    <- mapplot2.i + ggplot2::geom_point(data = coords, ggplot2::aes(x = Lon, y = Lat), size = 1, shape = 21, fill = "black")
+				#mapplot[[i]]    <- mapplot.i + ggplot2::theme_classic() + ggplot2::labs(title=paste0("Ancestry coefficients; K=",K), x="latitude", y="longitude") + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) + current.gg.sf + ggplot2::geom_point(data = coords, ggplot2::aes(x = Lon, y = Lat), size = 1, shape = 21, fill = "black")
+			} else {
+				mapplot[[i]] <- NULL
+			}
+		}
+		if(debug) message("step 8")
+		result <- c(list(margLPlot),admixturePlot,assignmentPlot,mapplot)
+		#### Save the PDF
+		if(debug) message("step 9")
+		
+		if(".pdf" %in% include.out){
+			pdf(height=6,width=10,file=save.as.pdf,onefile=TRUE)
+			lapply(X=result,FUN=print)
+			dev.off()
+		}
+		if(debug) message("step 10")
+		if(format=="VCF"){
+			# Delete the temporary fastStructure file
+			if(file.exists(str.path0)){
+				remove.str <- file.remove(str.path0)
+			}
+		}
+	} else {
+		result <- NULL
 	}
 	# Delete the folder with .log, .meanQ, and .meanP files; the info from these are compiled in a single file.
 	if(debug) message("step 14")
