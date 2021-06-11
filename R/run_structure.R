@@ -882,7 +882,7 @@ EvannoPlots <- function(input.dir=getwd(),save.as="EvannoPlots.pdf"){
 #' @param userun Number or numerical vector indicating which runs should be used for admixture plots. Default is 1 (the first run). When multiple runs are used, the mean is used across runs after aligning clusters.
 #' @return NULL; generates pdf with a barplot of admixture for each K
 #' @export admixturePlots
-admixturePlots <- function(x, xdir=NULL, labels=NULL, save.as=file.path(getwd(),"admixturePlots.pdf"), userun=1){
+admixturePlots <- function(x, xdir=NULL, labels=NULL, save.as=file.path(getwd(),"admixturePlots.pdf"), userun=1,save=T){
 	if(!is.null(xdir)){
 		# Character vector with paths to input files
 		qfiles         <- c(list.files(xdir, full.names=T, pattern="log_f$"), list.files(xdir, full.names=T, pattern="Qlog$"))
@@ -900,6 +900,18 @@ admixturePlots <- function(x, xdir=NULL, labels=NULL, save.as=file.path(getwd(),
 	} else {
 		if(length(grep("Qlog$", qfiles))==1){
 			qtab <- read.table(qfiles, header=T,sep="\t")
+			if(!"replicate" %in% colnames(qtab)){
+				if(nrow(unique(qtab[,c("individual", "cluster","K")])) == nrow(qtab)){
+					qtab[,"replicate"] <- 1
+				} else {
+					if(floor(nrow(qtab)/nrow(unique(qtab[,c("individual", "cluster","K")]))) == ceiling(nrow(qtab)/nrow(unique(qtab[,c("individual", "cluster","K")])))){
+						qtab <- qtab[order(test[,"K"], test[,"cluster"], test[,"individual"]),]
+						qtab[,"replicate"] <- rep(1:(nrow(qtab)/nrow(unique(qtab[,c("individual", "cluster","K")]))),each=nrow(unique(qtab[,c("individual", "cluster","K")])))
+					} else {
+						stop("number of replicates differ not equal")
+					}
+				}
+			}
 			if(all(is.na(qtab[,"replicate"]))){
 				qtab$replicate <- 1
 			}
@@ -1002,9 +1014,11 @@ admixturePlots <- function(x, xdir=NULL, labels=NULL, save.as=file.path(getwd(),
 		posterior.gg        <- ggplot2::ggplot(posterior.df, ggplot2::aes(fill= pop, x= assignment, y=indv)) + ggplot2::geom_bar(position="stack", stat="identity") + ggplot2::theme_classic() + ggplot2::theme(axis.text.y = ggplot2::element_text(size = label.size), panel.grid.major = ggplot2::element_blank(), panel.grid.minor = ggplot2::element_blank(), panel.background = ggplot2::element_blank()) + ggplot2::labs(x = "Admixture Proportion",y="",fill="Cluster",title=paste0("K = ",K)) + ggplot2::scale_fill_manual(values=myCols[1:K])
 		admixturePlot[[i]]  <- posterior.gg
 	}
-	pdf(height=6,width=10,file=save.as,onefile=TRUE)
-		lapply(X=admixturePlot, FUN=print)
-	dev.off()
+	if(save){
+		pdf(height=6,width=10,file=save.as,onefile=TRUE)
+			lapply(X=admixturePlot, FUN=print)
+		dev.off()
+	}
 	admixturePlot
 }
 #' @examples

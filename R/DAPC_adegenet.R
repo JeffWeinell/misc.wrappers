@@ -180,9 +180,9 @@ run_DAPC <- function(x, format="VCF", kmax=10, coords=NULL, samplenames=NULL, re
 	# Data frame holding assignment probability of each individual in each cluster at each K.
 	q.df           <- do.call(rbind,lapply(X=1:length(dapc.list),FUN=function(x){data.frame(indv=rep(rownames(posterior.list[[x]]),ncol(posterior.list[[x]])), pop=rep(colnames(posterior.list[[x]]),each=nrow(posterior.list[[x]])), assignment=c(posterior.list[[x]]),K=(x+1))}))
 	if(".Qlog" %in% include.out){
-		write.table(x=q.df,file=save.as.Qlog,row.names=FALSE,col.names=TRUE,quote=FALSE,sep="\t")
+		q.df2 <- data.frame(individual=q.df[,"indv"],cluster=q.df[,"pop"],assignment=q.df[,"assignment"],K=q.df[,"K"],replicate=NA)
+		write.table(x=q.df2,file=save.as.Qlog,row.names=FALSE,col.names=TRUE,quote=FALSE,sep="\t")
 	}
-	
 	#####
 	## Density Plots section still produces errors under some scenarios.
 	if(plot.components){
