@@ -1,749 +1,700 @@
-plot(Polygon(Luzon.polygon@coords))
-as_sf(Polygon(Luzon.polygon@coords))
-sf::as_sf(Polygon(Luzon.polygon@coords))
-ggplot2::as_sf(Polygon(Luzon.polygon@coords))
-sf::st_sf(Polygon(Luzon.polygon@coords))
-ggplot2::geom_polygon(Polygon(Luzon.polygon@coords))
-ggplot2::geom_polygon(Polygon(Luzon.polygon@coords))
-ph.df <- data.frame(x=Luzon.polygon@coords[,1],y=Luzon.polygon@coords[,2],island=1)
-ph.df
-ggplot2::ggplot() + ggplot2::geom_polygon(ph.df,aes(x=x,y=y))
-ggplot2::ggplot() + ggplot2::geom_polygon(ph.df,ggplot2::aes(x=x,y=y))
-library(ggplot2)
-ggplot2::ggplot() + ggplot2::geom_polygon(ph.df,mapping=ggplot2::aes(x=x,y=y))
-wnd= c(-180, 180,-90, 90)
-wnd
-raster::extent(wnd)
-extent(wnd)
-test.sp <- as(ph.df, "SpatialPolygons")
-test.sp <- as(Luzon.polygon, "SpatialPolygons")
-test.sp <- as(extent(Luzon.polygon), "SpatialPolygons")
-test.sp <- as(extent(Luzon.polygon@coords), "SpatialPolygons")
-test.sp <- as(raster::extent(Luzon.polygon@coords), "SpatialPolygons")
-test.sp
-?raster::extent
-?SpatialPolygons()
-test.sp <- as(list(Luzon.polygon), "SpatialPolygons")
-test.sp <- SpatialPolygons(list(Luzon.polygon))
-test.sp <- SpatialPolygons(Polygons(Luzon.polygon))
-test.sp <- SpatialPolygons(list(Polygons(list(Luzon.polygon))))
-test.sp <- SpatialPolygons(list(Polygons(list(Luzon.polygon),1)))
-plot(test.sp)
-world.land.sp    <- rnaturalearth::ne_countries(scale=110, returnclass="sp")
-ph.land10.sp     <- world.land10.sp[which(world.land10.sp[,"sovereignt"][[1]]=="Philippines"),]
-ph.island.areas  <- sapply(X=1:length(ph.land10.sp@polygons[[1]]@Polygons),FUN=function(x){ph.land10.sp@polygons[[1]]@Polygons[[x]]@area})
-Luzon.polygon    <- ph.land10.sp@polygons[[1]]@Polygons[[which(ph.island.areas == max(ph.island.areas))]]
-test.sp          <- SpatialPolygons(list(Polygons(list(Luzon.polygon),1)))
-Luzon.sp          <- SpatialPolygons(list(Polygons(list(Luzon.polygon),1)))
-plot(Luzon.sp)
-raster::crs(Luzon.sp) <- sp::CRS("EPSG:4326")
-wnd.sp           <- Luzon.sp
-wnd.sp               <- Luzon.sp
-raster::crs(wnd.sp2) <- sp::CRS("EPSG:4326")#
-				wnd.area             <- wnd.sp2@polygons[[1]]@Polygons[[1]]@area
-raster::crs(wnd.sp)  <- sp::CRS("EPSG:4326")#
-				wnd.area             <- wnd.sp@polygons[[1]]@Polygons[[1]]@area
-wnd.area
-regionsize=1
-regionsize.dd0       <- (regionsize*wnd.area)#
-				regionsize.dd        <- (regionsize.dd0*0.25)
-wnd <- Luzon.sp#
-				# wnd.sp is simply wnd#
-				wnd.sp <- wnd#
-				raster::crs(wnd.sp)  <- sp::CRS("EPSG:4326")#
-				wnd.area             <- wnd.sp@polygons[[1]]@Polygons[[1]]@area#
-				regionsize.dd0       <- (regionsize*wnd.area)#
-				regionsize.dd        <- (regionsize.dd0*0.25)
-samplesize=100; n.grp=2; grp.n.weights=NULL; grp.area.weights=NULL; min.grp.size=2; wnd=Luzon.sp; over.land=TRUE; interactions=c(0,1); show.plot=TRUE; return.as="data.frame"
-if(is.null(grp.n.weights)){#
-		grp.n.weights <- rep(1,n.grp)#
-	}#
-	if(is.null(grp.area.weights)){#
-		grp.area.weights <- rep(1,n.grp)#
-	}#
-	# Number > 0 that scales geographical areas of all groups relative to 'regionsize'*(area of 'wnd')#
-	grp.scaler=(1/n.grp)#
-	# Adding this soon. Plan is to convert each bounding box to an extent object and then Polygon object, and then combine into SpatialPolygons for multi-part areas.
-grp.scaler.start <- grp.scaler#
-	#result.temp        <- data.frame(NULL)#
-	PASS=FALSE#
-	miter <- 100#
-	ctr   <- 0#
-	if(length(samplesize)==1){#
-		if((n.grp*min.grp.size) > samplesize){#
-			stop("Total sample size 'samplesize' must be greater than the number of groups 'n.grp' times minimum group size 'min.grp.size'.",call.=FALSE)#
-		}#
+leporinum.barplots.lea.K3
+leporinum.barplots.lea.K3 <- leporinum.barplots.lea[[(bestK-1)]]
+leporinum.barplots.lea.K3
+barplot.gg.og
+barplot.gg
+leporinum.lea.df    <- leporinum.barplots.lea.K3$data
+leporinum.lea.df
+leporinum.lea.df$indv <- factor(leporinum.lea.df,levels=indv.order)
+leporinum.barplots.lea.K3$data <- leporinum.lea.df
+admixtureGrob <- function(x,lev,barplot.title=""){#
+	bp    <- x#
+	bp.df <- bp$data#
+	bp.df$indv <- factor(bp.df,levels=lev)#
+	bp$data <- bp.df#
+	bp.slim <- bp + ggplot2::theme(axis.text.x=ggplot2::element_blank(),axis.text.y=ggplot2::element_blank(),axis.ticks.x=ggplot2::element_blank(),axis.ticks.y=ggplot2::element_blank(),legend.position = "none",title=ggplot2::element_blank(),axis.line=ggplot2::element_blank())#
+	bp.grob <- gridExtra::ggplotGrob(bp.slim)#
+	bp.gtab <- gridExtra::arrangeGrob(bp.grob,top=barplot.title)#
+	bp.gtab#
+}
+leporinum.lea.gtab <- admixtureGrob(leporinum.barplots.lea.K3,lev=indv.order,barplot.title="LEA K=3")
+admixtureGrob <- function(x,lev,barplot.title=""){#
+	bp    <- x#
+	bp.df <- bp$data#
+	bp.df$indv <- factor(bp.df,levels=lev)#
+	bp$data <- bp.df#
+	bp.slim <- bp + ggplot2::theme(axis.text.x=ggplot2::element_blank(),axis.text.y=ggplot2::element_blank(),axis.ticks.x=ggplot2::element_blank(),axis.ticks.y=ggplot2::element_blank(),legend.position = "none",title=ggplot2::element_blank(),axis.line=ggplot2::element_blank())#
+	bp.grob <- ggplot2::ggplotGrob(bp.slim)#
+	bp.gtab <- gridExtra::arrangeGrob(bp.grob,top=barplot.title)#
+	bp.gtab#
+}
+leporinum.lea.gtab <- admixtureGrob(leporinum.barplots.lea.K3,lev=indv.order,barplot.title="LEA K=3")
+figure.gtab <- gridExtra::arrangeGrob(grobs=list(tree3.gtab,barplot.gtab,leporinum.lea.gtab),layout_matrix=matrix(c(1,2,3),nrow=1),respect=TRUE)
+plot(figure.gtab)
+plot(leporinum.barplots.lea.K3)
+plot(leporinum.barplots.lea[[1]])
+plot(leporinum.barplots.lea[[2]])
+leporinum.barplots.lea.K3
+leporinum.barplots.lea.K3 <- leporinum.barplots.lea[[(bestK-1)]]
+leporinum.barplots.lea.K3
+admixtureGrob <- function(x,lev,barplot.title=""){#
+	bp         <- x#
+	bp.df      <- bp$data#
+	bp.df$indv <- factor(bp.df,levels=lev)#
+	bp$data    <- bp.df#
+	bp.slim    <- bp + ggplot2::theme(axis.text.x=ggplot2::element_blank(),axis.text.y=ggplot2::element_blank(),axis.ticks.x=ggplot2::element_blank(),axis.ticks.y=ggplot2::element_blank(),legend.position = "none",title=ggplot2::element_blank(),axis.line=ggplot2::element_blank())#
+	bp.grob    <- ggplot2::ggplotGrob(bp.slim)#
+	bp.gtab    <- gridExtra::arrangeGrob(bp.grob,top=barplot.title)#
+	bp.gtab#
+}
+leporinum.lea.gtab <- admixtureGrob(leporinum.barplots.lea.K3,lev=indv.order,barplot.title="LEA K=3")
+plot(leporinum.lea.gtab)
+leporinum.barplots.lea.K3 <- leporinum.barplots.lea[[(bestK-1)]]
+leporinum.lea.df      <- leporinum.barplots.lea.K3$data
+leporinum.lea.df$indv
+indv.order
+length(leporinum.lea.df$indv)
+length(leporinum.lea.df$indv)/length(indv.order)
+leporinum.barplots.lea.K3$data <- leporinum.lea.df
+leporinum.barplots.lea.K3
+leporinum.lea.df
+leporinum.lea.df      <- leporinum.barplots.lea.K3$data
+leporinum.lea.df$indv <- factor(leporinum.lea.df$indv,levels=indv.order)
+admixtureGrob <- function(x,lev,barplot.title=""){#
+	bp         <- x#
+	bp.df      <- bp$data#
+	bp.df$indv <- factor(bp.df$indv,levels=lev)#
+	bp$data    <- bp.df#
+	bp.slim    <- bp + ggplot2::theme(axis.text.x=ggplot2::element_blank(),axis.text.y=ggplot2::element_blank(),axis.ticks.x=ggplot2::element_blank(),axis.ticks.y=ggplot2::element_blank(),legend.position = "none",title=ggplot2::element_blank(),axis.line=ggplot2::element_blank())#
+	bp.grob    <- ggplot2::ggplotGrob(bp.slim)#
+	bp.gtab    <- gridExtra::arrangeGrob(bp.grob,top=barplot.title)#
+	bp.gtab#
+}
+leporinum.barplots.lea.K3 <- leporinum.barplots.lea[[(bestK-1)]]
+leporinum.lea.gtab <- admixtureGrob(eporinum.barplots.lea.K3,lev=indv.order)
+leporinum.lea.gtab <- admixtureGrob(leporinum.barplots.lea.K3,lev=indv.order)
+plot(leporinum.lea.gtab )
+figure.gtab <- gridExtra::arrangeGrob(grobs=list(tree3.gtab,barplot.gtab,leporinum.lea.gtab),layout_matrix=matrix(c(1,2,3),nrow=1),respect=TRUE)
+plot(figure.gtab)
+leporinum.lea.gtab <- admixtureGrob(eporinum.barplots.lea.K3,lev=indv.order,barplot.title="LEA K=3")#
+figure.gtab        <- gridExtra::arrangeGrob(grobs=list(tree3.gtab,barplot.gtab,leporinum.lea.gtab),layout_matrix=matrix(c(1,2,3),nrow=1),respect=TRUE)
+leporinum.lea.gtab <- admixtureGrob(leporinum.barplots.lea.K3,lev=indv.order,barplot.title="LEA K=3")#
+figure.gtab        <- gridExtra::arrangeGrob(grobs=list(tree3.gtab,barplot.gtab,leporinum.lea.gtab),layout_matrix=matrix(c(1,2,3),nrow=1),respect=TRUE)#
+plot(figure.gtab)
+figure.gtab        <- gridExtra::arrangeGrob(grobs=list(tree3.gtab,barplot.gtab,leporinum.lea.gtab),layout_matrix=matrix(c(1,1,1,2,3),nrow=1),respect=TRUE)#
+plot(figure.gtab)
+figure.gtab        <- gridExtra::arrangeGrob(grobs=list(tree3.gtab,barplot.gtab,leporinum.lea.gtab),layout_matrix=matrix(c(1,1,1,2,3),nrow=1),respect=FALSE)
+plot(figure.gtab)
+leporinum.barplots.fs    <- admixturePlots(xdir="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/fastStructure/empirical/Oxyrhabdium-leporinum_BestSNP")
+statlog  <- read.table("/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/fastStructure/empirical/Oxyrhabdium-leporinum_BestSNP/Oxyrhabdium-leporinum_BestSNP_fastStructure.margLlog", header=T)
+kmax     <- max(statlog[,"K"])#
+statname <- "MarginalLikelihood"
+kstat    <- sapply(X=1:kmax, FUN=function(x) {mean(statlog[which(statlog[,"K"]==x), statname])})#
+kstat.df <- data.frame(K=1:kmax, mean.stat=kstat)
+bestK    <- kstat.df[which(kstat.df[,"mean.stat"]==max(kstat.df[,"mean.stat"])),"K"]
+bestK
+leporinum.barplots.fs.K8 <- leporinum.barplots.fs[[(bestK-1)]]
+leporinum.fs.gtab <- admixtureGrob(leporinum.barplots.fs.K8,lev=indv.order,barplot.title="fastStructure K=8")
+plot(leporinum.fs.gtab)
+figure.gtab        <- gridExtra::arrangeGrob(grobs=list(tree3.gtab,barplot.gtab,leporinum.lea.gtab,leporinum.fs.gtab),layout_matrix=matrix(c(1,1,1,2,3,4),nrow=1),respect=FALSE)#
+plot(figure.gtab)
+leporinum.barplots.fs.K8$scales$scales
+style.gg <- barplot.slim.gg
+style.gg$data <- NULL
+admixtureGrob <- function(x,lev,barplot.title="",style.gg=NULL){#
+	bp         <- x#
+	bp.df      <- bp$data#
+	bp.df$indv <- factor(bp.df$indv,levels=lev)#
+	if(!is.null(style.gg)){#
+		style.gg$data <- bp.df#
+		bp <- style.gg#
 	} else {#
-		if(length(samplesize)!=n.grp){#
-			stop("If 'samplesize' is a numerical vector, then it must have a length equal to the number of groups 'n.grp'.",call.=FALSE)#
-		}#
+		bp$data    <- bp.df#
+	}#
+	bp.slim    <- bp + ggplot2::theme(axis.text.x=ggplot2::element_blank(),axis.text.y=ggplot2::element_blank(),axis.ticks.x=ggplot2::element_blank(),axis.ticks.y=ggplot2::element_blank(),legend.position = "none",title=ggplot2::element_blank(),axis.line=ggplot2::element_blank())#
+	bp.grob    <- ggplot2::ggplotGrob(bp.slim)#
+	bp.gtab    <- gridExtra::arrangeGrob(bp.grob,top=barplot.title)#
+	bp.gtab#
+}
+leporinum.lea.gtab2 <- admixtureGrob(leporinum.barplots.lea.K3,lev=indv.order,barplot.title="LEA K=3",style.gg=barplot.slim.gg)
+leporinum.lea.gtab2 <- admixtureGrob(leporinum.barplots.lea.K3,lev=indv.order,barplot.title="LEA K=3",style.gg=NULL)
+plot(figure.gtab)
+leporinum.barplots.dapc  <- admixturePlots(xdir="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/DAPC/Oxyrhabdium-leporinum_BestSNP/Oxyrhabdium-leporinum_DAPC.BIClog")
+leporinum.barplots.dapc  <- admixturePlots(xdir="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/DAPC/Oxyrhabdium-leporinum_BestSNP/")
+xdir="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/DAPC/Oxyrhabdium-leporinum_BestSNP/"; labels=NULL; save.as=file.path(getwd(),"admixturePlots.pdf"); userun=1; save=T
+if(!is.null(xdir)){#
+		# Character vector with paths to input files#
+		qfiles         <- c(list.files(xdir, full.names=T, pattern="log_f$"), list.files(xdir, full.names=T, pattern="Qlog$"))#
+		save.as        <- file.path(xdir,"admixturePlots.pdf")#
+		labels <- NULL#
+	} else {#
+		qfiles <- x#
 	}
-is(wnd,"matrix")
-is(wnd,"SpatialPolygons")
-while(!PASS){#
-		ctr <- ctr + 1#
-		if(ctr > miter){#
-			stop(paste("after",miter,"attemps, failed to find points that pass conditions. ctr=",ctr,"ctr2=",ctr2,"; grp.scaler=",grp.scaler))#
-		}#
-		#if(ctr %in% seq(from=10,to=miter,by=10)){#
-		if(ctr>1){#
-			grp.scaler <- (grp.scaler*0.95)#
-		}#
-		### Clear the data frame if too few points on land during previous attempt#
-		#result.temp         <- data.frame(NULL)#
-		initial <- FALSE#
-		### Find group centers that pass conditions#
-		ctr2 <- 0#
-		while(!initial){#
-			ctr2 <- ctr2 + 1#
-			if(ctr2 > (miter/10)){#
-				break#
-				# stop(paste("failed to initialize after",miter,"attemps. ctr=",ctr,"ctr2=",ctr2))#
-			}#
-			if(ctr2>1){#
-				grp.scaler <- (grp.scaler*0.99)#
-			}#
-			# Random point within wnd.sp to determine subregion within which group centers will occur#
-			center.sp <- sp::spsample(wnd.sp,n=1,type="random")#
-			# Length two vector with "x" and "y" entries from sample.center, to pass to spCircle#
-			center.xy <- c(sp::coordinates(center.sp)); names(center.xy) <- c("x","y")#
-			# Create a circular polygon centered at sample center; in this case #
-			# sample.area.sp <- sampSurf::spCircle(radius=sqrt((regionsize/pi)),centerPoint=center.xy)[[1]]#
-			# regionsize2 <- (10^regionsize)#
-			# regionsize2 <- regionsize.dd#
-			#if(n.grp==1){#
-			#regionsize.dd <- (regionsize.dd*grp.scaler*0.5)#
-			#}#
-			sample.area.sp <- sampSurf::spCircle(radius=sqrt((regionsize.dd/pi)), centerPoint=center.xy)[[1]]#
-			#sample.area.sp.area <- attributes(attributes(attributes(sample.area.sp)$polygons[[1]])[[1]][[1]])$area#
-			# Check if entire sample.area.sp is within window defined by 'wnd' argument#
-	#		area.wnd.diff <- rgeos::gDifference(spgeom1=sample.area.sp,spgeom2=wnd.sp)#
-	#		# If area.wnd.diff is not NULL, then part of 'sample.area.sp' falls outside of the sampling window.#
-	#		if(!is.null(area.wnd.diff)){#
-	#			next#
-	#		}#
-			if(n.grp>1){#
-				# Sample group sampling-center locations from within sample.area.sp#
-				grp.pts <- sp::spsample(sample.area.sp,n=n.grp,type="random")#
-				# coordinates extracted from grp.pts#
-				grp.pts.mat <- sp::coordinates(grp.pts)#
-				colnames(grp.pts.mat) <- c("x","y")#
-				grp.areas <- (regionsize.dd*(grp.area.weights/(sum(grp.area.weights)))*grp.scaler)#
-				# create polygons centered at grp.pts, from which each groups points will be drawn. First need to determine group sizes...#
-				grp.areas.sp <- lapply(X=1:n.grp, FUN=function(x){sampSurf::spCircle(radius=sqrt((grp.areas/pi))[x],centerPoint=c(grp.pts.mat[x,]))[[1]]})#
-				# Distance between group centers. Not sure if this is necessary.#
-				# geodist(grp.pts.mat,measure="geodesic")#
-				grp.center.dists0 <- geodist::geodist(grp.pts.mat,measure="geodesic")#
-				grp.center.dists  <- grp.center.dists0[lower.tri(grp.center.dists0)]#
-				# check that each group centers occur over land, if over.land is true#
-			} else {#
-				grp.pts.mat  <- matrix(center.xy,nrow=1,dimnames=list(c(NULL),c("x","y")))#
-				grp.areas.sp <- list(sample.area.sp)#
-			}#
-			if(over.land){#
-				if(length(points.on.land(x=grp.pts.mat)[,1]) < n.grp){#
-				#if(length(points.on.land(x=sp::coordinates(grp.pts))[,1]) < n.grp){#
-					next#
+length(grep("log_f$", qfiles))>0
+length(grep("Qlog$", qfiles))==1
+qtab <- read.table(qfiles, header=T,sep="\t")
+qtab
+nrow(unique( qtab[,c("indv", "pop","assignment","K"))
+nrow(unique( qtab[,c("indv", "pop","assignment","K")])
+nrow(unique( qtab[,c("indv", "pop","assignment","K")]))
+nrow(unique( qtab[,c("indv", "pop","K")]))
+nrow(unique(qtab[,c("indv", "pop","K")])) == nrow(qtab)
+!"replicate" %in% colnames(qtab)
+qtab[1:10,]
+test <- qtab
+test2 <- order(test[,"K"],test[,"pop"],test[,"indv"])
+length(test2)
+test2[1]
+test2[1:10]
+floor(2)
+ceiling(2)
+floor(nrow(qtab)/nrow(unique(qtab[,c("indv", "pop","K")]))) == ceiling(nrow(qtab)/nrow(unique(qtab[,c("indv", "pop","K")])))
+admixturePlots <- function(x, xdir=NULL, labels=NULL, save.as=file.path(getwd(),"admixturePlots.pdf"), userun=1,save=T){#
+	if(!is.null(xdir)){#
+		# Character vector with paths to input files#
+		qfiles         <- c(list.files(xdir, full.names=T, pattern="log_f$"), list.files(xdir, full.names=T, pattern="Qlog$"))#
+		save.as        <- file.path(xdir,"admixturePlots.pdf")#
+		labels <- NULL#
+	} else {#
+		qfiles <- x#
+	}#
+	if(length(grep("log_f$", qfiles))>0){#
+		# Read qfiles into R#
+		qlist      <- pophelper::readQ(files=qfiles)#
+		names.df.path  <- list.files(xdir, full.names=T, pattern="_sampleIDs.txt$")#
+		samplenames.df <- read.table(names.df.path, header=T)#
+		samplenames    <- samplenames.df$IndvNames#
+	} else {#
+		if(length(grep("Qlog$", qfiles))==1){#
+			qtab <- read.table(qfiles, header=T,sep="\t")#
+			if(!"replicate" %in% colnames(qtab)){#
+				if(nrow(unique(qtab[,c("indv", "pop","K")])) == nrow(qtab)){#
+					qtab[,"replicate"] <- 1#
+				} else {#
+					if(floor(nrow(qtab)/nrow(unique(qtab[,c("indv", "pop","K")]))) == ceiling(nrow(qtab)/nrow(unique(qtab[,c("indv", "pop","K")])))){#
+						qtab <- qtab[order(test[,"K"], test[,"pop"], test[,"indv"]),]#
+						qtab[,"replicate"] <- rep(1:(nrow(qtab)/nrow(unique(qtab[,c("indv", "pop","K")]))),each=nrow(unique(qtab[,c("indv", "pop","K")])))#
+					} else {#
+						stop("number of replicates differ not equal")#
+					}#
 				}#
 			}#
-			initial <- TRUE#
-		}#
-		### For each group, the number of samples that will be drawn (or saved, if over.land=TRUE) from the group's sample region.#
-		if(length(samplesize)==1){#
-			if(n.grp==1){#
-				grp.sizes <- samplesize#
-			} else {#
-				# Initial values for entering while loop#
-				grp.sizes <- rep(0,n.grp)#
-				while(any(grp.sizes < min.grp.size)){#
-					grp.sizes  <- c(table(sample(x=c(1:n.grp),size=samplesize,prob=grp.n.weights,replace=TRUE)))#
-					# verify that at least each group has at least min.grp.size.#
-				}#
+			if(all(is.na(qtab[,"replicate"]))){#
+				qtab$replicate <- 1#
+			}#
+			qid         <- unique(qtab[,c("K","replicate")])#
+			### List of Q matrices (data frames) from the rectangular Qlog data frame#
+			qlist        <- lapply(X=1:nrow(qid), FUN=function(x){resB=do.call(cbind,lapply(X=1:qid[x,"K"], FUN=function(z) { A=qtab[which(qtab[,"replicate"]==qid[x,"replicate"] & qtab[,"K"]==qid[x,"K"] ),]; A[A[,"cluster"]==z, "assignment"]})); colnames(resB)=paste0("Cluster",1:qid[x,"K"]); rownames(resB)=1:nrow(resB); resC <- as.data.frame(resB); resC})#
+			names(qlist) <- sapply(X=1:nrow(qid),FUN=function(x) paste0("structure_K",qid[x,"K"],"r",qid[x,"replicate"],".log_f"))#
+			samplenames  <- qtab[1:length(unique(qtab[,"individual"])),"individual"]#
+			#### Need to set the following attributes for each data frame in qlist or else alignK function will fail.#
+			# ind, k, loci, reps, elpd, mvll, vll # each is an integer except elpd and mvll, which are numeric floats#
+			# This loop adds arbitrary values for required attributes, allowing us to use the alignK function for qmatrices programs other than STRUCTURE#
+			for(i in 1:length(qlist)){#
+				attr(qlist[[i]], 'ind')    <- nrow(qlist[[i]])#
+				attr(qlist[[i]], 'k')      <- ncol(qlist[[i]])#
+				attr(qlist[[i]], 'loci')   <- 5000#
+				attr(qlist[[i]], 'burnin') <- 9999#
+				attr(qlist[[i]], 'reps')   <- 99999#
+				attr(qlist[[i]], 'elpd')   <- -99999.9#
+				attr(qlist[[i]], 'mvll')   <- -99999.9#
+				attr(qlist[[i]], 'vll')    <- 2000#
 			}#
 		} else {#
-			grp.sizes <- samplesize#
+			stop("Q matrices must be supplied in either 'log_f' files produced by STRUCTURE (or 'run_structure' wrapper function) or 'Qlog' files like those produced by 'run_SNMF', 'run_fastStructure', or 'run_DAPC' functions")#
 		}#
-		# grp.sizes <- round(samplesize * (grp.n.weights/sum(grp.n.weights)))#
-		### Creates a SpatialPolygons object (sampling region) for each group#
-		#sample.area.sp <- lapply(1:n.grp, FUN=function(x){sampSurf::spCircle(radius= sqrt((grp.areas/pi))[x] , centerPoint=c(x=group.centers[x,1],y=group.centers[x,2]))[[1]]})#
-		### Check if groups meet conditions set by 'interactions' argument.#
-		if(!is.null(interactions) & n.grp > 1){#
-			if(!(interactions[1]==0 & interactions[2]==1)){#
-				# Much less complex list holding the sample sampling polygons#
-				# polygons.list <- lapply(X=1:n.grp, function(x){attributes(attributes(grp.areas.sp[[x]])$"polygons"[[1]])[[1]][[1]]})#
-				# Possibly equivalent:#
-				polygons.list <- lapply(X=1:n.grp, function(x) grp.areas.sp[[x]]@polygons[[1]]@Polygons[[1]])#
-				# All possible pairwise group comparisons#
-				grp.pairs <- do.call(rbind,pset(1:n.grp,2,2))#
-				# Calculate intersect area yet and sum areas for each pair of groups. (Doesnt work yet).#
-				grp.int.area <- grp.sum.area <- grp.ratio <- c()#
-				for(i in 1:nrow(grp.pairs)){#
-					polygon.pair   <- polygons.list[c(grp.pairs[i,1],grp.pairs[i,2])]#
-					grp1.area.temp <- polygon.pair[[1]]@area#
-					grp2.area.temp <- polygon.pair[[2]]@area#
-					pairsum.temp   <- sum(c(grp1.area.temp, grp2.area.temp))#
-					#grp.int <- raster::intersect(sample.area.sp[[grp.pairs[i,1]]], sample.area.sp[[grp.pairs[i,2]]])#
-					# returns NULL if polygons do not intersect; returns SpatialPolygons object if they do intersect#
-					grp.int  <- rgeos::gIntersection(spgeom1=grp.areas.sp[[grp.pairs[i,1]]],spgeom2=grp.areas.sp[[grp.pairs[i,2]]])#
-					#Nonintersecting portions of areas 1 and 2 (faster than getting diff of each in the other and then adding)#
-					#grp.diff <- rgeos::gSymdifference(spgeom1=grp.areas.sp[[grp.pairs[i,1]]],spgeom2=grp.areas.sp[[grp.pairs[i,2]]])#
-					# returns a spatial polygons object with the non-intersecting portions of the group pair polygons each as their own polygons. If no overlap the returned polygons are the same the input polygons.#
-					grp.diff1 <- rgeos::gDifference(spgeom1=grp.areas.sp[[grp.pairs[i,1]]],spgeom2=grp.areas.sp[[grp.pairs[i,2]]])#
-					grp.diff2 <- rgeos::gDifference(spgeom1=grp.areas.sp[[grp.pairs[i,2]]],spgeom2=grp.areas.sp[[grp.pairs[i,1]]])#
-					if(is.null(grp.int)){#
-						int.area.temp <- 0#
+	}#
+	numind     <- nrow(qlist[[1]])#
+	if(!is.null(labels)){#
+		samplenames <- labels#
+	} else {#
+		if(is.null(xdir)){#
+			samplenames <- 1:numind#
+		}#
+	}#
+	label.size <- min((288/numind),7)#
+	# Set rownames of each matrix in qlist as the names of samples#
+	qlist2 <- lapply(X=1:length(qlist), FUN=function(x) {A=qlist[[x]]; rownames(A)=samplenames; A})#
+	# Aligned qlist#
+	aqlist <- pophelper::alignK(qlist)#
+	# List of aligned q matrices with rownames as samplenames#
+	aqlist2   <- lapply(X=1:length(aqlist), FUN=function(x) {A=aqlist[[x]]; rownames(A)=samplenames; A})#
+	aqlist2.K <- sapply(aqlist2, ncol)#
+	kmax      <- max(aqlist2.K)#
+	numruns   <- max(table(aqlist2.K))#
+	### Just use the first run if userun are al greater than the number of runs#
+	if(any(userun <= numruns)){#
+		userun <- userun[userun %in% 1:numruns]#
+	} else {#
+		userun <- 1#
+	}#
+	#for(i in 1:unique(aqlist2.K)){#
+	#	aqlist.i <- do.call(cbind,aqlist2[aqlist2.K == i])#
+	#	margin()#
+	#}#
+	# List of aligned q matrices for first run of each K. Will edit this to use instead the mean across runs.#
+	slist      <- aqlist2[match(1:kmax, sapply(aqlist2, ncol))]#
+	slist.list <- list(); length(slist.list) <- numruns#
+#	slist      <- qlist2[match(1:kmax,sapply(qlist2,ncol))+(userun-1)]#
+	#slist2     <- list(); length(slist2) <- length(slist)#
+	for(i in 1:numruns){#
+		slist.list[[i]] <- aqlist2[match(1:kmax,sapply(aqlist2, ncol)) + (i-1)]#
+	}#
+	slist.list2 <- slist.list[userun]#
+	if(length(slist.list2)>1){#
+		### Average across runs#
+		for(i in 1:kmax){#
+			X    <- lapply(X=slist.list2, FUN=function(x){ c(t(x[[i]])) })#
+			Y    <- do.call(rbind, X)#
+			Z    <- colMeans(Y)#
+			zmat <- matrix(Z,ncol=i,byrow=T)#
+			rownames(zmat) <- samplenames#
+			colnames(zmat) <- colnames(slist[[i]])#
+			zdf            <- as.data.frame(zmat)#
+			slist2[[i]]    <- zdf#
+			#Y <- array(Y, dim=c(dim(X[[1]]), length(X)))#
+			#apply(X=Y, MARGIN=c(1, 2), FUN=mean, na.rm = TRUE)#
+		}#
+	} else {#
+		slist2    <- slist.list2[[1]]#
+	}#
+	Krange      <- 1:kmax#
+	Krange.plot <- 2:kmax#
+	# empty list to hold admixture plots#
+	admixturePlot <- list(); length(admixturePlot)   <- length(Krange.plot)#
+	for(K in 2:kmax){#
+		i=(K-1)#
+		if(K <= 15){#
+			myCols          <- goodcolors2(n=15)[1:K]#
+		}#
+		if(K>15){#
+			myCols          <- c(goodcolors2(n=15), sample(adegenet::funky(100), size=K-15))#
+		}#
+		q.matrix  <- slist2[[K]]#
+		#q.matrix  <- slist[[K]]#
+		# test <- ape::ladderize(phangorn::NJ(dist(q.matrix)))#
+		### Attempt to reorder individuals in the barplot by their population assignment proportions.#
+		indv.pop           <- apply(X=q.matrix, MARGIN=1, FUN=function(x){which(x==max(x))[1]})#
+		posterior.df       <- data.frame(indv=rep(rownames(q.matrix),ncol(q.matrix)), pop=rep(colnames(q.matrix),each=nrow(q.matrix)), assignment=c(unlist(unname(q.matrix))))#
+		posterior.df$indv  <- factor(posterior.df$indv, levels = names(sort(indv.pop)))#
+		#if(debug) message(cat("\r",paste0("K=",K," step 7.3")))#
+		posterior.gg        <- ggplot2::ggplot(posterior.df, ggplot2::aes(fill= pop, x= assignment, y=indv)) + ggplot2::geom_bar(position="stack", stat="identity") + ggplot2::theme_classic() + ggplot2::theme(axis.text.y = ggplot2::element_text(size = label.size), panel.grid.major = ggplot2::element_blank(), panel.grid.minor = ggplot2::element_blank(), panel.background = ggplot2::element_blank()) + ggplot2::labs(x = "Admixture Proportion",y="",fill="Cluster",title=paste0("K = ",K)) + ggplot2::scale_fill_manual(values=myCols[1:K])#
+		admixturePlot[[i]]  <- posterior.gg#
+	}#
+	if(save){#
+		pdf(height=6,width=10,file=save.as,onefile=TRUE)#
+			lapply(X=admixturePlot, FUN=print)#
+		dev.off()#
+	}#
+	admixturePlot#
+}
+leporinum.barplots.dapc  <- admixturePlots(xdir="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/DAPC/Oxyrhabdium-leporinum_BestSNP/")
+qtab
+colnames(qtab)
+admixturePlots <- function(x, xdir=NULL, labels=NULL, save.as=file.path(getwd(),"admixturePlots.pdf"), userun=1,save=T){#
+	if(!is.null(xdir)){#
+		# Character vector with paths to input files#
+		qfiles         <- c(list.files(xdir, full.names=T, pattern="log_f$"), list.files(xdir, full.names=T, pattern="Qlog$"))#
+		save.as        <- file.path(xdir,"admixturePlots.pdf")#
+		labels <- NULL#
+	} else {#
+		qfiles <- x#
+	}#
+	if(length(grep("log_f$", qfiles))>0){#
+		# Read qfiles into R#
+		qlist      <- pophelper::readQ(files=qfiles)#
+		names.df.path  <- list.files(xdir, full.names=T, pattern="_sampleIDs.txt$")#
+		samplenames.df <- read.table(names.df.path, header=T)#
+		samplenames    <- samplenames.df$IndvNames#
+	} else {#
+		if(length(grep("Qlog$", qfiles))==1){#
+			qtab <- read.table(qfiles, header=T,sep="\t")#
+			if(!"replicate" %in% colnames(qtab)){#
+				if(nrow(unique(qtab[,c("individual", "cluster","K")])) == nrow(qtab)){#
+					qtab[,"replicate"] <- 1#
+				} else {#
+					if(floor(nrow(qtab)/nrow(unique(qtab[,c("individual", "cluster","K")]))) == ceiling(nrow(qtab)/nrow(unique(qtab[,c("individual", "cluster","K")])))){#
+						qtab <- qtab[order(test[,"K"], test[,"cluster"], test[,"individual"]),]#
+						qtab[,"replicate"] <- rep(1:(nrow(qtab)/nrow(unique(qtab[,c("individual", "cluster","K")]))),each=nrow(unique(qtab[,c("individual", "cluster","K")])))#
 					} else {#
-						#int.area.temp <- attributes(attributes(attributes(grp.int)$"polygons"[[1]])[[1]][[1]])$area#
-						int.area.temp <- grp.int@polygons[[1]]@Polygons[[1]]@area#
+						stop("number of replicates differ not equal")#
+					}#
+				}#
+			}#
+			if(all(is.na(qtab[,"replicate"]))){#
+				qtab$replicate <- 1#
+			}#
+			qid         <- unique(qtab[,c("K","replicate")])#
+			### List of Q matrices (data frames) from the rectangular Qlog data frame#
+			qlist        <- lapply(X=1:nrow(qid), FUN=function(x){resB=do.call(cbind,lapply(X=1:qid[x,"K"], FUN=function(z) { A=qtab[which(qtab[,"replicate"]==qid[x,"replicate"] & qtab[,"K"]==qid[x,"K"] ),]; A[A[,"cluster"]==z, "assignment"]})); colnames(resB)=paste0("Cluster",1:qid[x,"K"]); rownames(resB)=1:nrow(resB); resC <- as.data.frame(resB); resC})#
+			names(qlist) <- sapply(X=1:nrow(qid),FUN=function(x) paste0("structure_K",qid[x,"K"],"r",qid[x,"replicate"],".log_f"))#
+			samplenames  <- qtab[1:length(unique(qtab[,"individual"])),"individual"]#
+			#### Need to set the following attributes for each data frame in qlist or else alignK function will fail.#
+			# ind, k, loci, reps, elpd, mvll, vll # each is an integer except elpd and mvll, which are numeric floats#
+			# This loop adds arbitrary values for required attributes, allowing us to use the alignK function for qmatrices programs other than STRUCTURE#
+			for(i in 1:length(qlist)){#
+				attr(qlist[[i]], 'ind')    <- nrow(qlist[[i]])#
+				attr(qlist[[i]], 'k')      <- ncol(qlist[[i]])#
+				attr(qlist[[i]], 'loci')   <- 5000#
+				attr(qlist[[i]], 'burnin') <- 9999#
+				attr(qlist[[i]], 'reps')   <- 99999#
+				attr(qlist[[i]], 'elpd')   <- -99999.9#
+				attr(qlist[[i]], 'mvll')   <- -99999.9#
+				attr(qlist[[i]], 'vll')    <- 2000#
+			}#
+		} else {#
+			stop("Q matrices must be supplied in either 'log_f' files produced by STRUCTURE (or 'run_structure' wrapper function) or 'Qlog' files like those produced by 'run_SNMF', 'run_fastStructure', or 'run_DAPC' functions")#
+		}#
+	}#
+	numind     <- nrow(qlist[[1]])#
+	if(!is.null(labels)){#
+		samplenames <- labels#
+	} else {#
+		if(is.null(xdir)){#
+			samplenames <- 1:numind#
+		}#
+	}#
+	label.size <- min((288/numind),7)#
+	# Set rownames of each matrix in qlist as the names of samples#
+	qlist2 <- lapply(X=1:length(qlist), FUN=function(x) {A=qlist[[x]]; rownames(A)=samplenames; A})#
+	# Aligned qlist#
+	aqlist <- pophelper::alignK(qlist)#
+	# List of aligned q matrices with rownames as samplenames#
+	aqlist2   <- lapply(X=1:length(aqlist), FUN=function(x) {A=aqlist[[x]]; rownames(A)=samplenames; A})#
+	aqlist2.K <- sapply(aqlist2, ncol)#
+	kmax      <- max(aqlist2.K)#
+	numruns   <- max(table(aqlist2.K))#
+	### Just use the first run if userun are al greater than the number of runs#
+	if(any(userun <= numruns)){#
+		userun <- userun[userun %in% 1:numruns]#
+	} else {#
+		userun <- 1#
+	}#
+	#for(i in 1:unique(aqlist2.K)){#
+	#	aqlist.i <- do.call(cbind,aqlist2[aqlist2.K == i])#
+	#	margin()#
+	#}#
+	# List of aligned q matrices for first run of each K. Will edit this to use instead the mean across runs.#
+	slist      <- aqlist2[match(1:kmax, sapply(aqlist2, ncol))]#
+	slist.list <- list(); length(slist.list) <- numruns#
+#	slist      <- qlist2[match(1:kmax,sapply(qlist2,ncol))+(userun-1)]#
+	#slist2     <- list(); length(slist2) <- length(slist)#
+	for(i in 1:numruns){#
+		slist.list[[i]] <- aqlist2[match(1:kmax,sapply(aqlist2, ncol)) + (i-1)]#
+	}#
+	slist.list2 <- slist.list[userun]#
+	if(length(slist.list2)>1){#
+		### Average across runs#
+		for(i in 1:kmax){#
+			X    <- lapply(X=slist.list2, FUN=function(x){ c(t(x[[i]])) })#
+			Y    <- do.call(rbind, X)#
+			Z    <- colMeans(Y)#
+			zmat <- matrix(Z,ncol=i,byrow=T)#
+			rownames(zmat) <- samplenames#
+			colnames(zmat) <- colnames(slist[[i]])#
+			zdf            <- as.data.frame(zmat)#
+			slist2[[i]]    <- zdf#
+			#Y <- array(Y, dim=c(dim(X[[1]]), length(X)))#
+			#apply(X=Y, MARGIN=c(1, 2), FUN=mean, na.rm = TRUE)#
+		}#
+	} else {#
+		slist2    <- slist.list2[[1]]#
+	}#
+	Krange      <- 1:kmax#
+	Krange.plot <- 2:kmax#
+	# empty list to hold admixture plots#
+	admixturePlot <- list(); length(admixturePlot)   <- length(Krange.plot)#
+	for(K in 2:kmax){#
+		i=(K-1)#
+		if(K <= 15){#
+			myCols          <- goodcolors2(n=15)[1:K]#
+		}#
+		if(K>15){#
+			myCols          <- c(goodcolors2(n=15), sample(adegenet::funky(100), size=K-15))#
+		}#
+		q.matrix  <- slist2[[K]]#
+		#q.matrix  <- slist[[K]]#
+		# test <- ape::ladderize(phangorn::NJ(dist(q.matrix)))#
+		### Attempt to reorder individuals in the barplot by their population assignment proportions.#
+		indv.pop           <- apply(X=q.matrix, MARGIN=1, FUN=function(x){which(x==max(x))[1]})#
+		posterior.df       <- data.frame(indv=rep(rownames(q.matrix),ncol(q.matrix)), pop=rep(colnames(q.matrix),each=nrow(q.matrix)), assignment=c(unlist(unname(q.matrix))))#
+		posterior.df$indv  <- factor(posterior.df$indv, levels = names(sort(indv.pop)))#
+		#if(debug) message(cat("\r",paste0("K=",K," step 7.3")))#
+		posterior.gg        <- ggplot2::ggplot(posterior.df, ggplot2::aes(fill= pop, x= assignment, y=indv)) + ggplot2::geom_bar(position="stack", stat="identity") + ggplot2::theme_classic() + ggplot2::theme(axis.text.y = ggplot2::element_text(size = label.size), panel.grid.major = ggplot2::element_blank(), panel.grid.minor = ggplot2::element_blank(), panel.background = ggplot2::element_blank()) + ggplot2::labs(x = "Admixture Proportion",y="",fill="Cluster",title=paste0("K = ",K)) + ggplot2::scale_fill_manual(values=myCols[1:K])#
+		admixturePlot[[i]]  <- posterior.gg#
+	}#
+	if(save){#
+		pdf(height=6,width=10,file=save.as,onefile=TRUE)#
+			lapply(X=admixturePlot, FUN=print)#
+		dev.off()#
+	}#
+	admixturePlot#
+}
+leporinum.barplots.dapc  <- admixturePlots(xdir="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/DAPC/Oxyrhabdium-leporinum_BestSNP/")
+leporinum.barplots.dapc[[1]]
+statlog  <- read.table("/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/fastStructure/empirical/Oxyrhabdium-leporinum_BestSNP/Oxyrhabdium-leporinum_BestSNP_fastStructure.margLlog", header=T)
+statlog[,1:10]
+statlog[1:10,]
+statlog  <- read.table("/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/DAPC/Oxyrhabdium-leporinum_BestSNP/Oxyrhabdium-leporinum_DAPC.BIClog", header=T)
+statlog[1:10,]
+statname <- "BIC"
+kstat    <- sapply(X=1:kmax, FUN=function(x) {mean(statlog[which(statlog[,"K"]==x), statname])})#
+kstat.df <- data.frame(K=1:kmax, mean.stat=kstat)#
+bestK    <- kstat.df[which(kstat.df[,"mean.stat"]==min(kstat.df[,"mean.stat"])),"K"]
+bestK
+leporinum.barplots.dapc.K10 <- leporinum.barplots.dapc[[(bestK-1)]]
+leporinum.barplots.dapc.K10
+leporinum.dapc.gtab <- admixtureGrob(leporinum.barplots.dapc.K10,lev=indv.order,barplot.title="DAPC K=10")
+figure.gtab  <- gridExtra::arrangeGrob(grobs=list(tree3.gtab,barplot.gtab,leporinum.lea.gtab,leporinum.fs.gtab,leporinum.dapc.gtab),layout_matrix=matrix(c(1,1,1,2,3,4,5),nrow=1),respect=FALSE)
+plot(figure.gtab)
+bp.test      <- leporinum.barplots.dapc.K10#
+test.df      <- bp.test$data#
+test.df$indv <- factor(test.df$indv, levels=indv.order)#
+bp.test$data <- test.df#
+test.slim.gg <- bp.test + theme(axis.text.x=element_blank(),axis.text.y=element_blank(),axis.ticks.x=element_blank(),axis.ticks.y=element_blank(),legend.position = "none",title=element_blank(),axis.line=element_blank())
+test2 <- admixtureGrob(x=leporinum.barplots.fs.K8,lev=indv.order,barplot.title="test",style.gg=test.slim.gg)
+plot(test2)
+test1 <- admixtureGrob(x=leporinum.barplots.fs.K8,lev=indv.order,barplot.title="test")#
+test2 <- admixtureGrob(x=leporinum.barplots.fs.K8,lev=indv.order,barplot.title="test",style.gg=test.slim.gg)
+plot(gridExtra::arrangeGrob(grobs=list(test1,test2),layout_matrix=matrix(c(1,2),nrow=1),respect=FALSE))
+plot(figure.gtab)
+plot(gridExtra::arrangeGrob(grobs=list(test1,test2),layout_matrix=matrix(c(1,2),nrow=1),respect=FALSE))
+test1 <- admixtureGrob(x=leporinum.barplots.lea.K3,lev=indv.order,barplot.title="test")#
+test2 <- admixtureGrob(x=leporinum.barplots.lea.K3,lev=indv.order,barplot.title="test",style.gg=test.slim.gg)#
+plot(gridExtra::arrangeGrob(grobs=list(test1,test2),layout_matrix=matrix(c(1,2),nrow=1),respect=FALSE))
+plot(figure.gtab)
+tree  <- ape::read.tree(file="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/IQTREE/Calamaria-gervaisii_AllPops_AllSNPs_Partitioned.tre")
+tree2 <- tree
+tree3 <- root(tree2,outgroup=tree2$tip.label[grep("KU326403",tree2$tip.label)])
+tree3.gg <- ggtre::ggtree(tree3)
+tree3.gg <- ggtree::ggtree(tree3)
+tree3.df <- as.data.frame(tree3.gg$data)
+indv.order <- tree3.df[order(tree3.df[tree3.df[,"isTip"],"y"]),"label"]
+Calamaria.barplots.lea    <- admixturePlots(xdir="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/LEA/empirical/Calamaria-gervaisii_AllPops_BestSNP")
+statlog  <- read.table("/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/LEA/empirical/Calamaria-gervaisii_AllPops_BestSNP/result_snmf.entropyLog", header=T)
+kmax     <- max(statlog[,"K"])#
+statname <- "crossentropy"#
+kstat    <- sapply(X=1:kmax, FUN=function(x) {mean(statlog[which(statlog[,"K"]==x), statname])})#
+kstat.df <- data.frame(K=1:kmax, mean.stat=kstat)#
+bestK    <- kstat.df[which(kstat.df[,"mean.stat"]==min(kstat.df[,"mean.stat"])),"K"]
+bestK
+Calamaria.barplots.lea.K2 <- Calamaria.barplots.lea[[bestK-1]]
+Calamaria.barplots.lea.K2
+Calamaria.lea.gtab <- admixtureGrob(Calamaria.barplots.lea.K2,lev=indv.order,barplot.title="LEA K=2")
+xdir <- "/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/DAPC/Oxyrhabdium-leporinum_BestSNP/"#
+Calamaria.barplots.dapc  <- admixturePlots(xdir=xdir)
+statlog  <- read.table(list.files(xdir,pattern=".BIClog$",full.names=T))
+statname <- "BIC"
+kstat    <- sapply(X=1:kmax, FUN=function(x) {mean(statlog[which(statlog[,"K"]==x), statname])})
+colnames(statlog)
+statlog  <- read.table(list.files(xdir,pattern=".BIClog$",full.names=T),header=T)
+statname <- "BIC"
+kstat    <- sapply(X=1:kmax, FUN=function(x) {mean(statlog[which(statlog[,"K"]==x), statname])})
+kstat.df <- data.frame(K=1:kmax, mean.stat=kstat)#
+bestK    <- kstat.df[which(kstat.df[,"mean.stat"]==min(kstat.df[,"mean.stat"])),"K"]
+bestK
+Calamaria.barplots.dapc.bestK <- Calamaria.barplots.dapc[[(bestK-1)]]
+Calamaria.dapc.gtab <- admixtureGrob(Calamaria.barplots.dapc.bestK,lev=indv.order,barplot.title="DAPC K=8")
+xdir <- "/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/DAPC/empirical/Calamaria-gervaisii_AllPops_BestSNP"#
+Calamaria.barplots.dapc  <- admixturePlots(xdir=xdir)
+statlog  <- read.table(list.files(xdir,pattern=".BIClog$",full.names=T),header=T)#
+statname <- "BIC"#
+kstat    <- sapply(X=1:kmax, FUN=function(x) {mean(statlog[which(statlog[,"K"]==x), statname])})#
+kstat.df <- data.frame(K=1:kmax, mean.stat=kstat)#
+bestK    <- kstat.df[which(kstat.df[,"mean.stat"]==min(kstat.df[,"mean.stat"])),"K"]
+Calamaria.barplots.dapc.bestK <- Calamaria.barplots.dapc[[(bestK-1)]]
+bestK
+Calamaria.dapc.gtab <- admixtureGrob(Calamaria.barplots.dapc.bestK,lev=indv.order,barplot.title=paste0("DAPC K=",bestK))
+Calamaria.dapc.gtab
+plot(Calamaria.dapc.gtab)
+xdir <- "/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/fastStructure/empirical/Calamaria-gervaisii_AllPops_BestSNP"#
+Calamaria.barplots.fs  <- admixturePlots(xdir=xdir)#
+statlog  <- read.table(list.files(xdir,pattern=".margLlog$",full.names=T),header=T)
+kmax     <- max(statlog[,"K"])#
+statname <- "MarginalLikelihood"#
+kstat    <- sapply(X=1:kmax, FUN=function(x) {mean(statlog[which(statlog[,"K"]==x), statname])})#
+kstat.df <- data.frame(K=1:kmax, mean.stat=kstat)
+bestK    <- kstat.df[which(kstat.df[,"mean.stat"]==max(kstat.df[,"mean.stat"])),"K"]
+Calamaria.barplots.fs.bestK <- Calamaria.barplots.dapc[[(bestK-1)]]#
+Calamaria.fs.gtab <- admixtureGrob(Calamaria.barplots.fs.bestK,lev=indv.order,barplot.title=paste0("fastStructure K=",bestK))
+bestK
+xdir <- "/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/STRUCTURE/structure_Calamaria-gervaisii"#
+Calamaria.barplots.structure  <- admixturePlots(xdir=xdir)
+qfiles  <- list.files(xdir, full.names=T, pattern="log_f$")
+qlist       <- pophelper::readQ(files=qfiles)#
+tr1         <- pophelper::tabulateQ(qlist)#
+sr1         <- pophelper::summariseQ(tr1)
+evStr.df    <- suppressWarnings(pophelper::evannoMethodStructure(sr1))
+bestK[[i]]	<- evStr.df[which(evStr.df[,statname]==max(evStr.df[,statname],na.rm=T))[1],"k"]
+statname
+statname    <- "deltaK"
+bestK	<- evStr.df[which(evStr.df[,statname]==max(evStr.df[,statname],na.rm=T))[1],"k"]
+bestK
+Calamaria.barplots.structure.bestK <- Calamaria.barplots.structure[[(bestK-1)]]#
+Calamaria.structure.gtab <- admixtureGrob(Calamaria.barplots.structure.bestK,lev=indv.order,barplot.title=paste0("fastStructure K=",bestK))
+tree3.grob <- ggplotGrob(tree3.gg)#
+tree3.gtab  <- gridExtra::arrangeGrob(tree3.grob,top="Calamaria gervaisii IQTREE partitioned")
+Calamaria.figure.gtab  <- gridExtra::arrangeGrob(grobs=list(tree3.gtab,Calamaria.structure.gtab,Calamaria.lea.gtab,Calamaria.fs.gtab,Calamaria.dapc.gtab),layout_matrix=matrix(c(1,1,1,2,3,4,5),nrow=1),respect=FALSE)#
+plot(Calamaria.figure.gtab)
+Calamaria.barplots.structure
+Calamaria.barplots.structure.bestK
+plot(Calamaria.figure.gtab)
+test  <- admixturePlots(xdir=xdir,20)
+test  <- admixturePlots(xdir=xdir,1:20)
+plot(test[[2]])
+plot(Calamaria.figure.gtab)
+tree  <- ape::read.tree("/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/IQTREE/Ahaetulla-prasina_AllPops_AllSNPs_Partitioned.tre")
+tree2 <- tree
+tree3 <- root(tree2,outgroup=tree2$tip.label[grep("KU337135",tree2$tip.label)])#
+tree3.gg <- ggtree::ggtree(tree3)#
+tree3.df <- as.data.frame(tree3.gg$data)
+indv.order <- tree3.df[order(tree3.df[tree3.df[,"isTip"],"y"]),"label"]
+Calamaria.tree.gtab  <-
+Calamaria.tree.gtab  <- tree3.gtab
+tree3.grob <- ggplotGrob(tree3.gg)
+Ahaetulla.tree.gtab  <- gridExtra::arrangeGrob(tree3.grob,top="Ahaetulla prasina IQTREE partitioned")
+plot(Ahaetulla.tree.gtab)
+tree   <- ape::read.tree("/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/IQTREE/Ahaetulla-prasina_AllPops_AllSNPs_Partitioned.tre")#
+#tree2 <- ape::drop.tip(tree,setdiff(tree$tip.label, barplot.df$indv))#
+tree2 <- tree#
+# root the tree; this step cant be automated entirely#
+tree3 <- ladderize(root(tree2,outgroup=tree2$tip.label[grep("KU337135",tree2$tip.label)]))#
+tree3.gg <- ggtree::ggtree(tree3)#
+tree3.df <- as.data.frame(tree3.gg$data)#
+## character vector of tip labels in the order they are plotted from bottom to top of the graphical window#
+indv.order <- tree3.df[order(tree3.df[tree3.df[,"isTip"],"y"]),"label"]#
+tree3.grob <- ggplotGrob(tree3.gg)#
+Ahaetulla.tree.gtab  <- gridExtra::arrangeGrob(tree3.grob,top="Ahaetulla prasina IQTREE partitioned")
+plot(Ahaetulla.tree.gtab)
+xdir <- "/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/LEA/empirical/Ahaetulla-prasina_AllPops_BestSNP"#
+Ahaetulla.barplots.lea    <- admixturePlots(xdir=xdir)#
+statlog  <- read.table(list.files(xdir,pattern=".entropyLog$",full.names=T),header=T)
+kmax     <- max(statlog[,"K"])#
+statname <- "crossentropy"#
+kstat    <- sapply(X=1:kmax, FUN=function(x) {mean(statlog[which(statlog[,"K"]==x), statname])})#
+kstat.df <- data.frame(K=1:kmax, mean.stat=kstat)#
+bestK    <- kstat.df[which(kstat.df[,"mean.stat"]==min(kstat.df[,"mean.stat"])),"K"]
+Ahaetulla.barplots.lea.bestK <- Ahaetulla.barplots.lea[[bestK-1]]#
+Ahaetulla.lea.gtab <- admixtureGrob(Ahaetulla.barplots.lea.bestK,lev=indv.order,barplot.title=paste0("LEA K=",bestK))
+bestK    <- kstat.df[which(kstat.df[,"mean.stat"]==min(kstat.df[,"mean.stat"])),"K"]
+bestK
+xdir <- "/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/DAPC/empirical/Ahaetulla-prasina_AllPops_BestSNP"#
+Ahaetulla.barplots.dapc  <- admixturePlots(xdir=xdir)#
+statlog  <- read.table(list.files(xdir,pattern=".BIClog$",full.names=T),header=T)#
+statname <- "BIC"#
+kstat    <- sapply(X=1:kmax, FUN=function(x) {mean(statlog[which(statlog[,"K"]==x), statname])})#
+kstat.df <- data.frame(K=1:kmax, mean.stat=kstat)#
+bestK    <- kstat.df[which(kstat.df[,"mean.stat"]==min(kstat.df[,"mean.stat"])),"K"]#
+Ahaetulla.barplots.dapc.bestK <- Ahaetulla.barplots.dapc[[(bestK-1)]]#
+Ahaetulla.dapc.gtab <- admixtureGrob(Ahaetulla.barplots.dapc.bestK,lev=indv.order,barplot.title=paste0("DAPC K=",bestK))
+xdir <- "/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/fastStructure/empirical/Ahaetulla-prasina_AllPops_BestSNP"#
+Ahaetulla.barplots.fs  <- admixturePlots(xdir=xdir)#
+statlog  <- read.table(list.files(xdir,pattern=".margLlog$",full.names=T),header=T)#
+kmax     <- max(statlog[,"K"])#
+statname <- "MarginalLikelihood"#
+kstat    <- sapply(X=1:kmax, FUN=function(x) {mean(statlog[which(statlog[,"K"]==x), statname])})#
+kstat.df <- data.frame(K=1:kmax, mean.stat=kstat)#
+bestK    <- kstat.df[which(kstat.df[,"mean.stat"]==max(kstat.df[,"mean.stat"])),"K"]#
+Ahaetulla.barplots.fs.bestK <- Ahaetulla.barplots.dapc[[(bestK-1)]]#
+Ahaetulla.fs.gtab <- admixtureGrob(Ahaetulla.barplots.fs.bestK,lev=indv.order,barplot.title=paste0("fastStructure K=",bestK))
+plot(Ahaetulla.fs.gtab)
+xdir <- "/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/STRUCTURE/structure_Ahaetulla-prasina_AllPops"#
 #
-					}#
-					# Area of the region of group 1 that does not intersect group 2 (for this pair of groups).#
-					if(is.null(grp.diff1)){#
-						diff1.area.temp <- 0#
-					} else {#
-						#diff1.area.temp <- attributes(attributes(attributes(grp.diff1)$"polygons"[[1]])[[1]][[1]])$area#
-						diff1.area.temp <- grp.diff1@polygons[[1]]@Polygons[[1]]@area#
-					}#
-					if(is.null(grp.diff2)){#
-						diff2.area.temp <- 0#
-					} else {#
-						#diff2.area.temp <- attributes(attributes(attributes(grp.diff2)$"polygons"[[1]])[[1]][[1]])$area#
-						diff2.area.temp <- grp.diff2@polygons[[1]]@Polygons[[1]]@area#
-					}#
-					#if(is.null(grp.diff)){#
-					#	diff.area.temp <- 0#
-					#} else {#
-					#	diff1.area.temp <- attributes(attributes(attributes(grp.diff)$"polygons"[[1]])[[1]][[1]])$area#
-					#	diff2.area.temp <- attributes(attributes(attributes(grp.diff)$"polygons"[[1]])[[1]][[2]])$area#
-					#}#
-					diff.area.temp  <- diff1.area.temp + diff2.area.temp#
-					ratio.temp <- int.area.temp/diff.area.temp#
-					#ratio.temp <- (int.area.temp/pairsum.temp)#
-					#grp.int <- raster::intersect(spgeom1=sample.area.sp[[1]],spgeom2=sample.area.sp[[2]])#
-					grp.int.area <- c(grp.int.area,int.area.temp)#
-					grp.sum.area <- c(grp.sum.area,pairsum.temp)#
-					grp.ratio    <- c(grp.ratio,ratio.temp)#
-				}#
-				area.df <- data.frame(group.i=grp.pairs[,1],group.j=grp.pairs[,2],area.intersection=grp.int.area,area.sumpair=grp.sum.area,area.intersection.sum.ratio=grp.ratio)#
-				# Check that the required conditions for interactions are met#
-				if(!all(area.df$area.intersection.sum.ratio >= interactions[1] & area.df$area.intersection.sum.ratio <= interactions[2])){#
-					# If conditions not met, try again from scratch. In future versions it would be useful to slide the polygons along their center axes to make minor adjustments.#
-					next#
-				}#
-			}#
-		}#
-		### Method using st_sample from SF package. Probably not as useful as the spsample from SP.#
-		if(FALSE){#
-			### Convert each SpatialPolygons object to an SF object#
-	#		sample.area.sf <- sf::st_as_sf(sample.area.sp)#
-			grp.areas.sf <- lapply(X=1:n.grp,FUN=function(x){sf::st_as_sf(grp.areas.sp[[x]])})#
-			### Sample within each area. If points must be over land, sample four times as many points as requested by 'size' argument.#
-			if(over.land){#
-				nsamp <- (grp.sizes*4)#
-				samples.sf.temp  <- lapply(X=1:n.grp,FUN=function(x){sf::st_sample(x=grp.areas.sf[[x]], size= nsamp[x])})#
-			} else {#
-				samples.sf.temp  <- lapply(X=1:n.grp,FUN=function(x) {sf::st_sample(x= grp.areas.sf[[x]],size=grp.sizes[x])})#
-			}#
-			### Hold sampled coordinates as a list of data matrices#
-			samples.mat.temp <- lapply(X=1:n.grp,FUN=function(x){sf::st_coordinates(samples.sf.temp[[x]])})#
-		}#
-		### Method using spsample from SP package.#
-		if(over.land){#
-			nsamp <- (grp.sizes*4)#
-			samples.sp.temp  <- lapply(X=1:n.grp,FUN=function(x){sp::spsample(x=grp.areas.sp[[x]], n= nsamp[x], type="random")})#
-		} else {#
-			samples.sp.temp  <- lapply(X=1:n.grp,FUN=function(x) {sp::spsample(x= grp.areas.sp[[x]],n=grp.sizes[x], type="random")})#
-		}#
-		samples.mat.temp <- lapply(X=1:n.grp,FUN=function(x){sp::coordinates(samples.sp.temp[[x]])})#
-		### Hold sampled coordinates as a list of data frames, and include a column in each data frame to indicate group assignment#
-		samples.df.temp <- do.call(rbind,lapply(X=1:n.grp,FUN=function(x){data.frame(X=samples.mat.temp[[x]][,1],Y=samples.mat.temp[[x]][,2],group=x)}))#
-		# Filtering samples outside of 'wnd'; 1=sample is within wnd; NA=sample is outside of wnd#
-		samples.in.wnd <- unlist(lapply(1:n.grp,function(x) over(samples.sp.temp[[x]],wnd.sp)))#
-		if(any(samples.in.wnd)==1){#
-			samples.df.temp <- samples.df.temp[which(samples.in.wnd==1),]#
-		}#
-		### Hold sampled coordinates as a list of data frames, and include a column in each data frame to indicate group assignment#
-#		samples.df.temp <- lapply(X=1:n.grp,FUN=function(x){data.frame(X=samples.mat.temp[[x]][,1],Y=samples.mat.temp[[x]][,2],group=x)})#
-		####### PAUSED HERE ###########
-		# ggplot2::ggplot(data = world.land) + ggplot2::geom_sf() + ggplot2::theme_classic() + ggplot2::geom_point(data = samples.df.temp, ggplot2::aes(x = X, y = Y), size = 2, shape = 21, fill = "darkred") # + coord_sf(xlim = c(-90, -78), ylim = c(24.5, 40), expand = FALSE)#
-		if(over.land){#
-			### Get subset of sampled coordinates that fall on land#
-			#samples.temp <- lapply(X=1:n.grp,FUN=function(x){points.on.land(x=samples.mat.temp[[x]])})#
-			# filtering samples that are not on land#
-			samples.temp <- points.on.land(samples.df.temp)#
-		#	samples.temp <- lapply(X=1:n.grp,FUN=function(x){points.on.land(x=samples.df.temp[[x]])})#
-			#samples.land.temp <- points.on.land(x=samples.df.temp)#
-		} else {#
-			samples.temp           <- samples.df.temp#
-			# colnames(samples.temp) <- c("longitude","latitude")#
-		}#
-		# Number of points sampled for each group after filtering points#
-	#	n.grp.pass  <- table(samples.temp[,"group"])#
-		n.grp.pass  <- sapply(X=1:n.grp, FUN=function(x) length(grep(x,samples.temp[,"group"])))#
-		#n.grp.pass  <- sapply(samples.temp,nrow)#
-		#sapply(n.grp.pass,funct)#
-		if(all(n.grp.pass >= grp.sizes)){#
-			PASS=TRUE#
-		} else {#
-			PASS=FALSE#
-		}#
-		# result.temp <- rbind(result.temp,samples.temp)#
-	}
-wnd.sp
-plot(wnd.sp)
-grp.scaler.start <- grp.scaler#
-	#result.temp        <- data.frame(NULL)#
-	PASS=FALSE#
-	miter <- 100#
-	ctr   <- 0
-if(length(samplesize)==1){#
-		if((n.grp*min.grp.size) > samplesize){#
-			stop("Total sample size 'samplesize' must be greater than the number of groups 'n.grp' times minimum group size 'min.grp.size'.",call.=FALSE)#
-		}#
-	} else {#
-		if(length(samplesize)!=n.grp){#
-			stop("If 'samplesize' is a numerical vector, then it must have a length equal to the number of groups 'n.grp'.",call.=FALSE)#
-		}#
-	}
-wnd <- Luzon.sp
-if(is(wnd,"matrix")){#
-			stop("not yet implemented")#
-			### in the future, each row will describe the bounding box of a group#
-		} else {#
-			if(is(wnd,"SpatialPolygons")){#
-				if(FALSE){#
-					stop("not yet implemented")#
-					### In the future, a spatial polygons object can be supplied#
-					world.land.sp    <- rnaturalearth::ne_countries(scale=110, returnclass="sp")#
-					ph.land10.sp     <- world.land10.sp[which(world.land10.sp[,"sovereignt"][[1]]=="Philippines"),]#
-					ph.island.areas  <- sapply(X=1:length(ph.land10.sp@polygons[[1]]@Polygons),FUN=function(x){ph.land10.sp@polygons[[1]]@Polygons[[x]]@area})#
-					Luzon.polygon    <- ph.land10.sp@polygons[[1]]@Polygons[[which(ph.island.areas == max(ph.island.areas))]]#
-					Luzon.sp         <- sp::SpatialPolygons(list(sp::Polygons(list(Luzon.polygon),1)))#
-					# Would set 'wnd' argument to Luzon.sp#
-					wnd <- Luzon.sp#
-					# wnd.sp is simply wnd#
-				}#
-				wnd.sp <- wnd#
-				raster::crs(wnd.sp)  <- sp::CRS("EPSG:4326")#
-				wnd.area             <- wnd.sp@polygons[[1]]@Polygons[[1]]@area#
-				regionsize.dd0       <- (regionsize*wnd.area)#
-				regionsize.dd        <- (regionsize.dd0*0.25)#
-			} else {#
-			if(is(wnd,"numeric")){#
-				# rectangular SpatialPolygons object with extent formed by 'wnd' argument.#
-				wnd.sp <- as(raster::extent(wnd), "SpatialPolygons")#
-				# area of the region bounded by 'wnd', in decimal degrees#
-				wnd.sp2 <- wnd.sp#
-				#sp::proj4string(wnd.sp2) <- sp::CRS("+proj=longlat +datum=WGS84")#
-				raster::crs(wnd.sp2) <- sp::CRS("EPSG:4326")#
-				#wnd.area <- attributes(attributes(wnd.sp2)$polygons[[1]])$area#
-				wnd.area <- wnd.sp2@polygons[[1]]@Polygons[[1]]@area#
-				# area of region spanning all group sampling areas, in decimal degrees#
-				regionsize.dd0 <- (regionsize*wnd.area)#
-				regionsize.dd  <- (regionsize.dd0*0.25)#
-			}#
-		}#
-	}
-plot(wnd.sp)
-!PASS
-ctr <- ctr + 1#
-		if(ctr > miter){#
-			stop(paste("after",miter,"attemps, failed to find points that pass conditions. ctr=",ctr,"ctr2=",ctr2,"; grp.scaler=",grp.scaler))#
-		}#
-		#if(ctr %in% seq(from=10,to=miter,by=10)){#
-		if(ctr>1){#
-			grp.scaler <- (grp.scaler*0.95)#
-		}#
-		### Clear the data frame if too few points on land during previous attempt#
-		#result.temp         <- data.frame(NULL)#
-		initial <- FALSE#
-		### Find group centers that pass conditions#
-		ctr2 <- 0
-!initial
-ctr2 <- ctr2 + 1#
-			if(ctr2 > (miter/10)){#
-				break#
-				# stop(paste("failed to initialize after",miter,"attemps. ctr=",ctr,"ctr2=",ctr2))#
-			}#
-			if(ctr2>1){#
-				grp.scaler <- (grp.scaler*0.99)#
-			}#
-			# Random point within wnd.sp to determine subregion within which group centers will occur#
-			center.sp <- sp::spsample(wnd.sp,n=1,type="random")#
-			# Length two vector with "x" and "y" entries from sample.center, to pass to spCircle#
-			center.xy <- c(sp::coordinates(center.sp)); names(center.xy) <- c("x","y")#
-			# Create a circular polygon centered at sample center; in this case #
-			# sample.area.sp <- sampSurf::spCircle(radius=sqrt((regionsize/pi)),centerPoint=center.xy)[[1]]#
-			# regionsize2 <- (10^regionsize)#
-			# regionsize2 <- regionsize.dd#
-			#if(n.grp==1){#
-			#regionsize.dd <- (regionsize.dd*grp.scaler*0.5)#
-			#}#
-			sample.area.sp <- sampSurf::spCircle(radius=sqrt((regionsize.dd/pi)), centerPoint=center.xy)[[1]]#
-			#sample.area.sp.area <- attributes(attributes(attributes(sample.area.sp)$polygons[[1]])[[1]][[1]])$area
-sp::spsample(wnd.sp,n=1,type="random")
-plot(center.sp,add=T)
-center.sp
-proj4string(wnd.sp)
-crs(wnd.sp)
-CRS(wnd.sp)
-sp::CRS(wnd.sp)
-sp::CRS("EPSG:4326")
-raster::crs(wnd.sp)  <- sp::CRS("EPSG:4326")
-proj4string(wnd.sp)
-wkt(wnd.sp)
-CRS(wnd.sp)
-class(wnd.sp)
-center.sp <- sp::spsample(wnd.sp, n=1, type="random")#
-			# Length two vector with "x" and "y" entries from sample.center, to pass to spCircle#
-			center.xy <- c(sp::coordinates(center.sp)); names(center.xy) <- c("x","y")#
-			# Create a circular polygon centered at sample center; in this case #
-			# sample.area.sp <- sampSurf::spCircle(radius=sqrt((regionsize/pi)),centerPoint=center.xy)[[1]]#
-			# regionsize2 <- (10^regionsize)#
-			# regionsize2 <- regionsize.dd#
-			#if(n.grp==1){#
-			#regionsize.dd <- (regionsize.dd*grp.scaler*0.5)#
-			#}#
-			sample.area.sp <- sampSurf::spCircle(radius=sqrt((regionsize.dd/pi)), centerPoint=center.xy)[[1]]
-plot(center.sp)
-plot(wnd.sp)
-plot(center.sp,add=T)
-n.grp>1
-grp.pts <- sp::spsample(sample.area.sp,n=n.grp,type="random")#
-				# coordinates extracted from grp.pts#
-				grp.pts.mat <- sp::coordinates(grp.pts)#
-				colnames(grp.pts.mat) <- c("x","y")
-grp.areas <- (regionsize.dd*(grp.area.weights/(sum(grp.area.weights)))*grp.scaler)#
-				# create polygons centered at grp.pts, from which each groups points will be drawn. First need to determine group sizes...#
-				grp.areas.sp <- lapply(X=1:n.grp, FUN=function(x){sampSurf::spCircle(radius=sqrt((grp.areas/pi))[x],centerPoint=c(grp.pts.mat[x,]))[[1]]})#
-				# Distance between group centers. Not sure if this is necessary.
-grp.center.dists0 <- geodist::geodist(grp.pts.mat,measure="geodesic")#
-				grp.center.dists  <- grp.center.dists0[lower.tri(grp.center.dists0)]
-grp.pts
-grp.areas
-grp.center.dists0
-plot(grp.pts,add=T,col="red")
-sample.area.sp
-plot(sample.area.sp,add=T)
-regionsize.dd        <- (regionsize.dd0)
-regionsize.dd
-center.sp <- sp::spsample(wnd.sp, n=1, type="random")#
-			# Length two vector with "x" and "y" entries from sample.center, to pass to spCircle#
-			center.xy <- c(sp::coordinates(center.sp)); names(center.xy) <- c("x","y")#
-			# Create a circular polygon centered at sample center; in this case #
-			# sample.area.sp <- sampSurf::spCircle(radius=sqrt((regionsize/pi)),centerPoint=center.xy)[[1]]#
-			# regionsize2 <- (10^regionsize)#
-			# regionsize2 <- regionsize.dd#
-			#if(n.grp==1){#
-			#regionsize.dd <- (regionsize.dd*grp.scaler*0.5)#
-			#}#
-			sample.area.sp <- sampSurf::spCircle(radius=sqrt((regionsize.dd/pi)), centerPoint=center.xy)[[1]]
-plot(sample.area.sp,add=T)
-if(n.grp>1){#
-				# Sample group sampling-center locations from within sample.area.sp#
-				grp.pts <- sp::spsample(sample.area.sp,n=n.grp,type="random")#
-				# coordinates extracted from grp.pts#
-				grp.pts.mat <- sp::coordinates(grp.pts)#
-				colnames(grp.pts.mat) <- c("x","y")#
-				grp.areas <- (regionsize.dd*(grp.area.weights/(sum(grp.area.weights)))*grp.scaler)#
-				# create polygons centered at grp.pts, from which each groups points will be drawn. First need to determine group sizes...#
-				grp.areas.sp <- lapply(X=1:n.grp, FUN=function(x){sampSurf::spCircle(radius=sqrt((grp.areas/pi))[x],centerPoint=c(grp.pts.mat[x,]))[[1]]})#
-				# Distance between group centers. Not sure if this is necessary.#
-				# geodist(grp.pts.mat,measure="geodesic")#
-				grp.center.dists0 <- geodist::geodist(grp.pts.mat,measure="geodesic")#
-				grp.center.dists  <- grp.center.dists0[lower.tri(grp.center.dists0)]#
-				# check that each group centers occur over land, if over.land is true#
-			} else {#
-				grp.pts.mat  <- matrix(center.xy,nrow=1,dimnames=list(c(NULL),c("x","y")))#
-				grp.areas.sp <- list(sample.area.sp)#
-			}
-if(over.land){#
-				if(length(points.on.land(x=grp.pts.mat)[,1]) < n.grp){#
-				#if(length(points.on.land(x=sp::coordinates(grp.pts))[,1]) < n.grp){#
-					next#
-				}#
-			}
-length(points.on.land(x=grp.pts.mat)[,1]) < n.grp
-ctr2 <- ctr2 + 1#
-			if(ctr2 > (miter/10)){#
-				break#
-				# stop(paste("failed to initialize after",miter,"attemps. ctr=",ctr,"ctr2=",ctr2))#
-			}#
-			if(ctr2>1){#
-				grp.scaler <- (grp.scaler*0.99)#
-			}#
-			# Random point within wnd.sp to determine subregion within which group centers will occur#
-			center.sp <- sp::spsample(wnd.sp, n=1, type="random")#
-			# Length two vector with "x" and "y" entries from sample.center, to pass to spCircle#
-			center.xy <- c(sp::coordinates(center.sp)); names(center.xy) <- c("x","y")#
-			# Create a circular polygon centered at sample center; in this case #
-			# sample.area.sp <- sampSurf::spCircle(radius=sqrt((regionsize/pi)),centerPoint=center.xy)[[1]]#
-			# regionsize2 <- (10^regionsize)#
-			# regionsize2 <- regionsize.dd#
-			#if(n.grp==1){#
-			#regionsize.dd <- (regionsize.dd*grp.scaler*0.5)#
-			#}#
-			sample.area.sp <- sampSurf::spCircle(radius=sqrt((regionsize.dd/pi)), centerPoint=center.xy)[[1]]#
-			#sample.area.sp.area <- attributes(attributes(attributes(sample.area.sp)$polygons[[1]])[[1]][[1]])$area#
-			# Check if entire sample.area.sp is within window defined by 'wnd' argument#
-	#		area.wnd.diff <- rgeos::gDifference(spgeom1=sample.area.sp,spgeom2=wnd.sp)#
-	#		# If area.wnd.diff is not NULL, then part of 'sample.area.sp' falls outside of the sampling window.#
-	#		if(!is.null(area.wnd.diff)){#
-	#			next#
-	#		}#
-			if(n.grp>1){#
-				# Sample group sampling-center locations from within sample.area.sp#
-				grp.pts <- sp::spsample(sample.area.sp,n=n.grp,type="random")#
-				# coordinates extracted from grp.pts#
-				grp.pts.mat <- sp::coordinates(grp.pts)#
-				colnames(grp.pts.mat) <- c("x","y")#
-				grp.areas <- (regionsize.dd*(grp.area.weights/(sum(grp.area.weights)))*grp.scaler)#
-				# create polygons centered at grp.pts, from which each groups points will be drawn. First need to determine group sizes...#
-				grp.areas.sp <- lapply(X=1:n.grp, FUN=function(x){sampSurf::spCircle(radius=sqrt((grp.areas/pi))[x],centerPoint=c(grp.pts.mat[x,]))[[1]]})#
-				# Distance between group centers. Not sure if this is necessary.#
-				# geodist(grp.pts.mat,measure="geodesic")#
-				grp.center.dists0 <- geodist::geodist(grp.pts.mat,measure="geodesic")#
-				grp.center.dists  <- grp.center.dists0[lower.tri(grp.center.dists0)]#
-				# check that each group centers occur over land, if over.land is true#
-			} else {#
-				grp.pts.mat  <- matrix(center.xy,nrow=1,dimnames=list(c(NULL),c("x","y")))#
-				grp.areas.sp <- list(sample.area.sp)#
-			}
-length(points.on.land(x=grp.pts.mat)[,1]) < n.grp
-plot(grp.pts,add=T,col="blue")
-plot(sample.area.sp,add=T,col="blue")
-if(length(samplesize)==1){#
-			if(n.grp==1){#
-				grp.sizes <- samplesize#
-			} else {#
-				# Initial values for entering while loop#
-				grp.sizes <- rep(0,n.grp)#
-				while(any(grp.sizes < min.grp.size)){#
-					grp.sizes  <- c(table(sample(x=c(1:n.grp),size=samplesize,prob=grp.n.weights,replace=TRUE)))#
-					# verify that at least each group has at least min.grp.size.#
-				}#
-			}#
-		} else {#
-			grp.sizes <- samplesize#
-		}
-grp.sizes
-!is.null(interactions) & n.grp > 1
-!(interactions[1]==0 & interactions[2]==1)
-polygons.list <- lapply(X=1:n.grp, function(x) grp.areas.sp[[x]]@polygons[[1]]@Polygons[[1]])#
-				# All possible pairwise group comparisons#
-				grp.pairs <- do.call(rbind,pset(1:n.grp,2,2))#
-				# Calculate intersect area yet and sum areas for each pair of groups. (Doesnt work yet).#
-				grp.int.area <- grp.sum.area <- grp.ratio <- c()
-nrow(grp.pairs)
-i=1
-polygon.pair   <- polygons.list[c(grp.pairs[i,1],grp.pairs[i,2])]#
-					grp1.area.temp <- polygon.pair[[1]]@area#
-					grp2.area.temp <- polygon.pair[[2]]@area#
-					pairsum.temp   <- sum(c(grp1.area.temp, grp2.area.temp))
-grp.int  <- rgeos::gIntersection(spgeom1=grp.areas.sp[[grp.pairs[i,1]]],spgeom2=grp.areas.sp[[grp.pairs[i,2]]])#
-					#Nonintersecting portions of areas 1 and 2 (faster than getting diff of each in the other and then adding)#
-					#grp.diff <- rgeos::gSymdifference(spgeom1=grp.areas.sp[[grp.pairs[i,1]]],spgeom2=grp.areas.sp[[grp.pairs[i,2]]])#
-					# returns a spatial polygons object with the non-intersecting portions of the group pair polygons each as their own polygons. If no overlap the returned polygons are the same the input polygons.#
-					grp.diff1 <- rgeos::gDifference(spgeom1=grp.areas.sp[[grp.pairs[i,1]]],spgeom2=grp.areas.sp[[grp.pairs[i,2]]])#
-					grp.diff2 <- rgeos::gDifference(spgeom1=grp.areas.sp[[grp.pairs[i,2]]],spgeom2=grp.areas.sp[[grp.pairs[i,1]]])#
-					if(is.null(grp.int)){#
-						int.area.temp <- 0#
-					} else {#
-						#int.area.temp <- attributes(attributes(attributes(grp.int)$"polygons"[[1]])[[1]][[1]])$area#
-						int.area.temp <- grp.int@polygons[[1]]@Polygons[[1]]@area#
-					}#
-					# Area of the region of group 1 that does not intersect group 2 (for this pair of groups).#
-					if(is.null(grp.diff1)){#
-						diff1.area.temp <- 0#
-					} else {#
-						#diff1.area.temp <- attributes(attributes(attributes(grp.diff1)$"polygons"[[1]])[[1]][[1]])$area#
-						diff1.area.temp <- grp.diff1@polygons[[1]]@Polygons[[1]]@area#
-					}#
-					if(is.null(grp.diff2)){#
-						diff2.area.temp <- 0#
-					} else {#
-						#diff2.area.temp <- attributes(attributes(attributes(grp.diff2)$"polygons"[[1]])[[1]][[1]])$area#
-						diff2.area.temp <- grp.diff2@polygons[[1]]@Polygons[[1]]@area#
-					}
-diff.area.temp  <- diff1.area.temp + diff2.area.temp#
-					ratio.temp <- int.area.temp/diff.area.temp#
-					#ratio.temp <- (int.area.temp/pairsum.temp)#
-					#grp.int <- raster::intersect(spgeom1=sample.area.sp[[1]],spgeom2=sample.area.sp[[2]])#
-					grp.int.area <- c(grp.int.area,int.area.temp)#
-					grp.sum.area <- c(grp.sum.area,pairsum.temp)#
-					grp.ratio    <- c(grp.ratio,ratio.temp)
-area.df <- data.frame(group.i=grp.pairs[,1],group.j=grp.pairs[,2],area.intersection=grp.int.area,area.sumpair=grp.sum.area,area.intersection.sum.ratio=grp.ratio)
-!all(area.df$area.intersection.sum.ratio >= interactions[1] & area.df$area.intersection.sum.ratio <= interactions[2])
-nsamp <- (grp.sizes*4)
-samples.sp.temp  <- lapply(X=1:n.grp,FUN=function(x){sp::spsample(x=grp.areas.sp[[x]], n= nsamp[x], type="random")})
-samples.mat.temp <- lapply(X=1:n.grp,FUN=function(x){sp::coordinates(samples.sp.temp[[x]])})
-samples.df.temp <- do.call(rbind,lapply(X=1:n.grp,FUN=function(x){data.frame(X=samples.mat.temp[[x]][,1],Y=samples.mat.temp[[x]][,2],group=x)}))
-samples.in.wnd <- unlist(lapply(1:n.grp,function(x) over(samples.sp.temp[[x]],wnd.sp)))
-CRS(wnd.sp)
-class(wnd.sp)
-CRS(samples.sp.temp)
-identicalCRS(samples.sp.temp, wnd.sp)
-proj4string(samples.sp.temp)
-class(samples.sp.temp)
-samples.sp.temp
-identicalCRS(samples.sp.temp[[1]], wnd.sp)
-identicalCRS(samples.sp.temp[[2]], wnd.sp)
-identicalCRS(wnd.sp,wnd.sp)
-CRS(wnd.sp)
-sp::CRS(wnd.sp)
-sp::CRS(list(wnd.sp))
-plot(wnd.sp)
-class(wnd.sp)
-test <- <- as(raster::extent(c(-180,180,-90,90)), "SpatialPolygons")
-test <- as(raster::extent(c(-180,180,-90,90)), "SpatialPolygons")
-CRS(test)
-raster::crs(test) <- sp::CRS("EPSG:4326")
-CRS(test)
-test
-crs(test)
-sp::crs(test)
-raster::crs(test)
-raster::crs(wnd.sp)
-plot(samples.sp.temp[[1]],add=T)
-raster::crs(samples.sp.temp)
-raster::crs(samples.sp.temp) <- sp::CRS("EPSG:4326")
-class(samples.sp.temp)
-for(i in 1:length(samples.sp.temp)){#
-				raster::crs(samples.sp.temp[[i]]) <- sp::CRS("EPSG:4326")#
-			}
-samples.mat.temp <- lapply(X=1:n.grp,FUN=function(x){sp::coordinates(samples.sp.temp[[x]])})#
-		### Hold sampled coordinates as a list of data frames, and include a column in each data frame to indicate group assignment#
-		samples.df.temp <- do.call(rbind,lapply(X=1:n.grp,FUN=function(x){data.frame(X=samples.mat.temp[[x]][,1],Y=samples.mat.temp[[x]][,2],group=x)}))
-samples.in.wnd <- unlist(lapply(1:n.grp,function(x) over(samples.sp.temp[[x]],wnd.sp)))
-if(any(samples.in.wnd)==1){#
-			samples.df.temp <- samples.df.temp[which(samples.in.wnd==1),]#
-		}
-samples.temp <- points.on.land(samples.df.temp)
-n.grp.pass  <- sapply(X=1:n.grp, FUN=function(x) length(grep(x,samples.temp[,"group"])))
-all(n.grp.pass >= grp.sizes)
-result <- samples.temp[unlist(lapply(1:n.grp,function(x) grep(x,samples.temp[,"group"])[1:grp.sizes[x]])),]
-mode(result[,"group"]) <- "character"#
-	# Convert data frame to spatial points object.#
-	result.sp <- sp::SpatialPoints(result[,c(1,2)])#
-	# Minimum convex hull polygon of all points.#
-	mcp.sp         <- suppressWarnings(adehabitatHR::mcp(result.sp,percent=100))#
-	#mcp.sp.area <- attributes(attributes(attributes(mcp.sp)$"polygons"[[1]])[[1]][[1]])$area#
-	mcp.sp.area    <- mcp.sp@polygons[[1]]@Polygons[[1]]@area#
-	absolute.areas <- c(windowarea=wnd.area,regionsize.dd0=regionsize.dd0,regionsize.dd=regionsize.dd,min.convex.hull.result=mcp.sp.area)#
-	relative.areas <- round((absolute.areas/wnd.area),digits=4)#
-	areas.df       <- data.frame(absolute =absolute.areas, relative.to.wnd=relative.areas)
-world.land     <- rnaturalearth::ne_countries(scale=110, returnclass="sf")#
-		world.land10   <- rnaturalearth::ne_countries(scale=10, returnclass="sf")#
-		result.df2plot <- result#
-		xdist <- geodist::geodist(result.df2plot[order(result.df2plot[,1]),][c(1,nrow(result.df2plot)),1:2],measure="geodesic",sequential=T)#
-		ydist <- geodist::geodist(result.df2plot[order(result.df2plot[,2]),][c(1,nrow(result.df2plot)),1:2],measure="geodesic",sequential=T)#
-		plot.margin <- which(c(xdist,ydist)==max(c(xdist,ydist)))#
-		zoommaparea.km <- (xdist/1000)*(ydist/1000)#
-		if(zoommaparea.km <10e6){#
-			zoom.map <- world.land10#
-		} else {#
-			zoom.map <- world.land#
-		}
-spbb   <- sp::bbox(result.sp)#
-		spbb2  <- apply(spbb,MARGIN=1,FUN=rangeBuffer,f=0.1)#
-		dfbb   <- data.frame(x1=spbb[1,1], x2=spbb[1,2], y1=spbb[2,1], y2=spbb[2,2])#
-		ggrect <- ggplot2::geom_rect(data=dfbb, mapping=ggplot2::aes(xmin=x1, xmax=x2, ymin=y1, ymax=y2),fill="black",color="black",alpha=0.1)#
-		zoom.plot   <- ggplot2::ggplot(data = zoom.map) + ggplot2::geom_sf() + ggplot2::theme_classic() + ggplot2::geom_point(data = result.df2plot, ggplot2::aes(x = X, y = Y, fill=group), size = 2, shape = 21) + ggplot2::coord_sf(xlim =range(result.df2plot[,1]),ylim = range(result.df2plot[,2])) + ggplot2::theme(panel.border = ggplot2::element_rect(color = "black", fill=NA, size=1)) + ggplot2::theme(legend.position = "none") + ggplot2::xlab("longitude") + ggplot2::ylab("latitude")#
-		global.plot <- ggplot2::ggplot(data = world.land) + ggplot2::geom_sf() + ggplot2::theme_classic() + ggplot2::geom_point(data = result.df2plot, ggplot2::aes(x = X, y = Y, fill=group), size = 2, shape = 21) + ggplot2::theme(panel.border = ggplot2::element_rect(color = "black", fill=NA, size=1)) + ggplot2::theme(axis.title.y = ggplot2::element_blank(), axis.title.x = ggplot2::element_blank()) + ggrect
-grobs.list <- list(ggplot2::ggplotGrob(global.plot),ggplot2::ggplotGrob(zoom.plot))#
-		if(plot.margin==2){#
-			bothmaps   <- gridExtra::arrangeGrob(grobs=grobs.list, layout_matrix=matrix(c(1,1,2),ncol=3))#
-		} else {#
-			bothmaps   <- gridExtra::arrangeGrob(grobs=grobs.list, layout_matrix=matrix(c(1,2),ncol=1))#
-		}
-grid::grid.newpage()#
-		grid::grid.draw(bothmaps)
-devtools::document()
-test <- rcoords(regionsize=1,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP")
-test <- rcoords(regionsize=1,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP")
-test <- rcoords(regionsize=2,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP")
-test <- rcoords(regionsize=2,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP")
-test <- rcoords(regionsize=2,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP")
-devtools::document()
-test <- rcoords(regionsize=2,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP")
-test <- rcoords(regionsize=3,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP")
-test <- rcoords(regionsize=5,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP")
-test <- rcoords(regionsize=4,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP")
-any(c(1,1,1)==1)
-any(c(1,1,1))==1
-devtools::document()
-test <- rcoords(regionsize=5,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP")
-any(samples.in.wnd == 1)
-devtools::document()
-test <- rcoords(regionsize=5,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP")
-test
-any(samples.in.wnd == 1)
-test <- rcoords(regionsize=5,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP")
-any(samples.in.wnd == 1)
-test <- rcoords(regionsize=5,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP")
-any(samples.in.wnd == 1)
-devtools::document()
-test <- rcoords(regionsize=5,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP")
-test <- rcoords(regionsize=5,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP")
-test <- rcoords(regionsize=5,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP")
-test <- rcoords(regionsize=5,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP")
-test <- rcoords(regionsize=10,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP")
-test <- rcoords(regionsize=10,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP")
-test0 <- rep(NA,10)
-any(test0==1)
-any(test0)==1
-any(test0==1,na.rm=T)
-devtools::document()
-test <- rcoords(regionsize=10,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP")
-test <- rcoords(regionsize=10,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP")
-test <- rcoords(regionsize=10,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP")
-test <- rcoords(regionsize=10,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP")
-test <- rcoords(regionsize=20,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP")
-devtools::document()
-test <- rcoords(regionsize=20,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP")
-sample.area.sp <- wnd.sp
-grp.pts <- sp::spsample(sample.area.sp,n=2,type="random")
-devtools::document()
-test <- rcoords(regionsize=20,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP")
-devtools::document()
-test <- rcoords(regionsize=20,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP")
-test <- rcoords(regionsize=20,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP",grp.area.weights=c(5,1))
-test <- rcoords(regionsize=20,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP",grp.area.weights=c(5,1),interactions=c(0,0.5))
-test <- rcoords(regionsize=20,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP",grp.area.weights=c(10,1),interactions=c(0,0.5))
-test <- rcoords(regionsize=20,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP",grp.area.weights=c(10,1),interactions=c(0,0.2))
-test <- rcoords(regionsize=20,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP",grp.area.weights=c(10,1),interactions=c(0,0.05))
-test <- rcoords(regionsize=20,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP",grp.area.weights=c(20,1),interactions=c(0,0.05))
-test <- rcoords(regionsize=20,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP",grp.area.weights=c(20,1),interactions=c(0,0))
-test <- rcoords(regionsize=20,samplesize=100,n.grp=,wnd=Luzon.sp,show.plot=T,return.as="SP",grp.area.weights=c(20,1),grp.n.weights=c(20,1),interactions=c(0,0))
-test <- rcoords(regionsize=20,samplesize=100,n.grp=,wnd=Luzon.sp,show.plot=T,return.as="SP",grp.area.weights=c(20,2),grp.n.weights=c(20,1),interactions=c(0,0))
-test <- rcoords(regionsize=20,samplesize=100,n.grp=,wnd=Luzon.sp,show.plot=T,return.as="SP",grp.area.weights=c(1,1),grp.n.weights=c(20,1),interactions=c(0,0))
-test <- rcoords(regionsize=20,samplesize=100,n.grp=,wnd=Luzon.sp,show.plot=T,return.as="SP",grp.area.weights=c(20,1),grp.n.weights=c(1,1),interactions=c(0,0))
-test <- rcoords(regionsize=20,samplesize=100,n.grp=,wnd=Luzon.sp,show.plot=T,return.as="SP",grp.area.weights=c(20,1),grp.n.weights=NULL,interactions=c(0,0))
-devtools::document()
-test <- rcoords(regionsize=20,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP",grp.area.weights=c(20,1),interactions=c(0,0))
-test <- rcoords(regionsize=20,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP",grp.area.weights=c(20,1),interactions=c(0,0))
-test <- rcoords(regionsize=20,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP",grp.area.weights=c(20,1),interactions=c(0,0))
-test <- rcoords(regionsize=20,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP",grp.area.weights=c(20,1),interactions=c(0,0),grp.n.weights=NULL)
-test <- rcoords(regionsize=20,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP",grp.area.weights=c(20,1),interactions=c(0,0),grp.n.weights=NULL)
-test <- rcoords(regionsize=20,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP",grp.area.weights=c(20,1),interactions=c(0,0),grp.n.weights=c(10,5))
-test <- rcoords(regionsize=20,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP",grp.area.weights=c(20,1),interactions=c(0,0),grp.n.weights=c(10,5))
-test <- rcoords(regionsize=20,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP",grp.area.weights=c(20,1),interactions=c(0,0),grp.n.weights=c(10,5))
-devtools::document()
-test <- rcoords(regionsize=20,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP",grp.area.weights=c(20,1),interactions=c(0,0),grp.n.weights=c(10,5))
-test <- rcoords(regionsize=20,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP",grp.area.weights=c(20,1),interactions=c(0,0),grp.n.weights=c(10,5))
-test <- rcoords(regionsize=20,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP",grp.area.weights=c(20,1),interactions=c(0.01,0.3),grp.n.weights=c(10,5))
-test <- rcoords(regionsize=20,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP",grp.area.weights=c(20,1),interactions=c(0.01,0.3),grp.n.weights=c(10,5))
-test <- rcoords(regionsize=20,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP",grp.area.weights=c(30,1),interactions=c(0.01,0.1),grp.n.weights=c(10,5))
-test <- rcoords(regionsize=20,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP",grp.area.weights=c(30,1),interactions=c(0,0.1),grp.n.weights=c(10,5))
-test <- rcoords(regionsize=20,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP",grp.area.weights=c(30,1),interactions=c(0,0),grp.n.weights=c(10,5))
-test <- rcoords(regionsize=20,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP",grp.area.weights=c(30,1),interactions=c(0,0),grp.n.weights=c(15,5))
-test <- rcoords(regionsize=20,samplesize=100,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP",grp.area.weights=c(30,1),interactions=c(0,0),grp.n.weights=c(30,1))
-test <- rcoords(regionsize=20,samplesize=500,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP",grp.area.weights=c(30,1),interactions=c(0,0),grp.n.weights=c(30,1))
-test <- rcoords(regionsize=20,samplesize=500,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP",grp.area.weights=c(30,1),interactions=c(0,0),grp.n.weights=c(30,1))
-test <- rcoords(regionsize=20,samplesize=500,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP",grp.area.weights=c(20,1),interactions=c(0,0),grp.n.weights=c(30,1))
-test <- rcoords(regionsize=20,samplesize=500,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP",grp.area.weights=c(20,1),interactions=c(0,0),grp.n.weights=c(30,1))
-test <- rcoords(regionsize=20,samplesize=500,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP",grp.area.weights=c(20,1),interactions=c(0,0),grp.n.weights=c(30,1))
-test <- rcoords(regionsize=20,samplesize=500,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP",grp.area.weights=c(20,1),interactions=c(0,0),grp.n.weights=c(30,1))
-test <- rcoords(regionsize=20,samplesize=500,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP",grp.area.weights=c(97453,12512),interactions=c(0,0),grp.n.weights=c(30,1))
-test <- rcoords(regionsize=20,samplesize=500,n.grp=2,wnd=Luzon.sp,show.plot=T,return.as="SP",grp.area.weights=c(97453,12512),interactions=c(0,0),grp.n.weights=c(30,1))
-q("no")
+Ahaetulla.barplots.structure  <- admixturePlots(xdir=xdir)
+statname    <- "deltaK"#
+qfiles      <- list.files(xdir, full.names=T, pattern="log_f$")#
+qlist       <- pophelper::readQ(files=qfiles)
+tr1         <- pophelper::tabulateQ(qlist)#
+sr1         <- pophelper::summariseQ(tr1)#
+evStr.df    <- suppressWarnings(pophelper::evannoMethodStructure(sr1))
+bestK       <- evStr.df[which(evStr.df[,statname]==max(evStr.df[,statname],na.rm=T))[1],"k"]#
+Ahaetulla.barplots.structure.bestK <- Ahaetulla.barplots.structure[[(bestK-1)]]
+Ahaetulla.structure.gtab <- admixtureGrob(Ahaetulla.barplots.structure.bestK,lev=indv.order,barplot.title=paste0("fastStructure K=",bestK))
+plot(Ahaetulla.structure.gtab)
+Ahaetulla.structure.gtab <- admixtureGrob(Ahaetulla.barplots.structure.bestK,lev=indv.order,barplot.title=paste0("STRUCTURE K=",bestK))
+Calamaria.structure.gtab <- admixtureGrob(Calamaria.barplots.structure.bestK,lev=indv.order,barplot.title=paste0("STRUCTURE K=",bestK))
+plot(Calamaria.figure.gtab)
+bestK=1
+Ahaetulla.lea.gtab <- admixtureGrob(grid::rectGrob(gp=grid::gpar(col=NA)),top=paste0("LEA K=",bestK))
+Ahaetulla.lea.gtab <- gridExtra::arrangeGrob(grid::rectGrob(gp=grid::gpar(col=NA)),top=paste0("LEA K=",bestK))
+Ahaetulla.figure.gtab  <- gridExtra::arrangeGrob(grobs=list(tree3.gtab,Calamaria.structure.gtab,Calamaria.lea.gtab,Calamaria.fs.gtab,Calamaria.dapc.gtab),layout_matrix=matrix(c(1,1,1,2,3,4,5),nrow=1),respect=FALSE)#
+plot(Ahaetulla.figure.gtab)
+plot(Calamaria.figure.gtab)
+Calamaria.structure.gtab <- admixtureGrob(Calamaria.barplots.structure.bestK,lev=indv.order,barplot.title=paste0("STRUCTURE K=",bestK))
+Calamaria.figure.gtab  <- gridExtra::arrangeGrob(grobs=list(tree3.gtab,Calamaria.structure.gtab,Calamaria.lea.gtab,Calamaria.fs.gtab,Calamaria.dapc.gtab),layout_matrix=matrix(c(1,1,1,2,3,4,5),nrow=1),respect=FALSE)
+plot(Calamaria.figure.gtab)
+xdir <- "/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/STRUCTURE/structure_Calamaria-gervaisii"
+statname    <- "deltaK"#
+qfiles      <- list.files(xdir, full.names=T, pattern="log_f$")#
+qlist       <- pophelper::readQ(files=qfiles)#
+tr1         <- pophelper::tabulateQ(qlist)
+sr1         <- pophelper::summariseQ(tr1)#
+evStr.df    <- suppressWarnings(pophelper::evannoMethodStructure(sr1))#
+bestK       <- evStr.df[which(evStr.df[,statname]==max(evStr.df[,statname],na.rm=T))[1],"k"]
+Calamaria.barplots.structure.bestK <- Calamaria.barplots.structure[[(bestK-1)]]#
+Calamaria.structure.gtab <- admixtureGrob(Calamaria.barplots.structure.bestK,lev=indv.order,barplot.title=paste0("STRUCTURE K=",bestK))
+Calamaria.figure.gtab  <- gridExtra::arrangeGrob(grobs=list(tree3.gtab,Calamaria.structure.gtab,Calamaria.lea.gtab,Calamaria.fs.gtab,Calamaria.dapc.gtab),layout_matrix=matrix(c(1,1,1,2,3,4,5),nrow=1),respect=FALSE)
+plot(Calamaria.figure.gtab)
+Calamaria.figure.gtab  <- gridExtra::arrangeGrob(grobs=list(Calamaria.tree.gtab,Calamaria.structure.gtab,Calamaria.lea.gtab,Calamaria.fs.gtab,Calamaria.dapc.gtab),layout_matrix=matrix(c(1,1,1,2,3,4,5),nrow=1),respect=FALSE)
+plot(Calamaria.figure.gtab)
+plot(Calamaria.structure.gtab)
+plot(Calamaria.barplots.structure.bestK)
+indv.order
+Calamaria.tree  <- ape::read.tree(file="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/IQTREE/Calamaria-gervaisii_AllPops_AllSNPs_Partitioned.tre")#
+#tree2 <- ape::drop.tip(tree,setdiff(tree$tip.label, barplot.df$indv))#
+Calamaria.tree2 <- tree#
+# root the tree; this step cant be automated entirely#
+Calamaria.tree3 <- ladderize(root(Calamaria.tree2,outgroup=Calamaria.tree2$tip.label[grep("KU326403",Calamaria.tree2$tip.label)]))
+Calamaria.tree  <- ape::read.tree(file="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/IQTREE/Calamaria-gervaisii_AllPops_AllSNPs_Partitioned.tre")#
+#tree2 <- ape::drop.tip(tree,setdiff(tree$tip.label, barplot.df$indv))#
+Calamaria.tree2 <- Calamaria.tree#
+# root the tree; this step cant be automated entirely#
+Calamaria.tree3 <- ladderize(root(Calamaria.tree2,outgroup=Calamaria.tree2$tip.label[grep("KU326403",Calamaria.tree2$tip.label)]))
+Calamaria.tree3.gg <- ggtree::ggtree(Calamaria.tree3)#
+Calamaria.tree3.df <- as.data.frame(Calamaria.tree3.gg$data)
+Calamaria.indv.order <- Calamaria.tree3.df[order(Calamaria.tree3.df[Calamaria.tree3.df[,"isTip"],"y"]),"label"]
+Calamaria.tree3.grob <- ggplotGrob(Calamaria.tree3.gg)#
+Calamaria.tree.gtab  <- gridExtra::arrangeGrob(Calamaria.tree3.grob,top="Calamaria gervaisii IQTREE partitioned")
+Calamaria.structure.gtab <- admixtureGrob(Calamaria.barplots.structure.bestK,lev=Calamaria.indv.order,barplot.title=paste0("STRUCTURE K=",bestK))
+Calamaria.structure.gtab
+plot(Calamaria.structure.gtab)
+Calamaria.figure.gtab  <- gridExtra::arrangeGrob(grobs=list(Calamaria.tree.gtab,Calamaria.structure.gtab,Calamaria.lea.gtab,Calamaria.fs.gtab,Calamaria.dapc.gtab),layout_matrix=matrix(c(1,1,1,2,3,4,5),nrow=1),respect=FALSE)
+plot(Calamaria.figure.gtab)
+Ahaetulla.tree   <- ape::read.tree("/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/IQTREE/Ahaetulla-prasina_AllPops_AllSNPs_Partitioned.tre")#
+#tree2 <- ape::drop.tip(tree,setdiff(tree$tip.label, barplot.df$indv))#
+Ahaetulla.tree2 <- Ahaetulla.tree#
+# root the tree; this step cant be automated entirely#
+Ahaetulla.tree3 <- ladderize(root(Ahaetulla.tree2,outgroup=Ahaetulla.tree2$tip.label[grep("KU337135",Ahaetulla.tree2$tip.label)]))
+Ahaetulla.tree3.gg <- ggtree::ggtree(Ahaetulla.tree3)#
+Ahaetulla.tree3.df <- as.data.frame(Ahaetulla.tree3.gg$data)#
+## character vector of tip labels in the order they are plotted from bottom to top of the graphical window#
+Ahaetulla.indv.order <- Ahaetulla.tree3.df[order(Ahaetulla.tree3.df[Ahaetulla.tree3.df[,"isTip"],"y"]),"label"]#
+Ahaetulla.tree3.grob <- ggplotGrob(Ahaetulla.tree3.gg)
+Ahaetulla.tree.gtab  <- gridExtra::arrangeGrob(Ahaetulla.tree3.grob,top="Ahaetulla prasina IQTREE partitioned")
+plot(Ahaetulla.tree.gtab)
+xdir <- "/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/LEA/empirical/Ahaetulla-prasina_AllPops_BestSNP"
+statlog  <- read.table(list.files(xdir,pattern=".entropyLog$",full.names=T),header=T)#
+kmax     <- max(statlog[,"K"])#
+statname <- "crossentropy"#
+kstat    <- sapply(X=1:kmax, FUN=function(x) {mean(statlog[which(statlog[,"K"]==x), statname])})#
+kstat.df <- data.frame(K=1:kmax, mean.stat=kstat)
+bestK    <- kstat.df[which(kstat.df[,"mean.stat"]==min(kstat.df[,"mean.stat"])),"K"]#
+if(bestK==1){#
+	Ahaetulla.lea.gtab <- gridExtra::arrangeGrob(grid::rectGrob(gp=grid::gpar(col=NA)),top=paste0("LEA K=",bestK))#
+} else {#
+	Ahaetulla.barplots.lea.bestK <- Ahaetulla.barplots.lea[[bestK-1]]#
+	Ahaetulla.lea.gtab <- admixtureGrob(Ahaetulla.barplots.lea.bestK,lev=Ahaetulla.indv.order,barplot.title=paste0("LEA K=",bestK))#
+}
+Ahaetulla.figure.gtab  <- gridExtra::arrangeGrob(grobs=list(Ahaetulla.tree3.gtab,Ahaetulla.structure.gtab,Ahaetulla.lea.gtab,Ahaetulla.fs.gtab,Ahaetulla.dapc.gtab),layout_matrix=matrix(c(1,1,1,2,3,4,5),nrow=1),respect=FALSE)
+Ahaetulla.figure.gtab  <- gridExtra::arrangeGrob(grobs=list(Ahaetulla.tree.gtab,Ahaetulla.structure.gtab,Ahaetulla.lea.gtab,Ahaetulla.fs.gtab,Ahaetulla.dapc.gtab),layout_matrix=matrix(c(1,1,1,2,3,4,5),nrow=1),respect=FALSE)
+plot(Ahaetulla.figure.gtab)
+xdir <- "/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/LEA/empirical/Ahaetulla-prasina_AllPops_BestSNP"
+statlog  <- read.table(list.files(xdir,pattern=".entropyLog$",full.names=T),header=T)
+dim(statlog)
+statlog[1:10,]
+qfiles         <- c(list.files(xdir, full.names=T, pattern="log_f$"), list.files(xdir, full.names=T, pattern="Qlog$"))
+qtab <- read.table(qfiles, header=T,sep="\t")
+dim(qtab)
+qtab[1:10,]
+dev.off()
+dev.off()

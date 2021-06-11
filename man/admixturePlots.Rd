@@ -11,7 +11,8 @@ admixturePlots(
   xdir = NULL,
   labels = NULL,
   save.as = file.path(getwd(), "admixturePlots.pdf"),
-  userun = 1
+  userun = 1,
+  save = T
 )
 }
 \arguments{
