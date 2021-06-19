@@ -136,7 +136,7 @@ vcf.path    <- file.path(system.file("extdata", package = "misc.wrappers"), "sim
 # Path to file with longitude and latitude of sampling locality of each individual
 coords.path <- file.path(system.file("extdata", package = "misc.wrappers"), "simK4_coords.txt")
 # Where to save output
-save.path <- file.path(.libPaths(),"misc.wrappers/examples/simK4")
+save.path   <- file.path(system.file("examples", package = "misc.wrappers"),"simK4")
 # Setup environment and input files for runeems_snps
 eems.setup  <- runeems_snps_setup(x=vcf.path, coords=coords.path, save.in=save.path, numMCMCIter = 100000, numBurnIter = 10000, numThinIter = 999)
 

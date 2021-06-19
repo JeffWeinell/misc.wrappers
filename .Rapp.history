@@ -1037,39 +1037,38 @@ test <- run_DAPC(#
 	include.out=c(".pdf")#
 )
 q("no")
-library(misc.wrappers)
-.libPaths()
-file.path(.libPaths(),"misc.wrappers")
-list.files(file.path(.libPaths(),"misc.wrappers"))
+library("misc.wrappers")
+vcf.path    <- file.path(system.file("extdata", package = "misc.wrappers"), "simK4.vcf.gz")#
+coords.path <- file.path(system.file("extdata", package = "misc.wrappers"), "simK4_coords.txt")#
+save.path   <- file.path(.libPaths(),"misc.wrappers/examples/simK4")
+save.path
+list.files(save.path)
+file.exists(save.path)
+dir.exists(save.path)
+dir.exists("/Library/Frameworks/R.framework/Versions/4.0/Resources/library/misc.wrappers/examples/")
+eems.setup  <- runeems_snps_setup(x=vcf.path, coords=coords.path, save.in=save.path, numMCMCIter = 100000, numBurnIter = 10000, numThinIter = 999)
+eems.setup
+readLines(eems.setup[1])
+system(eems.setup[1])
+paste("chmod u+x",eems.setup[1])
+system(paste("chmod u+x",eems.setup[1]))
+system(eems.setup[1])
+system(paste("chmod u+x",eems.setup))
+paste("chmod u+x",eems.setup)
+save.in
+save.path
+save.in=save.path
+result <- list.files(save.in,pattern="^runeems_snps.+.sh$",full.names=T)
+result
+system(paste("chmod u+x",result))
+textmessage <- list(result)
+textmessage
+names(textmessage) <- "Setup complete. To run EEMs, run these bash scripts:"
+print(textmessage)
+getwd()
 setwd("Documents/misc.wrappers")
 devtools::document()
-library(remotes); remotes::install_github("JeffWeinell/misc.wrappers",upgrade=FALSE); library(misc.wrappers)
-library(remotes); remotes::install_github("JeffWeinell/misc.wrappers",upgrade=FALSE); library(misc.wrappers)
-list.files(file.path(.libPaths(),"misc.wrappers"))
-list.files(file.path(.libPaths(),"misc.wrappers/examples"))
-config_miscwrappers()
-vcf.path    <- file.path(system.file("extdata", package = "misc.wrappers"), "simK4.vcf.gz")
-vcf.path
-coords.path <- file.path(system.file("extdata", package = "misc.wrappers"), "simK4_coords.txt")
-coords.path
-save.path <- file.path(.libPaths(),"misc.wrappers/examples/simK4")
-save.path
-eems.setup  <- runeems_snps_setup(x=vcf.path, coords=coords.path, save.in=save.path, numMCMCIter = 100000, numBurnIter = 10000, numThinIter = 999)
-nchains=3
-save.in=save.path
-print(paste0("Setup complete. To run EEMs, run bash scripts: '",save.in,"/runeems_snps_chain",1:nchains,".sh'"))
-print(paste0("Setup complete. To run EEMs, run bash scripts: '",paste(save.in,"/runeems_snps_chain",1:nchains,".sh'"), collapse=","))
-print(paste0("Setup complete. To run EEMs, run bash scripts: '",paste(paste0(save.in,"/runeems_snps_chain",1:nchains,".sh'")), collapse=","))
-paste0(save.in,"/runeems_snps_chain",1:nchains,".sh'")
-list(paste0(save.in,"/runeems_snps_chain",1:nchains,".sh'"))
-textmessage <- list(paste0(save.in,"/runeems_snps_chain",1:nchains,".sh'"))#
-	names(textmessage) <- "Setup complete. To run EEMs, run bash scripts: ")
-names(textmessage) <- "Setup complete. To run EEMs, run bash scripts: "
-textmessage
-print(textmessage)
-textmessage <- list(paste0(save.in,"/runeems_snps_chain",1:nchains,".sh'"))#
-	names(textmessage) <- "Setup complete. To run EEMs, run these bash scripts:"#
-	print(textmessage)
-devtools::document()
-remotes::install_github("JeffWeinell/misc.wrappers",upgrade=FALSE); library(misc.wrappers)
+list.files("inst/examples")
+eems.setup
+remotes::install_github("JeffWeinell/misc.wrappers",upgrade=FALSE)
 q()
