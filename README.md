@@ -130,6 +130,14 @@ This function takes as input two files: (1) SNPs in a VCF file and (2) a two-col
 
 ```
 library(misc.wrappers)
+
+# Path to VCF with SNPs
+vcf.path    <- file.path(system.file("extdata", package = "misc.wrappers"), "simK4.vcf.gz")
+# Path to file with longitude and latitude of sampling locality of each individual
+coords.path <- file.path(system.file("extdata", package = "misc.wrappers"), "simK4_coords.txt")
+# Where to save output
+save.path <- file.path(.libPaths(),"misc.wrappers/")
+
 ## Set up input files for runeems_snps
 runeems_snps_setup(data="Path/To/SNP/file.vcf",coord="Path/To/LonLat/of/Individuals/file.txt",output.dirpath="Path/To/Directory/That/Doesnt/Exist")
 ```

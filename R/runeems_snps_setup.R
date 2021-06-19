@@ -21,7 +21,7 @@
 #' @param n.sites The number of sites. Determined automatically if 'x' is a VCF file or vcfR or genind object, but must be supplied if 'x' is a path to a diffs matrix.
 #' @param pl Ploidy. Default is 2.
 #' @param nDemes Number of demes. Default is 300. This can be a single number or a numeric vector of length nchains with value to use for each chain.
-#' @param numMCMCIter Number of MCMC iterations (i.e., chain length).Default is 10000000. This can be a single number or a numeric vector of length nchains.
+#' @param numMCMCIter Number of MCMC iterations (i.e., chain length). Default is 10000000. This can be a single number or a numeric vector of length nchains.
 #' @param numBurnIter Number of Burnin iterations (i.e., chain length). Default is 1000000. This can be a single number or a numeric vector of length nchains.
 #' @param numThinIter Number of iterations to ignore before sampling the next MCMC iteration. Default is 9999. This can be a single number or a numeric vector of length nchains.
 #' @param nchains Number of chains to run. Default is 3.

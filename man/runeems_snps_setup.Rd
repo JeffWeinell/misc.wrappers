@@ -49,7 +49,7 @@ If you don't want to use the automatically generated *.outer file, you can creat
 
 \item{nDemes}{Number of demes. Default is 300. This can be a single number or a numeric vector of length nchains with value to use for each chain.}
 
-\item{numMCMCIter}{Number of MCMC iterations (i.e., chain length).Default is 10000000. This can be a single number or a numeric vector of length nchains.}
+\item{numMCMCIter}{Number of MCMC iterations (i.e., chain length). Default is 10000000. This can be a single number or a numeric vector of length nchains.}
 
 \item{numBurnIter}{Number of Burnin iterations (i.e., chain length). Default is 1000000. This can be a single number or a numeric vector of length nchains.}
 
