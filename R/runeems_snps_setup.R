@@ -201,19 +201,26 @@ runeems_snps_setup <- function(x, coords, save.in, outer=NULL, exe.path=NULL, n.
 	#} else {
 	#	print(paste0("Analysis setup complete. To begin, run bash scripts: '",save.in,"/runeems_snps_chain",1:nchains,".sh'"))
 	#}
-	
-	textmessage <- list(paste0(save.in,"/runeems_snps_chain",1:nchains,".sh'"))
-	names(textmessage) <- "Setup complete. To run EEMs, run these bash scripts:"
-	print(textmessage)
 	#print(paste0("Setup complete. To run EEMs, run bash scripts: '",paste(paste0(save.in,"/runeems_snps_chain",1:nchains,".sh'")), collapse=","))
 	#return(paste0(save.in,"/runeems_snps.sh"))
-	return(list.files(save.in,pattern="^runeems_snps.+.sh$",full.names=T))
+	result <- list.files(save.in,pattern="^runeems_snps.+.sh$",full.names=T)
+	# make bash scripts executable
+	system(paste("chmod u+x",result))
+	# list with locations of bash scripts
+	textmessage <- list(result)
+	names(textmessage) <- "Setup complete. To run EEMs, run these bash scripts:"
+	print(textmessage)
+	return(result)
 }
 #' @examples
 #' library(misc.wrappers)
-#' # Define path to input VCF and path to file with sample coordinates
-#' example_vcf_path <- file.path(system.file("extdata", package = "misc.wrappers"),"simulated_K4.vcf.gz")
-#' coords_path      <- file.path(system.file("extdata", package = "misc.wrappers"),"simulated_coords_K4.txt")
-#' # Setup everything needed for EEMS
-#' simK4_eems       <- runeems_snps_setup(x=example_vcf_path, coords=coords_path, save.in = "fastStructure_example_K4.pdf", include.out=c(".pdf"))
+#' 
+#' # Path to VCF with SNPs
+#' vcf.path    <- file.path(system.file("extdata", package = "misc.wrappers"), "simK4.vcf.gz")
+#' # Path to file with longitude and latitude of sampling locality of each individual
+#' coords.path <- file.path(system.file("extdata", package = "misc.wrappers"), "simK4_coords.txt")
+#' # Where to save output
+#' save.path <- file.path(.libPaths(),"misc.wrappers/examples/simK4")
+#' # Setup environment and input files for runeems_snps
+#' eems.setup  <- runeems_snps_setup(x=vcf.path, coords=coords.path, save.in=save.path, numMCMCIter = 100000, numBurnIter = 10000, numThinIter = 999)
 

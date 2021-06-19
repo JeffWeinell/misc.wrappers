@@ -1,60 +1,3 @@
-segments(x0=bestK,y0=par("usr")[3],y1=par("usr")[4],lty=2)
-segments(x0=bestK,y0=par("usr")[3],y1=par("usr")[4],lty=2,col="green")
-segments(x0=Kbest.criteria2,y0=par("usr")[3],y1=par("usr")[4],lty=2,col="blue")#
-	segments(x0=Kbest.criteria3,y0=par("usr")[3],y1=par("usr")[4],lty=2,col="red")
-t.test(crossentropy.mat[2,],crossentropy.mat[3,])
-test <- t.test(crossentropy.mat[2,],crossentropy.mat[3,])
-test
-class(test)
-attributes(test)
-test$p.value
-mtext(side=1,"Number of ancestral populations",line=2.2)#
-	mtext(side=2,"Cross-entropy",line=2.2)#
-	mtext(side=3,paste0("Cross-entropy (",reps," replicates) vs. number of ancestral populations (K)"),line=1)#
-	axis(1,at=Krange)
-entropyPlot    <- recordPlot()#
-	Krange.plot    <- setdiff(Krange,1)
-Krange.plot
-entropyPlot
-admixturePlot  <- list(); length(admixturePlot)   <- length(Krange.plot)#
-	mapplot        <- list(); length(mapplot)         <- length(Krange.plot)
-K=2
-i=(K-1)#
-		ce           <- LEA::cross.entropy(snmf.obj, K = K)#
-		best         <- which.min(ce)#
-	#	q.matrix.best <- suppressWarnings(tess3r::as.qmatrix(LEA::Q(snmf.obj,K=bestK,run=best)))#
-		if(K < 5){#
-			myCols          <- goodcolors(K,thresh=100)#
-		}#
-		if(K >= 5 & K < 7){#
-			myCols          <- goodcolors(K,thresh=100,cbspace="deut")#
-		}#
-		if(K >= 7 & K < 15){#
-			myCols          <- goodcolors(K,thresh=100,cbspace="")#
-		}#
-		if(K>=15){#
-			myCols          <- c(goodcolors(14,thresh=100,cbspace=""), sample(adegenet::funky(100), size=K-14))#
-		}
-q.matrix           <- LEA::Q(snmf.obj,K=K,run=best)#
-		rownames(q.matrix) <- samplenames#
-		colnames(q.matrix) <- paste0("cluster",1:ncol(q.matrix))#
-		posterior.df       <- data.frame(indv=rep(rownames(q.matrix),ncol(q.matrix)), pop=rep(colnames(q.matrix),each=nrow(q.matrix)), assignment=c(unlist(unname(q.matrix))))#
-		posterior.gg       <- ggplot2::ggplot(posterior.df, aes(fill= pop, x= assignment, y=indv)) + geom_bar(position="stack", stat="identity") + theme_classic() + theme(axis.text.y = element_text(size = label.size), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank()) + ggplot2::labs(x = "Membership Probability",y="",fill="Cluster",title=paste0("K = ",K)) + scale_fill_manual(values=myCols[1:K])#
-		plot(posterior.gg)#
-		admixturePlot[[i]]   <- recordPlot()
-if(!is.null(coords)){#
-			my.palette      <- tess3r::CreatePalette(myCols, 9)#
-			xdist           <- geosphere::distm(x=c(x.min,0),y=c(x.max,0))#
-			ydist           <- geosphere::distm(x=c(0,y.min),y=c(0,y.max))#
-			mapplot.initial <- plot(suppressWarnings(tess3r::as.qmatrix(q.matrix)), as.matrix(coords), method = "map.max", interpol = FieldsKrigModel(10), main = paste0("Ancestry coefficients; K=",K), xlab = "", ylab = "",resolution = c(100,100), cex = 0.4,col.palette = my.palette, window=c(x.min,x.max,y.min,y.max),asp=xdist/ydist)#
-			mapplot.i       <- plot(suppressWarnings(tess3r::as.qmatrix(q.matrix)), as.matrix(coords), method = "map.max", interpol = FieldsKrigModel(10), main = paste0("Ancestry coefficients; K=",K), xlab = "", ylab = "",resolution = c(500,500), cex = 0.4,col.palette = my.palette, window=c(par("usr")[1],par("usr")[2],par("usr")[3],par("usr")[4]),asp=xdist/ydist)#
-			mapplot[[i]]    <- recordPlot()#
-		}
-posterior.gg
-!is.null(coords)
-my.palette      <- tess3r::CreatePalette(myCols, 9)
-myCols
-coords
 xdist           <- geosphere::distm(x=c(x.min,0),y=c(x.max,0))#
 			ydist           <- geosphere::distm(x=c(0,y.min),y=c(0,y.max))
 xdist
@@ -1094,13 +1037,39 @@ test <- run_DAPC(#
 	include.out=c(".pdf")#
 )
 q("no")
+library(misc.wrappers)
+.libPaths()
+file.path(.libPaths(),"misc.wrappers")
+list.files(file.path(.libPaths(),"misc.wrappers"))
 setwd("Documents/misc.wrappers")
-library(devtools)
+devtools::document()
+library(remotes); remotes::install_github("JeffWeinell/misc.wrappers",upgrade=FALSE); library(misc.wrappers)
+library(remotes); remotes::install_github("JeffWeinell/misc.wrappers",upgrade=FALSE); library(misc.wrappers)
+list.files(file.path(.libPaths(),"misc.wrappers"))
+list.files(file.path(.libPaths(),"misc.wrappers/examples"))
+config_miscwrappers()
+vcf.path    <- file.path(system.file("extdata", package = "misc.wrappers"), "simK4.vcf.gz")
+vcf.path
+coords.path <- file.path(system.file("extdata", package = "misc.wrappers"), "simK4_coords.txt")
+coords.path
+save.path <- file.path(.libPaths(),"misc.wrappers/examples/simK4")
+save.path
+eems.setup  <- runeems_snps_setup(x=vcf.path, coords=coords.path, save.in=save.path, numMCMCIter = 100000, numBurnIter = 10000, numThinIter = 999)
+nchains=3
+save.in=save.path
+print(paste0("Setup complete. To run EEMs, run bash scripts: '",save.in,"/runeems_snps_chain",1:nchains,".sh'"))
+print(paste0("Setup complete. To run EEMs, run bash scripts: '",paste(save.in,"/runeems_snps_chain",1:nchains,".sh'"), collapse=","))
+print(paste0("Setup complete. To run EEMs, run bash scripts: '",paste(paste0(save.in,"/runeems_snps_chain",1:nchains,".sh'")), collapse=","))
+paste0(save.in,"/runeems_snps_chain",1:nchains,".sh'")
+list(paste0(save.in,"/runeems_snps_chain",1:nchains,".sh'"))
+textmessage <- list(paste0(save.in,"/runeems_snps_chain",1:nchains,".sh'"))#
+	names(textmessage) <- "Setup complete. To run EEMs, run bash scripts: ")
+names(textmessage) <- "Setup complete. To run EEMs, run bash scripts: "
+textmessage
+print(textmessage)
+textmessage <- list(paste0(save.in,"/runeems_snps_chain",1:nchains,".sh'"))#
+	names(textmessage) <- "Setup complete. To run EEMs, run these bash scripts:"#
+	print(textmessage)
 devtools::document()
 remotes::install_github("JeffWeinell/misc.wrappers",upgrade=FALSE); library(misc.wrappers)
-devtools::document()
-(100000-10000)/1000
-list.files()
-devtools::document()
-remotes::install_github("JeffWeinell/misc.wrappers",upgrade=FALSE); library(misc.wrappers)
-q("no")
+q()
