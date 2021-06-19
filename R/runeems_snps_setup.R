@@ -202,7 +202,8 @@ runeems_snps_setup <- function(x, coords, save.in, outer=NULL, exe.path=NULL, n.
 	#	print(paste0("Analysis setup complete. To begin, run bash scripts: '",save.in,"/runeems_snps_chain",1:nchains,".sh'"))
 	#}
 	print(paste0("Setup complete. To run EEMs, run bash scripts: '",save.in,"/runeems_snps_chain",1:nchains,".sh'"))
-	return(paste0(save.in,"/runeems_snps.sh"))
+	#return(paste0(save.in,"/runeems_snps.sh"))
+	return(list.files(save.in,pattern="^runeems_snps.+.sh$",full.names=T))
 }
 #' @examples
 #' library(misc.wrappers)
