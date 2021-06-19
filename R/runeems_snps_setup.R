@@ -201,7 +201,11 @@ runeems_snps_setup <- function(x, coords, save.in, outer=NULL, exe.path=NULL, n.
 	#} else {
 	#	print(paste0("Analysis setup complete. To begin, run bash scripts: '",save.in,"/runeems_snps_chain",1:nchains,".sh'"))
 	#}
-	print(paste0("Setup complete. To run EEMs, run bash scripts: '",save.in,"/runeems_snps_chain",1:nchains,".sh'"))
+	
+	textmessage <- list(paste0(save.in,"/runeems_snps_chain",1:nchains,".sh'"))
+	names(textmessage) <- "Setup complete. To run EEMs, run these bash scripts:"
+	print(textmessage)
+	#print(paste0("Setup complete. To run EEMs, run bash scripts: '",paste(paste0(save.in,"/runeems_snps_chain",1:nchains,".sh'")), collapse=","))
 	#return(paste0(save.in,"/runeems_snps.sh"))
 	return(list.files(save.in,pattern="^runeems_snps.+.sh$",full.names=T))
 }

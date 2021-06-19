@@ -136,10 +136,10 @@ vcf.path    <- file.path(system.file("extdata", package = "misc.wrappers"), "sim
 # Path to file with longitude and latitude of sampling locality of each individual
 coords.path <- file.path(system.file("extdata", package = "misc.wrappers"), "simK4_coords.txt")
 # Where to save output
-save.path <- file.path(.libPaths(),"misc.wrappers/")
+save.path <- file.path(.libPaths(),"misc.wrappers/examples/simK4")
+# Setup environment and input files for runeems_snps
+eems.setup  <- runeems_snps_setup(x=vcf.path, coords=coords.path, save.in=save.path, numMCMCIter = 100000, numBurnIter = 10000, numThinIter = 999)
 
-## Set up input files for runeems_snps
-runeems_snps_setup(data="Path/To/SNP/file.vcf",coord="Path/To/LonLat/of/Individuals/file.txt",output.dirpath="Path/To/Directory/That/Doesnt/Exist")
 ```
 Running runeems_snps_setup will create a directory with path output.dirpath and all of the following files:
   - `habitat_outer.pdf`
