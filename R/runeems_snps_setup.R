@@ -28,7 +28,7 @@
 #' @param ... Arguments to pass to create.outer. See ?create.outer() for possible arguments.
 #' @return Nothing is returned.
 #' @export runeems_snps_setup
-runeems_snps_setup <- function(x, coords, save.in, outer=NULL, exe.path=NULL, n.sites=NULL, pl=2, nDemes=300, numMCMCIter = 10000000, numBurnIter = 1000000, numThinIter = 9999, nchains=3,...){
+runeems_snps_setup <- function(x, coords, save.in, outer=NULL, exe.path=NULL, n.sites=NULL, pl=2, nDemes=300, numMCMCIter = 10000000, numBurnIter = 1000000, numThinIter = 9999, nchains=3, ...){
  # data.dirname <- paste0(sample(c(letters,LETTERS,0:9),size=10,replace=T),collapse="")
  # data.dirpath <- paste0(tempdir(),"/",data.dirname)
  # dir.create(data.dirpath)
@@ -95,14 +95,16 @@ runeems_snps_setup <- function(x, coords, save.in, outer=NULL, exe.path=NULL, n.
 	params.path <- paste0(save.in,"/params")
 	dir.create(params.path)
 	# Copy *.coord file to input.dirpath and rename as "data.coord"
-	system(paste("cp",coords, paste0(input.dirpath,"/data.coord")))
+#	system(paste("cp",coords, paste0(input.dirpath,"/data.coord")))
 	# Load coordinates matrix and determine number of individuals 
-	coords.df <- read.table(paste0(input.dirpath,"/data.coord"))
+	coords.df <- read.table(coords)
 	if(!is.numeric(coords.df[1,1])){
-		coords.df <- read.table(paste0(input.dirpath,"/data.coord"),header=F)
+		coords.df <- read.table(coords, header=F)
 	}
 	coords.df <- coords.df[,1:2]
 	n.coords  <- nrow(coords.df)
+	### Write coords.df to input.dirpath, without rownames or column names, and space-delineated
+	write.table(x=coords.df,file=paste0(input.dirpath,"/data.coord"),col.names=F,row.names=F,quote=F,sep=" ")
 	### Check if input.data is an object of class vcfR
 	if(is(input.data,"vcfR")){
 		n.indv <- (length(colnames(attributes(input.data)[[3]]))-1)
