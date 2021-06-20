@@ -2,7 +2,7 @@
 #' 
 #' Invokes the reemsplots2 function make_eems_plots, with additional functionality such as adding island borders and points showing individual coordinates..
 #' 
-#' @param xdir Character string to directory of a particular mcmc chain, or, to a directory containing a subdirectories "/mcmc/chain*".
+#' @param xdir Character string to directory of a particular mcmc chain, or, to a directory containing subdirectories "/mcmc/chain*".
 #' @param save.in Path to directory where output files should be saved. Default is NULL, in which case the value of 'mcmcdir' is used.
 #' @param plot.coords Whether or not to overlay the sample coordinates on EEMS maps. Default TRUE.
 #' @param plot.geography Whether or not to overlay country borders on EEMS maps. Default TRUE.
