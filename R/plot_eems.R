@@ -61,17 +61,15 @@ plot_eems <- function(xdir, save.in=NULL, plot.coords=T, plot.geography=T, mask.
 		# Check if more than two demes observed
 		obs_demes <- read_matrix(file.path(mcmcdir[1], "rdistoDemes.txt"), ncol = 3)
 		sizes     <- obs_demes[,3]
-		if (!sum(sizes > 1) < 2) {
+		include_disPlots <- (!sum(sizes > 1) < 2)
+		if (include_disPlots) {
 			dissimilarities      <- pairwise_dist(mcmcpath=mcmcdir, longlat=longlat, plot_params=plot_params)
 			dissimilarity.plots  <- plot_pairwise_dissimilarities_(dissimilarities=dissimilarities, add_abline=add_abline)
 			names(dissimilarity.plots) <- c("rdist01","rdist02","rdist03")
 		} else {
 			dissimilarity.plots <- list(NULL)
 		}
-
 		logP.plot <- plot_log_posterior(mcmcpath=mcmcdir)
-		
-
 		if(plot.coords){
 			#coordinates <- read.table(paste0(mcmcdir,"/rdistoDemes.txt"),header=F)[,c(1:2)]
 			#colnames(coordinates) <- c("Lon","Lat")
@@ -80,7 +78,7 @@ plot_eems <- function(xdir, save.in=NULL, plot.coords=T, plot.geography=T, mask.
 		}
 		mapplot  <- list(); length(mapplot) <- 4
 		for(i in 1:4){
-			mapplot.i  <- plots.chain[[i]]
+			mapplot.i  <- maps.chain[[i]]
 			coords <- unique(mapplot.i$data[,c(1:2)])
 			colnames(coords) <- c("Lon","Lat")
 			x.min    <- min((coords[,1]-0.5))
@@ -108,7 +106,7 @@ plot_eems <- function(xdir, save.in=NULL, plot.coords=T, plot.geography=T, mask.
 				mapplot[[i]] <- mapplot4.i
 			}
 		}
-		result.gglist <- c(mapplot,plots.chain[5:8])
+		result.gglist <- c(mapplot,dissimilarity.plots,logP.plot)
 		if("pdf" %in% include.out){
 			save.as.pdf <- file.path(save.in,"EEMS_maps.pdf")
 			pdf(height=6, width=8, file=save.as.pdf, onefile=TRUE)
@@ -117,7 +115,7 @@ plot_eems <- function(xdir, save.in=NULL, plot.coords=T, plot.geography=T, mask.
 		}
 		if("raster" %in% include.out){
 			save.as.raster  <- file.path(save.in,"EEMS_maps.tif")
-			plots.dat       <- lapply(X=plots.chain[1:4],FUN=function(x) as.data.frame(x$data))
+			plots.dat       <- lapply(X=maps.chain,FUN=function(x) as.data.frame(x$data))
 			rasterlist <- list(); length(rasterlist) <- 4
 			for(j in 1:4){
 				dat.temp <- plots.dat[[j]]
