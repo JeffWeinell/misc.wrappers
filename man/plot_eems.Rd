@@ -17,7 +17,7 @@ plot_eems(
 )
 }
 \arguments{
-\item{xdir}{Character string to directory of a particular mcmc chain, or, to a directory containing a subdirectories "/mcmc/chain*".}
+\item{xdir}{Character string to directory of a particular mcmc chain, or, to a directory containing subdirectories "/mcmc/chain*".}
 
 \item{save.in}{Path to directory where output files should be saved. Default is NULL, in which case the value of 'mcmcdir' is used.}
 
