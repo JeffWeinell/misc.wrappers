@@ -4,7 +4,8 @@
 \alias{plot_pairwise_dissimilarities_}
 \title{plot pairwise dissimilarities between demes
 
-Internal function used for making EEMS plots (plots 5–7).}
+Internal function used for making EEMS plots (plots 5–7).
+This function is from the R package 'reemsplots2' by Desislava Petkova (github repository 'dipetkov/reemsplots2').}
 \usage{
 plot_pairwise_dissimilarities_(dissimilarities, add_abline)
 }
@@ -20,4 +21,5 @@ List of ggplot objects
 plot pairwise dissimilarities between demes
 
 Internal function used for making EEMS plots (plots 5–7).
+This function is from the R package 'reemsplots2' by Desislava Petkova (github repository 'dipetkov/reemsplots2').
 }

@@ -4,7 +4,8 @@
 \alias{read_vector}
 \title{read vector
 
-Internal function used for making EEMS plots. Reads eems output file as a vector.}
+Internal function used for making EEMS plots. Reads eems output file as a vector.
+This function is from the R package 'reemsplots2' by Desislava Petkova (github repository 'dipetkov/reemsplots2').}
 \usage{
 read_vector(file)
 }
@@ -18,4 +19,5 @@ Vector with file contents
 read vector
 
 Internal function used for making EEMS plots. Reads eems output file as a vector.
+This function is from the R package 'reemsplots2' by Desislava Petkova (github repository 'dipetkov/reemsplots2').
 }

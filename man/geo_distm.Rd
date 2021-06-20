@@ -4,7 +4,8 @@
 \alias{geo_distm}
 \title{geo distances
 
-Used for making EEMS plots}
+Used for making EEMS plots
+This function is from the R package 'reemsplots2' by Desislava Petkova (github repository 'dipetkov/reemsplots2').}
 \usage{
 geo_distm(coord, longlat, plot_params)
 }
@@ -22,4 +23,5 @@ Distance between two points
 geo distances
 
 Used for making EEMS plots
+This function is from the R package 'reemsplots2' by Desislava Petkova (github repository 'dipetkov/reemsplots2').
 }

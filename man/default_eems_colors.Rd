@@ -8,7 +8,8 @@ Use the default DarkOrange to Blue color scheme, which combines two color scheme
 on a collection of color schemes for scientific graphics:
 See http://geog.uoregon.edu/datagraphics/color_scales.htm
 To reproduce the default eems colors, let oranges be dichromat::colorschemes$BluetoDarkOrange.12\link{12:7}
-and blues be dichromat::colorschemes$BrowntoBlue.12\link{7:12}}
+and blues be dichromat::colorschemes$BrowntoBlue.12\link{7:12}
+This function is from the R package 'reemsplots2' by Desislava Petkova (github repository 'dipetkov/reemsplots2').}
 \usage{
 default_eems_colors()
 }
@@ -23,4 +24,5 @@ on a collection of color schemes for scientific graphics:
 See http://geog.uoregon.edu/datagraphics/color_scales.htm
 To reproduce the default eems colors, let oranges be dichromat::colorschemes$BluetoDarkOrange.12\link{12:7}
 and blues be dichromat::colorschemes$BrowntoBlue.12\link{7:12}
+This function is from the R package 'reemsplots2' by Desislava Petkova (github repository 'dipetkov/reemsplots2').
 }

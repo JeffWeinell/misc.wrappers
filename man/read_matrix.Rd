@@ -4,7 +4,8 @@
 \alias{read_matrix}
 \title{read matrix
 
-Internal function used for making EEMS plots. Reads eems output file as a matrix.}
+Internal function used for making EEMS plots. Reads eems output file as a matrix.
+This function is from the R package 'reemsplots2' by Desislava Petkova (github repository 'dipetkov/reemsplots2').}
 \usage{
 read_matrix(file, ncol = 2)
 }
@@ -20,4 +21,5 @@ matrix with the file contents
 read matrix
 
 Internal function used for making EEMS plots. Reads eems output file as a matrix.
+This function is from the R package 'reemsplots2' by Desislava Petkova (github repository 'dipetkov/reemsplots2').
 }

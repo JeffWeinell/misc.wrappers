@@ -4,7 +4,8 @@
 \alias{filled_prob_contour}
 \title{filled probability contour
 
-Generates asthetics for ggplots.}
+Generates asthetics for ggplots.
+This function is from the R package 'reemsplots2' by Desislava Petkova (github repository 'dipetkov/reemsplots2').}
 \usage{
 filled_prob_contour(dimns, probs, plot_params, is_mrates)
 }
@@ -24,4 +25,5 @@ ggplot aesthetics
 filled probability contour
 
 Generates asthetics for ggplots.
+This function is from the R package 'reemsplots2' by Desislava Petkova (github repository 'dipetkov/reemsplots2').
 }

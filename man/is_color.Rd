@@ -4,7 +4,8 @@
 \alias{is_color}
 \title{Is color
 
-Check that a string, or a vector of strings, represents a hex color}
+Check that a string, or a vector of strings, represents a hex color
+This function is from the R package 'reemsplots2' by Desislava Petkova (github repository 'dipetkov/reemsplots2').}
 \usage{
 is_color(x)
 }
@@ -18,4 +19,5 @@ Logical
 Is color
 
 Check that a string, or a vector of strings, represents a hex color
+This function is from the R package 'reemsplots2' by Desislava Petkova (github repository 'dipetkov/reemsplots2').
 }

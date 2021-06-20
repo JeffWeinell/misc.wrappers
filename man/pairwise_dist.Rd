@@ -4,7 +4,8 @@
 \alias{pairwise_dist}
 \title{pairwise distances between demes
 
-Internal function used for making EEMS plots (plots 5–7). Calculates pairwise distances between demes.}
+Internal function used for making EEMS plots (plots 5–7). Calculates pairwise distances between demes.
+This function is from the R package 'reemsplots2' by Desislava Petkova (github repository 'dipetkov/reemsplots2').}
 \usage{
 pairwise_dist(mcmcpath, longlat, plot_params)
 }
@@ -22,4 +23,5 @@ List with parameter values used for the function plot_pairwise_dissimilarities_
 pairwise distances between demes
 
 Internal function used for making EEMS plots (plots 5–7). Calculates pairwise distances between demes.
+This function is from the R package 'reemsplots2' by Desislava Petkova (github repository 'dipetkov/reemsplots2').
 }

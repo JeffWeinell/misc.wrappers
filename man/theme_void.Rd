@@ -4,7 +4,8 @@
 \alias{theme_void}
 \title{theme void
 
-mostly blank ggplot theme}
+mostly blank ggplot theme
+This function is from the R package 'reemsplots2' by Desislava Petkova (github repository 'dipetkov/reemsplots2').}
 \usage{
 theme_void()
 }
@@ -15,4 +16,5 @@ ggplot object
 theme void
 
 mostly blank ggplot theme
+This function is from the R package 'reemsplots2' by Desislava Petkova (github repository 'dipetkov/reemsplots2').
 }

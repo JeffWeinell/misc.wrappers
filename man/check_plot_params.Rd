@@ -4,7 +4,8 @@
 \alias{check_plot_params}
 \title{Check Plot Parameters
 
-Internal function used for making EEMS plots}
+Internal function used for making EEMS plots
+This function is from the R package 'reemsplots2' by Desislava Petkova (github repository 'dipetkov/reemsplots2').}
 \usage{
 check_plot_params(pars)
 }
@@ -18,4 +19,5 @@ List of parameters for plotting
 Check Plot Parameters
 
 Internal function used for making EEMS plots
+This function is from the R package 'reemsplots2' by Desislava Petkova (github repository 'dipetkov/reemsplots2').
 }

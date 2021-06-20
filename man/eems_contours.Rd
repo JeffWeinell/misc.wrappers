@@ -4,7 +4,8 @@
 \alias{eems_contours}
 \title{eems contours
 
-Internal function used for making EEMS plots.}
+Internal function used for making EEMS plots.
+This function is from the R package 'reemsplots2' by Desislava Petkova (github repository 'dipetkov/reemsplots2').}
 \usage{
 eems_contours(mcmcpath, dimns, longlat, plot_params, is_mrates)
 }
@@ -26,4 +27,5 @@ A list with parameters to use for generating EEMS plots.
 eems contours
 
 Internal function used for making EEMS plots.
+This function is from the R package 'reemsplots2' by Desislava Petkova (github repository 'dipetkov/reemsplots2').
 }

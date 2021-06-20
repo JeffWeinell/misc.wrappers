@@ -4,7 +4,8 @@
 \alias{read_dimns}
 \title{Read dimns
 
-Internal function used for making EEMS plots.}
+Internal function used for making EEMS plots.
+This function is from the R package 'reemsplots2' by Desislava Petkova (github repository 'dipetkov/reemsplots2').}
 \usage{
 read_dimns(mcmcpath, longlat = TRUE, nmrks = 100)
 }
@@ -22,4 +23,5 @@ A list with parameters to use for generating EEMS plots.
 Read dimns
 
 Internal function used for making EEMS plots.
+This function is from the R package 'reemsplots2' by Desislava Petkova (github repository 'dipetkov/reemsplots2').
 }

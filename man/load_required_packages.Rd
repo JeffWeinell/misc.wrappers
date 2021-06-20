@@ -4,7 +4,8 @@
 \alias{load_required_packages}
 \title{load required packages
 
-Load packages}
+Load packages
+This function is from the R package 'reemsplots2' by Desislava Petkova (github repository 'dipetkov/reemsplots2').}
 \usage{
 load_required_packages(packages)
 }
@@ -18,4 +19,5 @@ message stating packages loaded
 load required packages
 
 Load packages
+This function is from the R package 'reemsplots2' by Desislava Petkova (github repository 'dipetkov/reemsplots2').
 }

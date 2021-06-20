@@ -4,7 +4,8 @@
 \alias{decompose_distances}
 \title{geo distances
 
-Used for making EEMS plots}
+Used for making EEMS plots
+This function is from the R package 'reemsplots2' by Desislava Petkova (github repository 'dipetkov/reemsplots2').}
 \usage{
 decompose_distances(diffs, sizes = NULL)
 }
@@ -20,4 +21,5 @@ List with parameters
 geo distances
 
 Used for making EEMS plots
+This function is from the R package 'reemsplots2' by Desislava Petkova (github repository 'dipetkov/reemsplots2').
 }

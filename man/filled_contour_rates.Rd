@@ -4,7 +4,8 @@
 \alias{filled_contour_rates}
 \title{filled contour rates
 
-Generates a ggplot object with filled contours}
+Generates a ggplot object with filled contours
+This function is from the R package 'reemsplots2' by Desislava Petkova (github repository 'dipetkov/reemsplots2').}
 \usage{
 filled_contour_rates(z, dimns)
 }
@@ -20,4 +21,5 @@ ggplot object
 filled contour rates
 
 Generates a ggplot object with filled contours
+This function is from the R package 'reemsplots2' by Desislava Petkova (github repository 'dipetkov/reemsplots2').
 }

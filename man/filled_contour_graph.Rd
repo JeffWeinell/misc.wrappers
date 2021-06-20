@@ -4,7 +4,8 @@
 \alias{filled_contour_graph}
 \title{filled contour graph
 
-Generates a filled countour graph ggplot object}
+Generates a filled countour graph ggplot object
+This function is from the R package 'reemsplots2' by Desislava Petkova (github repository 'dipetkov/reemsplots2').}
 \usage{
 filled_contour_graph(p, dimns, plot_params)
 }
@@ -22,4 +23,5 @@ ggplot object
 filled contour graph
 
 Generates a filled countour graph ggplot object
+This function is from the R package 'reemsplots2' by Desislava Petkova (github repository 'dipetkov/reemsplots2').
 }

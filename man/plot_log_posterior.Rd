@@ -4,7 +4,8 @@
 \alias{plot_log_posterior}
 \title{plot eems log posterior
 
-Used for making EEMS plot 8}
+Used for making EEMS plot 8
+This function is from the R package 'reemsplots2' by Desislava Petkova (github repository 'dipetkov/reemsplots2').}
 \usage{
 plot_log_posterior(mcmcpath)
 }
@@ -18,4 +19,5 @@ Object of class ggplot
 plot eems log posterior
 
 Used for making EEMS plot 8
+This function is from the R package 'reemsplots2' by Desislava Petkova (github repository 'dipetkov/reemsplots2').
 }

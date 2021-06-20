@@ -4,7 +4,8 @@
 \alias{read_voronoi}
 \title{read voronoi
 
-Reads EEMs output and constructs parameters for voronoi interpolation}
+Reads EEMs output and constructs parameters for voronoi interpolation
+This function is from the R package 'reemsplots2' by Desislava Petkova (github repository 'dipetkov/reemsplots2').}
 \usage{
 read_voronoi(mcmcpath, longlat, is_mrates)
 }
@@ -22,4 +23,5 @@ List with parameter values used for veronoi interpolation
 read voronoi
 
 Reads EEMs output and constructs parameters for voronoi interpolation
+This function is from the R package 'reemsplots2' by Desislava Petkova (github repository 'dipetkov/reemsplots2').
 }

@@ -4,7 +4,8 @@
 \alias{get_dist_metric}
 \title{get distance metric
 
-Get the distance metric from \code{eemsrun.txt}; use \code{euclidean} by default.}
+Get the distance metric from \code{eemsrun.txt}; use \code{euclidean} by default.
+This function is from the R package 'reemsplots2' by Desislava Petkova (github repository 'dipetkov/reemsplots2').}
 \usage{
 get_dist_metric(mcmcpath)
 }
@@ -18,4 +19,5 @@ Character string with distance metric to use
 get distance metric
 
 Get the distance metric from \code{eemsrun.txt}; use \code{euclidean} by default.
+This function is from the R package 'reemsplots2' by Desislava Petkova (github repository 'dipetkov/reemsplots2').
 }

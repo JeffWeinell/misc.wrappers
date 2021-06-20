@@ -4,7 +4,8 @@
 \alias{tiles2contours}
 \title{tiles2contours
 
-Converts tiles two contours}
+Converts tiles two contours
+This function is from the R package 'reemsplots2' by Desislava Petkova (github repository 'dipetkov/reemsplots2').}
 \usage{
 tiles2contours(tiles, rates, seeds, marks, distm)
 }
@@ -26,4 +27,5 @@ countours
 tiles2contours
 
 Converts tiles two contours
+This function is from the R package 'reemsplots2' by Desislava Petkova (github repository 'dipetkov/reemsplots2').
 }
