@@ -141,14 +141,7 @@ save.path   <- file.path(system.file("examples", package = "misc.wrappers"),"sim
 eems.setup  <- runeems_snps_setup(x=vcf.path, coords=coords.path, save.in=save.path, numMCMCIter = 100000, numBurnIter = 10000, numThinIter = 999)
 
 ```
-Running runeems_snps_setup will create a directory with path output.dirpath and all of the following files:
-  - `habitat_outer.pdf`
-  - `data/data.diffs`
-  - `data/data.outer`
-  - `data/data.coords`
-  - `mcmc/chain*/`; one for each chain
-  - `params/params-chain*.ini`; one for each chain
-  - `runeems_snps_chain*.sh`; bash script for running EEMS to generate MCMC chain*
+Running runeems_snps_setup will create the directory specified by the argument 'save.in', and the following files and subdirectories:
 
 <img src="inst/examples/Example_runeems_snps_setup.png" width="45%" />
 
