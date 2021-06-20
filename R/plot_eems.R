@@ -118,7 +118,7 @@ plot_eems <- function(xdir, plot.coords=T, plot.geography=T, mask.oceans=T, incl
 			# Hold the rasters in a rasterbrick
 			res.brick <- raster::brick(rasterlist)
 			# Write the brick as a multi-band geotiff
-			wb <- suppressWarnings(raster::writeRaster(x=res.brick, filename=save.as.raster, format="GTiff"), overwrite=T)
+			wb <- suppressWarnings(raster::writeRaster(x=res.brick, filename=save.as.raster, format="GTiff", overwrite=T))
 			if(length(usechains) > 1){
 				bricklist[[ch]] <- res.brick
 			}
@@ -137,7 +137,7 @@ plot_eems <- function(xdir, plot.coords=T, plot.geography=T, mask.oceans=T, incl
 		rp3.mean <- raster::mean(bp3)
 		rp4.mean <- raster::mean(bp4)
 		bmeans   <- raster::brick(list(rp1.mean,rp2.mean,rp3.mean,rp4.mean))
-		bw.mean  <- suppressWarnings(raster::writeRaster(x=bmeans, filename=file.path(xdir, "EEMS_maps_chainMeans.tif"), format="GTiff", overwrite=F))
+		bw.mean  <- suppressWarnings(raster::writeRaster(x=bmeans, filename=file.path(xdir, "EEMS_maps_chainMeans.tif"), format="GTiff", overwrite=T))
 	}
 	result2 <- result[usechains]
 	result2
