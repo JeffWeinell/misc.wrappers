@@ -8,21 +8,28 @@ Invokes the reemsplots2 function make_eems_plots, with additional functionality 
 \usage{
 plot_eems(
   mcmcdir,
-  output.plot.path = NULL,
+  save.in = NULL,
   plot.coords = T,
   plot.geography = T,
-  plot.oceans = T
+  mask.oceans = T,
+  include.out = c("pdf", "raster")
 )
 }
 \arguments{
 \item{mcmcdir}{Character string to directory of a particular mcmc chain}
 
-\item{output.plot.path}{Character string with path where to save output. If NULL, the plot is printed but not saved.}
+\item{save.in}{Path to directory where output files should be saved. Default is NULL, in which case the value of 'mcmcdir' is used.}
 
-\item{plot.coords}{Whether or not the sample}
+\item{plot.coords}{Whether or not to overlay the sample coordinates on EEMS maps. Default TRUE.}
+
+\item{plot.geography}{Whether or not to overlay country borders on EEMS maps. Default TRUE.}
+
+\item{mask.oceans}{Whether or not mask oceans on EEMS maps. Default TRUE.}
+
+\item{include.out}{Character string vector indicating the type of output files to generate.}
 }
 \value{
-NULL; plots are printed to screen and saved to output.plot.path
+List of ggplots.
 }
 \description{
 plot_eems function

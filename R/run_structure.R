@@ -1186,11 +1186,6 @@ assignmentPlots <- function(x, xdir=NULL, labels=NULL, save.as=file.path(getwd()
 #' assignmentPlots(xdir="PATH/TO/STRUCTURE/OUTPUT",userun=c(1:5))
 #' 
 
-
-
-
-
-
 #' @title Generate a popfile from STRUCTURE output
 #' 
 #' Takes as input the output files from strucutre runs and generates a pdf with plots of admixture
@@ -1367,7 +1362,7 @@ admixtureMap <- function(x=NULL, xdir=NULL, coords, labels=NULL, save.as=file.pa
 			slist2[[i]]    <- zdf
 		}
 	} else {
-		slist2    <- slist.list2[[1]]
+		slist2  <- slist.list2[[1]]
 	}
 	Krange      <- 1:kmax
 	Krange.plot <- 2:kmax
