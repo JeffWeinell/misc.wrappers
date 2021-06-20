@@ -33,13 +33,20 @@ plot_eems <- function(xdir, save.in=NULL, plot.coords=T, plot.geography=T, mask.
 		usechains <- intersect(usechains,1:nchains)
 	}
 	result <- list(); length(result) <- nchains
+	if("raster" %in% include.out & length(usechains) > 1){
+		bricklist <- list(); length(bricklist) <- nchains
+	}
 	for(i in usechains){
 		mcmcdir <- mcmcdirs[[i]]
 		if(is.null(save.in)){
 			save.in <- mcmcdir
 		}
 		### Generate EEMS plots
-		plots.chain     <- suppressWarnings(reemsplots2::make_eems_plots(mcmcdir, longlat = TRUE))
+		######
+		## CHANGE the NEXT LINE TO FIRST SOURCE FUNCTIONS FROM 'make_eems_plots_JLW.R' (in 'misc.wrappers/inst/extdata'), then use the version of the make_eems_plots function from that file rather than the version in reemsplots2
+		source(file.path(system.file("extdata", package = "misc.wrappers"),"make_eems_plots_JLW.R"))
+		# plots.chain     <- suppressWarnings(reemsplots2::make_eems_plots(mcmcdir, longlat = TRUE))
+		plots.chain     <- suppressWarnings(make_eems_plots(mcmcdir, longlat = TRUE))
 		if(plot.coords){
 			#coordinates <- read.table(paste0(mcmcdir,"/rdistoDemes.txt"),header=F)[,c(1:2)]
 			#colnames(coordinates) <- c("Lon","Lat")
@@ -87,20 +94,38 @@ plot_eems <- function(xdir, save.in=NULL, plot.coords=T, plot.geography=T, mask.
 			save.as.raster  <- file.path(save.in,"EEMS_maps.tif")
 			plots.dat       <- lapply(X=plots.chain[1:4],FUN=function(x) as.data.frame(x$data))
 			rasterlist <- list(); length(rasterlist) <- 4
-			for(i in 1:4){
-				dat.temp <- plots.dat[[i]]
+			for(j in 1:4){
+				dat.temp <- plots.dat[[j]]
 				e.temp   <- raster::extent(dat.temp[,1:2])
 				r.temp   <- raster::raster(e.temp, ncol=length(unique(dat.temp$x)), nrow=length(unique(dat.temp$y)))
-				rasterlist[[i]] <- raster::rasterize(dat.temp[, 1:2], r.temp, dat.temp[,3], fun=mean, background=-9999)
+				rasterlist[[j]] <- raster::rasterize(dat.temp[, 1:2], r.temp, dat.temp[,3], fun=mean, background=-9999)
 			}
 			# Hold the rasters in a rasterbrick
 			res.brick <- raster::brick(rasterlist)
 			# Write the brick as a multi-band geotiff
 			wb <- suppressWarnings(raster::writeRaster(x=res.brick, filename=save.as.raster, format="GTiff"))
+			if(length(usechains) > 1){
+				bricklist[[i]] <- res.brick
+			}
 		}
 		result[[i]] <- result.gglist
 	}
-	result[usechains]
+	### For each of the four EEMs plots, generate a raster with chain means. Hold these in a brick and write as a GeoTiff.
+	if("raster" %in% include.out & length(usechains) > 1){
+		bricklist2 <- bricklist[usechains]
+		bp1 <- raster::brick(lapply(X=1:length(bricklist2), FUN=function(x) {bricklist2[[x]][[1]]}))
+		bp2 <- raster::brick(lapply(X=1:length(bricklist2), FUN=function(x) {bricklist2[[x]][[2]]}))
+		bp3 <- raster::brick(lapply(X=1:length(bricklist2), FUN=function(x) {bricklist2[[x]][[3]]}))
+		bp4 <- raster::brick(lapply(X=1:length(bricklist2), FUN=function(x) {bricklist2[[x]][[4]]}))
+		rp1.mean <- raster::mean(bp1)
+		rp2.mean <- raster::mean(bp2)
+		rp3.mean <- raster::mean(bp3)
+		rp4.mean <- raster::mean(bp4)
+		bmeans   <- raster::brick(list(rp1.mean,rp2.mean,rp3.mean,rp4.mean))
+		bw.mean  <- suppressWarnings(raster::writeRaster(x=bmeans,filename=file.path(xdir,"EEMS_maps_chainMeans.tif",format="GTiff")))
+	}
+	result2 <- result[usechains]
+	result2
 }
 
 
