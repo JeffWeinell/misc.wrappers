@@ -126,7 +126,7 @@ dev.off()
 ```
 
 ### ```runeems_snps_setup``` Generate input files for runeems_snps
-This function takes as input two files: (1) SNPs in a VCF file and (2) a two-column text file with longitude and latitude coordinates for each individual in the VCF file. Output of this function includes all of the files and directories necessary for running EEMS. Bash files for running EEMS are also generated.
+This function takes as input two files: (1) SNPs in a VCF file and (2) a two-column text file with longitude and latitude coordinates for each individual in the VCF file. Output of this function includes all of the files and directories necessary for running EEMS (see example below), including bash scripts for running EEMS.
 
 ```
 library(misc.wrappers)
