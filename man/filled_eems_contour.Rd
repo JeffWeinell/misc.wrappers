@@ -12,7 +12,7 @@ filled_eems_contour(dimns, zmean, plot_params, is_mrates)
 \arguments{
 \item{dimns}{output of read_dimns function}
 
-\item{zmean}{}
+\item{zmean}{vector of zeros with length determined by the named entry 'nmrks' of the output of read_dimns function}
 
 \item{plot_params}{List of plotting parameters}
 

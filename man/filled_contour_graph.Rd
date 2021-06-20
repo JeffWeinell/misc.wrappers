@@ -10,7 +10,7 @@ This function is from the R package 'reemsplots2' by Desislava Petkova (github r
 filled_contour_graph(p, dimns, plot_params)
 }
 \arguments{
-\item{p}{}
+\item{p}{output of the function filled_contour_rates}
 
 \item{dimns}{output of read_dimns function}
 

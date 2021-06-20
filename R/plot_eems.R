@@ -3,7 +3,7 @@
 #' Invokes the reemsplots2 function make_eems_plots, with additional functionality such as adding island borders and points showing individual coordinates..
 #' 
 #' @param xdir Character string to directory of a particular mcmc chain, or, to a directory containing subdirectories "/mcmc/chain*".
-#' @param save.in Path to directory where output files should be saved. Default is NULL, in which case the value of 'mcmcdir' is used.
+##' @param save.in Path to directory where output files should be saved. Default is NULL, in which case the value of 'mcmcdir' is used.
 #' @param plot.coords Whether or not to overlay the sample coordinates on EEMS maps. Default TRUE.
 #' @param plot.geography Whether or not to overlay country borders on EEMS maps. Default TRUE.
 #' @param mask.oceans Whether or not mask oceans on EEMS maps. Default TRUE.
@@ -11,7 +11,7 @@
 #' @param usechains Integer vector specifying which chains to make plots for; Default is NULL, in which case plots are made for all chains.
 #' @return List of ggplots
 #' @export plot_eems
-plot_eems <- function(xdir, save.in=NULL, plot.coords=T, plot.geography=T, mask.oceans=T, include.out=c("pdf","raster"), usechains=NULL){
+plot_eems <- function(xdir, plot.coords=T, plot.geography=T, mask.oceans=T, include.out=c("pdf","raster"), usechains=NULL){
 	# source(file.path(system.file("extdata", package = "misc.wrappers"),"make_eems_plots_JLW.R"))
 	#if(is.null(save.in)){
 	#	save.in <- mcmcdir
@@ -44,10 +44,10 @@ plot_eems <- function(xdir, save.in=NULL, plot.coords=T, plot.geography=T, mask.
 		bricklist <- list(); length(bricklist) <- nchains
 	}
 	for(i in usechains){
-		mcmcdir <- mcmcdirs[[i]]
-		if(is.null(save.in)){
+		mcmcdir <- mcmcdirs[i]
+		#if(is.null(save.in)){
 			save.in <- mcmcdir
-		}
+		#}
 		### Check that the necessary output files are present
 		check_mcmcpath_contents(mcmcpath=mcmcdir)
 		### Load some of the EEMs output
@@ -146,7 +146,7 @@ plot_eems <- function(xdir, save.in=NULL, plot.coords=T, plot.geography=T, mask.
 		rp3.mean <- raster::mean(bp3)
 		rp4.mean <- raster::mean(bp4)
 		bmeans   <- raster::brick(list(rp1.mean,rp2.mean,rp3.mean,rp4.mean))
-		bw.mean  <- suppressWarnings(raster::writeRaster(x=bmeans,filename=file.path(xdir,"EEMS_maps_chainMeans.tif",format="GTiff")))
+		bw.mean  <- suppressWarnings(raster::writeRaster(x=bmeans,filename=file.path(xdir,"EEMS_maps_chainMeans.tif",format="GTiff"),overwrite=T))
 	}
 	result2 <- result[usechains]
 	result2
@@ -612,7 +612,7 @@ theme_void <- function() {
 #' Generates a ggplot object with filled contours
 #' This function is from the R package 'reemsplots2' by Desislava Petkova (github repository 'dipetkov/reemsplots2').
 #' 
-#' @param z 
+#' @param z vector of zeros with length determined by the named entry 'nmrks' of the output of read_dimns function
 #' @param dimns output of read_dimns function
 #' @return ggplot object
 #' @export filled_contour_rates
@@ -627,7 +627,7 @@ filled_contour_rates <- function(z, dimns) {
 #' Generates a filled countour graph ggplot object
 #' This function is from the R package 'reemsplots2' by Desislava Petkova (github repository 'dipetkov/reemsplots2').
 #' 
-#' @param p 
+#' @param p output of the function filled_contour_rates
 #' @param dimns output of read_dimns function
 #' @param plot_params List of plotting parameters
 #' @return ggplot object
@@ -651,7 +651,7 @@ filled_contour_graph <- function(p, dimns, plot_params) {
 #' This function is from the R package 'reemsplots2' by Desislava Petkova (github repository 'dipetkov/reemsplots2').
 #' 
 #' @param dimns output of read_dimns function
-#' @param zmean 
+#' @param zmean vector of zeros with length determined by the named entry 'nmrks' of the output of read_dimns function
 #' @param plot_params List of plotting parameters
 #' @param is_mrates Logical indicating if the plots are mrates, else qrates
 #' @return ggplot object

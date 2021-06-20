@@ -8,7 +8,6 @@ Invokes the reemsplots2 function make_eems_plots, with additional functionality 
 \usage{
 plot_eems(
   xdir,
-  save.in = NULL,
   plot.coords = T,
   plot.geography = T,
   mask.oceans = T,
@@ -19,8 +18,6 @@ plot_eems(
 \arguments{
 \item{xdir}{Character string to directory of a particular mcmc chain, or, to a directory containing subdirectories "/mcmc/chain*".}
 
-\item{save.in}{Path to directory where output files should be saved. Default is NULL, in which case the value of 'mcmcdir' is used.}
-
 \item{plot.coords}{Whether or not to overlay the sample coordinates on EEMS maps. Default TRUE.}
 
 \item{plot.geography}{Whether or not to overlay country borders on EEMS maps. Default TRUE.}
@@ -30,6 +27,8 @@ plot_eems(
 \item{include.out}{Character string vector indicating the type of output files to generate.}
 
 \item{usechains}{Integer vector specifying which chains to make plots for; Default is NULL, in which case plots are made for all chains.}
+
+\item{save.in}{Path to directory where output files should be saved. Default is NULL, in which case the value of 'mcmcdir' is used.}
 }
 \value{
 List of ggplots

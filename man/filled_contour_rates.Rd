@@ -10,7 +10,7 @@ This function is from the R package 'reemsplots2' by Desislava Petkova (github r
 filled_contour_rates(z, dimns)
 }
 \arguments{
-\item{z}{}
+\item{z}{vector of zeros with length determined by the named entry 'nmrks' of the output of read_dimns function}
 
 \item{dimns}{output of read_dimns function}
 }
