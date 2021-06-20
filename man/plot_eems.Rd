@@ -7,16 +7,17 @@
 Invokes the reemsplots2 function make_eems_plots, with additional functionality such as adding island borders and points showing individual coordinates..}
 \usage{
 plot_eems(
-  mcmcdir,
+  xdir,
   save.in = NULL,
   plot.coords = T,
   plot.geography = T,
   mask.oceans = T,
-  include.out = c("pdf", "raster")
+  include.out = c("pdf", "raster"),
+  usechains = NULL
 )
 }
 \arguments{
-\item{mcmcdir}{Character string to directory of a particular mcmc chain}
+\item{xdir}{Character string to directory of a particular mcmc chain, or, to a directory containing a subdirectories "/mcmc/chain*".}
 
 \item{save.in}{Path to directory where output files should be saved. Default is NULL, in which case the value of 'mcmcdir' is used.}
 
@@ -27,6 +28,8 @@ plot_eems(
 \item{mask.oceans}{Whether or not mask oceans on EEMS maps. Default TRUE.}
 
 \item{include.out}{Character string vector indicating the type of output files to generate.}
+
+\item{usechains}{Integer vector specifying which chains to make plots for; Default is NULL, in which case plots are made for all chains.}
 }
 \value{
 List of ggplots
