@@ -139,7 +139,6 @@ coords.path <- file.path(system.file("extdata", package = "misc.wrappers"), "sim
 save.path   <- file.path(system.file("examples", package = "misc.wrappers"),"simK4")
 # Setup environment and input files for runeems_snps
 eems.setup  <- runeems_snps_setup(x=vcf.path, coords=coords.path, save.in=save.path, numMCMCIter = 100000, numBurnIter = 10000, numThinIter = 999)
-
 ```
 Running runeems_snps_setup will create the directory specified by the argument 'save.in', and the following files and subdirectories:
 
