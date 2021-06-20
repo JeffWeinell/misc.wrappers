@@ -29,7 +29,7 @@ plot_eems(
 \item{include.out}{Character string vector indicating the type of output files to generate.}
 }
 \value{
-List of ggplots.
+List of ggplots
 }
 \description{
 plot_eems function

@@ -1,1074 +1,496 @@
-xdist           <- geosphere::distm(x=c(x.min,0),y=c(x.max,0))#
-			ydist           <- geosphere::distm(x=c(0,y.min),y=c(0,y.max))
-xdist
-ydist
-mapplot.initial <- plot(suppressWarnings(tess3r::as.qmatrix(q.matrix)), as.matrix(coords), method = "map.max", interpol = FieldsKrigModel(10), main = paste0("Ancestry coefficients; K=",K), xlab = "", ylab = "",resolution = c(100,100), cex = 0.4,col.palette = my.palette, window=c(x.min,x.max,y.min,y.max),asp=xdist/ydist)
-as.qmatrix(q.matrix)
-q.matrix           <- LEA::Q(snmf.obj,K=K,run=best)
-q.matrix
-snmf.obj
-class(snmf.obj)
-attributes(snmf.obj)
-vcf
-samplenames
-vcf.obj     <- vcfR::read.vcfR(vcf)
-samplenames <- colnames(vcf.obj@gt)[-1]#
-	numind      <- length(samplenames)
-numind
-vcftools.path="/panfs/pfs.local/home/j926w878/programs/vcftools_0.1.13/bin/vcftools";vcf="/panfs/pfs.local/home/j926w878/work/ddRAD/snps_goodData/Oxyrhabdium_AllSpecies_AllSNPs.vcf"; indv.keep=indvskeep; out="/panfs/pfs.local/home/j926w878/work/ddRAD/snps_goodData/Oxyrhabdium_both-modestum_BestSNP.vcf"; which.site="best"
-indvkeep
-indv.keep
-indv.keep="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/tess3r/indv_keep_Oxyrhabdium_both-modestum.txt"
-!is.null(indv.keep)
-is(indv.keep,"character"))
-is(indv.keep,"character")
-is(indv.keep,"character") & length(indv.keep)==1
-file.exists(indv.keep)
-indv.keep <- read.table(indv.keep)
-indv.keep
-indv.keep="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/tess3r/indv_keep_Oxyrhabdium_both-modestum.txt"
-unlist(read.table(indv.keep))
-unname(unlist(read.table(indv.keep)))
-indv.keep <- unname(unlist(read.table(indv.keep)))
-indv.keep
-readLines(indv.keep)
-indv.keep="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/tess3r/indv_keep_Oxyrhabdium_both-modestum.txt"
-readLines(indv.keep)
-indv.keep <- suppressWarnings(readLines(indv.keep))
-indv.keep
-vcf.obj    <- vcfR::read.vcfR(vcf)#
-	# matrix with "fixed" columns, which are the columns with site-specific stats across all samples#
-	# fix.mat    <- attributes(vcf.obj)[["fix"]]#
-	fix.mat    <- vcf.obj@fix
-vcf
-vcf="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/DAPC/Oxyrhabdium_both-modestum_BestSNP.vcf"
-vcftools.path
-vcftools.path=vcftools
-vcftools.path="vcftools"
-vcf.obj    <- vcfR::read.vcfR(vcf)#
-	# matrix with "fixed" columns, which are the columns with site-specific stats across all samples#
-	# fix.mat    <- attributes(vcf.obj)[["fix"]]#
-	fix.mat    <- vcf.obj@fix
-gt.mat     <- gsub(":.+","",vcf.obj@gt[,-1])
-dim(gt.mat)
-indv.keep
-!is.null(indv.keep)
-if(!is.null(indv.keep)){#
-		if(is(indv.keep,"character") & length(indv.keep)==1){#
-			if(file.exists(indv.keep)){#
-				#indv.keep <- unname(unlist(read.table(indv.keep)))#
-				indv.keep <- suppressWarnings(readLines(indv.keep))#
-			}#
-		}#
-		### Check that all names in indv.keep actually exist in the vcf#
-		if(all(indv.keep %in% colnames(gt.mat))){#
-			gt.mat <- gt.mat[,indv.keep,drop=F]#
+test3
+crs(world_sf)
+raster::crs(world_sf)
+x.min
+x.max
+ggplot2::geom_sf(data=world_sf,colour = "black", fill = NA)
+class(ggplot2::geom_sf(data=world_sf,colour = "black", fill = NA))
+test
+names(test)
+test$mapping
+test2 <- mapplot.i  + ggplot2::geom_sf(data=world_sf,mapping=NULL, colour = "black", fill = NA) + ggplot2::coord_sf(xlim=c(x.min, x.max), ylim=c(y.min, ymax=y.max),expand=FALSE)
+test2
+test2 <- mapplot.i  + ggplot2::geom_sf(data=world_sf,mapping=aes(fill=AREA), colour = "black", fill = NA) + ggplot2::coord_sf(xlim=c(x.min, x.max), ylim=c(y.min, ymax=y.max),expand=FALSE)
+test2 <- mapplot.i  + ggplot2::geom_sf(data=world_sf,mapping=ggplot2::aes(fill=AREA), colour = "black", fill = NA) + ggplot2::coord_sf(xlim=c(x.min, x.max), ylim=c(y.min, ymax=y.max),expand=FALSE)
+test2
+test2 <- mapplot.i  + ggplot2::geom_sf(data=world_sf,mapping=ggplot2::aes(fill=AREA), colour = "black", fill = NA,inherit.aes=F) + ggplot2::coord_sf(xlim=c(x.min, x.max), ylim=c(y.min, ymax=y.max),expand=FALSE)
+test2
+test2 <- mapplot.i  + ggplot2::geom_sf(data=world_sf, colour = "black", fill = NA,inherit.aes=F) + ggplot2::coord_sf(xlim=c(x.min, x.max), ylim=c(y.min, ymax=y.max),expand=FALSE)
+test2
+mcmcdir=mcmcpath; plots.chain     <- suppressWarnings(reemsplots2::make_eems_plots(mcmcdir, longlat = TRUE))
+spdf_world_10    <- rnaturalearth::ne_countries(scale=10)#
+	#spdf_oceans_10   <- invisible(rnaturalearth::ne_download(scale = 10, type = 'ocean', category = 'physical'))#
+	# oceans <- misc.wrappers::spdf_oceans_10#
+	spdf_oceans_10 <- misc.wrappers::spdf_oceans_10
+world_sf <- spdf_world_10[1]
+mapplot  <- list(); length(mapplot) <- length(plots.chain)
+coordinates <- sp::SpatialPoints(data.matrix(read.table(paste0(mcmcdir,"/rdistoDemes.txt"),header=F))[,1:2])
+coordinates
+class(coordinates)
+coords2 <- read.table(paste0(mcmcdir,"/rdistoDemes.txt"),header=F)
+coords2
+coords2 <- read.table(paste0(mcmcdir,"/rdistoDemes.txt"),header=F)[,c(1:2)]
+coords2
+coordinates <- read.table(paste0(mcmcdir,"/rdistoDemes.txt"),header=F)[,c(1:2)]#
+		colnames(coordinates) <- c("Lon","Lat")
+i=1
+mapplot  <- list(); length(mapplot) <- length(plots.chain)
+mapplot.i    <- plots.chain[[i]]#
+		mapplot2.i   <- mapplot.i + ggplot2::theme_classic() + ggplot2::geom_sf(data=world_sf,colour = "black", fill = NA,inherit.aes=FALSE) + ggplot2::coord_sf(xlim=c(x.min, x.max), ylim=c(y.min, ymax=y.max),expand=FALSE)#
+		if(plot.coords){#
+			mapplot[[i]] <- mapplot2.i + ggplot2::geom_point(data = coordinates, ggplot2::aes(x = Lon, y = Lat), size = 1, shape = 21, fill = "black")#
 		} else {#
-			stop(paste(paste(setdiff(indv.keep,colnames(gt.mat)),collapse=","), "not in VCF"))#
-		}#
-	}
-dim(gt.mat)
-min.n=4;min.n0=2;min.n1=1;which.site="best"
-out
-out="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/DAPC/Oxyrhabdium_both-modestum_BestSNP_v2.vcf"
-vcf
-which.site="best"
-site.NS      <- vapply(X=1:nrow(gt.mat),FUN=function(x){length(grep(".", unlist(strsplit(gt.mat[x,],split="/",fixed=T)),fixed=T,invert=T))},FUN.VALUE=1)
-site.0.NS    <- vapply(X=1:nrow(gt.mat),FUN=function(x){length(grep("0", gt.mat[x,],fixed=T,invert=F))},FUN.VALUE=1)
-site.1.NS    <- vapply(X=1:nrow(gt.mat),FUN=function(x){length(grep("1", gt.mat[x,],fixed=T,invert=F))},FUN.VALUE=1)#
-	# Matrix with "CHROM" and "POS" from fix.mat, plus columns containing site.NS, site.0.NS, and site.1.NS#
-	chrom.pos.mat <- cbind(fix.mat[,c("CHROM","POS")],site.NS,site.0.NS,site.1.NS)
-chrom.pos.df <- data.frame(CHROM=fix.mat[,"CHROM"],POS=fix.mat[,"POS"],site.NS=site.NS,site.0.NS=site.0.NS,site.1.NS=site.1.NS)#
-	mode(chrom.pos.df[,"CHROM"])     <- "character"#
-	mode(chrom.pos.df[,"POS"])       <- "character"#
-	mode(chrom.pos.df[,"site.NS"])   <- "numeric"#
-	mode(chrom.pos.df[,"site.0.NS"]) <- "numeric"#
-	mode(chrom.pos.df[,"site.1.NS"]) <- "numeric"#
-	if(any(chrom.pos.df[,"site.NS"] >= min.n & chrom.pos.df[,"site.0.NS"] >= min.n0 & chrom.pos.df[,"site.1.NS"] >= min.n1)){#
-		# filter1 <- which(chrom.pos.df[,"site.1.NS"] >=2)#
-		filter1 <- which(chrom.pos.df[,"site.NS"] >= min.n & chrom.pos.df[,"site.0.NS"] >= min.n0 & chrom.pos.df[,"site.1.NS"] >= min.n1)#
-	} else {#
-		stop("no sites in which the minor allele occurs in more than 1 individual")#
-	}
-chrom.pos.df.filtered1 <- chrom.pos.df[filter1,]#
-	# vector with loci names for each site retained#
-	loci        <- chrom.pos.df.filtered1[,"CHROM"]#
-	# vector with unique loci names#
-	loci.unique <- unique(loci)#
-	# For each unique locus ("CHROM") in chrom.pos.df.filtered1, return the row number for the site with the greatest site.NS#
-	chrom.pos.list.filtered2 <- list(); length(chrom.pos.list.filtered2) <- length(loci.unique)
-length(loci.unique)
-for(i in 1:length(loci.unique)){#
-		locus.i <- loci.unique[i]#
-		chrom.pos.df.i <- chrom.pos.df.filtered1[which(chrom.pos.df.filtered1[,"CHROM"]==locus.i),,drop=F]#
-		site.NS.i <- chrom.pos.df.i[,"site.NS"]#
-		max.i     <- max(site.NS.i)#
-		if(which.site=="best"){#
-			chrom.pos.list.filtered2[[i]]    <- chrom.pos.df.i[(which(site.NS.i==max.i)[1]),]#
-		}#
-		if(which.site=="first"){#
-			chrom.pos.list.filtered2[[i]]    <- chrom.pos.df.i[1,]#
-		}#
-		if(which.site=="random"){#
-			chrom.pos.list.filtered2[[i]]    <- chrom.pos.df.i[sample(1:length(site.NS.i),1),]#
-		}#
-		if(which.site=="all.passing"){#
-			chrom.pos.list.filtered2[[i]]    <- chrom.pos.df.i#
-		}#
-	}#
-	chrom.pos.df.filtered2 <- do.call(rbind, chrom.pos.list.filtered2)
-chrom.pos.filtered.df <- chrom.pos.df.filtered2[,c("CHROM","POS")]
-temp.file <- file.path(getwd(),"temp_filtertable.txt")#
-	write.table(chrom.pos.filtered.df, temp.file, quote=F, sep="\t", col.names=F, row.names=F)#
-	vcf.command <- paste(vcftools.path,"--vcf",vcf,"--positions",temp.file,"--recode -c > ",out)
-system(vcf.command)
-vcf.command
-dim(olnames(chrom.pos.df.filtered2))
-dim(colnames(chrom.pos.df.filtered2))
-colnames(chrom.pos.df.filtered2)
-colnames(gt.mat)
-temp.file2 <- file.path(getwd(),"temp_filtertable2.txt")
-temp.file2
-writeLines(text=colnames(gt.mat),con=temp.file2)
-vcf
-vcf.obj     <- vcfR::read.vcfR(vcf)#
-	samplenames <- colnames(vcf.obj@gt)[-1]#
-	numind      <- length(samplenames)#
-	label.size  <- min((288/numind),7)
-!is.null(coords)
-if(is(coords,"array") | is(coords,"data.frame")){#
-			coords <-  coords#
-		} else {#
-			if(file.exists(coords)){#
-				coords   <- read.table(coords)#
-			}#
+			mapplot[[i]] <- mapplot2.i#
 		}
-coords
-setdiff(rownames(coords),samplenames)
-setdiff(samplenames,rownames(coords))
-c(setdiff(rownames(coords),samplenames),setdiff(samplenames,rownames(coords)))
-length(c(setdiff(rownames(coords),samplenames),setdiff(samplenames,rownames(coords))))==0
-all(samplenames %in% rownames(coords))
-all(samplenames %in% rownames(coords) & rownames(coords) %in% samplenames)
-if(!all(samplenames %in% rownames(coords) & rownames(coords) %in% samplenames)){#
-			stop("All individuals in coords file must be in vcf")#
-		}#
-		x.min <- min((coords[,1]-0.5))#
-		x.max <- max((coords[,1]+0.5))#
-		y.min <- min((coords[,2]-0.5))#
-		y.max <- max((coords[,2]+0.5))#
-		maxK <- min(nrow(unique(coords)),(numind-1))
-maxK
-if(max(Krange) > maxK){#
-		Krange <- 1:maxK#
-	}
-Krange
-geno.temp.path <- paste0(tempfile(),".geno")#
-	geno.obj       <- vcfR2geno(vcf=vcf,out=geno.temp.path)#
-	snmf.obj       <- LEA::snmf(geno.temp.path,K=Krange, repetitions=reps,entropy=entropy,project="new",iterations=iter,CPU=CPU)#
-	crossentropy.mat  <- t(do.call(cbind,lapply(X=Krange,FUN=function(x){LEA::cross.entropy(snmf.obj,K = x)})))#
-	rownames(crossentropy.mat) <- Krange#
-	colnames(crossentropy.mat) <- paste0("rep",1:reps)#
-	boxplot(t(crossentropy.mat))#
-	mean.entropy   <- apply(crossentropy.mat,MARGIN=1,FUN=mean,na.rm=TRUE)
-if(any(diff(mean.entropy)>0)){#
-		bestK <- unname(which(diff(mean.entropy)>0)[1])#
-	} else {#
-		bestK <- unname(Krange[1])#
-	}#
-	Kbest.criteria1   <- bestK#
-	### Checking if the max BIC of the next K value is less than the min BIC of the previous K value.#
-	range.entropy.mat <- do.call(rbind,lapply(X=1:nrow(crossentropy.mat),FUN=function(x){range(crossentropy.mat[x,],na.rm=TRUE)}))#
-	entropy.is.nonoverlap <- NULL#
-	entropy.is.reduced    <- NULL#
-	for(i in 2:nrow(range.entropy.mat)){#
-		entropy.is.nonoverlap  <- c(entropy.is.nonoverlap, range.entropy.mat[i,1] > range.entropy.mat[(i-1),2] | range.entropy.mat[i,2] < range.entropy.mat[(i-1),1])#
-		entropy.is.reduced     <- c(entropy.is.reduced, range.entropy.mat[i,2] < range.entropy.mat[(i-1),1])#
-	}#
-	# If max BIC for K=2 is better than BIC K=1 and if some K values are not better (all BIC lower) than K-1, then find the first K value in which K+1 is not better.#
-	if(any(!entropy.is.reduced) & entropy.is.reduced[1]){#
-		Kbest.criteria2 <- which(!entropy.is.reduced)[1]#
-	} else {#
-		Kbest.criteria2 <- 1#
-	}#
-	### Which K value (for K>=2) yields the least variable BIC scores.#
-	Entropy.variation <- apply(X=crossentropy.mat,MARGIN=1,FUN=var,na.rm=TRUE)#
-	Kbest.criteria3   <- which(Entropy.variation==min(Entropy.variation[-1]))
-Kbest.criteria1
-Kbest.criteria2
-Kbest.criteria3
-segments(x0=bestK,y0=par("usr")[3],y1=par("usr")[4],lty=2,col="black")
-mtext(side=1,"Number of ancestral populations",line=2.2)#
-	mtext(side=2,"Cross-entropy",line=2.2)#
-	mtext(side=3,paste0("Cross-entropy (",reps," replicates) vs. number of ancestral populations (K)"),line=1)#
-	axis(1,at=Krange)
-entropyPlot    <- recordPlot()#
-	Krange.plot    <- setdiff(Krange,1)#
-	admixturePlot  <- list(); length(admixturePlot)   <- length(Krange.plot)#
-	mapplot        <- list(); length(mapplot)         <- length(Krange.plot)
-for(K in Krange.plot){#
-		i=(K-1)#
-		ce           <- LEA::cross.entropy(snmf.obj, K = K)#
-		best         <- which.min(ce)#
-	#	q.matrix.best <- suppressWarnings(tess3r::as.qmatrix(LEA::Q(snmf.obj,K=bestK,run=best)))#
-		if(K < 5){#
-			myCols          <- goodcolors(K,thresh=100)#
-		}#
-		if(K >= 5 & K < 7){#
-			myCols          <- goodcolors(K,thresh=100,cbspace="deut")#
-		}#
-		if(K >= 7 & K < 15){#
-			myCols          <- goodcolors(K,thresh=100,cbspace="")#
-		}#
-		if(K>=15){#
-			myCols          <- c(goodcolors(14,thresh=100,cbspace=""), sample(adegenet::funky(100), size=K-14))#
-		}#
-		q.matrix           <- LEA::Q(snmf.obj,K=K,run=best)#
-		rownames(q.matrix) <- samplenames#
-		colnames(q.matrix) <- paste0("cluster",1:ncol(q.matrix))#
-		posterior.df       <- data.frame(indv=rep(rownames(q.matrix),ncol(q.matrix)), pop=rep(colnames(q.matrix),each=nrow(q.matrix)), assignment=c(unlist(unname(q.matrix))))#
-		posterior.gg       <- ggplot2::ggplot(posterior.df, aes(fill= pop, x= assignment, y=indv)) + geom_bar(position="stack", stat="identity") + theme_classic() + theme(axis.text.y = element_text(size = label.size), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank()) + ggplot2::labs(x = "Membership Probability",y="",fill="Cluster",title=paste0("K = ",K)) + scale_fill_manual(values=myCols[1:K])#
-		plot(posterior.gg)#
-		admixturePlot[[i]]   <- recordPlot()#
-		if(!is.null(coords)){#
-			my.palette      <- tess3r::CreatePalette(myCols, 9)#
-			xdist           <- geosphere::distm(x=c(x.min,0),y=c(x.max,0))#
-			ydist           <- geosphere::distm(x=c(0,y.min),y=c(0,y.max))#
-			mapplot.initial <- plot(suppressWarnings(tess3r::as.qmatrix(q.matrix)), as.matrix(coords), method = "map.max", interpol = FieldsKrigModel(10), main = paste0("Ancestry coefficients; K=",K), xlab = "", ylab = "",resolution = c(100,100), cex = 0.4,col.palette = my.palette, window=c(x.min,x.max,y.min,y.max),asp=xdist/ydist)#
-			mapplot.i       <- plot(suppressWarnings(tess3r::as.qmatrix(q.matrix)), as.matrix(coords), method = "map.max", interpol = FieldsKrigModel(10), main = paste0("Ancestry coefficients; K=",K), xlab = "", ylab = "",resolution = c(500,500), cex = 0.4,col.palette = my.palette, window=c(par("usr")[1],par("usr")[2],par("usr")[3],par("usr")[4]),asp=xdist/ydist)#
-			mapplot[[i]]    <- recordPlot()#
-		}#
-	}
-if(!is.null(coords)){#
-		result <- c(list(entropyPlot),admixturePlot,mapplot)#
-	} else {#
-		result <- c(list(entropyPlot),admixturePlot)#
-	}
-!is.null(save.as)
-save.as
-pdf(height=6,width=10,file=save.as,onefile=TRUE)
-result
-dev.off()
-save.as
-crossentropy.mat
-i=2
-t.test(crossentropy.mat[i-1,],crossentropy.mat[i,])
-t.test.i <- t.test(crossentropy.mat[i-1,],crossentropy.mat[i,])
-attributes(t.test.i)
-pval.i   <- t.test.i$p.value
-pval.i
-t.test.i$statistic
-t.test.i$parameter
-t.test.i$conf.int
-t.test.i$null.value
-t.test.i$alternative
-boxplot(t(crossentropy.mat))
-stat.i   <- t.test.i$statistic
-stat.i
-i
-t.test.i <- t.test(crossentropy.mat[i-1,],crossentropy.mat[i,])#
-		pval.i   <- t.test.i$p.value#
-		stat.i   <- t.test.i$statistic
-pval.i < 0.05 & stat.i > 0
-i=3
-t.test.i <- t.test(crossentropy.mat[i-1,],crossentropy.mat[i,])#
-		pval.i   <- t.test.i$p.value#
-		stat.i   <- t.test.i$statistic
-pval.i
-stat.i
-pval.i < 0.05 & stat.i > 0
-i
-i=4
-t.test.i <- t.test(crossentropy.mat[i-1,],crossentropy.mat[i,])#
-		pval.i   <- t.test.i$p.value#
-		stat.i   <- t.test.i$statistic
-pval.i
-stat.i
-i=i+1
-i
-t.test.i <- t.test(crossentropy.mat[i-1,],crossentropy.mat[i,])#
-		pval.i   <- t.test.i$p.value#
-		stat.i   <- t.test.i$statistic
-pval.i
-stat.i
-pval.i < 0.05 & stat.i > 0
-i==nrow(crossentropy.mat)
-Kbest.criteria4 <- (i-1)
-Kbest.criteria4
-for(i in 2:nrow(crossentropy.mat)){#
-		t.test.i <- t.test(crossentropy.mat[i-1,],crossentropy.mat[i,])#
-		pval.i   <- t.test.i$p.value#
-		stat.i   <- t.test.i$statistic#
-		if(pval.i < 0.05 & stat.i > 0){#
-			next#
+plot.coords=T
+mapplot.i    <- plots.chain[[i]]#
+		mapplot2.i   <- mapplot.i + ggplot2::theme_classic() + ggplot2::geom_sf(data=world_sf,colour = "black", fill = NA,inherit.aes=FALSE) + ggplot2::coord_sf(xlim=c(x.min, x.max), ylim=c(y.min, ymax=y.max),expand=FALSE)#
+		if(plot.coords){#
+			mapplot[[i]] <- mapplot2.i + ggplot2::geom_point(data = coordinates, ggplot2::aes(x = Lon, y = Lat), size = 1, shape = 21, fill = "black")#
 		} else {#
-			if(i==nrow(crossentropy.mat)){#
-				Kbest.criteria4 <- NULL#
-			} else{#
-				Kbest.criteria4 <- (i-1)#
-			}#
-		}#
-	}
-Kbest.criteria4
-for(i in 2:nrow(crossentropy.mat)){#
-		t.test.i <- t.test(crossentropy.mat[i-1,],crossentropy.mat[i,])#
-		pval.i   <- t.test.i$p.value#
-		stat.i   <- t.test.i$statistic#
-		if(pval.i < 0.05 & stat.i > 0){#
-			next#
-		} else {#
-			if(i==nrow(crossentropy.mat)){#
-				Kbest.criteria4 <- NULL#
-			} else{#
-				Kbest.criteria4 <- (i-1)#
-				i <- nrow(crossentropy.mat)#
-			}#
-		}#
-	}
-Kbest.criteria4
-i
-for(i in 2:nrow(crossentropy.mat)){#
-		t.test.i <- t.test(crossentropy.mat[i-1,],crossentropy.mat[i,])#
-		pval.i   <- t.test.i$p.value#
-		stat.i   <- t.test.i$statistic#
-		if(pval.i < 0.05 & stat.i > 0){#
-			next#
-		} else {#
-			if(i==nrow(crossentropy.mat)){#
-				Kbest.criteria4 <- NULL#
-			} else{#
-				Kbest.criteria4 <- (i-1)#
-				break#
-			}#
-		}#
-	}
-i
-Kbest.criteria4
-segments(x0=bestK,y0=par("usr")[3],y1=par("usr")[4],lty=2,col="black")
-run_SNMF <- function(vcf,coords=NULL,Krange=1:40,reps=100,entropy=TRUE,project="new",iter=500,CPU=2,save.as=NULL){#
-	vcf.obj     <- vcfR::read.vcfR(vcf)#
-	samplenames <- colnames(vcf.obj@gt)[-1]#
-	numind      <- length(samplenames)#
-	label.size  <- min((288/numind),7)#
-	if(!is.null(coords)){#
-		if(is(coords,"array") | is(coords,"data.frame")){#
-			coords <-  coords#
-		} else {#
-			if(file.exists(coords)){#
-				coords   <- read.table(coords)#
-			}#
-		}#
-		### Check that all individuals with coords are in the vcf file, and vice versa.#
-		if(!all(samplenames %in% rownames(coords) & rownames(coords) %in% samplenames)){#
-			stop("All individuals in coords file must be in vcf")#
-		}#
-		x.min <- min((coords[,1]-0.5))#
-		x.max <- max((coords[,1]+0.5))#
-		y.min <- min((coords[,2]-0.5))#
-		y.max <- max((coords[,2]+0.5))#
-		maxK <- min(nrow(unique(coords)),(numind-1))#
-	} else {#
-		maxK <- (numind-1)#
-	}#
-	if(max(Krange) > maxK){#
-		Krange <- 1:maxK#
-	}#
-	geno.temp.path <- paste0(tempfile(),".geno")#
-	geno.obj       <- vcfR2geno(vcf=vcf,out=geno.temp.path)#
-	snmf.obj       <- LEA::snmf(geno.temp.path,K=Krange, repetitions=reps,entropy=entropy,project="new",iterations=iter,CPU=CPU)#
-	crossentropy.mat  <- t(do.call(cbind,lapply(X=Krange,FUN=function(x){LEA::cross.entropy(snmf.obj,K = x)})))#
-	rownames(crossentropy.mat) <- Krange#
-	colnames(crossentropy.mat) <- paste0("rep",1:reps)#
-	boxplot(t(crossentropy.mat))#
-	mean.entropy   <- apply(crossentropy.mat,MARGIN=1,FUN=mean,na.rm=TRUE)#
-#	plot(Krange,mean.entropy,pch=21,col="blue",xlab="",ylab="",xlim=range(Krange), ylim=range(range.entropy.mat))#
-#	arrows(x0=Krange,y0=range.entropy.mat[,1],y1=range.entropy.mat[,2],length=0.07,col="black",angle=90,code=3)#
-#	lines(Krange,mean.entropy,col="blue")#
-	if(any(diff(mean.entropy)>0)){#
-		bestK <- unname(which(diff(mean.entropy)>0)[1])#
-	} else {#
-		bestK <- unname(Krange[1])#
-	}#
-	Kbest.criteria1   <- bestK#
-	### Checking if the max BIC of the next K value is less than the min BIC of the previous K value.#
-	range.entropy.mat <- do.call(rbind,lapply(X=1:nrow(crossentropy.mat),FUN=function(x){range(crossentropy.mat[x,],na.rm=TRUE)}))#
-	entropy.is.nonoverlap <- NULL#
-	entropy.is.reduced    <- NULL#
-	for(i in 2:nrow(range.entropy.mat)){#
-		entropy.is.nonoverlap  <- c(entropy.is.nonoverlap, range.entropy.mat[i,1] > range.entropy.mat[(i-1),2] | range.entropy.mat[i,2] < range.entropy.mat[(i-1),1])#
-		entropy.is.reduced     <- c(entropy.is.reduced, range.entropy.mat[i,2] < range.entropy.mat[(i-1),1])#
-	}#
-	# If max BIC for K=2 is better than BIC K=1 and if some K values are not better (all BIC lower) than K-1, then find the first K value in which K+1 is not better.#
-	if(any(!entropy.is.reduced) & entropy.is.reduced[1]){#
-		Kbest.criteria2 <- which(!entropy.is.reduced)[1]#
-	} else {#
-		Kbest.criteria2 <- 1#
-	}#
-	### Which K value (for K>=2) yields the least variable BIC scores.#
-	Entropy.variation <- apply(X=crossentropy.mat,MARGIN=1,FUN=var,na.rm=TRUE)#
-	Kbest.criteria3   <- which(Entropy.variation==min(Entropy.variation[-1]))#
-	### Criteria 4: t-tests for entropy of each pairwise adjacent K#
-	for(i in 2:nrow(crossentropy.mat)){#
-		t.test.i <- t.test(crossentropy.mat[i-1,],crossentropy.mat[i,])#
-		pval.i   <- t.test.i$p.value#
-		stat.i   <- t.test.i$statistic#
-		if(pval.i < 0.05 & stat.i > 0){#
-			next#
-		} else {#
-			if(i==nrow(crossentropy.mat)){#
-				Kbest.criteria4 <- NULL#
-			} else{#
-				Kbest.criteria4 <- (i-1)#
-				break#
-			}#
-		}#
-	}#
-	segments(x0=bestK,y0=par("usr")[3],y1=par("usr")[4],lty=2,col="black")#
-	# segments(x0=bestK,y0=par("usr")[3],y1=par("usr")[4],lty=2,col="green")#
-	# segments(x0=Kbest.criteria2,y0=par("usr")[3],y1=par("usr")[4],lty=2,col="blue")#
-	# segments(x0=Kbest.criteria3,y0=par("usr")[3],y1=par("usr")[4],lty=2,col="red")#
-	mtext(side=1,"Number of ancestral populations",line=2.2)#
-	mtext(side=2,"Cross-entropy",line=2.2)#
-	mtext(side=3,paste0("Cross-entropy (",reps," replicates) vs. number of ancestral populations (K)"),line=1)#
-	axis(1,at=Krange)#
-	entropyPlot    <- recordPlot()#
-	Krange.plot    <- setdiff(Krange,1)#
-	admixturePlot  <- list(); length(admixturePlot)   <- length(Krange.plot)#
-	mapplot        <- list(); length(mapplot)         <- length(Krange.plot)#
-	for(K in Krange.plot){#
-		i=(K-1)#
-		ce           <- LEA::cross.entropy(snmf.obj, K = K)#
-		best         <- which.min(ce)#
-	#	q.matrix.best <- suppressWarnings(tess3r::as.qmatrix(LEA::Q(snmf.obj,K=bestK,run=best)))#
-		if(K < 5){#
-			myCols          <- goodcolors(K,thresh=100)#
-		}#
-		if(K >= 5 & K < 7){#
-			myCols          <- goodcolors(K,thresh=100,cbspace="deut")#
-		}#
-		if(K >= 7 & K < 15){#
-			myCols          <- goodcolors(K,thresh=100,cbspace="")#
-		}#
-		if(K>=15){#
-			myCols          <- c(goodcolors(14,thresh=100,cbspace=""), sample(adegenet::funky(100), size=K-14))#
-		}#
-		q.matrix           <- LEA::Q(snmf.obj,K=K,run=best)#
-		rownames(q.matrix) <- samplenames#
-		colnames(q.matrix) <- paste0("cluster",1:ncol(q.matrix))#
-		posterior.df       <- data.frame(indv=rep(rownames(q.matrix),ncol(q.matrix)), pop=rep(colnames(q.matrix),each=nrow(q.matrix)), assignment=c(unlist(unname(q.matrix))))#
-		posterior.gg       <- ggplot2::ggplot(posterior.df, aes(fill= pop, x= assignment, y=indv)) + geom_bar(position="stack", stat="identity") + theme_classic() + theme(axis.text.y = element_text(size = label.size), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank()) + ggplot2::labs(x = "Membership Probability",y="",fill="Cluster",title=paste0("K = ",K)) + scale_fill_manual(values=myCols[1:K])#
-		plot(posterior.gg)#
-		admixturePlot[[i]]   <- recordPlot()#
-		if(!is.null(coords)){#
-			my.palette      <- tess3r::CreatePalette(myCols, 9)#
-			xdist           <- geosphere::distm(x=c(x.min,0),y=c(x.max,0))#
-			ydist           <- geosphere::distm(x=c(0,y.min),y=c(0,y.max))#
-			mapplot.initial <- plot(suppressWarnings(tess3r::as.qmatrix(q.matrix)), as.matrix(coords), method = "map.max", interpol = FieldsKrigModel(10), main = paste0("Ancestry coefficients; K=",K), xlab = "", ylab = "",resolution = c(100,100), cex = 0.4,col.palette = my.palette, window=c(x.min,x.max,y.min,y.max),asp=xdist/ydist)#
-			mapplot.i       <- plot(suppressWarnings(tess3r::as.qmatrix(q.matrix)), as.matrix(coords), method = "map.max", interpol = FieldsKrigModel(10), main = paste0("Ancestry coefficients; K=",K), xlab = "", ylab = "",resolution = c(500,500), cex = 0.4,col.palette = my.palette, window=c(par("usr")[1],par("usr")[2],par("usr")[3],par("usr")[4]),asp=xdist/ydist)#
-			mapplot[[i]]    <- recordPlot()#
-		}#
-	}#
-	if(!is.null(coords)){#
-		result <- c(list(entropyPlot),admixturePlot,mapplot)#
-	} else {#
-		result <- c(list(entropyPlot),admixturePlot)#
-	}#
-	if(!is.null(save.as)){#
-		pdf(height=6,width=10,file=save.as,onefile=TRUE)#
-		lapply(X=result,FUN=print)#
-		dev.off()#
-	}#
-	result#
-}
-bothmodestum <- run_SNMF(vcf="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/DAPC/Oxyrhabdium_both-modestum_BestSNP.vcf",#
-	                           coords="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/tess3r/Oxyrhabdium_bothmodestum_coords.txt",reps=30,Krange=1:4,#
-	                           save.as="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/LEA/Oxyrhabdium_both-modestum_BestSNP_sNMF_run1.pdf")
-bothmodestum <- run_SNMF(vcf="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/DAPC/Oxyrhabdium_both-modestum_BestSNP.vcf",#
-	                           coords="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/tess3r/Oxyrhabdium_bothmodestum_coords.txt",reps=30,Krange=1:4,#
-	                           save.as="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/LEA/Oxyrhabdium_both-modestum_BestSNP_sNMF_test.pdf")
-runtess <- function(vcf,coords=NULL,Krange=1:40,ploidy=2,mask=0.05,reps=100,max.iteration=500,save.as=NULL){#
-	vcf.obj     <- vcfR::read.vcfR(vcf)#
-	samplenames <- colnames(vcf.obj@gt)[-1]#
-	numind      <- length(samplenames)#
-	label.size  <- min((288/numind),7)#
-	lfmm.obj    <- vcfR2lfmm(vcf=vcf)#
-	if(is(coords,"array") | is(coords,"data.frame")){#
-		coords <-  coords#
-	} else {#
-		if(file.exists(coords)){#
-			coords   <- read.table(coords)#
-		}#
-	}#
-	maxK <- min(nrow(unique(coords)),(numind-1))#
-	if(max(Krange) > maxK){#
-		Krange <- 1:maxK#
-	}#
-	tess.obj <- tess3r::tess3(X = lfmm.obj, coord = as.matrix(coords), K=Krange, ploidy = ploidy, verbose=FALSE ,mask=0.05, rep=reps, max.iteration=max.iteration,keep="all")#
-	crossentropy.mat <- do.call(rbind,lapply(X=1:length(tess.obj),FUN=function(x){matrix(unlist(tess.obj[[x]]["crossentropy"]),nrow=1)}))#
-	rownames(crossentropy.mat) <- Krange#
-	colnames(crossentropy.mat) <- paste0("rep",1:reps)#
-	par(mfrow=c(1,1))#
-	mean.entropy <- apply(crossentropy.mat,MARGIN=1,FUN=mean,na.rm=TRUE)#
-	range.entropy.mat <- do.call(rbind,lapply(X=1:nrow(crossentropy.mat),FUN=function(x){range(crossentropy.mat[x,],na.rm=TRUE)}))#
-	boxplot(t(crossentropy.mat))#
-	if(any(diff(mean.entropy)>0)){#
-		bestK <- unname(which(diff(mean.entropy)>0)[1])#
-	} else {#
-		bestK <- unname(Krange[1])#
-	}#
-	### Criteria 3: Which K value (for K>=2) yields the least variable entropy scores.#
-	Entropy.variation <- apply(X=crossentropy.mat,MARGIN=1,FUN=var,na.rm=TRUE)#
-	Kbest.criteria3   <- which(Entropy.variation==min(Entropy.variation[-1]))#
-	### Criteria 4: t-tests for entropy of each pairwise adjacent K#
-	for(i in 2:nrow(crossentropy.mat)){#
-		t.test.i <- t.test(crossentropy.mat[i-1,],crossentropy.mat[i,])#
-		pval.i   <- t.test.i$p.value#
-		stat.i   <- t.test.i$statistic#
-		if(pval.i < 0.05 & stat.i > 0){#
-			next#
-		} else {#
-			if(i==nrow(crossentropy.mat)){#
-				Kbest.criteria4 <- NULL#
-			} else{#
-				Kbest.criteria4 <- (i-1)#
-				break#
-			}#
-		}#
-	}#
-	####
-	if(bestK>1){#
-		segments(x0=bestK,y0=par("usr")[3],y1=par("usr")[4],lty=2)#
-	}#
-	mtext(side=1,"Number of ancestral populations",line=2.2)#
-	mtext(side=2,"Cross-validation score",line=2.2)#
-	mtext(side=3,paste0("Cross-validation score (",reps," replicates) vs. number of ancestral populations (K)"),line=1)#
-	axis(1,at=Krange)#
-	entropyPlot <- recordPlot()#
-	## List holding population assignment probabilities for each K#
-	slist <- lapply(X=Krange,FUN=function(x){as.data.frame(tess3r::qmatrix(tess3=tess.obj, K = x))})#
-	par(mar=c(5.1,4.1,4.1,2.1),mfrow=c(1,1))#
-	Krange.plot    <- setdiff(Krange,1)#
-	admixturePlot  <- list(); length(admixturePlot)   <- length(Krange.plot)#
-	mapplot        <- list(); length(mapplot)         <- length(Krange.plot)#
-	x.min <- min((coords[,1]-0.5))#
-	x.max <- max((coords[,1]+0.5))#
-	y.min <- min((coords[,2]-0.5))#
-	y.max <- max((coords[,2]+0.5))#
-	for(K in Krange.plot){#
-		i=(K-1)#
-		q.matrix  <- slist[[K]]#
-		rownames(q.matrix) <- samplenames#
-		colnames(q.matrix) <- paste0("cluster",1:ncol(q.matrix))#
-		posterior.df       <- data.frame(indv=rep(rownames(q.matrix),ncol(q.matrix)), pop=rep(colnames(q.matrix),each=nrow(q.matrix)), assignment=c(unlist(unname(q.matrix))))#
-		if(K < 5){#
-			myCols          <- goodcolors(K,thresh=100)#
-		}#
-		if(K >= 5 & K < 7){#
-			myCols          <- goodcolors(K,thresh=100,cbspace="deut")#
-		}#
-		if(K >= 7 & K < 15){#
-			myCols          <- goodcolors(K,thresh=100,cbspace="")#
-		}#
-		if(K>=15){#
-			myCols          <- c(goodcolors(14,thresh=100,cbspace=""), sample(adegenet::funky(100), size=K-14))#
-		}#
-		posterior.gg        <- ggplot2::ggplot(posterior.df, aes(fill= pop, x= assignment, y=indv)) + geom_bar(position="stack", stat="identity") + theme_classic() + theme(axis.text.y = element_text(size = label.size), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank()) + ggplot2::labs(x = "Membership Probability",y="",fill="Cluster",title=paste0("K = ",K)) + scale_fill_manual(values=myCols[1:K])#
-		plot(posterior.gg)#
-		admixturePlot[[i]]   <- recordPlot()#
-		my.palette   <- tess3r::CreatePalette(myCols, 9)#
-		xdist        <- geosphere::distm(x=c(x.min,0),y=c(x.max,0))#
-		ydist        <- geosphere::distm(x=c(0,y.min),y=c(0,y.max))#
-		mapplot.initial <- plot(suppressWarnings(tess3r::as.qmatrix(q.matrix)), as.matrix(coords), method = "map.max", interpol = FieldsKrigModel(10), main = paste0("Ancestry coefficients; K=",K), xlab = "", ylab = "",resolution = c(100,100), cex = 0.4,col.palette = my.palette, window=c(x.min,x.max,y.min,y.max),asp=xdist/ydist)#
-		mapplot.i       <- plot(suppressWarnings(tess3r::as.qmatrix(q.matrix)), as.matrix(coords), method = "map.max", interpol = FieldsKrigModel(10), main = paste0("Ancestry coefficients; K=",K), xlab = "", ylab = "",resolution = c(500,500), cex = 0.4,col.palette = my.palette, window=c(par("usr")[1],par("usr")[2],par("usr")[3],par("usr")[4]),asp=xdist/ydist)#
-		mapplot[[i]]    <- recordPlot()#
-	}#
-	result <- c(list(entropyPlot),admixturePlot,mapplot)#
-	if(!is.null(save.as)){#
-		pdf(height=6,width=10,file=save.as,onefile=TRUE)#
-		lapply(X=result,FUN=print)#
-		dev.off()#
-	}#
-	result#
-}
-run_DAPC <- function(vcf, kmax=50, coords=NULL, reps=100,probs.out=NULL,save.as=NULL){#
-	dev.new(width=10,height=6)#
-	vcf.obj     <- vcfR::read.vcfR(vcf,verbose=F)#
-	samplenames <- colnames(vcf.obj@gt)[-1]#
-	genind      <- suppressWarnings(vcfR::vcfR2genind(vcf.obj))#
-	numind      <- (dim(attributes(vcf.obj)[["gt"]])[2])-1#
-	label.size  <- min((288/numind),7)#
-	if(!is.null(coords)){#
-		if(is(coords,"array") | is(coords,"data.frame")){#
-			coords <-  coords#
-		} else {#
-			if(file.exists(coords)){#
-				coords   <- read.table(coords)#
-			}#
-		}#
-		x.min <- min((coords[,1]-0.5))#
-		x.max <- max((coords[,1]+0.5))#
-		y.min <- min((coords[,2]-0.5))#
-		y.max <- max((coords[,2]+0.5))#
-		maxK <- min(nrow(unique(coords)),(numind-1))#
-	} else {#
-		maxK <- (numind-1)#
-	}#
-	if(is.null(kmax)){#
-		kmax <- maxK#
-	} else {#
-		if(kmax > maxK){#
-			kmax <- maxK#
-		}#
-	}#
-	max.clusters <- kmax#
-	grp          <- adegenet::find.clusters(genind, max.n.clust=max.clusters,n.pca=max.clusters,choose.n.clust=F)#
-	grp.list <- list(); length(grp.list) <- reps#
-	par(mar=c(3.5,4,3,2.1))#
-	for(i in 1:reps){#
-		grp.list[[i]] <- adegenet::find.clusters(genind, max.n.clust=max.clusters,n.pca=max.clusters,choose.n.clust=F)#
-	}#
-	BIC.mat           <- do.call(cbind,lapply(X=1:reps,FUN=function(x){grp.list[[x]]$Kstat}))#
-	rownames(BIC.mat) <- 1:max.clusters#
-	colnames(BIC.mat) <- paste0("rep",1:reps)#
-	boxplot(t(BIC.mat))#
-	mean.BIC        <- apply(BIC.mat,MARGIN=1,FUN=mean,na.rm=TRUE)#
-	### Lowest K with a lower mean BIC than K+1 mean BIC.#
-	if(any(diff(mean.BIC)>0)){#
-		bestK <- unname(which(diff(mean.BIC)>0)[1])#
-	} else {#
-		bestK <- 1#
-	}#
-	Kbest.criteria1   <- bestK#
-	### Checking if the max BIC of the next K value is less than the min BIC of the previous K value.#
-	range.BIC.mat     <- do.call(rbind,lapply(X=1:nrow(BIC.mat),FUN=function(x){range(BIC.mat[x,],na.rm=TRUE)}))#
-	BIC.is.nonoverlap <- NULL#
-	BIC.is.reduced    <- NULL#
-	for(i in 2:nrow(range.BIC.mat)){#
-		BIC.is.nonoverlap     <- c(BIC.is.nonoverlap,range.BIC.mat[i,1] > range.BIC.mat[(i-1),2] | range.BIC.mat[i,2] < range.BIC.mat[(i-1),1])#
-		BIC.is.reduced     <- c(BIC.is.reduced,range.BIC.mat[i,2] < range.BIC.mat[(i-1),1])#
-	}#
-	# If max BIC for K=2 is better than BIC K=1 and if some K values are not better (all BIC lower) than K-1, then find the first K value in which K+1 is not better.#
-	if(any(!BIC.is.reduced) & BIC.is.reduced[1]){#
-		Kbest.criteria2 <- which(!BIC.is.reduced)[1]#
-	} else {#
-		Kbest.criteria2 <- 1#
-	}#
-	### Which K value (for K>=2) yields the least variable BIC scores.#
-	BICvK.variation <- apply(X=BIC.mat,MARGIN=1,FUN=var)#
-	KminVarBIC      <- which(BICvK.variation==min(BICvK.variation[-1]))#
-	Kbest.criteria3 <- KminVarBIC#
-	### Criteria 4: t-tests for BIC of each pairwise adjacent K#
-	for(i in 2:nrow(BIC.mat)){#
-		t.test.i <- t.test(BIC.mat[i-1,],BIC.mat[i,])#
-		pval.i   <- t.test.i$p.value#
-		stat.i   <- t.test.i$statistic#
-		if(pval.i < 0.05 & stat.i > 0){#
-			next#
-		} else {#
-			if(i==nrow(BIC.mat)){#
-				Kbest.criteria4 <- NULL#
-			} else{#
-				Kbest.criteria4 <- (i-1)#
-				break#
-			}#
-		}#
-	}#
-	if(bestK>1){#
-		segments(x0=Kbest.criteria1, y0=par("usr")[3], y1=par("usr")[4],lty=2,col="black")#
-	}#
-	# segments(x0=Kbest.criteria1, y0=par("usr")[3], y1=par("usr")[4],lty=2,col="green")#
-	# segments(x0=Kbest.criteria2, y0=par("usr")[3], y1=par("usr")[4],lty=2,col="blue")#
-	# segments(x0=Kbest.criteria3, y0=par("usr")[3], y1=par("usr")[4],lty=2,col="orange")#
-	mtext(side=1,"Number of ancestral populations",line=2.2)#
-	mtext(side=2,"BIC",line=2.2)#
-	mtext(side=3,paste0("BIC (",reps," replicates of find.clusters) vs. number of clusters (K)"),line=1)#
-	axis(1,at=1:max.clusters)#
-	BICPlot    <- recordPlot()#
-	best.npca    <- NULL#
-	grp.mat      <- matrix(data=0,nrow=length(grp$grp),ncol=(max.clusters-1))#
-	for(K in 2:max.clusters){#
-		i=(K-1)#
-		grp.K         <- adegenet::find.clusters(genind, max.n.clust=max.clusters,n.pca=max.clusters,n.clust=K)#
-		grp.mat[,i]   <- grp.K$grp#
-		dapc.pcamax.K <- suppressWarnings(adegenet::dapc(genind, grp.K$grp,n.pca=max.clusters,n.da=5))#
-		alpha_optim.K <- suppressWarnings(adegenet::optim.a.score(dapc.pcamax.K,plot=FALSE))#
-		best.npca     <- c(best.npca,alpha_optim.K$best)#
-	}#
-	##### Plot 2: BIC vs. K when number of PCs retained = alpha optimized #
-	par(mar=c(4,4,3,2.1))#
-	names(best.npca) <- 2:max.clusters#
-	barplot(best.npca)#
-	mtext(text="Alpha optimized number of principle components to retain",side=2,line=2)#
-	mtext(text="Number of clusters",side=1,line=2)#
-	mtext(text="alpha optimized # of PCs vs. number of clusters",side=3,line=1)#
-	grp.plot2      <- recordPlot()#
-	par(mfrow=c(1,1))#
-	admixturePlot  <- list(); length(admixturePlot)   <- max.clusters-1#
-	assignmentPlot <- list(); length(assignmentPlot)  <- max.clusters-1#
-	posterior.list <- list(); length(posterior.list)  <- max.clusters-1#
-	mapplot <- list(); length(mapplot)  <- max.clusters-1#
-	for(K in 2:max.clusters){#
-		i=(K-1)#
-		par(mar=c(5.1,4.1,4.1,2.1),mfrow=c(1,1))#
-		dapc.pcabest.K  <- adegenet::dapc(genind, grp.mat[,i],n.pca=best.npca[i],n.da=5)#
-		posterior       <- dapc.pcabest.K$posterior#
-		q.matrix        <- posterior#
-		posterior.list[[i]] <- posterior#
-		posterior.df    <- data.frame(indv=rep(rownames(posterior),ncol(posterior)), pop=rep(colnames(posterior),each=nrow(posterior)), assignment=c(posterior))#
-		if(K < 5){#
-			myCols          <- goodcolors(K,thresh=100)#
-		}#
-		if(K >= 5 & K < 7){#
-			myCols          <- goodcolors(K,thresh=100,cbspace="deut")#
-		}#
-		if(K >= 7 & K < 15){#
-			myCols          <- goodcolors(K,thresh=100,cbspace="")#
-		}#
-		if(K>=15){#
-			myCols          <- c(goodcolors(14,thresh=100,cbspace=""), sample(adegenet::funky(100), size=K-14))#
-		}#
-		posterior.gg        <- ggplot2::ggplot(posterior.df, aes(fill= pop, x= assignment, y=indv)) + geom_bar(position="stack", stat="identity") + theme_classic() + theme(axis.text.y = element_text(size = label.size), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank()) + ggplot2::labs(x = "Membership Probability",y="",fill="Cluster",title=paste0("K = ",K,"; PCs retained = ",best.npca[i])) + scale_fill_manual(values=myCols[1:K])#
-		plot(posterior.gg)#
-		admixturePlot[[i]]   <- recordPlot()#
-		par(mar=c(5,20,2,2.1),mfrow=c(1,1))#
-		assignment.K         <- adegenet::assignplot(dapc.pcabest.K,cex.lab=(label.size/10))#
-		mtext(text=paste0("K = ",K,"; PCs retained = ",best.npca[i]))#
-		assignmentPlot[[i]]  <- recordPlot()#
-		par(mar=c(5.1,4.1,4.1,2.1),mfrow=c(1,1))#
-		if(!is.null(coords)){#
-			my.palette      <- tess3r::CreatePalette(myCols, 9)#
-			xdist           <- geosphere::distm(x=c(x.min,0),y=c(x.max,0))#
-			ydist           <- geosphere::distm(x=c(0,y.min),y=c(0,y.max))#
-			tess3r.qmat     <- suppressWarnings(tess3r::as.qmatrix(q.matrix))#
-			coords.mat      <- as.matrix(coords)#
-			mapplot.initial <- plot(tess3r.qmat, coords.mat, method = "map.max", interpol = FieldsKrigModel(10), main = paste0("Ancestry coefficients; K=",K), xlab = "", ylab = "",resolution = c(100,100), cex = 0.4,col.palette = my.palette, window=c(x.min,x.max,y.min,y.max),asp=xdist/ydist)#
-			mapplot.i       <- plot(tess3r.qmat, coords.mat, method = "map.max", interpol = FieldsKrigModel(10), main = paste0("Ancestry coefficients; K=",K), xlab = "", ylab = "",resolution = c(500,500), cex = 0.4,col.palette = my.palette, window=c(par("usr")[1],par("usr")[2],par("usr")[3],par("usr")[4]),asp=xdist/ydist)#
-			mapplot[[i]]    <- recordPlot()#
-		}#
-	}#
-	if(bestK>1){#
-		posterior.bestK <- posterior.list[[bestK-1]]#
-		colnames(posterior.bestK) <- paste0("K",colnames(posterior.bestK))#
-		if(!is.null(probs.out)){#
-			write.table(posterior.bestK,file=probs.out,quote=F,col.names=T,row.names=T)#
-		}#
-	} else {#
-		posterior.bestK <- matrix(data=rep(1,numind),ncol=1)#
-		rownames(posterior.bestK) <- samplenames#
-	}#
-	dev.off()#
-	if(!is.null(coords)){#
-		result <- c(list(BICPlot,grp.plot2),admixturePlot,assignmentPlot,mapplot)#
-	} else {#
-		result <- c(list(BICPlot,grp.plot2),admixturePlot,assignmentPlot)#
-	}#
-	if(!is.null(save.as)){#
-		pdf(height=6,width=10,file=save.as,onefile=TRUE)#
-		lapply(X=result,FUN=print)#
-		dev.off()#
-	}#
-	result#
-}
-bothmodestum <- run_SNMF(vcf="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/DAPC/Oxyrhabdium_both-modestum_BestSNP.vcf",#
-	                           coords="/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/tess3r/Oxyrhabdium_bothmodestum_coords.txt",#
-	                           save.as="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/LEA/Oxyrhabdium_both-modestum_BestSNP_sNMF_run2.pdf")
-source("/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/DAPC/DAPC_adegenet.R")
-q()
-library(ade4)#
-	library(adegenet)#
-	library(vcfR)#
-	library(ggplot2)#
-	library(tess3r)#
-	library(rworldmap)#
-	library(LEA)#
-	library(geosphere)#
-	library(maps)#
-	library(dartR)#
-	source("/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/DAPC/DAPC_adegenet.R")#
-	source("/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/runtess.R")#
-	source("/Users/alyssaleinweber/Documents/Chapter3_Oxyrhabdium/LEA/run_SNMF.R")
-dev.new(width=10,height=6)
-cfmodestum_Luzon <- run_DAPC(vcf="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/DAPC/Oxyrhabdium-cf.modestum_Luzon_BestSNP.vcf",#
-                            probs.out="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/DAPC/Oxyrhabdium-cf.modestum_Luzon_BestSNP_DAPC_BestK_Membership_run2.txt",#
-                            coords="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/tess3r/Oxyrhabdium-cfmodestum_Luzon_coords.txt",#
-                            save.as="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/DAPC/Oxyrhabdium-cfmodestum_Luzon_BestSNP_DAPC_run1.pdf")
-vcf="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/DAPC/Oxyrhabdium-cf.modestum_Luzon_BestSNP.vcf";#
-                             probs.out="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/DAPC/Oxyrhabdium-cf.modestum_Luzon_BestSNP_DAPC_BestK_Membership_run2.txt";#
-                             coords="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/tess3r/Oxyrhabdium-cfmodestum_Luzon_coords.txt";#
-                             save.as="/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/DAPC/Oxyrhabdium-cfmodestum_Luzon_BestSNP_DAPC_run1.pdf"
-kmax=50
-reps=100
-vcf.obj     <- vcfR::read.vcfR(vcf,verbose=F)#
-	samplenames <- colnames(vcf.obj@gt)[-1]#
-	genind      <- suppressWarnings(vcfR::vcfR2genind(vcf.obj))#
-	numind      <- (dim(attributes(vcf.obj)[["gt"]])[2])-1#
-	label.size  <- min((288/numind),7)
-samplenames
-!is.null(coords)
-if(is(coords,"array") | is(coords,"data.frame")){#
-			coords <-  coords#
-		} else {#
-			if(file.exists(coords)){#
-				coords   <- read.table(coords)#
-			}#
+			mapplot[[i]] <- mapplot2.i#
 		}
-coords
-x.min <- min((coords[,1]-0.5))#
-		x.max <- max((coords[,1]+0.5))#
-		y.min <- min((coords[,2]-0.5))#
-		y.max <- max((coords[,2]+0.5))#
-		maxK <- min(nrow(unique(coords)),(numind-1))
-if(is.null(kmax)){#
-		kmax <- maxK#
-	} else {#
-		if(kmax > maxK){#
-			kmax <- maxK#
-		}#
-	}
-max.clusters <- kmax
-grp          <- adegenet::find.clusters(genind, max.n.clust=max.clusters,n.pca=max.clusters,choose.n.clust=F)
-for(i in 1:reps){#
-		grp.list[[i]] <- adegenet::find.clusters(genind, max.n.clust=max.clusters,n.pca=max.clusters,choose.n.clust=F)#
-	}#
-	BIC.mat           <- do.call(cbind,lapply(X=1:reps,FUN=function(x){grp.list[[x]]$Kstat}))
-grp.list <- list(); length(grp.list) <- reps#
-	par(mar=c(3.5,4,3,2.1))#
-	for(i in 1:reps){#
-		grp.list[[i]] <- adegenet::find.clusters(genind, max.n.clust=max.clusters,n.pca=max.clusters,choose.n.clust=F)#
-	}#
-	BIC.mat           <- do.call(cbind,lapply(X=1:reps,FUN=function(x){grp.list[[x]]$Kstat}))
-rownames(BIC.mat) <- 1:max.clusters#
-	colnames(BIC.mat) <- paste0("rep",1:reps)#
-	boxplot(t(BIC.mat))#
-	mean.BIC        <- apply(BIC.mat,MARGIN=1,FUN=mean,na.rm=TRUE)
-if(any(diff(mean.BIC)>0)){#
-		bestK <- unname(which(diff(mean.BIC)>0)[1])#
-	} else {#
-		bestK <- 1#
-	}#
-	Kbest.criteria1   <- bestK
-Kbest.criteria1
-range.BIC.mat     <- do.call(rbind,lapply(X=1:nrow(BIC.mat),FUN=function(x){range(BIC.mat[x,],na.rm=TRUE)}))#
-	BIC.is.nonoverlap <- NULL#
-	BIC.is.reduced    <- NULL
-range.BIC.mat
-for(i in 2:nrow(range.BIC.mat)){#
-		BIC.is.nonoverlap     <- c(BIC.is.nonoverlap,range.BIC.mat[i,1] > range.BIC.mat[(i-1),2] | range.BIC.mat[i,2] < range.BIC.mat[(i-1),1])#
-		BIC.is.reduced     <- c(BIC.is.reduced,range.BIC.mat[i,2] < range.BIC.mat[(i-1),1])#
-	}
-if(any(!BIC.is.reduced) & BIC.is.reduced[1]){#
-		Kbest.criteria2 <- which(!BIC.is.reduced)[1]#
-	} else {#
-		Kbest.criteria2 <- 1#
-	}
-BICvK.variation <- apply(X=BIC.mat,MARGIN=1,FUN=var)
-BICvK.variation
-KminVarBIC      <- which(BICvK.variation==min(BICvK.variation[-1]))
-KminVarBIC
-Kbest.criteria3 <- KminVarBIC[1]
-Kbest.criteria3
-for(i in 2:nrow(BIC.mat)){#
-		t.test.i <- t.test(BIC.mat[i-1,],BIC.mat[i,])#
-		pval.i   <- t.test.i$p.value#
-		stat.i   <- t.test.i$statistic#
-		if(pval.i < 0.05 & stat.i > 0){#
-			next#
+mapplot[[1]]
+i
+mapplot2.i
+mapplot.i
+mapplot2.i   <- mapplot.i + ggplot2::geom_sf(data=world_sf, colour = "black", fill = NA, inherit.aes=FALSE) + ggplot2::coord_sf(xlim=c(x.min, x.max), ylim=c(y.min, ymax=y.max),expand=FALSE)
+mapplot2.i
+y.min
+y.max
+test2 <- mapplot.i  + ggplot2::geom_sf(data=world_sf, colour = "black", fill = NA,inherit.aes=F) + ggplot2::coord_sf(xlim=c(x.min, x.max), ylim=c(y.min, ymax=y.max),expand=FALSE)
+test2
+mapplot.i
+class(mapplot.i)
+mapplot.i <- plots[[i]]
+mapplot.2i <- mapplot.i + ggplot2::geom_sf(data=world_sf,colour = "black", fill = NA,inherit.aes=F) + ggplot2::coord_sf(xlim=c(x.min, x.max), ylim=c(y.min, ymax=y.max),expand=FALSE)
+plot(mapplot.2i)
+world_sf <- rnaturalearth::ne_countries(scale=10,returnclass="sf")[1]
+mapplot.2i <- mapplot.i + ggplot2::geom_sf(data=world_sf,colour = "black", fill = NA,inherit.aes=F) + ggplot2::coord_sf(xlim=c(x.min, x.max), ylim=c(y.min, ymax=y.max),expand=FALSE)
+world_sf <- rnaturalearth::ne_countries(scale=10,returnclass="sf")[1]#
+	world_sp <- rnaturalearth::ne_countries(scale=10,returnclass="sp")
+mapplot.i    <- plots.chain[[i]]#
+		mapplot2.i   <- mapplot.i + ggplot2::geom_sf(data=world_sf, colour = "black", fill = NA, inherit.aes=FALSE) + ggplot2::coord_sf(xlim=c(x.min, x.max), ylim=c(y.min, ymax=y.max),expand=FALSE)
+mapplot2.i
+if(plot.coords){#
+			mapplot[[i]] <- mapplot2.i + ggplot2::geom_point(data = coordinates, ggplot2::aes(x = Lon, y = Lat), size = 1, shape = 21, fill = "black")#
 		} else {#
-			if(i==nrow(BIC.mat)){#
-				Kbest.criteria4 <- NULL#
-			} else{#
-				Kbest.criteria4 <- (i-1)#
-				break#
-			}#
-		}#
-	}
-t.test.i <- t.test(BIC.mat[i-1,],BIC.mat[i,])
-for(i in 2:nrow(BIC.mat)){#
-		if(KminVarBIC==0){#
-			Kbest.criteria4 <- NULL#
-			break#
-		}#
-		t.test.i <- t.test(BIC.mat[i-1,],BIC.mat[i,])#
-		pval.i   <- t.test.i$p.value#
-		stat.i   <- t.test.i$statistic#
-		if(pval.i < 0.05 & stat.i > 0){#
-			next#
+			mapplot[[i]] <- mapplot2.i#
+		}
+mapplot[[i]]
+class(spdf_oceans_10)
+class(world_sf)
+library(sf)
+test <- ggplot2::st_sf(spdf_oceans_10)
+test <- st_sf(spdf_oceans_10)
+test <- st_as_sf(spdf_oceans_10)
+oceans_sf <- sf::st_as_sf(spdf_oceans_10)
+mapplot3.i   <- mapplot2.i + ggplot2::geom_sf(data=oceans_sf, colour = NA, fill = "white", inherit.aes=FALSE) + ggplot2::coord_sf(xlim=c(x.min, x.max), ylim=c(y.min, ymax=y.max),expand=FALSE)
+mapplot3.i
+mapplot.i  <- plots.chain[[i]]#
+		mapplot2.i <- mapplot.i + ggplot2::geom_sf(data=world_sf, colour = "black", fill = NA, inherit.aes=FALSE) # + ggplot2::coord_sf(xlim=c(x.min, x.max), ylim=c(y.min, ymax=y.max),expand=FALSE)#
+		mapplot3.i <- mapplot2.i + ggplot2::geom_sf(data=oceans_sf, colour = NA, fill = "white", inherit.aes=FALSE) # + ggplot2::coord_sf(xlim=c(x.min, x.max), ylim=c(y.min, ymax=y.max),expand=FALSE)#
+		mapplot4.i <- mapplot3.i + ggplot2::coord_sf(xlim=c(x.min, x.max), ylim=c(y.min, ymax=y.max),expand=FALSE)
+mapplot2.i <- suppressMessages(mapplot.i + ggplot2::geom_sf(data=world_sf, colour = "black", fill = NA, inherit.aes=FALSE))
+mapplot3.i <- mapplot2.i + ggplot2::geom_sf(data=oceans_sf, colour = NA, fill = "white", inherit.aes=FALSE) # + ggplot2::coord_sf(xlim=c(x.min, x.max), ylim=c(y.min, ymax=y.max),expand=FALSE)#
+		mapplot4.i <- mapplot3.i + ggplot2::coord_sf(xlim=c(x.min, x.max), ylim=c(y.min, ymax=y.max),expand=FALSE)
+mapplot4.i
+mapplot.i  <- plots.chain[[i]]#
+		coords <- unique(mapplot.i$data[,c(1:2)])
+dim(coords)
+colnames(coords) <- c("Lon","Lat")#
+		x.min    <- min((coords[,1]-0.5))#
+		x.max    <- max((coords[,1]+0.5))#
+		y.min    <- min((coords[,2]-0.5))#
+		y.max    <- max((coords[,2]+0.5))
+mapplot2.i <- suppressMessages(mapplot.i + ggplot2::geom_sf(data=world_sf, colour = "black", fill = NA, inherit.aes=FALSE)) # + ggplot2::coord_sf(xlim=c(x.min, x.max), ylim=c(y.min, ymax=y.max),expand=FALSE)#
+		mapplot3.i <- mapplot2.i + ggplot2::geom_sf(data=oceans_sf, colour = NA, fill = "white", inherit.aes=FALSE) # + ggplot2::coord_sf(xlim=c(x.min, x.max), ylim=c(y.min, ymax=y.max),expand=FALSE)#
+		mapplot4.i <- mapplot3.i + ggplot2::coord_sf(xlim=c(x.min, x.max), ylim=c(y.min, ymax=y.max),expand=FALSE)#
+		if(plot.coords){#
+			mapplot[[i]] <- mapplot2.i + ggplot2::geom_point(data = coordinates, ggplot2::aes(x = Lon, y = Lat), size = 1, shape = 21, fill = "black")#
 		} else {#
-			if(i==nrow(BIC.mat)){#
-				Kbest.criteria4 <- NULL#
-			} else{#
-				Kbest.criteria4 <- (i-1)#
-				break#
-			}#
-		}#
-	}
-KminVarBIC==0
-BICvK.variation[Kbest.criteria3]
-for(i in 2:nrow(BIC.mat)){#
-		if(BICvK.variation[Kbest.criteria3]==0){#
-			Kbest.criteria4 <- NULL#
-			break#
-		}#
-		t.test.i <- t.test(BIC.mat[i-1,],BIC.mat[i,])#
-		pval.i   <- t.test.i$p.value#
-		stat.i   <- t.test.i$statistic#
-		if(pval.i < 0.05 & stat.i > 0){#
-			next#
+			mapplot[[i]] <- mapplot2.i#
+		}
+mapplot[[i]]
+if(plot.coords){#
+			mapplot[[i]] <- mapplot4.i + ggplot2::geom_point(data = coordinates, ggplot2::aes(x = Lon, y = Lat), size = 1, shape = 21, fill = "black")#
 		} else {#
-			if(i==nrow(BIC.mat)){#
-				Kbest.criteria4 <- NULL#
-			} else{#
-				Kbest.criteria4 <- (i-1)#
-				break#
-			}#
+			mapplot[[i]] <- mapplot4.i#
+		}
+mapplot[[i]]
+x.min    <- min(coords[,1])#
+		x.max    <- max(coords[,1])#
+		y.min    <- min(coords[,2])#
+		y.max    <- max(coords[,2])#
+		mapplot2.i <- suppressMessages(mapplot.i + ggplot2::geom_sf(data=world_sf, colour = "black", fill = NA, inherit.aes=FALSE)) # + ggplot2::coord_sf(xlim=c(x.min, x.max), ylim=c(y.min, ymax=y.max),expand=FALSE)#
+		mapplot3.i <- mapplot2.i + ggplot2::geom_sf(data=oceans_sf, colour = NA, fill = "white", inherit.aes=FALSE) # + ggplot2::coord_sf(xlim=c(x.min, x.max), ylim=c(y.min, ymax=y.max),expand=FALSE)#
+		mapplot4.i <- mapplot3.i + ggplot2::coord_sf(xlim=c(x.min, x.max), ylim=c(y.min, ymax=y.max),expand=FALSE)#
+		if(plot.coords){#
+			mapplot[[i]] <- mapplot4.i + ggplot2::geom_point(data = coordinates, ggplot2::aes(x = Lon, y = Lat), size = 1, shape = 21, fill = "black")#
+		} else {#
+			mapplot[[i]] <- mapplot4.i#
+		}
+mapplot[[i]]
+for(i in 1:length(plots.chain)){#
+		mapplot.i  <- plots.chain[[i]]#
+		coords <- unique(mapplot.i$data[,c(1:2)])#
+		colnames(coords) <- c("Lon","Lat")#
+		#x.min    <- min((coords[,1]-0.5))#
+		#x.max    <- max((coords[,1]+0.5))#
+		#y.min    <- min((coords[,2]-0.5))#
+		#y.max    <- max((coords[,2]+0.5))#
+		x.min    <- min(coords[,1])#
+		x.max    <- max(coords[,1])#
+		y.min    <- min(coords[,2])#
+		y.max    <- max(coords[,2])#
+		mapplot2.i <- suppressMessages(mapplot.i + ggplot2::geom_sf(data=world_sf, colour = "black", fill = NA, inherit.aes=FALSE)) # + ggplot2::coord_sf(xlim=c(x.min, x.max), ylim=c(y.min, ymax=y.max),expand=FALSE)#
+		mapplot3.i <- mapplot2.i + ggplot2::geom_sf(data=oceans_sf, colour = NA, fill = "white", inherit.aes=FALSE) # + ggplot2::coord_sf(xlim=c(x.min, x.max), ylim=c(y.min, ymax=y.max),expand=FALSE)#
+		mapplot4.i <- mapplot3.i + ggplot2::coord_sf(xlim=c(x.min, x.max), ylim=c(y.min, ymax=y.max),expand=FALSE)#
+		if(plot.coords){#
+			mapplot[[i]] <- mapplot4.i + ggplot2::geom_point(data = coordinates, ggplot2::aes(x = Lon, y = Lat), size = 1, shape = 21, fill = "black")#
+		} else {#
+			mapplot[[i]] <- mapplot4.i#
 		}#
 	}
-if(bestK>1){#
-		segments(x0=Kbest.criteria1, y0=par("usr")[3], y1=par("usr")[4],lty=2,col="black")#
-	}
-bestK
-if(bestK>1){#
-		segments(x0=Kbest.criteria1, y0=par("usr")[3], y1=par("usr")[4],lty=2,col="black")#
-	}
-mtext(side=1,"Number of ancestral populations",line=2.2)#
-	mtext(side=2,"BIC",line=2.2)#
-	mtext(side=3,paste0("BIC (",reps," replicates of find.clusters) vs. number of clusters (K)"),line=1)
-axis(1,at=1:max.clusters)#
-	BICPlot    <- recordPlot()#
-	best.npca    <- NULL#
-	grp.mat      <- matrix(data=0,nrow=length(grp$grp),ncol=(max.clusters-1))#
-	for(K in 2:max.clusters){#
-		i=(K-1)#
-		grp.K         <- adegenet::find.clusters(genind, max.n.clust=max.clusters,n.pca=max.clusters,n.clust=K)#
-		grp.mat[,i]   <- grp.K$grp#
-		dapc.pcamax.K <- suppressWarnings(adegenet::dapc(genind, grp.K$grp,n.pca=max.clusters,n.da=5))#
-		alpha_optim.K <- suppressWarnings(adegenet::optim.a.score(dapc.pcamax.K,plot=FALSE))#
-		best.npca     <- c(best.npca,alpha_optim.K$best)#
-	}
-##### Plot 2: BIC vs. K when number of PCs retained = alpha optimized #
-	par(mar=c(4,4,3,2.1))#
-	names(best.npca) <- 2:max.clusters#
-	barplot(best.npca)#
-	mtext(text="Alpha optimized number of principle components to retain",side=2,line=2)#
-	mtext(text="Number of clusters",side=1,line=2)#
-	mtext(text="alpha optimized # of PCs vs. number of clusters",side=3,line=1)#
-	grp.plot2      <- recordPlot()#
-	par(mfrow=c(1,1))#
-	admixturePlot  <- list(); length(admixturePlot)   <- max.clusters-1#
-	assignmentPlot <- list(); length(assignmentPlot)  <- max.clusters-1#
-	posterior.list <- list(); length(posterior.list)  <- max.clusters-1#
-	mapplot <- list(); length(mapplot)  <- max.clusters-1
-for(K in 2:max.clusters){#
-		i=(K-1)#
-		par(mar=c(5.1,4.1,4.1,2.1),mfrow=c(1,1))#
-		dapc.pcabest.K  <- adegenet::dapc(genind, grp.mat[,i],n.pca=best.npca[i],n.da=5)#
-		posterior       <- dapc.pcabest.K$posterior#
-		q.matrix        <- posterior#
-		posterior.list[[i]] <- posterior#
-		posterior.df    <- data.frame(indv=rep(rownames(posterior),ncol(posterior)), pop=rep(colnames(posterior),each=nrow(posterior)), assignment=c(posterior))#
-		if(K < 5){#
-			myCols          <- goodcolors(K,thresh=100)#
-		}#
-		if(K >= 5 & K < 7){#
-			myCols          <- goodcolors(K,thresh=100,cbspace="deut")#
-		}#
-		if(K >= 7 & K < 15){#
-			myCols          <- goodcolors(K,thresh=100,cbspace="")#
-		}#
-		if(K>=15){#
-			myCols          <- c(goodcolors(14,thresh=100,cbspace=""), sample(adegenet::funky(100), size=K-14))#
-		}#
-		posterior.gg        <- ggplot2::ggplot(posterior.df, aes(fill= pop, x= assignment, y=indv)) + geom_bar(position="stack", stat="identity") + theme_classic() + theme(axis.text.y = element_text(size = label.size), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank()) + ggplot2::labs(x = "Membership Probability",y="",fill="Cluster",title=paste0("K = ",K,"; PCs retained = ",best.npca[i])) + scale_fill_manual(values=myCols[1:K])#
-		plot(posterior.gg)#
-		admixturePlot[[i]]   <- recordPlot()#
-		par(mar=c(5,20,2,2.1),mfrow=c(1,1))#
-		assignment.K         <- adegenet::assignplot(dapc.pcabest.K,cex.lab=(label.size/10))#
-		mtext(text=paste0("K = ",K,"; PCs retained = ",best.npca[i]))#
-		assignmentPlot[[i]]  <- recordPlot()#
-		par(mar=c(5.1,4.1,4.1,2.1),mfrow=c(1,1))#
-		if(!is.null(coords)){#
-			my.palette      <- tess3r::CreatePalette(myCols, 9)#
-			xdist           <- geosphere::distm(x=c(x.min,0),y=c(x.max,0))#
-			ydist           <- geosphere::distm(x=c(0,y.min),y=c(0,y.max))#
-			tess3r.qmat     <- suppressWarnings(tess3r::as.qmatrix(q.matrix))#
-			coords.mat      <- as.matrix(coords)#
-			mapplot.initial <- plot(tess3r.qmat, coords.mat, method = "map.max", interpol = FieldsKrigModel(10), main = paste0("Ancestry coefficients; K=",K), xlab = "", ylab = "",resolution = c(100,100), cex = 0.4,col.palette = my.palette, window=c(x.min,x.max,y.min,y.max),asp=xdist/ydist)#
-			mapplot.i       <- plot(tess3r.qmat, coords.mat, method = "map.max", interpol = FieldsKrigModel(10), main = paste0("Ancestry coefficients; K=",K), xlab = "", ylab = "",resolution = c(500,500), cex = 0.4,col.palette = my.palette, window=c(par("usr")[1],par("usr")[2],par("usr")[3],par("usr")[4]),asp=xdist/ydist)#
-			mapplot[[i]]    <- recordPlot()#
+mapplot[[2]]
+for(i in 1:length(plots.chain)){#
+		mapplot.i  <- plots.chain[[i]]#
+		coords <- unique(mapplot.i$data[,c(1:2)])#
+		colnames(coords) <- c("Lon","Lat")#
+		x.min    <- min((coords[,1]-0.5))#
+		x.max    <- max((coords[,1]+0.5))#
+		y.min    <- min((coords[,2]-0.5))#
+		y.max    <- max((coords[,2]+0.5))#
+		#x.min    <- min(coords[,1])#
+		#x.max    <- max(coords[,1])#
+		#y.min    <- min(coords[,2])#
+		#y.max    <- max(coords[,2])#
+		mapplot2.i <- suppressMessages(mapplot.i + ggplot2::geom_sf(data=world_sf, colour = "black", fill = NA, inherit.aes=FALSE)) # + ggplot2::coord_sf(xlim=c(x.min, x.max), ylim=c(y.min, ymax=y.max),expand=FALSE)#
+		mapplot3.i <- mapplot2.i + ggplot2::geom_sf(data=oceans_sf, colour = NA, fill = "white", inherit.aes=FALSE) # + ggplot2::coord_sf(xlim=c(x.min, x.max), ylim=c(y.min, ymax=y.max),expand=FALSE)#
+		mapplot4.i <- mapplot3.i + ggplot2::coord_sf(xlim=c(x.min, x.max), ylim=c(y.min, ymax=y.max),expand=FALSE)#
+		if(plot.coords){#
+			mapplot[[i]] <- mapplot4.i + ggplot2::geom_point(data = coordinates, ggplot2::aes(x = Lon, y = Lat), size = 1, shape = 21, fill = "black")#
+		} else {#
+			mapplot[[i]] <- mapplot4.i#
 		}#
 	}
-if(bestK>1){#
-		posterior.bestK <- posterior.list[[bestK-1]]#
-		colnames(posterior.bestK) <- paste0("K",colnames(posterior.bestK))#
-		if(!is.null(probs.out)){#
-			write.table(posterior.bestK,file=probs.out,quote=F,col.names=T,row.names=T)#
+mapplot[[2]]
+plot1 <- plots.chain[[1]]
+data1 <- plot1$data
+dim(data1)
+data2 <- plots.chain[[2]]$data
+dim(data2)
+data3 <- plots.chain[[3]]$data
+dim(data3)
+length(plots.chain)
+plots.dat <- lapply(X=plots.chain,FUN=function(x) x$data)
+dim(plots.dat[[1]])
+plot.coords=T; plot.geography=T; mask.oceans=T; include.out=c("pdf","raster")
+save.in=NULL
+if(is.null(save.in)){#
+		save.in <- mcmcdir#
+	}
+for(i in 1:length(plots.chain)){#
+		mapplot.i  <- plots.chain[[i]]#
+		coords <- unique(mapplot.i$data[,c(1:2)])#
+		colnames(coords) <- c("Lon","Lat")#
+		x.min    <- min((coords[,1]-0.5))#
+		x.max    <- max((coords[,1]+0.5))#
+		y.min    <- min((coords[,2]-0.5))#
+		y.max    <- max((coords[,2]+0.5))#
+		#x.min    <- min(coords[,1])#
+		#x.max    <- max(coords[,1])#
+		#y.min    <- min(coords[,2])#
+		#y.max    <- max(coords[,2])#
+		# Add country borders#
+		if(plot.geography){#
+			mapplot2.i <- suppressMessages(mapplot.i + ggplot2::geom_sf(data=world_sf, colour = "black", fill = NA, inherit.aes=FALSE)) # + ggplot2::coord_sf(xlim=c(x.min, x.max), ylim=c(y.min, ymax=y.max),expand=FALSE)#
+		} else {#
+			mapplot2.i <- mapplot.i#
 		}#
-	} else {#
-		posterior.bestK <- matrix(data=rep(1,numind),ncol=1)#
-		rownames(posterior.bestK) <- samplenames#
+		# Mask oceans#
+		if(mask.oceans){#
+			mapplot3.i <- mapplot2.i + ggplot2::geom_sf(data=oceans_sf, colour = NA, fill = "white", inherit.aes=FALSE) # + ggplot2::coord_sf(xlim=c(x.min, x.max), ylim=c(y.min, ymax=y.max),expand=FALSE)#
+		} else {#
+			mapplot3.i <- mapplot2.i#
+		}#
+		# Crop to window defined by xmin, xmax, ymin, ymax#
+		mapplot4.i <- mapplot3.i + ggplot2::coord_sf(xlim=c(x.min, x.max), ylim=c(y.min, ymax=y.max), expand=FALSE)#
+		# Add points for coordinates of samples#
+		if(plot.coords){#
+			mapplot[[i]] <- mapplot4.i + ggplot2::geom_point(data = coordinates, ggplot2::aes(x = Lon, y = Lat), size = 1, shape = 21, fill = "black")#
+		} else {#
+			mapplot[[i]] <- mapplot4.i#
+		}#
 	}
-if(!is.null(coords)){#
-		result <- c(list(BICPlot,grp.plot2),admixturePlot,assignmentPlot,mapplot)#
-	} else {#
-		result <- c(list(BICPlot,grp.plot2),admixturePlot,assignmentPlot)#
+mapplot[[1]]
+mapplot[[2]]
+mapplot[[3]]
+mapplot[[4]]
+mapplot[[5]]
+plots.chain[[4]]
+plots.chain[[5]]
+plots.chain[[6]]
+plots.chain[[7]]
+plots.chain[[8]]
+mapplot  <- list(); length(mapplot) <- 4#
+	for(i in 1:4){#
+		mapplot.i  <- plots.chain[[i]]#
+		coords <- unique(mapplot.i$data[,c(1:2)])#
+		colnames(coords) <- c("Lon","Lat")#
+		x.min    <- min((coords[,1]-0.5))#
+		x.max    <- max((coords[,1]+0.5))#
+		y.min    <- min((coords[,2]-0.5))#
+		y.max    <- max((coords[,2]+0.5))#
+		#x.min    <- min(coords[,1])#
+		#x.max    <- max(coords[,1])#
+		#y.min    <- min(coords[,2])#
+		#y.max    <- max(coords[,2])#
+		# Add country borders#
+		if(plot.geography){#
+			mapplot2.i <- suppressMessages(mapplot.i + ggplot2::geom_sf(data=world_sf, colour = "black", fill = NA, inherit.aes=FALSE)) # + ggplot2::coord_sf(xlim=c(x.min, x.max), ylim=c(y.min, ymax=y.max),expand=FALSE)#
+		} else {#
+			mapplot2.i <- mapplot.i#
+		}#
+		# Mask oceans#
+		if(mask.oceans){#
+			mapplot3.i <- mapplot2.i + ggplot2::geom_sf(data=oceans_sf, colour = NA, fill = "white", inherit.aes=FALSE) # + ggplot2::coord_sf(xlim=c(x.min, x.max), ylim=c(y.min, ymax=y.max),expand=FALSE)#
+		} else {#
+			mapplot3.i <- mapplot2.i#
+		}#
+		# Crop to window defined by xmin, xmax, ymin, ymax#
+		mapplot4.i <- mapplot3.i + ggplot2::coord_sf(xlim=c(x.min, x.max), ylim=c(y.min, ymax=y.max), expand=FALSE)#
+		# Add points for coordinates of samples#
+		if(plot.coords){#
+			mapplot[[i]] <- mapplot4.i + ggplot2::geom_point(data = coordinates, ggplot2::aes(x = Lon, y = Lat), size = 1, shape = 21, fill = "black")#
+		} else {#
+			mapplot[[i]] <- mapplot4.i#
+		}#
 	}
-pdf(height=6,width=10,file=save.as,onefile=TRUE)
-result
-dev.off()
-dev.new(height=6,width=10)
-source("/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/DAPC/DAPC_adegenet.R")
-q()
-library(remotes)
-remotes::install_github("JeffWeinell/misc.wrappers",upgrade=FALSE,auth_token="323d9e4cd00247a39a805dbb66f37db6403cfb8b")
-library(misc.wrappers)
-q()
-library(remotes)
-install_github("JeffWeinell/misc.wrappers")
-library(misc.wrappers)
-test <- run_DAPC(#
-	x=file.path(system.file("extdata", package = "misc.wrappers"),"simK4.vcf.gz"),#
-	format="VCF",#
-	kmax=10,#
-	coords="/Users/alyssaleinweber/Documents/misc.wrappers/inst/extdata/simK4_coords.txt",#
-	samplenames=NULL,#
-	reps=30,#
-	probs.out=NULL,#
-	save.as="/Users/alyssaleinweber/Documents/DAPC_simK4_withCoords_v3.pdf",#
-	include.out=c(".pdf")#
-)
-q("no")
-library("misc.wrappers")
-vcf.path    <- file.path(system.file("extdata", package = "misc.wrappers"), "simK4.vcf.gz")#
-coords.path <- file.path(system.file("extdata", package = "misc.wrappers"), "simK4_coords.txt")#
-save.path   <- file.path(.libPaths(),"misc.wrappers/examples/simK4")
-save.path
-list.files(save.path)
-file.exists(save.path)
-dir.exists(save.path)
-dir.exists("/Library/Frameworks/R.framework/Versions/4.0/Resources/library/misc.wrappers/examples/")
-eems.setup  <- runeems_snps_setup(x=vcf.path, coords=coords.path, save.in=save.path, numMCMCIter = 100000, numBurnIter = 10000, numThinIter = 999)
-eems.setup
-readLines(eems.setup[1])
-system(eems.setup[1])
-paste("chmod u+x",eems.setup[1])
-system(paste("chmod u+x",eems.setup[1]))
-system(eems.setup[1])
-system(paste("chmod u+x",eems.setup))
-paste("chmod u+x",eems.setup)
-save.in
-save.path
-save.in=save.path
-result <- list.files(save.in,pattern="^runeems_snps.+.sh$",full.names=T)
-result
-system(paste("chmod u+x",result))
-textmessage <- list(result)
-textmessage
-names(textmessage) <- "Setup complete. To run EEMs, run these bash scripts:"
-print(textmessage)
+result.gglist <- c(mapplot,plots.chain[5:8])
+result.gglist[[1]]
+result.gglist[[2]]
+result.gglist[[3]]
+result.gglist[[4]]
+"pdf" %in% include.out
+save.as.pdf <- file.path(save.in,"EEMS_maps.pdf")
+save.as.pdf
 getwd()
-setwd("Documents/misc.wrappers")
+save.in <- "/Users/alyssaleinweber/Documents/"
+save.as.pdf <- file.path(save.in,"EEMS_maps.pdf")
+save.as.psd
+save.as.pdf
+pdf(height=6, width=8, file=save.as.pdf, onefile=TRUE)#
+			lapply(X=result.gglist, FUN=print)#
+		dev.off()
+length(result.gglist)
+dev.off()
+dev.off()
+pdf(height=6, width=8, file=save.as.pdf, onefile=TRUE)#
+			#lapply(X=result.gglist, FUN=print)#
+			print(result.gglist)#
+		dev.off()
+save.as.raster <- file.path(save.in,"EEMS_maps.tif")
+plots.dat      <- lapply(X=plots.chain[1:4],FUN=function(x) x$data)
+plots.dat[[1]][1:10,]
+plots.dat[[2]][1:10,]
+plots.dat[[3]][1:10,]
+plots.dat[[4]][1:10,]
+plots.dat[[5]][1:10,]
+plots.mat <- matrix(data=NA, ncol=plots.chain[[1]]$x, nrow=plots.chain[[1]]$y)
+plots.mat <- matrix(data=NA, ncol=length(unique(plots.chain[[1]]$x)), nrow= length(unique(plots.chain[[1]]$y)) )
+NAmat <- matrix(data=NA, ncol=length(unique(plots.chain[[1]]$x)), nrow= length(unique(plots.chain[[1]]$y)))
+dim(NAmat)
+length(unique(plots.chain[[1]]$x)
+length(unique(plots.chain[[1]]$x))
+length(unique(plots.chain[[1]][,"x"]))
+dim(plots.chain[[1]])
+length(unique(plots.dat[[1]]$x))
+NAmat <- matrix(data=NA, ncol=length(unique(plots.dat[[1]]$x)), nrow= length(unique(plots.dat[[1]]$y)))
+dim(NAmat)
+colnames(NAmat) <- unique(plots.dat[[1]]$x)#
+		rownames(NAmat) <- unique(plots.dat[[1]]$y)
+NAmat[1:5,1:5]
+plots.dat[1,c("x","y")]
+plots.dat[[1]][1,c("x","y")]
+plots.dat2       <- lapply(X=plots.chain[1:4],FUN=function(x) as.data.frame(x$data))
+plots.dat2[[1]][1:10,]
+plots.dat       <- lapply(X=plots.chain[1:4],FUN=function(x) as.data.frame(x$data))
+NAmat           <- matrix(data=NA, ncol=length(unique(plots.dat[[1]]$x)), nrow= length(unique(plots.dat[[1]]$y)))#
+		colnames(NAmat) <- unique(plots.dat[[1]]$x)#
+		rownames(NAmat) <- unique(plots.dat[[1]]$y)#
+		mat.temp <- NAmat
+NAmat[1:5,1:5]
+plots.dat[1,c("x","y")]
+plots.dat[[1]][1,c("x","y")]
+mat.temp[plots.dat[[1]][1,"y"], plots.dat[[1]][1,"x"]]
+plots.dat[[1]][1,"y"]
+plots.dat[[1]][1,"x"]
+which(rownames(mat.temp)==plots.dat[[1]][1,"y"])
+mat.temp[which(rownames(mat.temp)==plots.dat[[1]][1,"y"]), which(colnames(mat.temp)==plots.dat[[1]][1,"x"])]
+plots.dat[[1]][1,"z"]
+i=1
+mat.temp <- NAmat#
+			dat.temp <- plots.dat[[i]]#
+			for(z in 1:nrow(dat.temp)){#
+				mat.temp[which(rownames(mat.temp)==dat.temp[z,"y"]), which(colnames(mat.temp)==dat.temp[z,"x"])] <- dat.temp[z,"z"]#
+			}
+mat.temp[1:10,1:10]
+any(is.na(mat.temp))
+length(which(is.na(mat.temp)==TRUE))
+length(which(is.na(mat.temp)==FALSE))
+rasterlist <- list(); length(rasterlist) <- 4
+rasterlist <- list(); length(rasterlist) <- 4#
+		for(i in 1:4){#
+			mat.temp <- NAmat#
+			dat.temp <- plots.dat[[i]]#
+			for(z in 1:nrow(dat.temp)){#
+				mat.temp[which(rownames(mat.temp)==dat.temp[z,"y"]), which(colnames(mat.temp)==dat.temp[z,"x"])] <- dat.temp[z,"z"]#
+			}#
+			rasterlist[[i]] <- mat.temp#
+		}
+library(raster)
+?raster
+test <- raster(x=rasterlist[[1]],values=TRUE)
+test <- raster(x=rasterlist[[1]],vals=rasterlist[[1]])
+test <- raster(x=rasterlist[[1]])
+test
+mat.temp[is.na(mat.temp)] <- -9999
+save.as.raster  <- file.path(save.in,"EEMS_maps.tif")#
+		plots.dat       <- lapply(X=plots.chain[1:4],FUN=function(x) as.data.frame(x$data))#
+		NAmat           <- matrix(data=NA, ncol=length(unique(plots.dat[[1]]$x)), nrow= length(unique(plots.dat[[1]]$y)))#
+		colnames(NAmat) <- unique(plots.dat[[1]]$x)#
+		rownames(NAmat) <- unique(plots.dat[[1]]$y)#
+		rasterlist <- list(); length(rasterlist) <- 4#
+		for(i in 1:4){#
+			mat.temp <- NAmat#
+			dat.temp <- plots.dat[[i]]#
+			for(z in 1:nrow(dat.temp)){#
+				mat.temp[which(rownames(mat.temp)==dat.temp[z,"y"]), which(colnames(mat.temp)==dat.temp[z,"x"])] <- dat.temp[z,"z"]#
+			}#
+			mat.temp[is.na(mat.temp)] <- -9999#
+			rasterlist[[i]] <- mat.temp#
+		}
+rasterlist2 <- lapply(X=1:4,FUN=function(x) {raster::raster(x=x,xmn=x.min,xmx=x.max,ymn=y.min,ymx=y.max)})
+rasterlist2 <- lapply(X=1:4,FUN=function(x) {raster::raster(x=rasterlist[[x]],xmn=x.min,xmx=x.max,ymn=y.min,ymx=y.max)})
+plot(rasterlist2[[1]])
+mat.temp[!is.na(mat.temp)] <- 1
+raster.temp <- raster(mat.temp,xmn=x.min,xmx=x.max,ymn=y.min,ymx=y.max)
+plot(raster.temp)
+for(z in 1:nrow(dat.temp)){#
+				mat.temp[which(rownames(mat.temp)==dat.temp[z,"y"]), which(colnames(mat.temp)==dat.temp[z,"x"])] <- dat.temp[z,"z"]#
+			}
+mat.temp[!is.na(mat.temp)] <- 1
+mat.temp[is.na(mat.temp)] <- -9999
+raster.temp <- raster(mat.temp,xmn=x.min,xmx=x.max,ymn=y.min,ymx=y.max)
+plot(raster.temp)
+raster.temp
+rasterlist2[[1]]
+rasterlist2[[2]]
+rasterlist2[[3]]
+rasterlist2[[4]]
+plot(rasterlist2[[4]])
+res.brick <- raster::brick(rasterlist2)
+save.as.raster
+wb <- raster::writeRaster(x=res.brick,filename=save.as.raster,format="GTiff")
+result.gglist[[1]]
+dat1=list()#
+dat1$x=seq(302339.6,by=1000,len=71)#
+dat1$y=seq(5431470,by=1000,len=124)#
+dat1$z=matrix(runif(71*124),71,124)
+image(dat1,asp=1)
+test <- image(dat1,asp=1)
+str(test)
+class(test)
+test
+r <-raster(#
+             dat1$z,#
+             xmn=range(dat1$x)[1], xmx=range(dat1$x)[2],#
+             ymn=range(dat1$y)[1], ymx=range(dat1$y)[2], #
+             crs=CRS("+proj=utm +zone=11 +datum=NAD83")#
+            )
+plot(r)
+test
+image(dat1,asp=1)
+plot(r)
+r=raster(dat1);plot(r)
+r
+dim(rasterlist[[1]])
+dim(plots.dat[[1]])
+dat.temp.list <- list(); length(dat.temp.list) <- 3
+i=1
+dat.temp <- plots.dat[[i]]
+colnames(dat.temp)
+dat.temp.list   <- apply(X=dat.temp,MARGIN=2,FUN=function(x){x})
+names(dat.temp.list)
+lengths(dat.temp.list)
+length(dat.temp.list)
+ncol(dat.temp)
+dat.temp.list   <- lapply(X=1:3, FUN=function(x){dat.temp[,x]})
+length(dat.temp.list)
+lengths(dat.temp.list)
+names(dat.temp.list)
+names(dat.temp.list) <- colnames(dat.temp)
+test <- <- raster::raster(dat.temp.list)
+test <- raster::raster(dat.temp.list)
+e <- extent(dat.temp[,1:2])
+e
+r <- raster(e, ncol=length(unique(dat.temp$x)), nrow=length(unique(dat.temp$y)))
+x <- raster::rasterize(dat.temp[, 1:2], r, dat.temp[,3], fun=mean)
+plot(x)
+x
+rasterlist <- list(); length(rasterlist) <- 4#
+		for(i in 1:4){#
+			dat.temp <- plots.dat[[i]]#
+			#dat.temp.list        <- lapply(X=1:3, FUN=function(x){dat.temp[,x]})#
+			#names(dat.temp.list) <- colnames(dat.temp)#
+			e.temp <- raster::extent(dat.temp[,1:2])#
+			r.temp <- raster::raster(e.temp, ncol=length(unique(dat.temp$x)), nrow=length(unique(dat.temp$y)))#
+			rasterlist[[i]] <- raster::rasterize(dat.temp[, 1:2], r.temp, dat.temp[,3], fun=mean)#
+			# rasterlist[[i]] <- raster::raster(dat.temp.list)#
+			# dat.temp.list   <- list(); length(dat.temp.list) <- 3#
+			# dat.temp.list$x <- dat.temp$x#
+			# dat.temp.list$y <- dat.temp$y#
+			# dat.temp.list$x <- dat.temp$z#
+			# mat.temp <- NAmat#
+			# for(z in 1:nrow(dat.temp)){#
+			# 	mat.temp[which(rownames(mat.temp)==dat.temp[z,"y"]), which(colnames(mat.temp)==dat.temp[z,"x"])] <- dat.temp[z,"z"]#
+			# }#
+			# mat.temp[is.na(mat.temp)] <- -9999#
+			# rasterlist[[i]] <- mat.temp#
+		}
+res.brick <- raster::brick(rasterlist)
+wb <- raster::writeRaster(x=res.brick, filename=save.as.raster, format="GTiff")
+wb <- raster::writeRaster(x=res.brick, filename=save.as.raster, format="GTiff",overwrite=T)
+?rasterize
+rasterlist <- list(); length(rasterlist) <- 4#
+		for(i in 1:4){#
+			dat.temp <- plots.dat[[i]]#
+			#dat.temp.list        <- lapply(X=1:3, FUN=function(x){dat.temp[,x]})#
+			#names(dat.temp.list) <- colnames(dat.temp)#
+			e.temp <- raster::extent(dat.temp[,1:2])#
+			r.temp <- raster::raster(e.temp, ncol=length(unique(dat.temp$x)), nrow=length(unique(dat.temp$y)))#
+			rasterlist[[i]] <- raster::rasterize(dat.temp[, 1:2], r.temp, dat.temp[,3], fun=mean, background=-9999)#
+			# rasterlist[[i]] <- raster::raster(dat.temp.list)#
+			# dat.temp.list   <- list(); length(dat.temp.list) <- 3#
+			# dat.temp.list$x <- dat.temp$x#
+			# dat.temp.list$y <- dat.temp$y#
+			# dat.temp.list$x <- dat.temp$z#
+			# mat.temp <- NAmat#
+			# for(z in 1:nrow(dat.temp)){#
+			# 	mat.temp[which(rownames(mat.temp)==dat.temp[z,"y"]), which(colnames(mat.temp)==dat.temp[z,"x"])] <- dat.temp[z,"z"]#
+			# }#
+			# mat.temp[is.na(mat.temp)] <- -9999#
+			# rasterlist[[i]] <- mat.temp#
+		}#
+		#### Now need to turn each matrix in rasterlist into an actual raster object, then hold the rasters in a rasterbrick, then rasterbrick as geotiff#
+		#rasterlist2 <- lapply(X=1:4,FUN=function(x) {raster::raster(x=rasterlist[[x]],xmn=x.min,xmx=x.max,ymn=y.min,ymx=y.max)})#
+		res.brick <- raster::brick(rasterlist)
+wb <- raster::writeRaster(x=res.brick, filename=save.as.raster, format="GTiff",overwrite=T)
+install.packages("raster")
+library(raster)
+wb <- raster::writeRaster(x=res.brick, filename=save.as.raster, format="GTiff",overwrite=T)
+getwd()
 devtools::document()
-list.files("inst/examples")
-eems.setup
 remotes::install_github("JeffWeinell/misc.wrappers",upgrade=FALSE)
 q()
