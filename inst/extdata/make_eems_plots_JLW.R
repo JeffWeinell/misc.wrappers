@@ -105,6 +105,7 @@ make_eems_plots <- function(mcmcpath, longlat = TRUE, dpi = 250,add_grid = FALSE
 	plots
 }
 
+
 eems_contours <- function(mcmcpath, dimns, longlat, plot_params, is_mrates) {
 	if (is_mrates){
 		message("Generate effective migration surface ","(posterior mean of m rates). ","See plots$mrates01 and plots$mrates02.")
@@ -225,6 +226,146 @@ read_dimns <- function(mcmcpath, longlat, nmrks = 100) {
   demes <- dplyr::as_data_frame(demes) %>% setNames(c("x", "y")) %>% dplyr::mutate(id = dplyr::row_number()) %>% dplyr::left_join(ipmap) %>% dplyr::arrange(id) %>% dplyr::mutate(n = dplyr::if_else(is.na(n), 0L, n))
   edges <- dplyr::bind_cols(demes[edges[, 1], ] %>% dplyr::select(x, y),demes[edges[, 2], ] %>% dplyr::select(x, y)) %>% setNames(c("x", "y", "xend", "yend"))
   list(marks = marks, nmrks = nrow(marks), xlim = xlim, ylim = ylim,outer = outer, demes = demes, edges = edges, dist_metric = dist_metric)
+}
+
+decompose_distances <- function(diffs, sizes = NULL) {
+  # Diffs can have NAs on the main diagonal; these elements correspond to demes
+  # with a single observation. For such deme a, no dissimilarities between
+  # two distinct individuals are observed. I approximate diffs(a,a) with the
+  # average diffs(b,b) computed across demes b with multiple samples.
+  if (!is.null(sizes))
+    diag(diffs)[sizes < 2] <- mean(diag(diffs)[sizes >= 2])
+  within <- diag(diffs)
+  selfsim <- matrix(within, nrow(diffs), ncol(diffs))
+  between <- diffs - (selfsim + t(selfsim)) / 2
+  between <- between[upper.tri(between, diag = FALSE)]
+  list(within = within, between = between)
+}
+
+check_plot_params <- function(pars) {
+
+	if (is.logical(pars$add_grid)) {
+		pars$add_grid <- pars$add_grid[1]
+	} else {
+		pars$add_grid <- FALSE
+	}
+	
+	if (is_color(pars$col_grid)) pars$col_grid <- pars$col_grid[1]
+	else pars$col_grid <- "#BBBBBB"
+
+	if (is.logical(pars$add_outline)) pars$add_outline <- pars$add_outline[1]
+	else pars$add_outline <- FALSE
+	if (is_color(pars$col_outline)) pars$col_outline <- pars$col_outline[1]
+	else pars$col_outline <- "#EEEEEE"
+
+	if (is.logical(pars$add_demes)) pars$add_demes <- pars$add_demes[1]
+	else pars$add_demes <- FALSE
+	if (is_color(pars$col_demes)) pars$col_demes <- pars$col_demes[1]
+	else pars$col_demes <- "#000000"
+	if (is.logical(pars$add_seeds)) pars$add_seeds <- pars$add_seeds[1]
+	else pars$add_seeds <- TRUE
+
+	if (is.numeric(pars$m_colscale)) pars$m_colscale <- pars$m_colscale
+	else pars$m_colscale <- c(-2.5, 2.5)
+	if (is.numeric(pars$q_colscale)) pars$q_colscale <- pars$q_colscale
+	else pars$q_colscale <- c(-0.1, 0.1)
+
+	if (length(pars$eems_colors) < 2 || any(!is_color(pars$eems_colors)))
+	  pars$eems_colors <- default_eems_colors()
+
+	if (is.null(pars$prob_level)) prob_level <- 0.9
+	else prob_level <- pars$prob_level
+	prob_level <- prob_level[prob_level > 0.5 & prob_level < 1]
+	if (length(prob_level) != 1) prob_level <- 0.9
+	pars$prob_level <- prob_level
+	pars
+}
+
+geo_distm <- function(coord, longlat, plot_params) {
+  if (!longlat) coord <- coord[, c(2, 1)]
+  dist <- sp::spDists(coord, longlat = TRUE)
+  dist <- dist[upper.tri(dist, diag = FALSE)]
+  dist
+}
+
+pairwise_dist <- function(mcmcpath, longlat, plot_params) {
+  # List of observed demes, with number of samples taken collected Each row
+  # specifies: x coordinate, y coordinate, n samples
+  obs_demes <- read_matrix(file.path(mcmcpath[1], "rdistoDemes.txt"), ncol = 3)
+  sizes <- obs_demes[, 3]
+  if (sum(sizes > 1) < 2) {
+    message("There should be at least two observed demes ",
+            "to plot pairwise dissimilarities")
+    return(NULL)
+  }
+  npops <- nrow(obs_demes)
+  demes <- seq(npops)
+  diffs_obs <- matrix(0, npops, npops)
+  diffs_hat <- matrix(0, npops, npops)
+  for (path in mcmcpath) {
+    tempi <- read_matrix(file.path(path, "rdistoDemes.txt"), ncol = 3)
+    if (sum(dim(obs_demes) != dim(tempi)) || sum(obs_demes != tempi)) {
+      message("EEMS results for at least two different population grids. ",
+              "Plot pairwise dissimilarity for each grid separately.")
+      return(list(between = data_frame(), within = data_frame(),
+                  ibd = data_frame()))
+    }
+    diffs_obs <- diffs_obs +
+      as.matrix(read.table(file.path(path, "rdistJtDobsJ.txt")))
+    diffs_hat <- diffs_hat +
+      as.matrix(read.table(file.path(path, "rdistJtDhatJ.txt")))
+  }
+  diffs_obs <- diffs_obs / length(mcmcpath)
+  diffs_hat <- diffs_hat / length(mcmcpath)
+  alpha <- matrix(demes, nrow = npops, ncol = npops)
+  beta <- t(alpha)
+  tempi <- matrix(sizes, npops, npops)
+  smaller_deme <- pmin(tempi, t(tempi))
+  smaller_deme <- smaller_deme[upper.tri(smaller_deme, diag = FALSE)]
+  alpha <- alpha[upper.tri(alpha, diag = FALSE)]
+  beta <- beta[upper.tri(beta, diag = FALSE)]
+  # Under pure isolation by distance, we expect the genetic dissimilarities
+  # between demes increase with the geographic distance separating them
+  dist <- geo_distm(obs_demes[, 1:2], longlat, plot_params)
+  bw_obs <- decompose_distances(diffs_obs, sizes)
+  bw_hat <- decompose_distances(diffs_hat)
+  b_component <- data_frame(alpha_x = obs_demes[, 1][alpha],
+                            alpha_y = obs_demes[, 2][alpha],
+                            beta_x = obs_demes[, 1][beta],
+                            beta_y = obs_demes[, 2][beta],
+                            fitted = bw_hat$between,
+                            obsrvd = bw_obs$between,
+                            size = smaller_deme)
+  w_component <- data_frame(alpha_x = obs_demes[, 1][demes],
+                            alpha_y = obs_demes[, 2][demes],
+                            fitted = bw_hat$within,
+                            obsrvd = bw_obs$within,
+                            size = sizes)
+  g_component <- data_frame(alpha_x = obs_demes[, 1][alpha],
+                            alpha_y = obs_demes[, 2][alpha],
+                            beta_x = obs_demes[, 1][beta],
+                            beta_y = obs_demes[, 2][beta],
+                            fitted = dist,
+                            obsrvd = bw_obs$between,
+                            size = smaller_deme)
+  list(between = b_component, within = w_component, ibd = g_component)
+}
+
+#######
+## Add these functions to plot_eems.R
+
+load_required_packages <- function(packages) {
+  for (package in packages) {
+    if (!requireNamespace(package, quietly = TRUE))
+      stop("The ", package, " package is required. ",
+           "Please install it first.")
+    else
+      message("Loading ", package, ".")
+  }
+}
+
+tiles2contours <- function(tiles, rates, seeds, marks, distm) {
+    .Call('_reemsplots2_tiles2contours', PACKAGE = 'reemsplots2', tiles, rates, seeds, marks, distm)
 }
 
 read_voronoi <- function(mcmcpath, longlat, is_mrates) {
@@ -350,135 +491,3 @@ filled_prob_contour <- function(dimns, probs, plot_params, is_mrates) {
                          breaks = breaks, labels = labels)
   p
 }
-
-decompose_distances <- function(diffs, sizes = NULL) {
-  # Diffs can have NAs on the main diagonal; these elements correspond to demes
-  # with a single observation. For such deme a, no dissimilarities between
-  # two distinct individuals are observed. I approximate diffs(a,a) with the
-  # average diffs(b,b) computed across demes b with multiple samples.
-  if (!is.null(sizes))
-    diag(diffs)[sizes < 2] <- mean(diag(diffs)[sizes >= 2])
-  within <- diag(diffs)
-  selfsim <- matrix(within, nrow(diffs), ncol(diffs))
-  between <- diffs - (selfsim + t(selfsim)) / 2
-  between <- between[upper.tri(between, diag = FALSE)]
-  list(within = within, between = between)
-}
-
-check_plot_params <- function(pars) {
-
-  if (is.logical(pars$add_grid)) pars$add_grid <- pars$add_grid[1]
-  else pars$add_grid <- FALSE
-  if (is_color(pars$col_grid)) pars$col_grid <- pars$col_grid[1]
-  else pars$col_grid <- "#BBBBBB"
-
-  if (is.logical(pars$add_outline)) pars$add_outline <- pars$add_outline[1]
-  else pars$add_outline <- FALSE
-  if (is_color(pars$col_outline)) pars$col_outline <- pars$col_outline[1]
-  else pars$col_outline <- "#EEEEEE"
-
-  if (is.logical(pars$add_demes)) pars$add_demes <- pars$add_demes[1]
-  else pars$add_demes <- FALSE
-  if (is_color(pars$col_demes)) pars$col_demes <- pars$col_demes[1]
-  else pars$col_demes <- "#000000"
-  if (is.logical(pars$add_seeds)) pars$add_seeds <- pars$add_seeds[1]
-  else pars$add_seeds <- TRUE
-
-  if (is.numeric(pars$m_colscale)) pars$m_colscale <- pars$m_colscale
-  else pars$m_colscale <- c(-2.5, 2.5)
-  if (is.numeric(pars$q_colscale)) pars$q_colscale <- pars$q_colscale
-  else pars$q_colscale <- c(-0.1, 0.1)
-
-  if (length(pars$eems_colors) < 2 || any(!is_color(pars$eems_colors)))
-    pars$eems_colors <- default_eems_colors()
-
-  if (is.null(pars$prob_level)) prob_level <- 0.9
-  else prob_level <- pars$prob_level
-  prob_level <- prob_level[prob_level > 0.5 & prob_level < 1]
-  if (length(prob_level) != 1) prob_level <- 0.9
-  pars$prob_level <- prob_level
-  pars
-}
-geo_distm <- function(coord, longlat, plot_params) {
-  if (!longlat) coord <- coord[, c(2, 1)]
-  dist <- sp::spDists(coord, longlat = TRUE)
-  dist <- dist[upper.tri(dist, diag = FALSE)]
-  dist
-}
-pairwise_dist <- function(mcmcpath, longlat, plot_params) {
-  # List of observed demes, with number of samples taken collected Each row
-  # specifies: x coordinate, y coordinate, n samples
-  obs_demes <- read_matrix(file.path(mcmcpath[1], "rdistoDemes.txt"), ncol = 3)
-  sizes <- obs_demes[, 3]
-  if (sum(sizes > 1) < 2) {
-    message("There should be at least two observed demes ",
-            "to plot pairwise dissimilarities")
-    return(NULL)
-  }
-  npops <- nrow(obs_demes)
-  demes <- seq(npops)
-  diffs_obs <- matrix(0, npops, npops)
-  diffs_hat <- matrix(0, npops, npops)
-  for (path in mcmcpath) {
-    tempi <- read_matrix(file.path(path, "rdistoDemes.txt"), ncol = 3)
-    if (sum(dim(obs_demes) != dim(tempi)) || sum(obs_demes != tempi)) {
-      message("EEMS results for at least two different population grids. ",
-              "Plot pairwise dissimilarity for each grid separately.")
-      return(list(between = data_frame(), within = data_frame(),
-                  ibd = data_frame()))
-    }
-    diffs_obs <- diffs_obs +
-      as.matrix(read.table(file.path(path, "rdistJtDobsJ.txt")))
-    diffs_hat <- diffs_hat +
-      as.matrix(read.table(file.path(path, "rdistJtDhatJ.txt")))
-  }
-  diffs_obs <- diffs_obs / length(mcmcpath)
-  diffs_hat <- diffs_hat / length(mcmcpath)
-  alpha <- matrix(demes, nrow = npops, ncol = npops)
-  beta <- t(alpha)
-  tempi <- matrix(sizes, npops, npops)
-  smaller_deme <- pmin(tempi, t(tempi))
-  smaller_deme <- smaller_deme[upper.tri(smaller_deme, diag = FALSE)]
-  alpha <- alpha[upper.tri(alpha, diag = FALSE)]
-  beta <- beta[upper.tri(beta, diag = FALSE)]
-  # Under pure isolation by distance, we expect the genetic dissimilarities
-  # between demes increase with the geographic distance separating them
-  dist <- geo_distm(obs_demes[, 1:2], longlat, plot_params)
-  bw_obs <- decompose_distances(diffs_obs, sizes)
-  bw_hat <- decompose_distances(diffs_hat)
-  b_component <- data_frame(alpha_x = obs_demes[, 1][alpha],
-                            alpha_y = obs_demes[, 2][alpha],
-                            beta_x = obs_demes[, 1][beta],
-                            beta_y = obs_demes[, 2][beta],
-                            fitted = bw_hat$between,
-                            obsrvd = bw_obs$between,
-                            size = smaller_deme)
-  w_component <- data_frame(alpha_x = obs_demes[, 1][demes],
-                            alpha_y = obs_demes[, 2][demes],
-                            fitted = bw_hat$within,
-                            obsrvd = bw_obs$within,
-                            size = sizes)
-  g_component <- data_frame(alpha_x = obs_demes[, 1][alpha],
-                            alpha_y = obs_demes[, 2][alpha],
-                            beta_x = obs_demes[, 1][beta],
-                            beta_y = obs_demes[, 2][beta],
-                            fitted = dist,
-                            obsrvd = bw_obs$between,
-                            size = smaller_deme)
-  list(between = b_component, within = w_component, ibd = g_component)
-}
-
-load_required_packages <- function(packages) {
-  for (package in packages) {
-    if (!requireNamespace(package, quietly = TRUE))
-      stop("The ", package, " package is required. ",
-           "Please install it first.")
-    else
-      message("Loading ", package, ".")
-  }
-}
-
-tiles2contours <- function(tiles, rates, seeds, marks, distm) {
-    .Call('_reemsplots2_tiles2contours', PACKAGE = 'reemsplots2', tiles, rates, seeds, marks, distm)
-}
-
