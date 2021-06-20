@@ -27,8 +27,6 @@ plot_eems(
 \item{include.out}{Character string vector indicating the type of output files to generate.}
 
 \item{usechains}{Integer vector specifying which chains to make plots for; Default is NULL, in which case plots are made for all chains.}
-
-\item{save.in}{Path to directory where output files should be saved. Default is NULL, in which case the value of 'mcmcdir' is used.}
 }
 \value{
 List of ggplots

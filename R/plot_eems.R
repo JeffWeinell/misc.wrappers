@@ -3,7 +3,6 @@
 #' Invokes the reemsplots2 function make_eems_plots, with additional functionality such as adding island borders and points showing individual coordinates..
 #' 
 #' @param xdir Character string to directory of a particular mcmc chain, or, to a directory containing subdirectories "/mcmc/chain*".
-##' @param save.in Path to directory where output files should be saved. Default is NULL, in which case the value of 'mcmcdir' is used.
 #' @param plot.coords Whether or not to overlay the sample coordinates on EEMS maps. Default TRUE.
 #' @param plot.geography Whether or not to overlay country borders on EEMS maps. Default TRUE.
 #' @param mask.oceans Whether or not mask oceans on EEMS maps. Default TRUE.
@@ -12,10 +11,6 @@
 #' @return List of ggplots
 #' @export plot_eems
 plot_eems <- function(xdir, plot.coords=T, plot.geography=T, mask.oceans=T, include.out=c("pdf","raster"), usechains=NULL){
-	# source(file.path(system.file("extdata", package = "misc.wrappers"),"make_eems_plots_JLW.R"))
-	#if(is.null(save.in)){
-	#	save.in <- mcmcdir
-	#}
 	### Default parameters of reemsplots2::make_eems_plots
 	longlat = TRUE; dpi = 250; add_grid = FALSE; col_grid = "#BBBBBB"; add_demes = FALSE; col_demes = "#000000"; add_outline = FALSE; col_outline = "#FFFFFF"; eems_colors = NULL; prob_level = 0.9; m_colscale = NULL; q_colscale = NULL; add_abline = FALSE
 	func_params <- list(add_grid = add_grid, add_demes = add_demes, add_outline = add_outline, eems_colors = eems_colors, prob_level = prob_level,col_grid = col_grid, col_demes = col_demes,col_outline = col_outline,m_colscale = m_colscale, q_colscale = q_colscale,add_abline = add_abline)
@@ -31,6 +26,7 @@ plot_eems <- function(xdir, plot.coords=T, plot.geography=T, mask.oceans=T, incl
 		### overrides value of argument
 		plot.coords <- FALSE
 	}
+
 	spdf_oceans_10 <- misc.wrappers::spdf_oceans_10
 	oceans_sf      <- sf::st_as_sf(spdf_oceans_10)
 	world_sf       <- rnaturalearth::ne_countries(scale=10,returnclass="sf")[1]
@@ -39,22 +35,19 @@ plot_eems <- function(xdir, plot.coords=T, plot.geography=T, mask.oceans=T, incl
 	} else {
 		usechains <- intersect(usechains,1:nchains)
 	}
+
 	result <- list(); length(result) <- nchains
 	if("raster" %in% include.out & length(usechains) > 1){
 		bricklist <- list(); length(bricklist) <- nchains
 	}
-	for(i in usechains){
-		mcmcdir <- mcmcdirs[i]
-		#if(is.null(save.in)){
-			save.in <- mcmcdir
-		#}
+	for(ch in usechains){
+		mcmcdir <- mcmcdirs[ch]
+		save.in <- mcmcdir
 		### Check that the necessary output files are present
 		check_mcmcpath_contents(mcmcpath=mcmcdir)
 		### Load some of the EEMs output
 		dimns   <- read_dimns(mcmcpath=mcmcdir[1], longlat=longlat, nmrks = dpi)
 		### Generate EEMS plots
-		# plots.chain  <- suppressWarnings(reemsplots2::make_eems_plots(mcmcdir, longlat = TRUE))
-		# plots.chain  <- suppressWarnings(make_eems_plots(mcmcpath=mcmcdir, longlat = TRUE))
 		mplots     <- eems_contours(mcmcpath=mcmcdir, dimns=dimns, longlat=longlat, plot_params=plot_params, is_mrates = TRUE)
 		qplots     <- eems_contours(mcmcpath=mcmcdir, dimns=dimns, longlat=longlat, plot_params=plot_params, is_mrates = FALSE)
 		maps.chain <- list(mplots[[1]], mplots[[2]], qplots[[1]], qplots[[2]])
@@ -71,8 +64,6 @@ plot_eems <- function(xdir, plot.coords=T, plot.geography=T, mask.oceans=T, incl
 		}
 		logP.plot <- list(pilogl01=plot_log_posterior(mcmcpath=mcmcdir))
 		if(plot.coords){
-			#coordinates <- read.table(paste0(mcmcdir,"/rdistoDemes.txt"),header=F)[,c(1:2)]
-			#colnames(coordinates) <- c("Lon","Lat")
 			coordinates <- read.table(file.path(xdir,"data","data.coord"),header=F)[,c(1:2)]
 			colnames(coordinates) <- c("Lon","Lat")
 		}
@@ -116,7 +107,7 @@ plot_eems <- function(xdir, plot.coords=T, plot.geography=T, mask.oceans=T, incl
 		}
 		if("raster" %in% include.out){
 			save.as.raster  <- file.path(save.in,"EEMS_maps.tif")
-			plots.dat       <- lapply(X=maps.chain,FUN=function(x) as.data.frame(x$data))
+			plots.dat       <- lapply(X=maps.chain,FUN=function(x) {as.data.frame(x$data)})
 			rasterlist <- list(); length(rasterlist) <- 4
 			for(j in 1:4){
 				dat.temp <- plots.dat[[j]]
@@ -127,12 +118,12 @@ plot_eems <- function(xdir, plot.coords=T, plot.geography=T, mask.oceans=T, incl
 			# Hold the rasters in a rasterbrick
 			res.brick <- raster::brick(rasterlist)
 			# Write the brick as a multi-band geotiff
-			wb <- suppressWarnings(raster::writeRaster(x=res.brick, filename=save.as.raster, format="GTiff"))
+			wb <- suppressWarnings(raster::writeRaster(x=res.brick, filename=save.as.raster, format="GTiff"), overwrite=T)
 			if(length(usechains) > 1){
-				bricklist[[i]] <- res.brick
+				bricklist[[ch]] <- res.brick
 			}
 		}
-		result[[i]] <- result.gglist
+		result[[ch]] <- result.gglist
 	}
 	### For each of the four EEMs plots, generate a raster with chain means. Hold these in a brick and write as a GeoTiff.
 	if("raster" %in% include.out & length(usechains) > 1){
@@ -146,7 +137,7 @@ plot_eems <- function(xdir, plot.coords=T, plot.geography=T, mask.oceans=T, incl
 		rp3.mean <- raster::mean(bp3)
 		rp4.mean <- raster::mean(bp4)
 		bmeans   <- raster::brick(list(rp1.mean,rp2.mean,rp3.mean,rp4.mean))
-		bw.mean  <- suppressWarnings(raster::writeRaster(x=bmeans,filename=file.path(xdir,"EEMS_maps_chainMeans.tif",format="GTiff"),overwrite=T))
+		bw.mean  <- suppressWarnings(raster::writeRaster(x=bmeans, filename=file.path(xdir, "EEMS_maps_chainMeans.tif"), format="GTiff", overwrite=F))
 	}
 	result2 <- result[usechains]
 	result2
