@@ -509,10 +509,9 @@ load_required_packages <- function(packages) {
 #' @return countours
 #' @export tiles2contours
 tiles2contours <- function(tiles, rates, seeds, marks, distm) {
+	require("reemsplots2")
 	.Call('_reemsplots2_tiles2contours', PACKAGE = 'reemsplots2', tiles, rates, seeds, marks, distm)
 }
-
-
 
 #' @title read voronoi
 #' 
