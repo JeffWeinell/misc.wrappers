@@ -12,7 +12,7 @@
 #' @return List of ggplots
 #' @export plot_eems
 plot_eems <- function(xdir, save.in=NULL, plot.coords=T, plot.geography=T, mask.oceans=T, include.out=c("pdf","raster"), usechains=NULL){
-	source(file.path(system.file("extdata", package = "misc.wrappers"),"make_eems_plots_JLW.R"))
+	# source(file.path(system.file("extdata", package = "misc.wrappers"),"make_eems_plots_JLW.R"))
 	#if(is.null(save.in)){
 	#	save.in <- mcmcdir
 	#}
