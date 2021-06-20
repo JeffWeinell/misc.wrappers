@@ -4,7 +4,7 @@
 \alias{filled_eems_contour}
 \title{filled eems contour
 
-generates a ggplot object with filled contours
+generates ggplot object corresponding to eems plots 1 and 3
 This function is from the R package 'reemsplots2' by Desislava Petkova (github repository 'dipetkov/reemsplots2').}
 \usage{
 filled_eems_contour(dimns, zmean, plot_params, is_mrates)
@@ -24,6 +24,6 @@ ggplot object
 \description{
 filled eems contour
 
-generates a ggplot object with filled contours
+generates ggplot object corresponding to eems plots 1 and 3
 This function is from the R package 'reemsplots2' by Desislava Petkova (github repository 'dipetkov/reemsplots2').
 }

@@ -194,14 +194,22 @@ check_plot_params <- function(pars) {
 	if (is.logical(pars$add_seeds)) pars$add_seeds <- pars$add_seeds[1]
 	else pars$add_seeds <- TRUE
 
-	if (is.numeric(pars$m_colscale)) pars$m_colscale <- pars$m_colscale
-	else pars$m_colscale <- c(-2.5, 2.5)
-	if (is.numeric(pars$q_colscale)) pars$q_colscale <- pars$q_colscale
-	else pars$q_colscale <- c(-0.1, 0.1)
-
-	if (length(pars$eems_colors) < 2 || any(!is_color(pars$eems_colors)))
-	  pars$eems_colors <- default_eems_colors()
-
+	### Color scale for eems plot 1. Default input pars$m_colscale is null (not numeric).
+	if (is.numeric(pars$m_colscale)) {
+		pars$m_colscale <- pars$m_colscale
+	} else {
+		pars$m_colscale <- c(-2.5, 2.5)
+	}
+	### Color scale for eems plot 3. Default input pars$q_colscale is null (not numeric).
+	if (is.numeric(pars$q_colscale)) {
+		pars$q_colscale <- pars$q_colscale
+	} else {
+		pars$q_colscale <- c(-0.1, 0.1)
+	}
+	### Colors to use for color scale
+	if (length(pars$eems_colors) < 2 || any(!is_color(pars$eems_colors))){
+		pars$eems_colors <- default_eems_colors()
+	}
 	if (is.null(pars$prob_level)) prob_level <- 0.9
 	else prob_level <- pars$prob_level
 	prob_level <- prob_level[prob_level > 0.5 & prob_level < 1]
@@ -209,8 +217,6 @@ check_plot_params <- function(pars) {
 	pars$prob_level <- prob_level
 	pars
 }
-
-
 
 #' @title Read dimns
 #' 
@@ -252,11 +258,16 @@ read_dimns <- function(mcmcpath, longlat=TRUE, nmrks = 100) {
 	marks <- sp::SpatialPoints(marks)[outer_poly, ]
 	marks <- marks@coords
 	### set column names to x and y
-	outer <- dplyr::as_data_frame(outer) %>% setNames(c("x", "y"))
+	#outer <- dplyr::as_data_frame(outer) %>% setNames(c("x", "y"))
+	#outer <- as.data.frame(outer) %>% setNames(c("x", "y"))
+	outer <- tibble::as_tibble(outer) %>% setNames(c("x", "y"))
 	### 
-	ipmap <- dplyr::data_frame(id = ipmap) %>% dplyr::count(id)
+	#ipmap <- dplyr::data_frame(id = ipmap) %>% dplyr::count(id)
+	#ipmap <- data.frame(id = ipmap) %>% dplyr::count(id)
+	ipmap <- tibble::tibble(id = ipmap) %>% dplyr::count(id)
 	### set column names to x and y
-	demes <- dplyr::as_data_frame(demes) %>% setNames(c("x", "y")) %>% dplyr::mutate(id = dplyr::row_number()) %>% dplyr::left_join(ipmap) %>% dplyr::arrange(id) %>% dplyr::mutate(n = dplyr::if_else(is.na(n), 0L, n))
+	#demes <- dplyr::as_data_frame(demes) %>% setNames(c("x", "y")) %>% dplyr::mutate(id = dplyr::row_number()) %>% dplyr::left_join(ipmap) %>% dplyr::arrange(id) %>% dplyr::mutate(n = dplyr::if_else(is.na(n), 0L, n))
+	demes <- tibble::as_tibble(demes) %>% setNames(c("x", "y")) %>% dplyr::mutate(id = dplyr::row_number()) %>% dplyr::left_join(ipmap) %>% dplyr::arrange(id) %>% dplyr::mutate(n = dplyr::if_else(is.na(n), 0L, n))
 	edges <- dplyr::bind_cols(demes[edges[, 1], ] %>% dplyr::select(x, y),demes[edges[, 2], ] %>% dplyr::select(x, y)) %>% setNames(c("x", "y", "xend", "yend"))
 	list(marks = marks, nmrks = nrow(marks), xlim = xlim, ylim = ylim,outer = outer, demes = demes, edges = edges, dist_metric = dist_metric)
 }
@@ -357,7 +368,8 @@ pairwise_dist <- function(mcmcpath, longlat, plot_params) {
 		tempi <- read_matrix(file.path(path, "rdistoDemes.txt"), ncol = 3)
 		if (sum(dim(obs_demes) != dim(tempi)) || sum(obs_demes != tempi)) {
 			message("EEMS results for at least two different population grids. ", "Plot pairwise dissimilarity for each grid separately.")
-			return(list(between = dplyr::data_frame(), within = dplyr::data_frame(), ibd = dplyr::data_frame()))
+			#return(list(between = dplyr::data_frame(), within = dplyr::data_frame(), ibd = dplyr::data_frame()))
+			return(list(between = tibble::tibble(), within = tibble::tibble(), ibd = tibble::tibble()))
 		}
 		diffs_obs <- diffs_obs + as.matrix(read.table(file.path(path, "rdistJtDobsJ.txt")))
 		diffs_hat <- diffs_hat + as.matrix(read.table(file.path(path, "rdistJtDhatJ.txt")))
@@ -376,9 +388,14 @@ pairwise_dist <- function(mcmcpath, longlat, plot_params) {
 	dist <- geo_distm(obs_demes[, 1:2], longlat, plot_params)
 	bw_obs <- decompose_distances(diffs_obs, sizes)
 	bw_hat <- decompose_distances(diffs_hat)
-	b_component <- dplyr::data_frame(alpha_x = obs_demes[, 1][alpha],alpha_y = obs_demes[, 2][alpha],beta_x = obs_demes[, 1][beta],beta_y = obs_demes[, 2][beta],fitted = bw_hat$between,obsrvd = bw_obs$between,size = smaller_deme)
-	w_component <- dplyr::data_frame(alpha_x = obs_demes[, 1][demes],alpha_y = obs_demes[, 2][demes],fitted = bw_hat$within,obsrvd = bw_obs$within,size = sizes)
-	g_component <- dplyr::data_frame(alpha_x = obs_demes[, 1][alpha],alpha_y = obs_demes[, 2][alpha],beta_x = obs_demes[, 1][beta],beta_y = obs_demes[, 2][beta],fitted = dist,obsrvd = bw_obs$between,size = smaller_deme)
+	#b_component <- dplyr::data_frame(alpha_x = obs_demes[, 1][alpha],alpha_y = obs_demes[, 2][alpha],beta_x = obs_demes[, 1][beta],beta_y = obs_demes[, 2][beta],fitted = bw_hat$between,obsrvd = bw_obs$between,size = smaller_deme)
+	#w_component <- dplyr::data_frame(alpha_x = obs_demes[, 1][demes],alpha_y = obs_demes[, 2][demes],fitted = bw_hat$within,obsrvd = bw_obs$within,size = sizes)
+	#g_component <- dplyr::data_frame(alpha_x = obs_demes[, 1][alpha],alpha_y = obs_demes[, 2][alpha],beta_x = obs_demes[, 1][beta],beta_y = obs_demes[, 2][beta],fitted = dist,obsrvd = bw_obs$between,size = smaller_deme)
+	b_component <- tibble::tibble(alpha_x = obs_demes[, 1][alpha],alpha_y = obs_demes[, 2][alpha],beta_x = obs_demes[, 1][beta],beta_y = obs_demes[, 2][beta],fitted = bw_hat$between,obsrvd = bw_obs$between,size = smaller_deme)
+	w_component <- tibble::tibble(alpha_x = obs_demes[, 1][demes],alpha_y = obs_demes[, 2][demes],fitted = bw_hat$within,obsrvd = bw_obs$within,size = sizes)
+	g_component <- tibble::tibble(alpha_x = obs_demes[, 1][alpha],alpha_y = obs_demes[, 2][alpha],beta_x = obs_demes[, 1][beta],beta_y = obs_demes[, 2][beta],fitted = dist,obsrvd = bw_obs$between,size = smaller_deme)
+
+
 	list(between = b_component, within = w_component, ibd = g_component)
 }
 
@@ -422,7 +439,9 @@ plot_log_posterior <- function(mcmcpath) {
 	pl_df <- NULL
 	for (path in mcmcpath) {
 		pl    <- read_matrix(file.path(path, "mcmcpilogl.txt"))
-		pl_df <- dplyr::bind_rows(pl_df, dplyr::as_data_frame(pl) %>% dplyr::mutate(path))
+		#pl_df <- dplyr::bind_rows(pl_df, dplyr::as_data_frame(pl) %>% dplyr::mutate(path))
+		pl_df <- dplyr::bind_rows(pl_df, tibble::as_tibble(pl) %>% dplyr::mutate(path))
+
 	}
 	pl_df <- pl_df %>% setNames(c("pi", "logl", "path")) %>% dplyr::mutate(mcmcpath = factor(data.table::rleid(path))) %>% dplyr::group_by(mcmcpath) %>% dplyr::mutate(iter = dplyr::row_number(), pilogl = pi + logl)
 		ggplot2::ggplot(pl_df, ggplot2::aes(x = iter, y = pilogl, color = mcmcpath)) + ggplot2::geom_path() + ggplot2::labs(x = "MCMC iteration  (after burn-in and thinning)",y = "log posterior",title = "Have the MCMC chains converged?",subtitle = "If not, restart EEMS and/or increase numMCMCIter") + ggplot2::theme_bw() + ggplot2::theme(panel.grid.minor = ggplot2::element_blank(),panel.grid.major.x = ggplot2::element_blank())
@@ -610,7 +629,8 @@ theme_void <- function() {
 filled_contour_rates <- function(z, dimns) {
 	w <- cbind(dimns$marks, z)
 	colnames(w) <- c("x", "y", "z")
-	ggplot2::ggplot(dplyr::as_data_frame(w), ggplot2::aes(x = x, y = y)) + ggplot2::geom_tile(ggplot2::aes(fill = z)) + ggplot2::scale_x_continuous(limits = dimns$xlim) + ggplot2::scale_y_continuous(limits = dimns$ylim) + ggplot2::coord_quickmap() + theme_void() + ggplot2::theme(legend.text.align = 1)
+	#ggplot2::ggplot(dplyr::as_data_frame(w), ggplot2::aes(x = x, y = y)) + ggplot2::geom_tile(ggplot2::aes(fill = z)) + ggplot2::scale_x_continuous(limits = dimns$xlim) + ggplot2::scale_y_continuous(limits = dimns$ylim) + ggplot2::coord_quickmap() + theme_void() + ggplot2::theme(legend.text.align = 1)
+	ggplot2::ggplot(as.data.frame(w), ggplot2::aes(x = x, y = y)) + ggplot2::geom_tile(ggplot2::aes(fill = z)) + ggplot2::scale_x_continuous(limits = dimns$xlim) + ggplot2::scale_y_continuous(limits = dimns$ylim) + ggplot2::coord_quickmap() + theme_void() + ggplot2::theme(legend.text.align = 1)
 }
 
 #' @title filled contour graph
@@ -638,7 +658,7 @@ filled_contour_graph <- function(p, dimns, plot_params) {
 
 #' @title filled eems contour
 #' 
-#' generates a ggplot object with filled contours
+#' generates ggplot object corresponding to eems plots 1 and 3
 #' This function is from the R package 'reemsplots2' by Desislava Petkova (github repository 'dipetkov/reemsplots2').
 #' 
 #' @param dimns output of read_dimns function
