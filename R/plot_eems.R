@@ -56,7 +56,7 @@ plot_eems <- function(xdir, save.in=NULL, plot.coords=T, plot.geography=T, mask.
 		# plots.chain  <- suppressWarnings(reemsplots2::make_eems_plots(mcmcdir, longlat = TRUE))
 		# plots.chain  <- suppressWarnings(make_eems_plots(mcmcpath=mcmcdir, longlat = TRUE))
 		mplots     <- eems_contours(mcmcpath=mcmcdir, dimns=dimns, longlat=longlat, plot_params=plot_params, is_mrates = TRUE)
-		qplots     <- eems_contours(mcmcpath=mcmcpath, dimns=dimns, longlat=longlat, plot_params=plot_params, is_mrates = FALSE)
+		qplots     <- eems_contours(mcmcpath=mcmcdir, dimns=dimns, longlat=longlat, plot_params=plot_params, is_mrates = FALSE)
 		maps.chain <- list(mplots[[1]], mplots[[2]], qplots[[1]], qplots[[2]])
 		# Check if more than two demes observed
 		obs_demes <- read_matrix(file.path(mcmcdir[1], "rdistoDemes.txt"), ncol = 3)
