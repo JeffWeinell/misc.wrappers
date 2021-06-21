@@ -119,11 +119,16 @@ runtess(x=vcf.path,coords=coords.path,kmax=10,reps=30,save.as="tess3r_simK4.pdf"
 ### ```plot_model``` Create a graphical representation of a demographic model that is defined by a template (.tpl) and estimation (.est) file.
 ```
 library(misc.wrappers)
-model.obj  <- plot_model(tpl.path="/PATH/TO/model.tpl",  est.path="/PATH/TO/model.est")
-pdf("cartoon_model.pdf",width=10,height=6)
+example_est <- "file.path(system.file("extdata", package = "misc.wrappers"), "example.est")"
+example_tpl <- "file.path(system.file("extdata", package = "misc.wrappers"), "example.tpl")"
+model.obj   <- plot_model(tpl.path=example_tpl,  est.path=example_est)
+pdf("example_model.pdf", width=10,height=6)
 model.obj
 dev.off()
 ```
+
+<img src="inst/examples/example_model.png" width="45%" />
+
 
 ### ```create.outer```. Generates a set of outer habitat coordinates that can be used for EEMS
 This function takes as input a file with coordinates of samples. Example input file: [coords.txt](inst/extdata/createouter_exampleInput_coords.txt)
