@@ -137,6 +137,7 @@ coords50 <- rcoords(r=10,size=50,limits=c(-180,180,-50,50))
 coords50_outer1 <- create.outer(coords=coords50, method=1, output.path="coords50_outer1.txt", plot.output.path="coords50_outer1.pdf")
 ```
 Method 1 output: [outer1.txt](inst/extdata/createouter_exampleOutput_method1_outer.text) <!--, [outer1.pdf](inst/extdata/createouter_exampleOutput_method1_outer.pdf)-->
+
 <img src="inst/examples/createouter_exampleOutput_gg_method1_outer.png" width="45%" />
 
 ```
@@ -144,6 +145,7 @@ Method 1 output: [outer1.txt](inst/extdata/createouter_exampleOutput_method1_out
 coords50_outer2 <- create.outer(coords=coords50, method=2, output.path="coords50_outer2.txt", plot.output.path="coords50_outer2.pdf")
 ```
 Method 2 output: [outer2.txt](inst/extdata/createouter_exampleOutput_method2_outer.text) <!--, , [outer2.pdf](inst/extdata/createouter_exampleOutput_method2_outer.pdf)-->
+
 <img src="inst/examples/createouter_exampleOutput_method2_outer.png" width="45%" />
 
 ```
@@ -151,6 +153,7 @@ Method 2 output: [outer2.txt](inst/extdata/createouter_exampleOutput_method2_out
 coords50_outer3 <- create.outer(coords=coords50, method=3, output.path="coords50_outer3.txt", plot.output.path="coords50_outer3.pdf")
 ```
 Method 3 output: [outer3.txt](inst/extdata/createouter_exampleOutput_method3_outer.text)<!--, , [outer3.pdf](inst/extdata/createouter_exampleOutput_method3_outer.pdf)-->
+
 <img src="inst/examples/createouter_exampleOutput_method3_outer.png" width="45%" />
 
 
