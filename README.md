@@ -125,6 +125,37 @@ model.obj
 dev.off()
 ```
 
+### ```create.outer```. Generates a set of outer habitat coordinates that can be used for EEMS
+This function takes as input a file with coordinates of samples. Example input file: [coords.txt](inst/extdata/createouter_exampleInput_coords.txt)
+
+```
+library(misc.wrappers)
+# Sample 50 points from 10-degree radius area with center located on land somewhere between -50 and 50 degrees latitude.
+coords50 <- rcoords(r=10,size=50,limits=c(-180,180,-50,50))
+
+# Using method 1 to create the outer set of points and generate a figure with points on map. Method 1 may not work well for points on continents vs. island archipelagos.
+coords50_outer1 <- create.outer(coords=coords50, method=1, output.path="coords50_outer1.txt", plot.output.path="coords50_outer1.pdf")
+```
+Method 1 output: [outer1.txt](inst/extdata/createouter_exampleOutput_method1_outer.text) <!--, [outer1.pdf](inst/extdata/createouter_exampleOutput_method1_outer.pdf)-->
+Points in outer1.txt (green) in relation to input sample coordinates (black):
+<img src="inst/extdata/createouter_exampleOutput_method1_outer.pdf" width="45%" />
+
+
+```
+# Using method 2
+coords50_outer2 <- create.outer(coords=coords50, method=2, output.path="coords50_outer2.txt", plot.output.path="coords50_outer2.pdf")
+```
+Method 2 output: [outer2.txt](inst/extdata/createouter_exampleOutput_method2_outer.text) <!--, , [outer2.pdf](inst/extdata/createouter_exampleOutput_method2_outer.pdf)-->
+
+```
+# Using method 3
+coords50_outer3 <- create.outer(coords=coords50, method=3, output.path="coords50_outer3.txt", plot.output.path="coords50_outer3.pdf")
+```
+Method 3 output: [outer3.txt](inst/extdata/createouter_exampleOutput_method3_outer.text)<!--, , [outer3.pdf](inst/extdata/createouter_exampleOutput_method3_outer.pdf)-->
+
+
+
+
 ### ```runeems_snps_setup``` Generate input files for runeems_snps
 This function takes as input two files: (1) SNPs in a VCF file and (2) a two-column text file with longitude and latitude coordinates for each individual in the VCF file. Output of this function includes all of the files and directories necessary for running EEMS (see example below), including bash scripts for running EEMS.
 
