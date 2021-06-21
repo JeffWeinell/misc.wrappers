@@ -127,7 +127,7 @@ model.obj
 dev.off()
 ```
 
-<img src="inst/examples/example_model.png" width="45%" />
+<img src="inst/examples/example_model.png" width="80%" />
 
 
 ### ```create.outer```. Generates a set of outer habitat coordinates that can be used for EEMS
