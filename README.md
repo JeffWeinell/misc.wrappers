@@ -126,7 +126,7 @@ pdf("example_model.pdf", width=10,height=6)
 model.obj
 dev.off()
 ```
-Graph of model defined by [example.tpl](inst/extdata/example.tpl) and [example.est](inst/extdata/example.est):
+Cartoon graph of the model defined by [example.tpl](inst/extdata/example.tpl) and [example.est](inst/extdata/example.est):
 
 <img src="inst/examples/example_model.png" width="100%" />
 
