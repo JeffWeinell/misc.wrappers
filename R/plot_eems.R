@@ -113,7 +113,7 @@ plot_eems <- function(xdir, plot.coords=T, plot.geography=T, mask.oceans=T, incl
 				dat.temp <- plots.dat[[j]]
 				e.temp   <- raster::extent(dat.temp[,1:2])
 				r.temp   <- raster::raster(e.temp, ncol=length(unique(dat.temp$x)), nrow=length(unique(dat.temp$y)))
-				rasterlist[[j]] <- raster::rasterize(dat.temp[, 1:2], r.temp, dat.temp[,3], fun=mean, background=-9999)
+				rasterlist[[j]] <- raster::rasterize(dat.temp[, 1:2], r.temp, dat.temp[,3], fun=mean, background=-3.4e+38)
 			}
 			# Hold the rasters in a rasterbrick
 			res.brick <- raster::brick(rasterlist)
@@ -696,7 +696,11 @@ filled_prob_contour <- function(dimns, probs, plot_params, is_mrates) {
 	probs <- (probs + 1) / 2
 	probs[probs < 0] <- 0
 	probs[probs > 1] <- 1
-	if (is_mrates) r <- "m" else r <- "q"
+	if (is_mrates) {
+		r <- "m" 
+	} else {
+		r <- "q"
+	}
 	breaks <- c(1 - plot_params$prob_level, plot_params$prob_level)
 	labels <- c(paste0("P{log(", r, ") < 0} = ", plot_params$prob_level),paste0("P{log(", r, ") > 0} = ", plot_params$prob_level))
 	p <- filled_contour_rates(probs, dimns)
