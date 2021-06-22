@@ -92,7 +92,7 @@ runeems_snps_setup <- function(x, coords, save.in, outer=NULL, exe.path=NULL, n.
 	dir.create(mcmcpath)
 	sapply(X=mcmcpath.subdirs,FUN=dir.create)
 	# Create directory to hold params files
-	params.path <- paste0(save.in,"/params")
+	params.path <- file.path(save.in,"params")
 	dir.create(params.path)
 	# Copy *.coord file to input.dirpath and rename as "data.coord"
 #	system(paste("cp",coords, paste0(input.dirpath,"/data.coord")))
@@ -168,14 +168,14 @@ runeems_snps_setup <- function(x, coords, save.in, outer=NULL, exe.path=NULL, n.
 	if(is.null(outer)){
 		data_outer <- create.outer(coords=coords.df, output.path=paste0(input.dirpath,"/data.outer"), plot.output.path=paste0(save.in,"/habitat_outer.pdf"),...)
 	} else {
-		system(paste("cp",outer,paste0(input.dirpath,"/data.outer")))
+		system(paste0("cp '",outer,"' '",file.path(input.dirpath,"data.outer"),"'"))
 	}
 	### Generate diffs file, saving to input.dirpath with name "data.diffs"
 	# data.diffs <- genind2diffs(genind.obj=genind,output.file=paste0(input.dirpath,"/data.diffs"))
 	# diffs      <- data.diffs["diffs"]
 	# nIndiv     <- c(data.diffs["nIndiv"])
 	# nSites     <- data.diffs["nSites"]
-	params.files.path <- paste0(params.path,"/params-chain",1:nchains,".ini")
+	params.files.path <- file.path(params.path,paste0("params-chain",1:nchains,".ini"))
 	for(i in 1:nchains){
 		L1 <- paste0("datapath = ",paste0(input.dirpath,"/data"))
 		L2 <- paste0("mcmcpath = ",mcmcpath.subdirs[i])
