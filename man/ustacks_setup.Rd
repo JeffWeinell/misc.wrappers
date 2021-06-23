@@ -7,18 +7,29 @@
 This function creates a bash job file for each combination of input sequence read files (one per individual), values of m and M to run STACKS.
 The output of this function is a character string vector with paths to bash job files, which can be piped to the function 'rsbatch' to submit the jobs.}
 \usage{
-ustacks_setup(ustacks.path, files, save.in, mM, p = 16)
+ustacks_setup(
+  files,
+  save.in,
+  mMN = cbind(m = rep(3, 8), M = 1:8, N = 3:10),
+  p = 16,
+  ustacks.path = NULL
+)
 }
 \arguments{
-\item{ustacks.path}{Character string with path to the ustacks executable.}
-
 \item{files}{Input sequence data files, one for each individual.}
 
 \item{save.in}{Character string with directory where output directories and files should be saved.}
 
-\item{mM}{Two-column data frame or matrix with m and M values in the first and second columns, respectively. Each row indicates a combination of m and M to use for STACKS}
+\item{mMN}{Three-column data frame or matrix with m, M, and N values in the first, second, and third columns, respectively. Each row indicates a combination of m, M, and N to use for STACKS. Default cbind(m=rep(3,8),M=1:8,N=3:10).
+m = Minimum depth of coverage required to create a stack. Default 3.
+M = Maximum distance (in nucleotides) allowed between stacks. Default 1-8.
+N = Maximum distance allowed to align secondary reads to primary stacks. Default 'M+2'.}
 
 \item{p}{Number of threads to use for job parallization. Default 16.}
+
+\item{ustacks.path}{Character string with path to the ustacks executable. Default NULL, in which case the path is derived from the default setting, which can be set with config_miscwrappers('<path/to/ustacks>').}
+
+\item{N}{Maximum distance allowed to align secondary reads to primary stacks. Default 'M+2'.}
 }
 \value{
 Character string vector with the paths to bash job files.
