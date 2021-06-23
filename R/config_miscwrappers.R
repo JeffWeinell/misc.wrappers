@@ -58,11 +58,49 @@ config_miscwrappers <- function(exe.paths=NULL){
 #' # Example 3: set path to the fastStructure file 'structure.py'
 #' config_miscwrappers(exe.path="/FULL/PATH/TO/structure.py")
 
+#' @title sh single quote
+#' 
+#' Calls the base function shQuote with default options; sq is faster to type.
+#' 
+#' @param x Character string to be quoted
+#' @return Character string with leading and trailing "'" character added to input string
+#' @export sq
+sq <- function(x){
+	shQuote(x)
+}
 
 
-
-
-
+#' @title sbatch setup and submit
+#' 
+#' Creates slurm sbatch submission string, and optionally submits the job using system
+#' 
+#' @param sh.path Character string with path to bash script
+#' @param partition Character string with name of partition to submit the job to. Passed to sbatch argument '--partition'. Default NA.
+#' @param nodes Number of nodes to split the job across. Default 1.
+#' @param ntasksPerNode Number of tasks (cores) to use per node. Default 1.
+#' @param memGb Total amount of memory to allocate for the job. Default 50Gb.
+#' @param time Numerical vector with length 4, with the number of days, hours, minutes, and seconds, respectively, to allocate for the job.
+#' @param submit Logical with whether or not to submit the jobs to the cluster.
+#' @return Either vector of character strings that can be piped to system, or NULL
+#' @export rsbatch
+rsbatch <- function(sh.path,partition=NA,nodes=1,ntasksPerNode=1,memGb=50,time=c(0,6,0,0),submit=FALSE){
+	#sprintf("%s-%s:%s:%s",list(0,6,0,0))
+	#do.call(sprintf,list(0,6,0,0),"%s-%s:%s:%s")
+	#do.call(sprintf,c("%s-%s:%s:%s",list(0,6,0,0)))
+	time2    <- lapply(time,FUN=formatC,width=2,format="d",flag="0")
+	#pars.df  <- data.frame(args=c("--partition=","--nodes=","--ntasks-per-node=","--mem=","--time="),values=c(partition,nodes,ntasksPerNode,paste0(memGb,"Gb"),paste0(days,"-",hrs,":00:00")))
+	pars.df  <- data.frame(args=c("--partition=","--nodes=","--ntasks-per-node=","--mem=","--time="), values=c(partition,nodes,ntasksPerNode,paste0(memGb,"Gb"),do.call(sprintf,c("%s-%s:%s:%s",time2))))
+	pars.use <- !is.na(pars.df[,"values"])
+	pars.df2 <- pars.df[pars.use,]
+	params   <- paste(sapply(1:nrow(pars.df2),FUN=function(x) {paste0(pars.df2[x,],collapse="")}),collapse=" ")
+	# params <- sprintf("sbatch --nodes=%s --ntasks-per-node=%s --mem=%sGb --time=%s-%s:00:00 --partition=%s %s",nodes,ntasksPerNode,memGb,days,hrs,partition,sq(sh.path))
+	jobstrings <- paste(params,sq(sh.path))
+	if(!submit){
+		return(jobstrings)
+	} else {
+		lapply(jobstrings,system)
+	}
+}
 
 
 
