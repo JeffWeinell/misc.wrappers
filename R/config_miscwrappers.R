@@ -94,7 +94,7 @@ rsbatch <- function(sh.path,partition=NA,nodes=1,ntasksPerNode=1,memGb=50,time=c
 	pars.df2 <- pars.df[pars.use,]
 	params   <- paste(sapply(1:nrow(pars.df2),FUN=function(x) {paste0(pars.df2[x,],collapse="")}),collapse=" ")
 	# params <- sprintf("sbatch --nodes=%s --ntasks-per-node=%s --mem=%sGb --time=%s-%s:00:00 --partition=%s %s",nodes,ntasksPerNode,memGb,days,hrs,partition,sq(sh.path))
-	jobstrings <- paste(params,sq(sh.path))
+	jobstrings <- paste("sbatch",params,sq(sh.path))
 	if(!submit){
 		return(jobstrings)
 	} else {
