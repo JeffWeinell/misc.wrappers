@@ -391,7 +391,7 @@ summarize_stacks <- function(dir,save=TRUE,use.popmap=FALSE,popmap=NULL){
 		}
 		genind.obj@pop <- as.factor(pops$V2[match(colnames(vcf.obj@gt[,-1]),pops[,1])])
 		bs.nc          <- hierfstat::basic.stats(genind.obj)
-		res.temp       <- as.data.frame(cbind(params=basename(mMNndirs[[i]]),bs.nc@overall))
+		res.temp       <- data.frame(params=basename(mMNndirs[[i]]),as.data.frame(t(bs.nc$overall)))
 		res            <- rbind(res,res.temp)
 	}
 	#rownames(res) <- basename(mMNndirs)
