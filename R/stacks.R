@@ -390,7 +390,7 @@ summarize_stacks <- function(dir,save=TRUE,use.popmap=FALSE,popmap=NULL){
 		#counts.indv    <- sapply(X=1:ncol(gt), FUN=function(x) {A=table(gt[,x], useNA='always'); B=as.numeric(A[is.na(names(A))])/sum(A); B})
 		counts.indv    <- lapply(X=1:ncol(gt), FUN=function(x) {table(gt[,x], useNA='always')})
 		missingness.sites <- round(sapply(X=1:length(counts.sites),FUN=function(x) {A=counts.sites[[x]]; as.numeric(A[is.na(names(A))])/sum(A)}),digits=4)
-		missingness.loci  <- round(sapply(X=1:length(counts.indv),FUN=function(x) {A=counts.indv[[x]]; as.numeric(A[is.na(names(A))])/sum(A)}),digits=4)
+		missingness.indv  <- round(sapply(X=1:length(counts.indv),FUN=function(x) {A=counts.indv[[x]]; as.numeric(A[is.na(names(A))])/sum(A)}),digits=4)
 		frare <- sapply(1:length(counts.sites),FUN=function(x) {round(table(unlist(strsplit(rep(names(counts.sites[[x]]),counts.sites[[x]]),split="/")))["1"]/sum(table(unlist(strsplit(rep(names(counts.sites[[x]]),counts.sites[[x]]),split="/")))),digits=4)})
 		genind.obj <- suppressWarnings(vcfR::vcfR2genind(vcf.obj))
 		if(is.na(popmap.path)){
