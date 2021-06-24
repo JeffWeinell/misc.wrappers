@@ -7,7 +7,7 @@
 For each combination of N and set of ustacks, this function creates a bash job file to run cstacks.
 The output of this function is a character string vector with paths to bash job files, which can be piped to the function 'rsbatch' to submit the jobs.}
 \usage{
-cstacks_setup(files, save.in, n = 1, p = 16, cstacks.path = NULL)
+cstacks_setup(save.in, n = 1, p = 16, cstacks.path = NULL)
 }
 \arguments{
 \item{save.in}{Character string with directory where output directories and files should be saved. This should be the same as the value used for the 'save.in' argument of ustacks_setup.}

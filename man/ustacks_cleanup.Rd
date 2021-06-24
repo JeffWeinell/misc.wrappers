@@ -7,18 +7,12 @@
 Deletes ustacks bash scripts in a directory. Run this after all ustacks jobs are completed.}
 \usage{
 ustacks_cleanup(dir)
-
-ustacks_cleanup(dir)
 }
 \arguments{
-\item{dir}{Character string with path to directory containing cstacks bash scripts}
+\item{dir}{Character string with path to directory containing ustacks bash scripts}
 }
 \description{
 cleanup ustacks
 
 Deletes ustacks bash scripts in a directory. Run this after all ustacks jobs are completed.
-
-cleanup cstacks
-
-Deletes cstacks bash scripts in a directory. Run this after all cstacks jobs are completed.
 }
