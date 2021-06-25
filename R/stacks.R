@@ -455,6 +455,7 @@ summarize_VCFs <- function(VCF.paths,save.in,popmap.path=NULL){
 	res <- data.frame()
 	for(i in 1:length(VCF.paths)){
 		vcf <- VCF.paths[i]
+		message(sprintf("processing '%s' [%s/%s]",basename(vcf),i,length(VCF.paths)))
 		if(!file.exists(vcf)){
 			stop("could not find 'populations.snps.vcf'")
 		}
@@ -479,7 +480,7 @@ summarize_VCFs <- function(VCF.paths,save.in,popmap.path=NULL){
 		# tab.df   <- as.data.frame(cbind(pop=genind.obj$pop,genind.obj@tab))
 		# stats.wc  <- hierfstat::wc(tab.df)
 		bs.nc   <- hierfstat::basic.stats(genind.obj)
-		res.temp  <- data.frame(params=basename(vcf),as.data.frame(t(bs.nc$overall)))
+		res.temp  <- data.frame(filename=basename(vcf),as.data.frame(t(bs.nc$overall)))
 		# res.temp$Fst.wc <- 
 		res.temp$max.missingness.indv  <- round(max(missingness.indv),digits=4)
 		res.temp$min.missingness.indv  <- round(min(missingness.indv),digits=4)
@@ -492,13 +493,7 @@ summarize_VCFs <- function(VCF.paths,save.in,popmap.path=NULL){
 		res.temp$nloci  <- length(unique(vcf.obj@fix[,"CHROM"]))
 		res <- rbind(res,res.temp)
 	}
-	# params.mat1  <- do.call(rbind,strsplit(res$params,"_"))
-	# params.mat2  <- gsub("^.","", params.mat1)
-	# mode(params.mat2) <- "integer"
-	# colnames(params.mat2) <- c("m","M","N","n")
-	# params.df <- as.data.frame(params.mat2)
-	# res2 <- data.frame(res,params.df)
-	colnames(res) <- c("params","Heterozygosity.observed","Heterozygosity.expected","Overall.GeneDiversity","Dst","Htp","Dstp","Fst","Fstp","Fis","Dest","max.missingness.indv","min.missingness.indv","max.missingness.site","min.missingness.site","missingness.total","frare.mean","nsite","nloci")
+	colnames(res) <- c("filename","Heterozygosity.observed","Heterozygosity.expected","Overall.GeneDiversity","Dst","Htp","Dstp","Fst","Fstp","Fis","Dest","max.missingness.indv","min.missingness.indv","max.missingness.site","min.missingness.site","missingness.total","frare.mean","nsite","nloci")
 	if(save){
 		write.table(x=res,file=file.path(save.in,"VCF_stats.txt"),quote=F,col.names=T,row.names=F,sep="\t")
 	}
