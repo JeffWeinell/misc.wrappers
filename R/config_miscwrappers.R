@@ -69,6 +69,17 @@ sq <- function(x){
 	shQuote(x)
 }
 
+#' @title update miscwrappers
+#' 
+#' Updates misc.wrappers by calling remotes::install_github function
+#' 
+#' @param upgrade Whether or not to update dependencies. Default FALSE.
+#' @param ... Additional arguments to pass to install_github
+#' @return NULL
+#' @export update_miscwrappers
+update_miscwrappers <- function(upgrade=FALSE,...){
+	remotes::install_github("JeffWeinell/misc.wrappers",upgrade,...)
+}
 
 #' @title sbatch setup and submit
 #' 
