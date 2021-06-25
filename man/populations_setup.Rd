@@ -25,7 +25,7 @@ populations_setup(
 
 \item{popmap}{Character string to population map. Default NULL, in which case all individuals in 'save.in' are assigned to the same 'population'.}
 
-\item{include.out}{Character string vector indicating which output files should be generated. Default is to include all the files possible.  See STACKS for explanation.
+\item{include.out}{Character string vector indicating which output files should be generated. Default is to include all the files possible. See STACKS for explanation.
 fasta-loci — output locus consensus sequences in FASTA format..
 fasta-samples — output the sequences of the two haplotypes of each (diploid) sample, for each locus, in FASTA format.
 vcf — output SNPs and haplotypes in Variant Call Format (VCF).
