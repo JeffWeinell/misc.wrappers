@@ -1576,7 +1576,7 @@ newpoint <-function(p0,p1,c){
 #' Note: I may update this to not require vcftools.
 #' 
 #' @param vcf Character string with path to input vcf.
-#' @param vcftools.path Character string with path to the vcftools executable.
+#' @param vcftools.path Character string with path to the vcftools executable. Default NULL, in which case vcftools.path is determined from table returned by config_miscwrappers(). See 'config_miscwrappers' function.
 #' @param out Character string where to write output vcf.
 #' @param indv.keep Character string with names of individuals to keep. Default is NULL (all individuals kept).
 #' @param min.n Integer >= 1 specifying the minimum number of non-missing alleles required to keep a site. Default = 4. If set to "all", only complete-data sites kept.
@@ -1587,6 +1587,13 @@ newpoint <-function(p0,p1,c){
 #' @return List with [[1]] path to vcftools, [[2]] dataframe with input and output values for VCF filepaths, number of loci (chromosomes), sites (positions), and individuals (samples).
 #' @export vcf_getSNP
 vcf_getSNP      <- function(vcftools.path,vcf,out,indv.keep=NULL,which.site="best",min.n=4,max.fMD=1,min.n0=2,min.n1=1){
+	if(is.null(vcftools.path)){
+		if(any(config_miscwrappers()[,"program"]=="vcftools")){
+			vcftools.path <- config_miscwrappers()[config_miscwrappers()[,"program"]=="vcftools","exe_path"]
+		} else {
+			stop("Set 'vcftools.path' argument, or use config_miscwrappers(exe.path=<path/to/vcftools>) to set the package default path for vcftools")
+		}
+	}
 	vcf.obj     <- vcfR::read.vcfR(vcf)
 	samplenames <- colnames(vcf.obj@gt)[-1]
 	# matrix with "fixed" columns, which are the columns with site-specific stats across all samples

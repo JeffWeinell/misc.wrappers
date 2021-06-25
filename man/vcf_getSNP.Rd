@@ -21,7 +21,7 @@ vcf_getSNP(
 )
 }
 \arguments{
-\item{vcftools.path}{Character string with path to the vcftools executable.}
+\item{vcftools.path}{Character string with path to the vcftools executable. Default NULL, in which case vcftools.path is determined from table returned by config_miscwrappers(). See 'config_miscwrappers' function.}
 
 \item{vcf}{Character string with path to input vcf.}
 
