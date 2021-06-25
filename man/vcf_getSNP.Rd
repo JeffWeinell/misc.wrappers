@@ -9,9 +9,9 @@ The best site is the one with the least missing data. To break ties, take the fi
 Note: I may update this to not require vcftools.}
 \usage{
 vcf_getSNP(
-  vcftools.path,
   vcf,
   out,
+  vcftools.path = NULL,
   indv.keep = NULL,
   which.site = "best",
   min.n = 4,
@@ -21,11 +21,11 @@ vcf_getSNP(
 )
 }
 \arguments{
-\item{vcftools.path}{Character string with path to the vcftools executable. Default NULL, in which case vcftools.path is determined from table returned by config_miscwrappers(). See 'config_miscwrappers' function.}
-
 \item{vcf}{Character string with path to input vcf.}
 
 \item{out}{Character string where to write output vcf.}
+
+\item{vcftools.path}{Character string with path to the vcftools executable. Default NULL, in which case vcftools.path is determined from table returned by config_miscwrappers(). See 'config_miscwrappers' function.}
 
 \item{indv.keep}{Character string with names of individuals to keep. Default is NULL (all individuals kept).}
 

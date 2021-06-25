@@ -433,6 +433,81 @@ summarize_stacks <- function(dir,save=TRUE,use.popmap=FALSE,popmap=NULL){
 }
 
 
+
+#' @title summarize_VCFs
+#' 
+#' Same as 'summarize_stacks', except the full paths to input VCFs and an output directory are suppllied as arguments.
+#' 
+#' @param VCF.paths Character string vector to one or more input VCF files.
+#' @param save.in Path to directory where the output table should be save. If NULL, the the table is not saved.
+#' @param popmap.path Character string to population map. If NULL, all individuals in are assigned to the same 'population'.
+#' @return data frame with basic stats
+#' @export summarize_VCFs
+summarize_VCFs <- function(VCF.paths,save.in,popmap.path=NULL){
+	if(is.null(save.in)){
+		save <- FALSE
+	} else {
+		save <- TRUE
+	}
+	if(is.null(popmap.path)){
+		popmap.path <- NA
+	}
+	res <- data.frame()
+	for(i in 1:length(VCF.paths)){
+		vcf <- VCF.paths[i]
+		if(!file.exists(vcf)){
+			stop("could not find 'populations.snps.vcf'")
+		}
+		vcf.obj   <- vcfR::read.vcfR(vcf,verbose=F,checkFile=F)
+		gt        <- gsub(":.+","",vcf.obj@gt[,-1])
+		gt.counts <- table(gt,useNA='always')
+		#counts.sites <- sapply(X=1:nrow(gt), FUN=function(x) {A=table(gt[x,], useNA='always'); B=as.numeric(A[is.na(names(A))])/sum(A); B})
+		counts.sites <- lapply(X=1:nrow(gt), FUN=function(x) {table(gt[x,], useNA='always')})
+		#counts.indv <- sapply(X=1:ncol(gt), FUN=function(x) {A=table(gt[,x], useNA='always'); B=as.numeric(A[is.na(names(A))])/sum(A); B})
+		counts.indv <- lapply(X=1:ncol(gt), FUN=function(x) {table(gt[,x], useNA='always')})
+		missingness.sites <- round(sapply(X=1:length(counts.sites),FUN=function(x) {A=counts.sites[[x]]; as.numeric(A[is.na(names(A))])/sum(A)}),digits=4)
+		missingness.indv <- round(sapply(X=1:length(counts.indv),FUN=function(x) {A=counts.indv[[x]]; as.numeric(A[is.na(names(A))])/sum(A)}),digits=4)
+		frare <- sapply(1:length(counts.sites),FUN=function(x) {round(table(unlist(strsplit(rep(names(counts.sites[[x]]),counts.sites[[x]]),split="/")))["1"]/sum(table(unlist(strsplit(rep(names(counts.sites[[x]]),counts.sites[[x]]),split="/")))),digits=4)})
+		genind.obj <- suppressWarnings(vcfR::vcfR2genind(vcf.obj))
+		if(is.na(popmap.path)){
+			pops <- data.frame(V1=colnames(vcf.obj@gt[,-1]),V2=1)
+		} else {
+			pops <- read.table(popfile, header=F)
+		}
+		genind.obj@pop <- as.factor(pops$V2[match(colnames(vcf.obj@gt[,-1]),pops[,1])])
+		# length(table(gt))
+		# tab.df   <- as.data.frame(cbind(pop=genind.obj$pop,genind.obj@tab))
+		# stats.wc  <- hierfstat::wc(tab.df)
+		bs.nc   <- hierfstat::basic.stats(genind.obj)
+		res.temp  <- data.frame(params=basename(vcf),as.data.frame(t(bs.nc$overall)))
+		# res.temp$Fst.wc <- 
+		res.temp$max.missingness.indv  <- round(max(missingness.indv),digits=4)
+		res.temp$min.missingness.indv  <- round(min(missingness.indv),digits=4)
+		#res.temp$mean.missingness.indv <- round(mean(missingness.indv),digits=4)
+		res.temp$max.missingness.site  <- round(max(missingness.sites),digits=4)
+		res.temp$min.missingness.site  <- round(min(missingness.sites),digits=4)
+		res.temp$missingness.total     <- round(mean(missingness.sites),digits=4)
+		res.temp$frare.mean <- mean(frare)
+		res.temp$nsite  <- nrow(gt)
+		res.temp$nloci  <- length(unique(vcf.obj@fix[,"CHROM"]))
+		res <- rbind(res,res.temp)
+	}
+	# params.mat1  <- do.call(rbind,strsplit(res$params,"_"))
+	# params.mat2  <- gsub("^.","", params.mat1)
+	# mode(params.mat2) <- "integer"
+	# colnames(params.mat2) <- c("m","M","N","n")
+	# params.df <- as.data.frame(params.mat2)
+	# res2 <- data.frame(res,params.df)
+	colnames(res) <- c("params","Heterozygosity.observed","Heterozygosity.expected","Overall.GeneDiversity","Dst","Htp","Dstp","Fst","Fstp","Fis","Dest","max.missingness.indv","min.missingness.indv","max.missingness.site","min.missingness.site","missingness.total","frare.mean","nsite","nloci")
+	if(save){
+		write.table(x=res,file=file.path(save.in,"VCF_stats.txt"),quote=F,col.names=T,row.names=F,sep="\t")
+	}
+	res
+}
+
+
+
+
 ### #' @title batch setup process_radtags
 ### #' 
 ### #' For each set pool of prepocessed samples this function creates a bash job file to run process_radtags.

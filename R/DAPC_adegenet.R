@@ -1586,7 +1586,7 @@ newpoint <-function(p0,p1,c){
 #' @param which.site Character string indicating the method for choosing a site to keep for each locus (or chromosome). Default = "best", which is considered the one with the least missing data, or the first among sites tied for least missing data. Other options are "all.passing", which retains all sites (positions) that pass variation filters (min.n, min.0.n.0, min.1.n), "first" (first site kept at each locus), or "random".
 #' @return List with [[1]] path to vcftools, [[2]] dataframe with input and output values for VCF filepaths, number of loci (chromosomes), sites (positions), and individuals (samples).
 #' @export vcf_getSNP
-vcf_getSNP      <- function(vcftools.path,vcf,out,indv.keep=NULL,which.site="best",min.n=4,max.fMD=1,min.n0=2,min.n1=1){
+vcf_getSNP      <- function(vcf,out,vcftools.path=NULL,indv.keep=NULL,which.site="best",min.n=4,max.fMD=1,min.n0=2,min.n1=1){
 	if(is.null(vcftools.path)){
 		if(any(config_miscwrappers()[,"program"]=="vcftools")){
 			vcftools.path <- config_miscwrappers()[config_miscwrappers()[,"program"]=="vcftools","exe_path"]
