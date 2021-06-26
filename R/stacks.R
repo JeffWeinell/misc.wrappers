@@ -74,7 +74,7 @@ cstacks_setup <- function(save.in,n=1,p=16,cstacks.path=NULL){
 		make.outdirs <- sapply(paste("mkdir -p",outdirs),system)
 		outdirs.mat <- matrix(data=outdirs,ncol=length(n),byrow=T)
 		copy.ufiles <- lapply(1:nrow(outdirs.mat),FUN=function(x){sapply(1:length(n),FUN=function(y){file.copy(list.files(mMNdirs[x],full.names=T), outdirs.mat[x,y])})})
-		#delete.old <- sapply(paste("rm -R",mMNdirs),system)
+		delete.old <- sapply(paste("rm -R",mMNdirs),system)
 	}
 	samples  <- unlist(lapply(X=1:length(outdirs), FUN=function(x) {paste(paste("-s",sq(gsub(".snps.tsv.gz$","",list.files(outdirs[x],full.names=T,pattern=".snps.tsv.gz$")))),collapse=" ")}))
 	all.df   <- data.frame(c=sq(cstacks.path),o=paste("-o",sq(outdirs)),s=samples,n=paste("-n",rep(n,length(mMNdirs))),p=paste("-p",p))
