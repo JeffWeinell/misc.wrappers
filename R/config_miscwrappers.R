@@ -78,7 +78,7 @@ sq <- function(x){
 #' @return NULL
 #' @export update_miscwrappers
 update_miscwrappers <- function(upgrade=FALSE,...){
-	remotes::install_github("JeffWeinell/misc.wrappers",upgrade,...)
+	remotes::install_github("JeffWeinell/misc.wrappers",upgrade=upgrade,...)
 }
 
 #' @title sbatch setup and submit
