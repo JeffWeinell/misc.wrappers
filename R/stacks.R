@@ -65,16 +65,27 @@ cstacks_setup <- function(save.in,n=1,p=16,cstacks.path=NULL){
 			stop("Set 'cstacks.path' argument, or use config_miscwrappers(exe.path=<path/to/cstacks>) to set the package default path for cstacks")
 		}
 	}
-	#cstacks -o ./stacks -s ./stacks/f0_male -s ./stacks/f0_female -n 4 -p 15
-	mMNdirs   <- list.dirs(save.in,recursive=F)
-	outdirs  <- paste0(rep(mMNdirs,each=length(n)),rep(paste0("_n",n),length(mMNdirs)))
-	if(length(n)==1){
-		file.rename(mMNdirs,outdirs)
+	#mMNdirs  <- list.dirs(save.in,recursive=F)
+	mMNdirs  <- list.files(save.in,recursive=F,pattern="^m._M._N.$",include.dirs=T,full.names=T)
+	if(length(mMNdirs)==0){
+		mMNndirs <- list.files(save.in,recursive=F,pattern="^m._M._N._n.$",include.dirs=T,full.names=T)
+		if(length(mMNndirs)>0){
+			setup.dirs <- FALSE
+			outdirs <- mMNndirs
+			mMNdirs <- gsub("_n.$","",mMNndirs)
+		} else {
+			stop("no input directories found")
+		}
 	} else {
-		make.outdirs <- sapply(paste("mkdir -p",outdirs),system)
-		outdirs.mat <- matrix(data=outdirs,ncol=length(n),byrow=T)
-		copy.ufiles <- lapply(1:nrow(outdirs.mat),FUN=function(x){sapply(1:length(n),FUN=function(y){file.copy(list.files(mMNdirs[x],full.names=T), outdirs.mat[x,y])})})
-		delete.old <- sapply(paste("rm -R",mMNdirs),system)
+		outdirs <- paste0(rep(mMNdirs,each=length(n)),rep(paste0("_n",n),length(mMNdirs)))
+		if(length(n)==1){
+			file.rename(mMNdirs,outdirs)
+		} else {
+			make.outdirs <- sapply(paste("mkdir -p",outdirs),system)
+			outdirs.mat  <- matrix(data=outdirs,ncol=length(n),byrow=T)
+			copy.ufiles  <- lapply(1:nrow(outdirs.mat),FUN=function(x){sapply(1:length(n),FUN=function(y){file.copy(list.files(mMNdirs[x],full.names=T), outdirs.mat[x,y])})})
+			#delete.old   <- sapply(paste("rm -R",mMNdirs),system)
+		}
 	}
 	samples  <- unlist(lapply(X=1:length(outdirs), FUN=function(x) {paste(paste("-s",sq(gsub(".snps.tsv.gz$","",list.files(outdirs[x],full.names=T,pattern=".snps.tsv.gz$")))),collapse=" ")}))
 	all.df   <- data.frame(c=sq(cstacks.path),o=paste("-o",sq(outdirs)),s=samples,n=paste("-n",rep(n,length(mMNdirs))),p=paste("-p",p))
@@ -382,15 +393,15 @@ summarize_stacks <- function(dir,save=TRUE,use.popmap=FALSE,popmap=NULL){
 		if(!file.exists(vcf)){
 			stop("could not find 'populations.snps.vcf'")
 		}
-		vcf.obj  <- vcfR::read.vcfR(vcf,verbose=F,checkFile=F)
-		gt    <- gsub(":.+","",vcf.obj@gt[,-1])
+		vcf.obj    <- vcfR::read.vcfR(vcf,verbose=F,checkFile=F)
+		gt         <- gsub(":.+","",vcf.obj@gt[,-1])
 		gt.counts  <- table(gt,useNA='always')
 		#counts.sites <- sapply(X=1:nrow(gt), FUN=function(x) {A=table(gt[x,], useNA='always'); B=as.numeric(A[is.na(names(A))])/sum(A); B})
 		counts.sites <- lapply(X=1:nrow(gt), FUN=function(x) {table(gt[x,], useNA='always')})
 		#counts.indv <- sapply(X=1:ncol(gt), FUN=function(x) {A=table(gt[,x], useNA='always'); B=as.numeric(A[is.na(names(A))])/sum(A); B})
 		counts.indv <- lapply(X=1:ncol(gt), FUN=function(x) {table(gt[,x], useNA='always')})
-		missingness.sites <- round(sapply(X=1:length(counts.sites),FUN=function(x) {A=counts.sites[[x]]; as.numeric(A[is.na(names(A))])/sum(A)}),digits=4)
-		missingness.indv <- round(sapply(X=1:length(counts.indv),FUN=function(x) {A=counts.indv[[x]]; as.numeric(A[is.na(names(A))])/sum(A)}),digits=4)
+		missingness.sites <- round(sapply(X=1:length(counts.sites),FUN=function(x) {A=counts.sites[[x]]; as.numeric(A[names(A) %in% c("./.",NA)])/sum(A)}),digits=4)
+		missingness.indv <- round(sapply(X=1:length(counts.indv),FUN=function(x) {A=counts.indv[[x]]; as.numeric(A[names(A) %in% c("./.",NA)])/sum(A)}),digits=4)
 		frare <- sapply(1:length(counts.sites),FUN=function(x) {round(table(unlist(strsplit(rep(names(counts.sites[[x]]),counts.sites[[x]]),split="/")))["1"]/sum(table(unlist(strsplit(rep(names(counts.sites[[x]]),counts.sites[[x]]),split="/")))),digits=4)})
 		genind.obj <- suppressWarnings(vcfR::vcfR2genind(vcf.obj))
 		if(is.na(popmap.path)){
@@ -457,43 +468,84 @@ summarize_VCFs <- function(VCF.paths,save.in,popmap.path=NULL){
 		vcf <- VCF.paths[i]
 		message(sprintf("processing '%s' [%s/%s]",basename(vcf),i,length(VCF.paths)))
 		if(!file.exists(vcf)){
-			stop("could not find 'populations.snps.vcf'")
+			stop(sprintf("could not find '%s'",vcf))
 		}
 		vcf.obj   <- vcfR::read.vcfR(vcf,verbose=F,checkFile=F)
 		gt        <- gsub(":.+","",vcf.obj@gt[,-1])
-		gt.counts <- table(gt,useNA='always')
+		#gt.counts <- table(gt,useNA='always')
 		#counts.sites <- sapply(X=1:nrow(gt), FUN=function(x) {A=table(gt[x,], useNA='always'); B=as.numeric(A[is.na(names(A))])/sum(A); B})
 		counts.sites <- lapply(X=1:nrow(gt), FUN=function(x) {table(gt[x,], useNA='always')})
 		#counts.indv <- sapply(X=1:ncol(gt), FUN=function(x) {A=table(gt[,x], useNA='always'); B=as.numeric(A[is.na(names(A))])/sum(A); B})
 		counts.indv <- lapply(X=1:ncol(gt), FUN=function(x) {table(gt[,x], useNA='always')})
 		missingness.sites <- round(sapply(X=1:length(counts.sites),FUN=function(x) {A=counts.sites[[x]]; as.numeric(sum(A[names(A) %in% c("./.",NA)]))/sum(A)}),digits=4)
 		missingness.indv  <- round(sapply(X=1:length(counts.indv),FUN=function(x) {A=counts.indv[[x]]; as.numeric(sum(A[names(A) %in% c("./.",NA)]))/sum(A)}),digits=4)
+		counts.sites.nonmissing <- lapply(X=1:length(counts.sites), FUN=function(x) {counts.sites[[x]][names(counts.sites[[x]]) %in% c("0/0","0/1","1/1")]})
+		### From Nei 1987
+		# Observed heterozygosity (= sHo = mHo in the basic.stats function)
+		Ho.sites <- sapply(X=1:length(counts.sites),FUN=function(x){A=counts.sites[[x]]; B=sum(A[names(A) %in% c("0/0","1/1")])/sum(A[names(A) %in% c("0/0","0/1","1/1")]); 1-B})
+		#Ho.total <- 1-mean(sapply(X=1:length(counts.sites),FUN=function(x){A=counts.sites[[x]]; sum(A[names(A) %in% c("0/0","1/1")])/sum(A[names(A) %in% c("0/0","0/1","1/1")])}))
+		Ho.total <- mean(Ho.sites)
+		# Expected heterozygosity
+		alleles.counts.sites   <- do.call(rbind,lapply(X=1:length(counts.sites.nonmissing),FUN=function(x){A <- counts.sites.nonmissing[[x]]; table(unlist(strsplit(rep(names(A),A),"/")))}))
+		# x2i.bar  <- lapply(X=1:nrow(alleles.counts.sites),FUN=function(x){(alleles.counts.sites[x,]*alleles.counts.sites[x,])/sum(alleles.counts.sites[x,])})
+		### xi = 'p' in the function basic.stats
+		xi       <- do.call(rbind,lapply(X=1:nrow(alleles.counts.sites),FUN=function(x){(alleles.counts.sites[x,])/sum(alleles.counts.sites[x,])}))
+		x2i.bar  <- xi*xi
+		# x2.bar = 'sp2' = msp2 = mp2 in the function basic.stats
+		x2.bar   <- apply(x2i.bar,1,sum)
+		#x2i.bar  <- lapply(X=1:nrow(alleles.counts.sites),FUN=function(x){(alleles.counts.sites[x,])/sum(alleles.counts.sites[x,])*(alleles.counts.sites[x,])/sum(alleles.counts.sites[x,])})
+		nk.sites <- sapply(1:length(Ho.sites),FUN=function(x){sum(alleles.counts.sites[x,])})
+		# Same as 'mn' in basic.stats
+		n <- nk.sites/2
+		# Hs <- n/(n - 1) * (1 - sp2 - sHo/2/n)
+		# Expected heterozygosity (Hs) at each site (= 'Hs' in basic.stats function)
+		Hs.sites   <- n/(n-1)*(1-x2.bar-Ho.sites/2/n)
+		# Expected heterozygosity (overall)
+		Hs.total   <- mean(Hs.sites)
+		# Inbreeding coefficient at each site
+		Fis.sites  <- 1-(Ho.sites/Hs.sites)
+		# Inbreeding coefficient (total)
+		Fis.total  <- 1-(Ho.total/Hs.total)
+		mHs        <- n/(n-1)*(1-x2.bar-Ho.sites/2/n)
+		Ht.sites   <- (1 - x2.bar + (mHs/n) - (Ho.sites/2/n))
+		#Ht.total   <- (1 - x2.bar + (mHs/n) - (Ho.sites/2/n))
+		Ht.total <- mean(Ht.sites)
+		#mFis <- 1 - Ho.sites/mHs
+		#Dst  <- Ht - mHs
+		#Dstp <- np/(np - 1) * Dst
 		frare <- sapply(1:length(counts.sites),FUN=function(x) {round(table(unlist(strsplit(rep(names(counts.sites[[x]]),counts.sites[[x]]),split="/")))["1"]/sum(table(unlist(strsplit(rep(names(counts.sites[[x]]),counts.sites[[x]]),split="/")))),digits=4)})
-		genind.obj <- suppressWarnings(vcfR::vcfR2genind(vcf.obj))
-		if(is.na(popmap.path)){
-			pops <- data.frame(V1=colnames(vcf.obj@gt[,-1]),V2=1)
-		} else {
-			pops <- read.table(popfile, header=F)
-		}
-		genind.obj@pop <- as.factor(pops$V2[match(colnames(vcf.obj@gt[,-1]),pops[,1])])
-		# length(table(gt))
-		# tab.df   <- as.data.frame(cbind(pop=genind.obj$pop,genind.obj@tab))
-		# stats.wc  <- hierfstat::wc(tab.df)
-		bs.nc   <- hierfstat::basic.stats(genind.obj)
-		res.temp  <- data.frame(filename=basename(vcf),as.data.frame(t(bs.nc$overall)))
+		#if(FALSE){
+		#	genind.obj <- suppressWarnings(vcfR::vcfR2genind(vcf.obj))
+		#	if(is.na(popmap.path)){
+		#		pops <- data.frame(V1=colnames(vcf.obj@gt[,-1]),V2=1)
+		#	} else {
+		#		pops <- read.table(popfile, header=F)
+		#	}
+		#	genind.obj@pop <- as.factor(pops$V2[match(colnames(vcf.obj@gt[,-1]),pops[,1])])
+		#	# length(table(gt))
+		#	# tab.df   <- as.data.frame(cbind(pop=genind.obj$pop,genind.obj@tab))
+		#	# stats.wc  <- hierfstat::wc(tab.df)
+		#	bs.nc   <- hierfstat::basic.stats(genind.obj)
+		#	res.temp  <- data.frame(filename=basename(vcf),as.data.frame(t(bs.nc$overall)))
+		#}
+		res.temp <- data.frame(filename=basename(vcf))
 		# res.temp$Fst.wc <- 
-		res.temp$max.missingness.indv  <- round(max(missingness.indv),digits=4)
-		res.temp$min.missingness.indv  <- round(min(missingness.indv),digits=4)
+		res.temp$Heterozygosity.observed <- Ho.total
+		res.temp$Heterozygosity.expected <- Hs.total
+		res.temp$Overall.GeneDiversity   <- Ht.total
+		res.temp$Fis                     <- Fis.total
+		res.temp$max.missingness.indv    <- round(max(missingness.indv),digits=4)
+		res.temp$min.missingness.indv    <- round(min(missingness.indv),digits=4)
 		#res.temp$mean.missingness.indv <- round(mean(missingness.indv),digits=4)
-		res.temp$max.missingness.site  <- round(max(missingness.sites),digits=4)
-		res.temp$min.missingness.site  <- round(min(missingness.sites),digits=4)
-		res.temp$missingness.total     <- round(mean(missingness.sites),digits=4)
+		res.temp$max.missingness.site    <- round(max(missingness.sites),digits=4)
+		res.temp$min.missingness.site    <- round(min(missingness.sites),digits=4)
+		res.temp$missingness.total       <- round(mean(missingness.sites),digits=4)
 		res.temp$frare.mean <- mean(frare)
 		res.temp$nsite  <- nrow(gt)
 		res.temp$nloci  <- length(unique(vcf.obj@fix[,"CHROM"]))
 		res <- rbind(res,res.temp)
 	}
-	colnames(res) <- c("filename","Heterozygosity.observed","Heterozygosity.expected","Overall.GeneDiversity","Dst","Htp","Dstp","Fst","Fstp","Fis","Dest","max.missingness.indv","min.missingness.indv","max.missingness.site","min.missingness.site","missingness.total","frare.mean","nsite","nloci")
+	#colnames(res) <- c("filename","Heterozygosity.observed","Heterozygosity.expected","Overall.GeneDiversity","Dst","Htp","Dstp","Fst","Fstp","Fis","Dest","max.missingness.indv","min.missingness.indv","max.missingness.site","min.missingness.site","missingness.total","frare.mean","nsite","nloci")
 	if(save){
 		write.table(x=res,file=file.path(save.in,"VCF_stats.txt"),quote=F,col.names=T,row.names=F,sep="\t")
 	}
