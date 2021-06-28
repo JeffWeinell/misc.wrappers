@@ -1579,14 +1579,15 @@ newpoint <-function(p0,p1,c){
 #' @param vcftools.path Character string with path to the vcftools executable. Default NULL, in which case vcftools.path is determined from table returned by config_miscwrappers(). See 'config_miscwrappers' function.
 #' @param out Character string where to write output vcf.
 #' @param indv.keep Character string with names of individuals to keep. Default is NULL (all individuals kept).
-#' @param min.n Integer >= 1 specifying the minimum number of non-missing alleles required to keep a site. Default = 4. If set to "all", only complete-data sites kept.
+##' @param min.n Integer >= 1 specifying the minimum number of non-missing alleles required to keep a site. Default = 3; often, 4 is preferred (for use with quartet based analyses). If set to "all", only complete-data sites kept.
+#' @param min.indv Integer >= 1 specifying the minimum number of individuals with data required to keep a site. Default = 3. If set to "all", only complete-data sites kept.
 #' @param max.fMD Number in the range (0,1) specifying the maximum fraction of missing alleles at a site. Default = 1.
 #' @param min.n0 Minimum number of individuals required to have at least one copy of the major allele to keep a site. Default = 2.
 #' @param min.n1 Minimum number of individuals required to have at least one copy of the minor allele to keep a site. Default = 1.
 #' @param which.site Character string indicating the method for choosing a site to keep for each locus (or chromosome). Default = "best", which is considered the one with the least missing data, or the first among sites tied for least missing data. Other options are "all.passing", which retains all sites (positions) that pass variation filters (min.n, min.0.n.0, min.1.n), "first" (first site kept at each locus), or "random".
 #' @return List with [[1]] path to vcftools, [[2]] dataframe with input and output values for VCF filepaths, number of loci (chromosomes), sites (positions), and individuals (samples).
 #' @export vcf_getSNP
-vcf_getSNP      <- function(vcf,out,vcftools.path=NULL,indv.keep=NULL,which.site="best",min.n=4,max.fMD=1,min.n0=2,min.n1=1){
+vcf_getSNP      <- function(vcf,out,vcftools.path=NULL,indv.keep=NULL,which.site="best",min.indv=2,max.fMD=1,min.n0=2,min.n1=1){
 	if(is.null(vcftools.path)){
 		if(any(config_miscwrappers()[,"program"]=="vcftools")){
 			vcftools.path <- config_miscwrappers()[config_miscwrappers()[,"program"]=="vcftools","exe_path"]
@@ -1624,22 +1625,26 @@ vcf_getSNP      <- function(vcf,out,vcftools.path=NULL,indv.keep=NULL,which.site
 	test.sample <- unlist(gt.mat)[!is.na(unlist(gt.mat))][1]
 	ploidy      <- length(unlist(strsplit(test.sample,split="[/,|]")))
 	# If min.n = "all", update min.all to equal the maximum possible number of alleles at a site.
-	if(min.n=="all"){
-		min.n  <- ploidy*ncol(gt.mat)
+#	if(min.n=="all"){
+#		min.n  <- ploidy*ncol(gt.mat)
+#	}
+	if(min.indv=="all"){
+		min.indv  <- ncol(gt.mat)
 	}
-	n.ind  <- ploidy*ncol(gt.mat)
-	min.n2 <- ceiling(n.ind-(max.fMD*n.ind))
-	min.n  <- max(min.n, min.n2)
+	n.alleles  <- ploidy*ncol(gt.mat)
+	# minimum number of alleles required to keep a sample
+	min.n2 <- ceiling(n.alleles-(max.fMD*n.alleles))
+	min.n  <- max((ploidy*min.indv), min.n2)
 	# For each site, the number of non-missing alleles
-	site.NS      <- vapply(X=1:nrow(gt.mat),FUN=function(x){length(grep(".", unlist(strsplit(gt.mat[x,],split="/",fixed=T)),fixed=T,invert=T))},FUN.VALUE=1)
+	#site.NS <- vapply(X=1:nrow(gt.mat),FUN=function(x){length(grep([.,NA],unlist(strsplit(gt.mat[x,], split="/", fixed=T)), invert=T))},FUN.VALUE=1)
+	site.NS      <- vapply(X=1:nrow(gt.mat),FUN=function(x){length(which(!unlist(strsplit(gt.mat[x,],split="/",fixed=T)) %in% c(".",NA)))},FUN.VALUE=1)
 	# For each site, the number of individuals with at least one copy of the major allele
 	site.0.NS    <- vapply(X=1:nrow(gt.mat),FUN=function(x){length(grep("0", gt.mat[x,],fixed=T,invert=F))},FUN.VALUE=1)
 	# For each site, the number of individuals with at least one copy of the minor allele
 	site.1.NS    <- vapply(X=1:nrow(gt.mat),FUN=function(x){length(grep("1", gt.mat[x,],fixed=T,invert=F))},FUN.VALUE=1)
 	# Matrix with "CHROM" and "POS" from fix.mat, plus columns containing site.NS, site.0.NS, and site.1.NS
 	chrom.pos.mat <- cbind(fix.mat[,c("CHROM","POS")],site.NS,site.0.NS,site.1.NS)
-	
-	chrom.pos.df <- data.frame(CHROM=fix.mat[,"CHROM"],POS=fix.mat[,"POS"],site.NS=site.NS,site.0.NS=site.0.NS,site.1.NS=site.1.NS)
+	chrom.pos.df  <- data.frame(CHROM=fix.mat[,"CHROM"],POS=fix.mat[,"POS"],site.NS=site.NS,site.0.NS=site.0.NS,site.1.NS=site.1.NS)
 	mode(chrom.pos.df[,"CHROM"])     <- "character"
 	mode(chrom.pos.df[,"POS"])       <- "character"
 	mode(chrom.pos.df[,"site.NS"])   <- "numeric"

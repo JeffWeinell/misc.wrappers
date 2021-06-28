@@ -66,13 +66,13 @@ cstacks_setup <- function(save.in,n=1,p=16,cstacks.path=NULL){
 		}
 	}
 	#mMNdirs  <- list.dirs(save.in,recursive=F)
-	mMNdirs  <- list.files(save.in,recursive=F,pattern="^m._M._N.$",include.dirs=T,full.names=T)
+	mMNdirs  <- list.files(save.in,recursive=F,pattern="^m[0-9]+_M[0-9]+_N[0-9]+$",include.dirs=T,full.names=T)
 	if(length(mMNdirs)==0){
-		mMNndirs <- list.files(save.in,recursive=F,pattern="^m._M._N._n.$",include.dirs=T,full.names=T)
+		mMNndirs <- list.files(save.in,recursive=F,pattern="^m[0-9]+_M[0-9]+_N[0-9]+_n[0-9]+$",include.dirs=T,full.names=T)
 		if(length(mMNndirs)>0){
 			setup.dirs <- FALSE
 			outdirs <- mMNndirs
-			mMNdirs <- gsub("_n.$","",mMNndirs)
+			mMNdirs <- gsub("_n[0-9]+$","",mMNndirs)
 		} else {
 			stop("no input directories found")
 		}
