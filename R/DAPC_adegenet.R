@@ -1598,15 +1598,8 @@ vcf_getSNP      <- function(vcf,out,vcftools.path=NULL,indv.keep=NULL,which.site
 	vcf.obj     <- vcfR::read.vcfR(vcf)
 	samplenames <- colnames(vcf.obj@gt)[-1]
 	# matrix with "fixed" columns, which are the columns with site-specific stats across all samples
-	# fix.mat    <- attributes(vcf.obj)[["fix"]]
 	fix.mat    <- vcf.obj@fix
 	# matrix with genotype columns, which are the columns with site-specific stats across all samples
-	# gt.mat     <- attributes(vcf.obj)[["gt"]]
-	# gt.mat     <- vcf.obj@gt[,-1]
-	# Remove first column of gt
-	#gt.mat     <- gt.mat[,-1]
-	# Remove everything after ":" in strings
-	#gt.mat     <- gsub(":.+","",gt.mat)
 	gt.mat <- gsub(":.+","",vcf.obj@gt[,-1])
 	if(!is.null(indv.keep)){
 		if(is(indv.keep,"character") & length(indv.keep)==1){
@@ -1638,21 +1631,24 @@ vcf_getSNP      <- function(vcf,out,vcftools.path=NULL,indv.keep=NULL,which.site
 	# For each site, the number of non-missing alleles
 	#site.NS <- vapply(X=1:nrow(gt.mat),FUN=function(x){length(grep([.,NA],unlist(strsplit(gt.mat[x,], split="/", fixed=T)), invert=T))},FUN.VALUE=1)
 	site.NS      <- vapply(X=1:nrow(gt.mat),FUN=function(x){length(which(!unlist(strsplit(gt.mat[x,],split="/",fixed=T)) %in% c(".",NA)))},FUN.VALUE=1)
+	# For each site, the number of individuals with data
+	site.nindv   <- vapply(X=1:nrow(gt.mat),FUN=function(x){length(which(!gt.mat[x,] %in% c("./.",NA)))}, FUN.VALUE=1)
 	# For each site, the number of individuals with at least one copy of the major allele
-	site.0.NS    <- vapply(X=1:nrow(gt.mat),FUN=function(x){length(grep("0", gt.mat[x,],fixed=T,invert=F))},FUN.VALUE=1)
+	site.0.NS    <- vapply(X=1:nrow(gt.mat),FUN=function(x){length(grep("0", gt.mat[x,],fixed=T,invert=F))}, FUN.VALUE=1)
 	# For each site, the number of individuals with at least one copy of the minor allele
-	site.1.NS    <- vapply(X=1:nrow(gt.mat),FUN=function(x){length(grep("1", gt.mat[x,],fixed=T,invert=F))},FUN.VALUE=1)
+	site.1.NS    <- vapply(X=1:nrow(gt.mat),FUN=function(x){length(grep("1", gt.mat[x,],fixed=T,invert=F))}, FUN.VALUE=1)
 	# Matrix with "CHROM" and "POS" from fix.mat, plus columns containing site.NS, site.0.NS, and site.1.NS
-	chrom.pos.mat <- cbind(fix.mat[,c("CHROM","POS")],site.NS,site.0.NS,site.1.NS)
-	chrom.pos.df  <- data.frame(CHROM=fix.mat[,"CHROM"],POS=fix.mat[,"POS"],site.NS=site.NS,site.0.NS=site.0.NS,site.1.NS=site.1.NS)
-	mode(chrom.pos.df[,"CHROM"])     <- "character"
-	mode(chrom.pos.df[,"POS"])       <- "character"
-	mode(chrom.pos.df[,"site.NS"])   <- "numeric"
-	mode(chrom.pos.df[,"site.0.NS"]) <- "numeric"
-	mode(chrom.pos.df[,"site.1.NS"]) <- "numeric"
-	if(any(chrom.pos.df[,"site.NS"] >= min.n & chrom.pos.df[,"site.0.NS"] >= min.n0 & chrom.pos.df[,"site.1.NS"] >= min.n1)){
+	chrom.pos.mat <- cbind(fix.mat[,c("CHROM","POS")],site.NS,site.nindv,site.0.NS,site.1.NS)
+	chrom.pos.df  <- data.frame(CHROM=fix.mat[,"CHROM"],POS=fix.mat[,"POS"],site.nindv=site.nindv,site.NS=site.NS,site.0.NS=site.0.NS,site.1.NS=site.1.NS)
+	mode(chrom.pos.df[,"CHROM"])      <- "character"
+	mode(chrom.pos.df[,"POS"])        <- "character"
+	mode(chrom.pos.df[,"site.nindv"]) <- "numeric"
+	mode(chrom.pos.df[,"site.NS"])    <- "numeric"
+	mode(chrom.pos.df[,"site.0.NS"])  <- "numeric"
+	mode(chrom.pos.df[,"site.1.NS"])  <- "numeric"
+	if(any(chrom.pos.df[,"site.NS"] >= min.n & chrom.pos.df[,"site.nindv"] >= min.indv & chrom.pos.df[,"site.0.NS"] >= min.n0 & chrom.pos.df[,"site.1.NS"] >= min.n1)){
 		# filter1 <- which(chrom.pos.df[,"site.1.NS"] >=2)
-		filter1 <- which(chrom.pos.df[,"site.NS"] >= min.n & chrom.pos.df[,"site.0.NS"] >= min.n0 & chrom.pos.df[,"site.1.NS"] >= min.n1)
+		filter1 <- which(chrom.pos.df[,"site.NS"] >= min.n & chrom.pos.df[,"site.nindv"] >= min.indv & chrom.pos.df[,"site.0.NS"] >= min.n0 & chrom.pos.df[,"site.1.NS"] >= min.n1)
 	} else {
 		stop("no sites pass filtering criteria")
 		#stop("no sites in which the minor allele occurs in more than 1 individual")
