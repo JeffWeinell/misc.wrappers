@@ -450,12 +450,12 @@ summarize_stacks <- function(dir,save=TRUE,use.popmap=FALSE,popmap=NULL){
 #' Same as 'summarize_stacks', except the full paths to input VCFs and an output directory are suppllied as arguments.
 #' 
 #' @param VCF.paths Character string vector to one or more input VCF files.
-#' @param save.in Path to directory where the output table should be save. If NULL, the the table is not saved.
+#' @param save.as Path to location where output stats table should be saved. If NULL, the the table is not saved.
 #' @param popmap.path Character string to population map. If NULL, all individuals in are assigned to the same 'population'.
 #' @return data frame with basic stats
 #' @export summarize_VCFs
-summarize_VCFs <- function(VCF.paths,save.in,popmap.path=NULL){
-	if(is.null(save.in)){
+summarize_VCFs <- function(VCF.paths,save.as,popmap.path=NULL){
+	if(is.null(save.as)){
 		save <- FALSE
 	} else {
 		save <- TRUE
@@ -501,15 +501,15 @@ summarize_VCFs <- function(VCF.paths,save.in,popmap.path=NULL){
 		# Expected heterozygosity (Hs) at each site (= 'Hs' in basic.stats function)
 		Hs.sites   <- n/(n-1)*(1-x2.bar-Ho.sites/2/n)
 		# Expected heterozygosity (overall)
-		Hs.total   <- mean(Hs.sites)
+		Hs.total   <- mean(Hs.sites, na.rm=T)
 		# Inbreeding coefficient at each site
-		Fis.sites  <- 1-(Ho.sites/Hs.sites)
+		Fis.sites  <- 1-round((Ho.sites/Hs.sites),5)
 		# Inbreeding coefficient (total)
-		Fis.total  <- 1-(Ho.total/Hs.total)
+		Fis.total  <- 1-round((Ho.total/Hs.total),5)
 		mHs        <- n/(n-1)*(1-x2.bar-Ho.sites/2/n)
 		Ht.sites   <- (1 - x2.bar + (mHs/n) - (Ho.sites/2/n))
 		#Ht.total   <- (1 - x2.bar + (mHs/n) - (Ho.sites/2/n))
-		Ht.total <- mean(Ht.sites)
+		Ht.total <- mean(Ht.sites,na.rm=T)
 		#mFis <- 1 - Ho.sites/mHs
 		#Dst  <- Ht - mHs
 		#Dstp <- np/(np - 1) * Dst
@@ -534,20 +534,20 @@ summarize_VCFs <- function(VCF.paths,save.in,popmap.path=NULL){
 		res.temp$Heterozygosity.expected <- Hs.total
 		res.temp$Overall.GeneDiversity   <- Ht.total
 		res.temp$Fis                     <- Fis.total
-		res.temp$max.missingness.indv    <- round(max(missingness.indv),digits=4)
-		res.temp$min.missingness.indv    <- round(min(missingness.indv),digits=4)
+		res.temp$max.missingness.indv    <- round(max(missingness.indv,na.rm=T),digits=4)
+		res.temp$min.missingness.indv    <- round(min(missingness.indv,na.rm=T),digits=4)
 		#res.temp$mean.missingness.indv <- round(mean(missingness.indv),digits=4)
-		res.temp$max.missingness.site    <- round(max(missingness.sites),digits=4)
-		res.temp$min.missingness.site    <- round(min(missingness.sites),digits=4)
-		res.temp$missingness.total       <- round(mean(missingness.sites),digits=4)
-		res.temp$frare.mean <- mean(frare)
+		res.temp$max.missingness.site    <- round(max(missingness.sites,na.rm=T),digits=4)
+		res.temp$min.missingness.site    <- round(min(missingness.sites,na.rm=T),digits=4)
+		res.temp$missingness.total       <- round(mean(missingness.sites,na.rm=T),digits=4)
+		res.temp$frare.mean <- mean(frare,na.rm=T)
 		res.temp$nsite  <- nrow(gt)
 		res.temp$nloci  <- length(unique(vcf.obj@fix[,"CHROM"]))
 		res <- rbind(res,res.temp)
 	}
 	#colnames(res) <- c("filename","Heterozygosity.observed","Heterozygosity.expected","Overall.GeneDiversity","Dst","Htp","Dstp","Fst","Fstp","Fis","Dest","max.missingness.indv","min.missingness.indv","max.missingness.site","min.missingness.site","missingness.total","frare.mean","nsite","nloci")
 	if(save){
-		write.table(x=res,file=file.path(save.in,"VCF_stats.txt"),quote=F,col.names=T,row.names=F,sep="\t")
+		write.table(x=res,file=save.as, quote=F,col.names=T,row.names=F,sep="\t")
 	}
 	res
 }

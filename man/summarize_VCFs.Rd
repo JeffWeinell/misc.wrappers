@@ -6,12 +6,12 @@
 
 Same as 'summarize_stacks', except the full paths to input VCFs and an output directory are suppllied as arguments.}
 \usage{
-summarize_VCFs(VCF.paths, save.in, popmap.path = NULL)
+summarize_VCFs(VCF.paths, save.as, popmap.path = NULL)
 }
 \arguments{
 \item{VCF.paths}{Character string vector to one or more input VCF files.}
 
-\item{save.in}{Path to directory where the output table should be save. If NULL, the the table is not saved.}
+\item{save.as}{Path to location where output stats table should be saved. If NULL, the the table is not saved.}
 
 \item{popmap.path}{Character string to population map. If NULL, all individuals in are assigned to the same 'population'.}
 }
