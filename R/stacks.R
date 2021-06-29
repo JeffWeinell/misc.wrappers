@@ -542,10 +542,10 @@ summarize_VCFs <- function(VCF.paths,save.as,popmap.path=NULL,include.out=c("tot
 		#}
 		#res.temp.sites     <- data.frame(filename=basename(vcf),locus=fx[,"CHROM"],position=fx[,"POS"],proportion.indv.missing=missingness.sites,indv.missing=counts.sites.nonmissing,Ho=Ho.sites,Hs=Hs.sites,Fis=Fis.sites,frequency.rare=frare)
 		if("persite" %in% include.out){
-			res.temp.sites.mat <- cbind(fx[,c("CHROM","POS")], missingness.sites, sapply(counts.sites.nonmissing,sum), round(Ho.sites,digits=5), round(Hs.sites,digits=5), round(Fis.sites, digits=5), round(frare,digits=5))
-			colnames(res.temp.sites.mat) <- c("locus","position","proportion.indv.missing","indv.sampled","Ho","Hs","Fis","frequency.rare")
+			res.temp.sites.mat <- cbind(fx[,c("CHROM","POS")], missingness.sites, sapply(counts.sites.nonmissing,sum), round(Ho.sites,digits=5), round(Hs.sites,digits=5), round(Ht.sites,digits=5), round(Fis.sites, digits=5), round(frare,digits=5))
+			colnames(res.temp.sites.mat) <- c("locus","position","proportion.indv.missing","indv.sampled","Ho","Hs","Ht","Fis","frequency.rare")
 			res.temp.sites.df  <- data.frame(filename=basename(vcf),as.data.frame(res.temp.sites.mat))
-			mode(res.temp.sites.df$proportion.indv.missing) <- mode(res.temp.sites.df$Ho) <- mode(res.temp.sites.df$Hs) <- mode(res.temp.sites.df$Fis) <- mode(res.temp.sites.df$frequency.rare) <- "numeric"
+			mode(res.temp.sites.df$proportion.indv.missing) <- mode(res.temp.sites.df$Ho) <- mode(res.temp.sites.df$Hs) <- mode(res.temp.sites.df$Ht) <- mode(res.temp.sites.df$Fis) <- mode(res.temp.sites.df$frequency.rare) <- "numeric"
 			mode(res.temp.sites.df$indv.sampled) <- "integer"
 			#min.ind.df.list <- lapply(X=sort(unique(res.temp.sites.df$indv.sampled)),FUN=function(x) {res.temp.sites.df[which(res.temp.sites.df$indv.sampled >= x),]})
 			#Fis.minIndv     <- sapply(X=1:length(min.ind.df.list), FUN=function(x) {1-(mean(min.ind.df.list[[x]]$Ho,na.rm=T)/mean(min.ind.df.list[[x]]$Hs,na.rm=T))})
