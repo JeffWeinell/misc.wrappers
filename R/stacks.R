@@ -550,7 +550,7 @@ summarize_VCFs <- function(VCF.paths,save.as,popmap.path=NULL,include.out=c("tot
 			#min.ind.df.list <- lapply(X=sort(unique(res.temp.sites.df$indv.sampled)),FUN=function(x) {res.temp.sites.df[which(res.temp.sites.df$indv.sampled >= x),]})
 			#Fis.minIndv     <- sapply(X=1:length(min.ind.df.list), FUN=function(x) {1-(mean(min.ind.df.list[[x]]$Ho,na.rm=T)/mean(min.ind.df.list[[x]]$Hs,na.rm=T))})
 			#names(Fis.minIndv) <- as.character(sort(unique(res.temp.sites.df$indv.sampled)))
-			res.sites <- rbind(res,res.temp)
+			res.sites <- rbind(res.sites,res.temp.sites.df)
 		}
 		if("total" %in% include.out){
 			res.temp           <- data.frame(filename=basename(vcf))
@@ -581,7 +581,7 @@ summarize_VCFs <- function(VCF.paths,save.as,popmap.path=NULL,include.out=c("tot
 			write.table(x=res.sites,file=save.as.persite, quote=F,col.names=T,row.names=F,sep="\t")
 		}
 	}
-	return(list(res,res.sites))
+	list(res,res.sites)
 }
 
 ### #' @title batch setup process_radtags
