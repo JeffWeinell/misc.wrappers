@@ -571,6 +571,27 @@ summarize_VCFs <- function(VCF.paths,save.as,popmap.path=NULL,include.out=c("tot
 			res <- rbind(res,res.temp)
 		}
 	}
+	persite.df <- function(df){
+		df.list               <- lapply(X=1:length(unique(df$filename)),FUN=function(x){A= df[which(df$filename==unique(df$filename)[x]),]; rownames(A) <- 1:nrow(A); B=data.frame(A,row.id=as.numeric(rownames(A))); B})
+		snps.first            <- lapply(1:length(df.list),function(x) 1:nrow(df.list[[x]]) %in% match(unique(df.list[[x]]$locus),df.list[[x]]$locus))
+		df.list2              <- lapply(1:length(df.list),function(z) {df.list[[z]][order(df.list[[z]]$locus, df.list[[z]]$indv.sampled, decreasing=c(FALSE,TRUE)),]})
+		snps.best             <- lapply(1:length(df.list2),function(x){1:nrow(df.list2[[x]]) %in% df.list2[[x]][match(unique(df.list2[[x]]$locus),df.list2[[x]]$locus),"row.id"]})
+		df.list3              <- lapply(1:length(df.list),function(x){data.frame(df.list[[x]],is.firstSNP=snps.first[[x]],is.bestSNP=snps.best[[x]])})
+		df.temp2              <- do.call(rbind,df.list3)
+		df.temp2$filename     <- factor(df.temp2$filename)
+		df.temp2$indv.sampled <- factor(df.temp2$indv.sampled)
+		params.list    <- strsplit(levels(df.temp2$filename),"_")
+		params.strings <- sapply(1:length(params.list),function(x) {paste(params.list[[x]][grep("^[m,M,N,n][0-9]+$",params.list[[x]])],collapse=" ")})
+		each.x <- as.numeric(table(df.temp2$filename))
+		stacks.params  <- unlist(sapply(1:length(params.strings),function(x){rep(params.strings[x],each.x[x])}))
+		res.df <- data.frame(df.temp2,stacks.params=stacks.params)
+		res.df$stacks.params <- factor(res.df$stacks.params)
+		res.df$indv.sampled  <- factor(res.df$indv.sampled)
+		res.df
+	}
+	if("persite" %in% include.out){
+		res.sites2 <- persite.df(res.sites)
+	}
 	#colnames(res) <- c("filename","Heterozygosity.observed","Heterozygosity.expected","Overall.GeneDiversity","Dst","Htp","Dstp","Fst","Fstp","Fis","Dest","max.missingness.indv","min.missingness.indv","max.missingness.site","min.missingness.site","missingness.total","frare.mean","nsite","nloci")
 	if(save){
 		if("total" %in% include.out){
@@ -578,10 +599,10 @@ summarize_VCFs <- function(VCF.paths,save.as,popmap.path=NULL,include.out=c("tot
 		}
 		if("persite" %in% include.out){
 			save.as.persite <- paste0(tools::file_path_sans_ext(save.as),"_persite.txt")
-			write.table(x=res.sites,file=save.as.persite, quote=F,col.names=T,row.names=F,sep="\t")
+			write.table(x=res.sites2,file=save.as.persite, quote=F,col.names=T,row.names=F,sep="\t")
 		}
 	}
-	list(res,res.sites)
+	list(res,res.sites2)
 }
 
 ### #' @title batch setup process_radtags
