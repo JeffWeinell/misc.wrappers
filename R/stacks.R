@@ -452,9 +452,10 @@ summarize_stacks <- function(dir,save=TRUE,use.popmap=FALSE,popmap=NULL){
 #' @param VCF.paths Character string vector to one or more input VCF files.
 #' @param save.as Path to location where output stats table should be saved. If NULL, the the table is not saved.
 #' @param popmap.path Character string to population map. If NULL, all individuals in are assigned to the same 'population'.
-#' @return data frame with basic stats
+#' @param include.out Character string vector indicating which output files to generate.
+#' @return data frame(s) with basic stats
 #' @export summarize_VCFs
-summarize_VCFs <- function(VCF.paths,save.as,popmap.path=NULL){
+summarize_VCFs <- function(VCF.paths,save.as,popmap.path=NULL,include.out=c("total","persite")){
 	if(is.null(save.as)){
 		save <- FALSE
 	} else {
@@ -463,7 +464,16 @@ summarize_VCFs <- function(VCF.paths,save.as,popmap.path=NULL){
 	if(is.null(popmap.path)){
 		popmap.path <- NA
 	}
-	res <- data.frame()
+	if("total" %in% include.out){
+		res <- data.frame()
+	} else {
+		res <- NULL
+	}
+	if("persite" %in% include.out){
+		res.sites <- data.frame()
+	} else {
+		res.sites <- NULL
+	}
 	for(i in 1:length(VCF.paths)){
 		vcf <- VCF.paths[i]
 		message(sprintf("processing '%s' [%s/%s]",basename(vcf),i,length(VCF.paths)))
@@ -472,20 +482,22 @@ summarize_VCFs <- function(VCF.paths,save.as,popmap.path=NULL){
 		}
 		vcf.obj   <- vcfR::read.vcfR(vcf,verbose=F,checkFile=F)
 		gt        <- gsub(":.+","",vcf.obj@gt[,-1])
+		fx        <- vcf.obj@fix
 		#gt.counts <- table(gt,useNA='always')
 		#counts.sites <- sapply(X=1:nrow(gt), FUN=function(x) {A=table(gt[x,], useNA='always'); B=as.numeric(A[is.na(names(A))])/sum(A); B})
 		counts.sites <- lapply(X=1:nrow(gt), FUN=function(x) {table(gt[x,], useNA='always')})
 		#counts.indv <- sapply(X=1:ncol(gt), FUN=function(x) {A=table(gt[,x], useNA='always'); B=as.numeric(A[is.na(names(A))])/sum(A); B})
 		counts.indv <- lapply(X=1:ncol(gt), FUN=function(x) {table(gt[,x], useNA='always')})
+		# Fraction of individuals missing at each site
 		missingness.sites <- round(sapply(X=1:length(counts.sites),FUN=function(x) {A=counts.sites[[x]]; as.numeric(sum(A[names(A) %in% c("./.",NA)]))/sum(A)}),digits=4)
+		# Fraction of sites missing for each individual
 		missingness.indv  <- round(sapply(X=1:length(counts.indv),FUN=function(x) {A=counts.indv[[x]]; as.numeric(sum(A[names(A) %in% c("./.",NA)]))/sum(A)}),digits=4)
 		counts.sites.nonmissing <- lapply(X=1:length(counts.sites), FUN=function(x) {counts.sites[[x]][names(counts.sites[[x]]) %in% c("0/0","0/1","1/1")]})
 		### From Nei 1987
 		# Observed heterozygosity (= sHo = mHo in the basic.stats function)
 		Ho.sites <- sapply(X=1:length(counts.sites),FUN=function(x){A=counts.sites[[x]]; B=sum(A[names(A) %in% c("0/0","1/1")])/sum(A[names(A) %in% c("0/0","0/1","1/1")]); 1-B})
 		#Ho.total <- 1-mean(sapply(X=1:length(counts.sites),FUN=function(x){A=counts.sites[[x]]; sum(A[names(A) %in% c("0/0","1/1")])/sum(A[names(A) %in% c("0/0","0/1","1/1")])}))
-		Ho.total <- mean(Ho.sites)
-		# Expected heterozygosity
+		Ho.total <- mean(Ho.sites,na.rm=T)
 		alleles.counts.sites   <- do.call(rbind,lapply(X=1:length(counts.sites.nonmissing),FUN=function(x){A <- counts.sites.nonmissing[[x]]; table(unlist(strsplit(rep(names(A),A),"/")))}))
 		# x2i.bar  <- lapply(X=1:nrow(alleles.counts.sites),FUN=function(x){(alleles.counts.sites[x,]*alleles.counts.sites[x,])/sum(alleles.counts.sites[x,])})
 		### xi = 'p' in the function basic.stats
@@ -528,32 +540,49 @@ summarize_VCFs <- function(VCF.paths,save.as,popmap.path=NULL){
 		#	bs.nc   <- hierfstat::basic.stats(genind.obj)
 		#	res.temp  <- data.frame(filename=basename(vcf),as.data.frame(t(bs.nc$overall)))
 		#}
-		res.temp <- data.frame(filename=basename(vcf))
-		# res.temp$Fst.wc <- 
-		res.temp$Heterozygosity.observed <- Ho.total
-		res.temp$Heterozygosity.expected <- Hs.total
-		res.temp$Overall.GeneDiversity   <- Ht.total
-		res.temp$Fis                     <- Fis.total
-		res.temp$max.missingness.indv    <- round(max(missingness.indv,na.rm=T),digits=4)
-		res.temp$min.missingness.indv    <- round(min(missingness.indv,na.rm=T),digits=4)
-		#res.temp$mean.missingness.indv <- round(mean(missingness.indv),digits=4)
-		res.temp$max.missingness.site    <- round(max(missingness.sites,na.rm=T),digits=4)
-		res.temp$min.missingness.site    <- round(min(missingness.sites,na.rm=T),digits=4)
-		res.temp$missingness.total       <- round(mean(missingness.sites,na.rm=T),digits=4)
-		res.temp$frare.mean <- mean(frare,na.rm=T)
-		res.temp$nsite  <- nrow(gt)
-		res.temp$nloci  <- length(unique(vcf.obj@fix[,"CHROM"]))
-		res <- rbind(res,res.temp)
+		#res.temp.sites     <- data.frame(filename=basename(vcf),locus=fx[,"CHROM"],position=fx[,"POS"],proportion.indv.missing=missingness.sites,indv.missing=counts.sites.nonmissing,Ho=Ho.sites,Hs=Hs.sites,Fis=Fis.sites,frequency.rare=frare)
+		if("persite" %in% include.out){
+			res.temp.sites.mat <- cbind(fx[,c("CHROM","POS")], missingness.sites, sapply(counts.sites.nonmissing,sum), round(Ho.sites,digits=5), round(Hs.sites,digits=5), round(Fis.sites, digits=5), round(frare,digits=5))
+			colnames(res.temp.sites.mat) <- c("locus","position","proportion.indv.missing","indv.sampled","Ho","Hs","Fis","frequency.rare")
+			res.temp.sites.df  <- data.frame(filename=basename(vcf),as.data.frame(res.temp.sites.mat))
+			mode(res.temp.sites.df$proportion.indv.missing) <- mode(res.temp.sites.df$Ho) <- mode(res.temp.sites.df$Hs) <- mode(res.temp.sites.df$Fis) <- mode(res.temp.sites.df$frequency.rare) <- "numeric"
+			mode(res.temp.sites.df$indv.sampled) <- "integer"
+			#min.ind.df.list <- lapply(X=sort(unique(res.temp.sites.df$indv.sampled)),FUN=function(x) {res.temp.sites.df[which(res.temp.sites.df$indv.sampled >= x),]})
+			#Fis.minIndv     <- sapply(X=1:length(min.ind.df.list), FUN=function(x) {1-(mean(min.ind.df.list[[x]]$Ho,na.rm=T)/mean(min.ind.df.list[[x]]$Hs,na.rm=T))})
+			#names(Fis.minIndv) <- as.character(sort(unique(res.temp.sites.df$indv.sampled)))
+			res.sites <- rbind(res,res.temp)
+		}
+		if("total" %in% include.out){
+			res.temp           <- data.frame(filename=basename(vcf))
+			# res.temp$Fst.wc <- 
+			res.temp$Heterozygosity.observed <- Ho.total
+			res.temp$Heterozygosity.expected <- Hs.total
+			res.temp$Overall.GeneDiversity   <- Ht.total
+			res.temp$Fis                     <- Fis.total
+			res.temp$max.missingness.indv    <- round(max(missingness.indv,na.rm=T),digits=4)
+			res.temp$min.missingness.indv    <- round(min(missingness.indv,na.rm=T),digits=4)
+			#res.temp$mean.missingness.indv <- round(mean(missingness.indv),digits=4)
+			res.temp$max.missingness.site    <- round(max(missingness.sites,na.rm=T),digits=4)
+			res.temp$min.missingness.site    <- round(min(missingness.sites,na.rm=T),digits=4)
+			res.temp$missingness.total       <- round(mean(missingness.sites,na.rm=T),digits=4)
+			res.temp$frare.mean <- mean(frare,na.rm=T)
+			res.temp$nsite  <- nrow(gt)
+			res.temp$nloci  <- length(unique(vcf.obj@fix[,"CHROM"]))
+			res <- rbind(res,res.temp)
+		}
 	}
 	#colnames(res) <- c("filename","Heterozygosity.observed","Heterozygosity.expected","Overall.GeneDiversity","Dst","Htp","Dstp","Fst","Fstp","Fis","Dest","max.missingness.indv","min.missingness.indv","max.missingness.site","min.missingness.site","missingness.total","frare.mean","nsite","nloci")
 	if(save){
-		write.table(x=res,file=save.as, quote=F,col.names=T,row.names=F,sep="\t")
+		if("total" %in% include.out){
+			write.table(x=res,file=save.as, quote=F,col.names=T,row.names=F,sep="\t")
+		}
+		if("persite" %in% include.out){
+			save.as.persite <- paste0(tools::file_path_sans_ext(save.as),"_persite.txt")
+			write.table(x=res.sites,file=save.as.persite, quote=F,col.names=T,row.names=F,sep="\t")
+		}
 	}
-	res
+	return(list(res,res.sites))
 }
-
-
-
 
 ### #' @title batch setup process_radtags
 ### #' 

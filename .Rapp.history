@@ -1,496 +1,271 @@
-test3
-crs(world_sf)
-raster::crs(world_sf)
-x.min
-x.max
-ggplot2::geom_sf(data=world_sf,colour = "black", fill = NA)
-class(ggplot2::geom_sf(data=world_sf,colour = "black", fill = NA))
-test
-names(test)
-test$mapping
-test2 <- mapplot.i  + ggplot2::geom_sf(data=world_sf,mapping=NULL, colour = "black", fill = NA) + ggplot2::coord_sf(xlim=c(x.min, x.max), ylim=c(y.min, ymax=y.max),expand=FALSE)
-test2
-test2 <- mapplot.i  + ggplot2::geom_sf(data=world_sf,mapping=aes(fill=AREA), colour = "black", fill = NA) + ggplot2::coord_sf(xlim=c(x.min, x.max), ylim=c(y.min, ymax=y.max),expand=FALSE)
-test2 <- mapplot.i  + ggplot2::geom_sf(data=world_sf,mapping=ggplot2::aes(fill=AREA), colour = "black", fill = NA) + ggplot2::coord_sf(xlim=c(x.min, x.max), ylim=c(y.min, ymax=y.max),expand=FALSE)
-test2
-test2 <- mapplot.i  + ggplot2::geom_sf(data=world_sf,mapping=ggplot2::aes(fill=AREA), colour = "black", fill = NA,inherit.aes=F) + ggplot2::coord_sf(xlim=c(x.min, x.max), ylim=c(y.min, ymax=y.max),expand=FALSE)
-test2
-test2 <- mapplot.i  + ggplot2::geom_sf(data=world_sf, colour = "black", fill = NA,inherit.aes=F) + ggplot2::coord_sf(xlim=c(x.min, x.max), ylim=c(y.min, ymax=y.max),expand=FALSE)
-test2
-mcmcdir=mcmcpath; plots.chain     <- suppressWarnings(reemsplots2::make_eems_plots(mcmcdir, longlat = TRUE))
-spdf_world_10    <- rnaturalearth::ne_countries(scale=10)#
-	#spdf_oceans_10   <- invisible(rnaturalearth::ne_download(scale = 10, type = 'ocean', category = 'physical'))#
-	# oceans <- misc.wrappers::spdf_oceans_10#
-	spdf_oceans_10 <- misc.wrappers::spdf_oceans_10
-world_sf <- spdf_world_10[1]
-mapplot  <- list(); length(mapplot) <- length(plots.chain)
-coordinates <- sp::SpatialPoints(data.matrix(read.table(paste0(mcmcdir,"/rdistoDemes.txt"),header=F))[,1:2])
-coordinates
-class(coordinates)
-coords2 <- read.table(paste0(mcmcdir,"/rdistoDemes.txt"),header=F)
-coords2
-coords2 <- read.table(paste0(mcmcdir,"/rdistoDemes.txt"),header=F)[,c(1:2)]
-coords2
-coordinates <- read.table(paste0(mcmcdir,"/rdistoDemes.txt"),header=F)[,c(1:2)]#
-		colnames(coordinates) <- c("Lon","Lat")
-i=1
-mapplot  <- list(); length(mapplot) <- length(plots.chain)
-mapplot.i    <- plots.chain[[i]]#
-		mapplot2.i   <- mapplot.i + ggplot2::theme_classic() + ggplot2::geom_sf(data=world_sf,colour = "black", fill = NA,inherit.aes=FALSE) + ggplot2::coord_sf(xlim=c(x.min, x.max), ylim=c(y.min, ymax=y.max),expand=FALSE)#
-		if(plot.coords){#
-			mapplot[[i]] <- mapplot2.i + ggplot2::geom_point(data = coordinates, ggplot2::aes(x = Lon, y = Lat), size = 1, shape = 21, fill = "black")#
-		} else {#
-			mapplot[[i]] <- mapplot2.i#
-		}
-plot.coords=T
-mapplot.i    <- plots.chain[[i]]#
-		mapplot2.i   <- mapplot.i + ggplot2::theme_classic() + ggplot2::geom_sf(data=world_sf,colour = "black", fill = NA,inherit.aes=FALSE) + ggplot2::coord_sf(xlim=c(x.min, x.max), ylim=c(y.min, ymax=y.max),expand=FALSE)#
-		if(plot.coords){#
-			mapplot[[i]] <- mapplot2.i + ggplot2::geom_point(data = coordinates, ggplot2::aes(x = Lon, y = Lat), size = 1, shape = 21, fill = "black")#
-		} else {#
-			mapplot[[i]] <- mapplot2.i#
-		}
-mapplot[[1]]
-i
-mapplot2.i
-mapplot.i
-mapplot2.i   <- mapplot.i + ggplot2::geom_sf(data=world_sf, colour = "black", fill = NA, inherit.aes=FALSE) + ggplot2::coord_sf(xlim=c(x.min, x.max), ylim=c(y.min, ymax=y.max),expand=FALSE)
-mapplot2.i
-y.min
-y.max
-test2 <- mapplot.i  + ggplot2::geom_sf(data=world_sf, colour = "black", fill = NA,inherit.aes=F) + ggplot2::coord_sf(xlim=c(x.min, x.max), ylim=c(y.min, ymax=y.max),expand=FALSE)
-test2
-mapplot.i
-class(mapplot.i)
-mapplot.i <- plots[[i]]
-mapplot.2i <- mapplot.i + ggplot2::geom_sf(data=world_sf,colour = "black", fill = NA,inherit.aes=F) + ggplot2::coord_sf(xlim=c(x.min, x.max), ylim=c(y.min, ymax=y.max),expand=FALSE)
-plot(mapplot.2i)
-world_sf <- rnaturalearth::ne_countries(scale=10,returnclass="sf")[1]
-mapplot.2i <- mapplot.i + ggplot2::geom_sf(data=world_sf,colour = "black", fill = NA,inherit.aes=F) + ggplot2::coord_sf(xlim=c(x.min, x.max), ylim=c(y.min, ymax=y.max),expand=FALSE)
-world_sf <- rnaturalearth::ne_countries(scale=10,returnclass="sf")[1]#
-	world_sp <- rnaturalearth::ne_countries(scale=10,returnclass="sp")
-mapplot.i    <- plots.chain[[i]]#
-		mapplot2.i   <- mapplot.i + ggplot2::geom_sf(data=world_sf, colour = "black", fill = NA, inherit.aes=FALSE) + ggplot2::coord_sf(xlim=c(x.min, x.max), ylim=c(y.min, ymax=y.max),expand=FALSE)
-mapplot2.i
-if(plot.coords){#
-			mapplot[[i]] <- mapplot2.i + ggplot2::geom_point(data = coordinates, ggplot2::aes(x = Lon, y = Lat), size = 1, shape = 21, fill = "black")#
-		} else {#
-			mapplot[[i]] <- mapplot2.i#
-		}
-mapplot[[i]]
-class(spdf_oceans_10)
-class(world_sf)
-library(sf)
-test <- ggplot2::st_sf(spdf_oceans_10)
-test <- st_sf(spdf_oceans_10)
-test <- st_as_sf(spdf_oceans_10)
-oceans_sf <- sf::st_as_sf(spdf_oceans_10)
-mapplot3.i   <- mapplot2.i + ggplot2::geom_sf(data=oceans_sf, colour = NA, fill = "white", inherit.aes=FALSE) + ggplot2::coord_sf(xlim=c(x.min, x.max), ylim=c(y.min, ymax=y.max),expand=FALSE)
-mapplot3.i
-mapplot.i  <- plots.chain[[i]]#
-		mapplot2.i <- mapplot.i + ggplot2::geom_sf(data=world_sf, colour = "black", fill = NA, inherit.aes=FALSE) # + ggplot2::coord_sf(xlim=c(x.min, x.max), ylim=c(y.min, ymax=y.max),expand=FALSE)#
-		mapplot3.i <- mapplot2.i + ggplot2::geom_sf(data=oceans_sf, colour = NA, fill = "white", inherit.aes=FALSE) # + ggplot2::coord_sf(xlim=c(x.min, x.max), ylim=c(y.min, ymax=y.max),expand=FALSE)#
-		mapplot4.i <- mapplot3.i + ggplot2::coord_sf(xlim=c(x.min, x.max), ylim=c(y.min, ymax=y.max),expand=FALSE)
-mapplot2.i <- suppressMessages(mapplot.i + ggplot2::geom_sf(data=world_sf, colour = "black", fill = NA, inherit.aes=FALSE))
-mapplot3.i <- mapplot2.i + ggplot2::geom_sf(data=oceans_sf, colour = NA, fill = "white", inherit.aes=FALSE) # + ggplot2::coord_sf(xlim=c(x.min, x.max), ylim=c(y.min, ymax=y.max),expand=FALSE)#
-		mapplot4.i <- mapplot3.i + ggplot2::coord_sf(xlim=c(x.min, x.max), ylim=c(y.min, ymax=y.max),expand=FALSE)
-mapplot4.i
-mapplot.i  <- plots.chain[[i]]#
-		coords <- unique(mapplot.i$data[,c(1:2)])
-dim(coords)
-colnames(coords) <- c("Lon","Lat")#
-		x.min    <- min((coords[,1]-0.5))#
-		x.max    <- max((coords[,1]+0.5))#
-		y.min    <- min((coords[,2]-0.5))#
-		y.max    <- max((coords[,2]+0.5))
-mapplot2.i <- suppressMessages(mapplot.i + ggplot2::geom_sf(data=world_sf, colour = "black", fill = NA, inherit.aes=FALSE)) # + ggplot2::coord_sf(xlim=c(x.min, x.max), ylim=c(y.min, ymax=y.max),expand=FALSE)#
-		mapplot3.i <- mapplot2.i + ggplot2::geom_sf(data=oceans_sf, colour = NA, fill = "white", inherit.aes=FALSE) # + ggplot2::coord_sf(xlim=c(x.min, x.max), ylim=c(y.min, ymax=y.max),expand=FALSE)#
-		mapplot4.i <- mapplot3.i + ggplot2::coord_sf(xlim=c(x.min, x.max), ylim=c(y.min, ymax=y.max),expand=FALSE)#
-		if(plot.coords){#
-			mapplot[[i]] <- mapplot2.i + ggplot2::geom_point(data = coordinates, ggplot2::aes(x = Lon, y = Lat), size = 1, shape = 21, fill = "black")#
-		} else {#
-			mapplot[[i]] <- mapplot2.i#
-		}
-mapplot[[i]]
-if(plot.coords){#
-			mapplot[[i]] <- mapplot4.i + ggplot2::geom_point(data = coordinates, ggplot2::aes(x = Lon, y = Lat), size = 1, shape = 21, fill = "black")#
-		} else {#
-			mapplot[[i]] <- mapplot4.i#
-		}
-mapplot[[i]]
-x.min    <- min(coords[,1])#
-		x.max    <- max(coords[,1])#
-		y.min    <- min(coords[,2])#
-		y.max    <- max(coords[,2])#
-		mapplot2.i <- suppressMessages(mapplot.i + ggplot2::geom_sf(data=world_sf, colour = "black", fill = NA, inherit.aes=FALSE)) # + ggplot2::coord_sf(xlim=c(x.min, x.max), ylim=c(y.min, ymax=y.max),expand=FALSE)#
-		mapplot3.i <- mapplot2.i + ggplot2::geom_sf(data=oceans_sf, colour = NA, fill = "white", inherit.aes=FALSE) # + ggplot2::coord_sf(xlim=c(x.min, x.max), ylim=c(y.min, ymax=y.max),expand=FALSE)#
-		mapplot4.i <- mapplot3.i + ggplot2::coord_sf(xlim=c(x.min, x.max), ylim=c(y.min, ymax=y.max),expand=FALSE)#
-		if(plot.coords){#
-			mapplot[[i]] <- mapplot4.i + ggplot2::geom_point(data = coordinates, ggplot2::aes(x = Lon, y = Lat), size = 1, shape = 21, fill = "black")#
-		} else {#
-			mapplot[[i]] <- mapplot4.i#
-		}
-mapplot[[i]]
-for(i in 1:length(plots.chain)){#
-		mapplot.i  <- plots.chain[[i]]#
-		coords <- unique(mapplot.i$data[,c(1:2)])#
-		colnames(coords) <- c("Lon","Lat")#
-		#x.min    <- min((coords[,1]-0.5))#
-		#x.max    <- max((coords[,1]+0.5))#
-		#y.min    <- min((coords[,2]-0.5))#
-		#y.max    <- max((coords[,2]+0.5))#
-		x.min    <- min(coords[,1])#
-		x.max    <- max(coords[,1])#
-		y.min    <- min(coords[,2])#
-		y.max    <- max(coords[,2])#
-		mapplot2.i <- suppressMessages(mapplot.i + ggplot2::geom_sf(data=world_sf, colour = "black", fill = NA, inherit.aes=FALSE)) # + ggplot2::coord_sf(xlim=c(x.min, x.max), ylim=c(y.min, ymax=y.max),expand=FALSE)#
-		mapplot3.i <- mapplot2.i + ggplot2::geom_sf(data=oceans_sf, colour = NA, fill = "white", inherit.aes=FALSE) # + ggplot2::coord_sf(xlim=c(x.min, x.max), ylim=c(y.min, ymax=y.max),expand=FALSE)#
-		mapplot4.i <- mapplot3.i + ggplot2::coord_sf(xlim=c(x.min, x.max), ylim=c(y.min, ymax=y.max),expand=FALSE)#
-		if(plot.coords){#
-			mapplot[[i]] <- mapplot4.i + ggplot2::geom_point(data = coordinates, ggplot2::aes(x = Lon, y = Lat), size = 1, shape = 21, fill = "black")#
-		} else {#
-			mapplot[[i]] <- mapplot4.i#
-		}#
-	}
-mapplot[[2]]
-for(i in 1:length(plots.chain)){#
-		mapplot.i  <- plots.chain[[i]]#
-		coords <- unique(mapplot.i$data[,c(1:2)])#
-		colnames(coords) <- c("Lon","Lat")#
-		x.min    <- min((coords[,1]-0.5))#
-		x.max    <- max((coords[,1]+0.5))#
-		y.min    <- min((coords[,2]-0.5))#
-		y.max    <- max((coords[,2]+0.5))#
-		#x.min    <- min(coords[,1])#
-		#x.max    <- max(coords[,1])#
-		#y.min    <- min(coords[,2])#
-		#y.max    <- max(coords[,2])#
-		mapplot2.i <- suppressMessages(mapplot.i + ggplot2::geom_sf(data=world_sf, colour = "black", fill = NA, inherit.aes=FALSE)) # + ggplot2::coord_sf(xlim=c(x.min, x.max), ylim=c(y.min, ymax=y.max),expand=FALSE)#
-		mapplot3.i <- mapplot2.i + ggplot2::geom_sf(data=oceans_sf, colour = NA, fill = "white", inherit.aes=FALSE) # + ggplot2::coord_sf(xlim=c(x.min, x.max), ylim=c(y.min, ymax=y.max),expand=FALSE)#
-		mapplot4.i <- mapplot3.i + ggplot2::coord_sf(xlim=c(x.min, x.max), ylim=c(y.min, ymax=y.max),expand=FALSE)#
-		if(plot.coords){#
-			mapplot[[i]] <- mapplot4.i + ggplot2::geom_point(data = coordinates, ggplot2::aes(x = Lon, y = Lat), size = 1, shape = 21, fill = "black")#
-		} else {#
-			mapplot[[i]] <- mapplot4.i#
-		}#
-	}
-mapplot[[2]]
-plot1 <- plots.chain[[1]]
-data1 <- plot1$data
-dim(data1)
-data2 <- plots.chain[[2]]$data
-dim(data2)
-data3 <- plots.chain[[3]]$data
-dim(data3)
-length(plots.chain)
-plots.dat <- lapply(X=plots.chain,FUN=function(x) x$data)
-dim(plots.dat[[1]])
-plot.coords=T; plot.geography=T; mask.oceans=T; include.out=c("pdf","raster")
-save.in=NULL
-if(is.null(save.in)){#
-		save.in <- mcmcdir#
-	}
-for(i in 1:length(plots.chain)){#
-		mapplot.i  <- plots.chain[[i]]#
-		coords <- unique(mapplot.i$data[,c(1:2)])#
-		colnames(coords) <- c("Lon","Lat")#
-		x.min    <- min((coords[,1]-0.5))#
-		x.max    <- max((coords[,1]+0.5))#
-		y.min    <- min((coords[,2]-0.5))#
-		y.max    <- max((coords[,2]+0.5))#
-		#x.min    <- min(coords[,1])#
-		#x.max    <- max(coords[,1])#
-		#y.min    <- min(coords[,2])#
-		#y.max    <- max(coords[,2])#
-		# Add country borders#
-		if(plot.geography){#
-			mapplot2.i <- suppressMessages(mapplot.i + ggplot2::geom_sf(data=world_sf, colour = "black", fill = NA, inherit.aes=FALSE)) # + ggplot2::coord_sf(xlim=c(x.min, x.max), ylim=c(y.min, ymax=y.max),expand=FALSE)#
-		} else {#
-			mapplot2.i <- mapplot.i#
-		}#
-		# Mask oceans#
-		if(mask.oceans){#
-			mapplot3.i <- mapplot2.i + ggplot2::geom_sf(data=oceans_sf, colour = NA, fill = "white", inherit.aes=FALSE) # + ggplot2::coord_sf(xlim=c(x.min, x.max), ylim=c(y.min, ymax=y.max),expand=FALSE)#
-		} else {#
-			mapplot3.i <- mapplot2.i#
-		}#
-		# Crop to window defined by xmin, xmax, ymin, ymax#
-		mapplot4.i <- mapplot3.i + ggplot2::coord_sf(xlim=c(x.min, x.max), ylim=c(y.min, ymax=y.max), expand=FALSE)#
-		# Add points for coordinates of samples#
-		if(plot.coords){#
-			mapplot[[i]] <- mapplot4.i + ggplot2::geom_point(data = coordinates, ggplot2::aes(x = Lon, y = Lat), size = 1, shape = 21, fill = "black")#
-		} else {#
-			mapplot[[i]] <- mapplot4.i#
-		}#
-	}
-mapplot[[1]]
-mapplot[[2]]
-mapplot[[3]]
-mapplot[[4]]
-mapplot[[5]]
-plots.chain[[4]]
-plots.chain[[5]]
-plots.chain[[6]]
-plots.chain[[7]]
-plots.chain[[8]]
-mapplot  <- list(); length(mapplot) <- 4#
-	for(i in 1:4){#
-		mapplot.i  <- plots.chain[[i]]#
-		coords <- unique(mapplot.i$data[,c(1:2)])#
-		colnames(coords) <- c("Lon","Lat")#
-		x.min    <- min((coords[,1]-0.5))#
-		x.max    <- max((coords[,1]+0.5))#
-		y.min    <- min((coords[,2]-0.5))#
-		y.max    <- max((coords[,2]+0.5))#
-		#x.min    <- min(coords[,1])#
-		#x.max    <- max(coords[,1])#
-		#y.min    <- min(coords[,2])#
-		#y.max    <- max(coords[,2])#
-		# Add country borders#
-		if(plot.geography){#
-			mapplot2.i <- suppressMessages(mapplot.i + ggplot2::geom_sf(data=world_sf, colour = "black", fill = NA, inherit.aes=FALSE)) # + ggplot2::coord_sf(xlim=c(x.min, x.max), ylim=c(y.min, ymax=y.max),expand=FALSE)#
-		} else {#
-			mapplot2.i <- mapplot.i#
-		}#
-		# Mask oceans#
-		if(mask.oceans){#
-			mapplot3.i <- mapplot2.i + ggplot2::geom_sf(data=oceans_sf, colour = NA, fill = "white", inherit.aes=FALSE) # + ggplot2::coord_sf(xlim=c(x.min, x.max), ylim=c(y.min, ymax=y.max),expand=FALSE)#
-		} else {#
-			mapplot3.i <- mapplot2.i#
-		}#
-		# Crop to window defined by xmin, xmax, ymin, ymax#
-		mapplot4.i <- mapplot3.i + ggplot2::coord_sf(xlim=c(x.min, x.max), ylim=c(y.min, ymax=y.max), expand=FALSE)#
-		# Add points for coordinates of samples#
-		if(plot.coords){#
-			mapplot[[i]] <- mapplot4.i + ggplot2::geom_point(data = coordinates, ggplot2::aes(x = Lon, y = Lat), size = 1, shape = 21, fill = "black")#
-		} else {#
-			mapplot[[i]] <- mapplot4.i#
-		}#
-	}
-result.gglist <- c(mapplot,plots.chain[5:8])
-result.gglist[[1]]
-result.gglist[[2]]
-result.gglist[[3]]
-result.gglist[[4]]
-"pdf" %in% include.out
-save.as.pdf <- file.path(save.in,"EEMS_maps.pdf")
-save.as.pdf
-getwd()
-save.in <- "/Users/alyssaleinweber/Documents/"
-save.as.pdf <- file.path(save.in,"EEMS_maps.pdf")
-save.as.psd
-save.as.pdf
-pdf(height=6, width=8, file=save.as.pdf, onefile=TRUE)#
-			lapply(X=result.gglist, FUN=print)#
-		dev.off()
-length(result.gglist)
-dev.off()
-dev.off()
-pdf(height=6, width=8, file=save.as.pdf, onefile=TRUE)#
-			#lapply(X=result.gglist, FUN=print)#
-			print(result.gglist)#
-		dev.off()
-save.as.raster <- file.path(save.in,"EEMS_maps.tif")
-plots.dat      <- lapply(X=plots.chain[1:4],FUN=function(x) x$data)
-plots.dat[[1]][1:10,]
-plots.dat[[2]][1:10,]
-plots.dat[[3]][1:10,]
-plots.dat[[4]][1:10,]
-plots.dat[[5]][1:10,]
-plots.mat <- matrix(data=NA, ncol=plots.chain[[1]]$x, nrow=plots.chain[[1]]$y)
-plots.mat <- matrix(data=NA, ncol=length(unique(plots.chain[[1]]$x)), nrow= length(unique(plots.chain[[1]]$y)) )
-NAmat <- matrix(data=NA, ncol=length(unique(plots.chain[[1]]$x)), nrow= length(unique(plots.chain[[1]]$y)))
-dim(NAmat)
-length(unique(plots.chain[[1]]$x)
-length(unique(plots.chain[[1]]$x))
-length(unique(plots.chain[[1]][,"x"]))
-dim(plots.chain[[1]])
-length(unique(plots.dat[[1]]$x))
-NAmat <- matrix(data=NA, ncol=length(unique(plots.dat[[1]]$x)), nrow= length(unique(plots.dat[[1]]$y)))
-dim(NAmat)
-colnames(NAmat) <- unique(plots.dat[[1]]$x)#
-		rownames(NAmat) <- unique(plots.dat[[1]]$y)
-NAmat[1:5,1:5]
-plots.dat[1,c("x","y")]
-plots.dat[[1]][1,c("x","y")]
-plots.dat2       <- lapply(X=plots.chain[1:4],FUN=function(x) as.data.frame(x$data))
-plots.dat2[[1]][1:10,]
-plots.dat       <- lapply(X=plots.chain[1:4],FUN=function(x) as.data.frame(x$data))
-NAmat           <- matrix(data=NA, ncol=length(unique(plots.dat[[1]]$x)), nrow= length(unique(plots.dat[[1]]$y)))#
-		colnames(NAmat) <- unique(plots.dat[[1]]$x)#
-		rownames(NAmat) <- unique(plots.dat[[1]]$y)#
-		mat.temp <- NAmat
-NAmat[1:5,1:5]
-plots.dat[1,c("x","y")]
-plots.dat[[1]][1,c("x","y")]
-mat.temp[plots.dat[[1]][1,"y"], plots.dat[[1]][1,"x"]]
-plots.dat[[1]][1,"y"]
-plots.dat[[1]][1,"x"]
-which(rownames(mat.temp)==plots.dat[[1]][1,"y"])
-mat.temp[which(rownames(mat.temp)==plots.dat[[1]][1,"y"]), which(colnames(mat.temp)==plots.dat[[1]][1,"x"])]
-plots.dat[[1]][1,"z"]
-i=1
-mat.temp <- NAmat#
-			dat.temp <- plots.dat[[i]]#
-			for(z in 1:nrow(dat.temp)){#
-				mat.temp[which(rownames(mat.temp)==dat.temp[z,"y"]), which(colnames(mat.temp)==dat.temp[z,"x"])] <- dat.temp[z,"z"]#
-			}
-mat.temp[1:10,1:10]
-any(is.na(mat.temp))
-length(which(is.na(mat.temp)==TRUE))
-length(which(is.na(mat.temp)==FALSE))
-rasterlist <- list(); length(rasterlist) <- 4
-rasterlist <- list(); length(rasterlist) <- 4#
-		for(i in 1:4){#
-			mat.temp <- NAmat#
-			dat.temp <- plots.dat[[i]]#
-			for(z in 1:nrow(dat.temp)){#
-				mat.temp[which(rownames(mat.temp)==dat.temp[z,"y"]), which(colnames(mat.temp)==dat.temp[z,"x"])] <- dat.temp[z,"z"]#
-			}#
-			rasterlist[[i]] <- mat.temp#
-		}
-library(raster)
-?raster
-test <- raster(x=rasterlist[[1]],values=TRUE)
-test <- raster(x=rasterlist[[1]],vals=rasterlist[[1]])
-test <- raster(x=rasterlist[[1]])
-test
-mat.temp[is.na(mat.temp)] <- -9999
-save.as.raster  <- file.path(save.in,"EEMS_maps.tif")#
-		plots.dat       <- lapply(X=plots.chain[1:4],FUN=function(x) as.data.frame(x$data))#
-		NAmat           <- matrix(data=NA, ncol=length(unique(plots.dat[[1]]$x)), nrow= length(unique(plots.dat[[1]]$y)))#
-		colnames(NAmat) <- unique(plots.dat[[1]]$x)#
-		rownames(NAmat) <- unique(plots.dat[[1]]$y)#
-		rasterlist <- list(); length(rasterlist) <- 4#
-		for(i in 1:4){#
-			mat.temp <- NAmat#
-			dat.temp <- plots.dat[[i]]#
-			for(z in 1:nrow(dat.temp)){#
-				mat.temp[which(rownames(mat.temp)==dat.temp[z,"y"]), which(colnames(mat.temp)==dat.temp[z,"x"])] <- dat.temp[z,"z"]#
-			}#
-			mat.temp[is.na(mat.temp)] <- -9999#
-			rasterlist[[i]] <- mat.temp#
-		}
-rasterlist2 <- lapply(X=1:4,FUN=function(x) {raster::raster(x=x,xmn=x.min,xmx=x.max,ymn=y.min,ymx=y.max)})
-rasterlist2 <- lapply(X=1:4,FUN=function(x) {raster::raster(x=rasterlist[[x]],xmn=x.min,xmx=x.max,ymn=y.min,ymx=y.max)})
-plot(rasterlist2[[1]])
-mat.temp[!is.na(mat.temp)] <- 1
-raster.temp <- raster(mat.temp,xmn=x.min,xmx=x.max,ymn=y.min,ymx=y.max)
-plot(raster.temp)
-for(z in 1:nrow(dat.temp)){#
-				mat.temp[which(rownames(mat.temp)==dat.temp[z,"y"]), which(colnames(mat.temp)==dat.temp[z,"x"])] <- dat.temp[z,"z"]#
-			}
-mat.temp[!is.na(mat.temp)] <- 1
-mat.temp[is.na(mat.temp)] <- -9999
-raster.temp <- raster(mat.temp,xmn=x.min,xmx=x.max,ymn=y.min,ymx=y.max)
-plot(raster.temp)
-raster.temp
-rasterlist2[[1]]
-rasterlist2[[2]]
-rasterlist2[[3]]
-rasterlist2[[4]]
-plot(rasterlist2[[4]])
-res.brick <- raster::brick(rasterlist2)
-save.as.raster
-wb <- raster::writeRaster(x=res.brick,filename=save.as.raster,format="GTiff")
-result.gglist[[1]]
-dat1=list()#
-dat1$x=seq(302339.6,by=1000,len=71)#
-dat1$y=seq(5431470,by=1000,len=124)#
-dat1$z=matrix(runif(71*124),71,124)
-image(dat1,asp=1)
-test <- image(dat1,asp=1)
-str(test)
-class(test)
-test
-r <-raster(#
-             dat1$z,#
-             xmn=range(dat1$x)[1], xmx=range(dat1$x)[2],#
-             ymn=range(dat1$y)[1], ymx=range(dat1$y)[2], #
-             crs=CRS("+proj=utm +zone=11 +datum=NAD83")#
-            )
-plot(r)
-test
-image(dat1,asp=1)
-plot(r)
-r=raster(dat1);plot(r)
-r
-dim(rasterlist[[1]])
-dim(plots.dat[[1]])
-dat.temp.list <- list(); length(dat.temp.list) <- 3
-i=1
-dat.temp <- plots.dat[[i]]
-colnames(dat.temp)
-dat.temp.list   <- apply(X=dat.temp,MARGIN=2,FUN=function(x){x})
-names(dat.temp.list)
-lengths(dat.temp.list)
-length(dat.temp.list)
-ncol(dat.temp)
-dat.temp.list   <- lapply(X=1:3, FUN=function(x){dat.temp[,x]})
-length(dat.temp.list)
-lengths(dat.temp.list)
-names(dat.temp.list)
-names(dat.temp.list) <- colnames(dat.temp)
-test <- <- raster::raster(dat.temp.list)
-test <- raster::raster(dat.temp.list)
-e <- extent(dat.temp[,1:2])
-e
-r <- raster(e, ncol=length(unique(dat.temp$x)), nrow=length(unique(dat.temp$y)))
-x <- raster::rasterize(dat.temp[, 1:2], r, dat.temp[,3], fun=mean)
-plot(x)
-x
-rasterlist <- list(); length(rasterlist) <- 4#
-		for(i in 1:4){#
-			dat.temp <- plots.dat[[i]]#
-			#dat.temp.list        <- lapply(X=1:3, FUN=function(x){dat.temp[,x]})#
-			#names(dat.temp.list) <- colnames(dat.temp)#
-			e.temp <- raster::extent(dat.temp[,1:2])#
-			r.temp <- raster::raster(e.temp, ncol=length(unique(dat.temp$x)), nrow=length(unique(dat.temp$y)))#
-			rasterlist[[i]] <- raster::rasterize(dat.temp[, 1:2], r.temp, dat.temp[,3], fun=mean)#
-			# rasterlist[[i]] <- raster::raster(dat.temp.list)#
-			# dat.temp.list   <- list(); length(dat.temp.list) <- 3#
-			# dat.temp.list$x <- dat.temp$x#
-			# dat.temp.list$y <- dat.temp$y#
-			# dat.temp.list$x <- dat.temp$z#
-			# mat.temp <- NAmat#
-			# for(z in 1:nrow(dat.temp)){#
-			# 	mat.temp[which(rownames(mat.temp)==dat.temp[z,"y"]), which(colnames(mat.temp)==dat.temp[z,"x"])] <- dat.temp[z,"z"]#
-			# }#
-			# mat.temp[is.na(mat.temp)] <- -9999#
-			# rasterlist[[i]] <- mat.temp#
-		}
-res.brick <- raster::brick(rasterlist)
-wb <- raster::writeRaster(x=res.brick, filename=save.as.raster, format="GTiff")
-wb <- raster::writeRaster(x=res.brick, filename=save.as.raster, format="GTiff",overwrite=T)
-?rasterize
-rasterlist <- list(); length(rasterlist) <- 4#
-		for(i in 1:4){#
-			dat.temp <- plots.dat[[i]]#
-			#dat.temp.list        <- lapply(X=1:3, FUN=function(x){dat.temp[,x]})#
-			#names(dat.temp.list) <- colnames(dat.temp)#
-			e.temp <- raster::extent(dat.temp[,1:2])#
-			r.temp <- raster::raster(e.temp, ncol=length(unique(dat.temp$x)), nrow=length(unique(dat.temp$y)))#
-			rasterlist[[i]] <- raster::rasterize(dat.temp[, 1:2], r.temp, dat.temp[,3], fun=mean, background=-9999)#
-			# rasterlist[[i]] <- raster::raster(dat.temp.list)#
-			# dat.temp.list   <- list(); length(dat.temp.list) <- 3#
-			# dat.temp.list$x <- dat.temp$x#
-			# dat.temp.list$y <- dat.temp$y#
-			# dat.temp.list$x <- dat.temp$z#
-			# mat.temp <- NAmat#
-			# for(z in 1:nrow(dat.temp)){#
-			# 	mat.temp[which(rownames(mat.temp)==dat.temp[z,"y"]), which(colnames(mat.temp)==dat.temp[z,"x"])] <- dat.temp[z,"z"]#
-			# }#
-			# mat.temp[is.na(mat.temp)] <- -9999#
-			# rasterlist[[i]] <- mat.temp#
-		}#
-		#### Now need to turn each matrix in rasterlist into an actual raster object, then hold the rasters in a rasterbrick, then rasterbrick as geotiff#
-		#rasterlist2 <- lapply(X=1:4,FUN=function(x) {raster::raster(x=rasterlist[[x]],xmn=x.min,xmx=x.max,ymn=y.min,ymx=y.max)})#
-		res.brick <- raster::brick(rasterlist)
-wb <- raster::writeRaster(x=res.brick, filename=save.as.raster, format="GTiff",overwrite=T)
-install.packages("raster")
-library(raster)
-wb <- raster::writeRaster(x=res.brick, filename=save.as.raster, format="GTiff",overwrite=T)
-getwd()
+devtools::document()
+Ahaetulla.stats <- read.table("/Users/alyssaleinweber/Downloads/Ahaetulla_stacks_stats.txt")
+Ahaetulla.stats
+library(ggplot2)
+Ahaetulla.stats <- read.table("/Users/alyssaleinweber/Downloads/Ahaetulla_stacks_stats.txt",header=T)
+Ahaetulla.stats
+strsplit(Ahaetulla.stats$params,split="_")
+do.call(rbind,strsplit(Ahaetulla.stats$params,"_"))
+params.mat1 <- do.call(rbind,strsplit(Ahaetulla.stats$params,"_"))
+strsplit(params.mat1,"")
+do.call(rbind,strsplit(params.mat1,""))
+params.mat1
+gsub("^.","", params.mat1)
+params.mat2 <- gsub("^.","", params.mat1)
+mode(params.mat2) <- "integer"
+params.mat2
+colnames(params.mat2) <- c("m","M","N","n")
+params.mat2
+params.df <- as.data.frame(params.mat2)
+params.df
+res2 <- data.frame(Ahaetulla.stats,params.df)
+res2
+?drop
+wc
+library(hierfstat)
+wc
+Fxy
+?Fxy
+??Fxy
+res2
+ggplot(data= res2,aes(x=params,y=Ho)) + geom_bar()
+rlang::last_error()
+res3 <- res2
+res3$params <- factor(res3$params)
+ggplot(data=res3, aes(x=params,y=Ho)) + geom_bar()
+ggplot(data=res3) + geom_bar(aes(x=params,y=Ho))
+ggplot() + geom_bar(res3 ,aes(x=params,y=Ho))
+ggplot(data=res3, aes(x=params,y=Ho))
+res3
+res3
+ggplot() + geom_bar(data=res3 ,mapping=aes(x=params,y=Ho))
+ggplot(data=res3 ,mapping=aes(x=params,y=Ho)) + geom_bar()
+ggplot(data=res3 ,mapping=aes(x=params,y=Ho))
+ggplot(data=res3 ,mapping=aes(y=Ho),x=params) + geom_bar()
+ggplot(data=res3 ,mapping=aes(x=params,y=Ho)) + geom_bar(stat="identity")
+ggplot(data=res3 ,mapping=aes(x=M,y=Ho,fill=n)) + geom_bar(stat="identity")
+ggplot(data=res3 ,mapping=aes(x=M,y=Ho,fill=n)) + geom_point()
+ggplot(data=res3 ,mapping=aes(x=M,y=Ho,color=n)) + geom_point()
+ggplot(data=res3 ,mapping=aes(x=M,y=Ho,color=n)) + geom_point() + scale_color_discrete()
+res3$n <- factor(res3$n)
+ggplot(data=res3 ,mapping=aes(x=M,y=Ho,color=n)) + geom_point() + scale_color_discrete()
+ggplot(data=res3 ,mapping=aes(x=M,y=Ho,color=n)) + geom_point() + scale_color_discrete() + theme_void()
+ggplot(data=res3 ,mapping=aes(x=M,y=Ho,color=n)) + geom_point() + scale_color_discrete() + theme_classic()
+ggplot(data=res3 ,mapping=aes(x=M,y=Hs,color=n)) + geom_point() + scale_color_discrete() + theme_classic()
+?basic.stats
+ggplot(data=res3 ,mapping=aes(x=M,y=Fis,color=n)) + geom_point() + scale_color_discrete() + theme_classic()
+ggplot(data=res3 ,mapping=aes(x=M,y= nsite,color=n)) + geom_point() + scale_color_discrete() + theme_classic()
+ggplot(data=res3 ,mapping=aes(x=M,y= mean.missing.site,color=n)) + geom_point() + scale_color_discrete() + theme_classic()
+res3$missing.total <- res3mean.missing.indv
+res3$missing.total <- res3$mean.missing.indv
+plot.nloci            <- ggplot(data=res3 ,mapping=aes(x=M,y= nloci,color=n)) + geom_point() + scale_color_discrete() + theme_classic()
+plot.nloci
+plot.missing.total    <- ggplot(data=res3 ,mapping=aes(x=M,y= missing.total,color=n)) + geom_point() + scale_color_discrete() + theme_classic()
+plot.missing.total
+ggplot(data=res3 ,mapping=aes(x=M,y= missing.total,color=n),size=4) + geom_point() + scale_color_discrete() + theme_classic()
+ggplot(data=res3 ,mapping=aes(x=M,y= missing.total,color=n),size=7) + geom_point() + scale_color_discrete() + theme_classic()
+ggplot(data=res3 ,mapping=aes(x=M,y= missing.total,color=n)) + geom_point(size=7) + scale_color_discrete() + theme_classic()
+ggplot(data=res3 ,mapping=aes(x=M,y= missing.total,color=n)) + geom_point(size=5) + scale_color_discrete() + theme_classic()
+ggplot(data=res3 ,mapping=aes(x=M,y= missing.total,color=n)) + geom_point(size=4) + scale_color_discrete() + theme_classic()
+ggplot(data=res3 ,mapping=aes(x=M,y= missing.total,color=n)) + geom_point(size=3) + scale_color_discrete() + theme_classic()
+ggplot(data=res3 ,mapping=aes(x=M,y= nloci,color=n)) + geom_point(size=3) + scale_color_discrete() + theme_classic()
+# m3M1N3n2 has hight number of loci
+ggplot(data=res3 ,mapping=aes(x=M,y= missing.total,color=n)) + geom_point(size=3) + scale_color_discrete() + theme_classic()
+# m3M1N3n2 has fairly low missing data
+ggplot(data=res3 ,mapping=aes(x=M,y= nsites,color=n)) + geom_point(size=3) + scale_color_discrete() + theme_classic()
+ggplot(data=res3 ,mapping=aes(x=M,y= nsite,color=n)) + geom_point(size=3) + scale_color_discrete() + theme_classic()
+ggplot(data=res3 ,mapping=aes(x=M,y= Fis,color=n)) + geom_point(size=3) + scale_color_discrete() + theme_classic()
+devtools::document()
+devtools::document()
 devtools::document()
 remotes::install_github("JeffWeinell/misc.wrappers",upgrade=FALSE)
-q()
+devtools::document()
+devtools::document()
+devtools::document()
+87/3
+"/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/Ahaetulla_VCF_stats.txt"
+read.table("/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/Ahaetulla_VCF_stats.txt",header=T)
+vcf.stats <- read.table("/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/Ahaetulla_VCF_stats.txt",header=T)
+vcf.stats$m <- NA
+vcf.stats$m <- vcf.stats$M <- vcf.stats$N <- vcf.stats$n <- vcf.stats$MaxMissingDataSiteFilter <- NA
+mMNn.string0 <- gsub("Ahaetulla_AllPops_","",vcf.stats$filename)
+mMNn.string1 <- gsub("_BestSNP.+$","", mMNn.string0)
+mMNn.string1
+mMNn.mat <- do.call(rbind,strsplit(mMNn.string1,"_"))
+mMNn.mat
+mMNn.mat <- gsub("^.","",do.call(rbind,strsplit(mMNn.string1,"_")))
+mMNn.mat
+mode(mNMn.mat) <- "numeric"
+mode(mMNn.mat) <- "numeric"
+vcf.stats <- read.table("/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/Ahaetulla_VCF_stats.txt",header=T)
+vcf.stats2 <- data.frame(vcf.stats,mMNn.mat)
+vcf.stats2[1,]
+colnames(mMNn.mat) <- c("m","M","N","n")
+vcf.stats2 <- data.frame(vcf.stats,mMNn.mat)
+vcf.stats2[1,]
+vcf.stats2$MaxMissingDataSiteFilter <- NA
+grep("MissingData5percent",vcf.stats2$filename)
+vcf.stats2$MaxMissingDataSiteFilter[grep("MissingData5percent",vcf.stats2$filename)] <- 5
+vcf.stats2$MaxMissingDataSiteFilter[grep("MissingData10percent",vcf.stats2$filename)] <- 10
+vcf.stats2$MaxMissingDataSiteFilter[grep("MissingData20percent",vcf.stats2$filename)] <- 20
+vcf.stats2$MaxMissingDataSiteFilter[is.na(vcf.stats2$MaxMissingDataSiteFilter)] <- 100
+vcf.stats2[1:3,]
+vcf.stats2$max.missingness.indv
+vcf.stats2$max.missingness.site
+devtools::document()
+devtools::document()
+ggplot(data=vcf.stats2 ,mapping=aes(x=M,y= nloci,color=n)) + geom_point(size=3) + scale_color_discrete() + theme_classic()
+vcf.stats2$n <- factor(vcf.stats2$n)
+ggplot(data=vcf.stats2 ,mapping=aes(x=M,y= nloci,color=n)) + geom_point(size=3) + scale_color_discrete() + theme_classic()
+ggplot(data=vcf.stats2 ,mapping=aes(x=M,y= nloci,color=n,shape=MaxMissingDataSiteFilter)) + geom_point(size=3) + scale_color_discrete() + theme_classic()
+vcf.stats2$MaxMissingDataSiteFilter <- factor(vcf.stats2$MaxMissingDataSiteFilter)
+ggplot(data=vcf.stats2 ,mapping=aes(x=M,y= nloci,color=n,shape=MaxMissingDataSiteFilter)) + geom_point(size=3) + scale_shape_discrete() + theme_classic()
+vcf.stats2$MaxMissingDataSiteFilter
+table(vcf.stats2$MaxMissingDataSiteFilter)
+vcf.stats2[vcf.stats2$MaxMissingDataSiteFilter==100,"nloci"]
+vcf.stats2[vcf.stats2$MaxMissingDataSiteFilter==100,"filename"]
+vcf.stats2$MaxMissingDataSiteFilter <- NA
+vcf.stats2$MaxMissingDataSiteFilter[grep("MissingData5percent",vcf.stats2$filename)] <- 5#
+vcf.stats2$MaxMissingDataSiteFilter[grep("MissingData10percent",vcf.stats2$filename)] <- 10#
+vcf.stats2$MaxMissingDataSiteFilter[grep("MissingData20percent",vcf.stats2$filename)] <- 20
+vcf.stats2$MaxMissingDataSiteFilter[grep("NoMissingData",vcf.stats2$filename)] <- 0
+vcf.stats2$MaxMissingDataSiteFilter[is.na(vcf.stats2$MaxMissingDataSiteFilter)] <- 100
+vcf.stats2[vcf.stats2$MaxMissingDataSiteFilter==100,"nloci"]
+ggplot(data=vcf.stats2 ,mapping=aes(x=M,y= nloci,color=n,shape=MaxMissingDataSiteFilter)) + geom_point(size=3) + scale_shape_discrete() + theme_classic()
+vcf.stats2$MaxMissingDataSiteFilter <- factor(vcf.stats2$MaxMissingDataSiteFilter)
+ggplot(data=vcf.stats2 ,mapping=aes(x=M,y= nloci,color=n,shape=MaxMissingDataSiteFilter)) + geom_point(size=3) + scale_shape_discrete() + theme_classic()
+colnames(vcf.stats2)
+ggplot(data=vcf.stats2 ,mapping=aes(x=M,y=Fis,color=n,shape=MaxMissingDataSiteFilter)) + geom_point(size=3) + scale_shape_discrete() + theme_classic()
+ggplot(data=vcf.stats2 ,mapping=aes(x=M,y=Fis,color=n,shape=MaxMissingDataSiteFilter)) + geom_point(size=3) + scale_shape_discrete() + theme_classic() +title("test")
+ggplot(data=vcf.stats2 ,mapping=aes(x=M,y=Fis,color=n,shape=MaxMissingDataSiteFilter)) + geom_point(size=3) + scale_shape_discrete() + theme_classic() +theme(title.text="test")
+ggplot(data=vcf.stats2 ,mapping=aes(x=M,y=Fis,color=n,shape=MaxMissingDataSiteFilter)) + geom_point(size=3) + scale_shape_discrete() + theme_classic() +theme(text.title="test")
+ggplot(data=vcf.stats2 ,mapping=aes(x=M,y=Fis,color=n,shape=MaxMissingDataSiteFilter)) + geom_point(size=3) + scale_shape_discrete() + theme_classic() + theme(title="test")
+ggplot(data=vcf.stats2 ,mapping=aes(x=M,y=Fis,color=n,shape=MaxMissingDataSiteFilter)) + geom_point(size=3) + scale_shape_discrete() + theme_classic() + theme(title=element_text("test"))
+ggplot(data=vcf.stats2 ,mapping=aes(x=M,y=Fis,color=n,shape=MaxMissingDataSiteFilter)) + geom_point(size=3) + scale_shape_discrete() + theme_classic() + labs(title="test")
+ggplot(data=vcf.stats2 ,mapping=aes(x=M,y=Fis,color=n,shape=MaxMissingDataSiteFilter)) + geom_point(size=3) + scale_shape_discrete() + theme_classic() + labs(title="Ahaetulla prasina Best SNP per locus")
+ggplot(data=vcf.stats2 ,mapping=aes(x=M,y=Fis,color=n,shape=MaxMissingDataSiteFilter)) + geom_point(size=3) + scale_shape_discrete() + scale_x_discrete(breaks=1:8) + theme_classic() + labs(title="Ahaetulla prasina Best SNP per locus")
+ggplot(data=vcf.stats2 ,mapping=aes(x=M,y=Fis,color=n,shape=MaxMissingDataSiteFilter)) + geom_point(size=3) + scale_shape_discrete() + scale_x_discrete(breaks=1:8,labels=1:8) + theme_classic() + labs(title="Ahaetulla prasina Best SNP per locus")
+ggplot(data=vcf.stats2 ,mapping=aes(x=M,y=Fis,color=n,shape=MaxMissingDataSiteFilter)) + geom_point(size=3) + scale_shape_discrete() + scale_x_discrete(labels=1:8) + theme_classic() + labs(title="Ahaetulla prasina Best SNP per locus")
+ggplot(data=vcf.stats2 ,mapping=aes(x=M,y=Fis,color=n,shape=MaxMissingDataSiteFilter)) + geom_point(size=3) + scale_shape_discrete() + scale_x_discrete(name=1:8) + theme_classic() + labs(title="Ahaetulla prasina Best SNP per locus")
+ggplot(data=vcf.stats2 ,mapping=aes(x=M,y=Fis,color=n,shape=MaxMissingDataSiteFilter)) + geom_point(size=3) + scale_shape_discrete() + scale_x_discrete(limits=c(1,8)) + theme_classic() + labs(title="Ahaetulla prasina Best SNP per locus")
+ggplot(data=vcf.stats2 ,mapping=aes(x=M,y=Fis,color=n,shape=MaxMissingDataSiteFilter)) + geom_point(size=3) + scale_shape_discrete() + scale_x_discrete(limits=1:8) + theme_classic() + labs(title="Ahaetulla prasina Best SNP per locus")
+ggplot(data=vcf.stats2 ,mapping=aes(x=M,y=Fis,color=n,shape=MaxMissingDataSiteFilter)) + geom_point(size=3) + scale_shape_discrete() + scale_x_discrete(limits=factor(1:8)) + theme_classic() + labs(title="Ahaetulla prasina Best SNP per locus")
+ggplot(data=vcf.stats2 ,mapping=aes(x=M,y=Fis,color=n,shape=MaxMissingDataSiteFilter)) + geom_point(size=3) + scale_shape_discrete() + scale_x_discrete(limits=factor(1:8)) + theme_classic() + labs(title="Inbreeding coefficient vs. M, n, max missing data per site, Ahaetulla prasina Best SNP per locus")
+ggplot(data=vcf.stats2 ,mapping=aes(x=M,y=Fis,color=n,shape=MaxMissingDataSiteFilter)) + geom_point(size=3) + scale_shape_discrete() + scale_x_discrete(limits=factor(1:8)) + theme_classic() + labs(title="Inbreeding coefficient vs. M, n, max missing data per site, for Ahaetulla prasina Best SNP per locus")
+ggplot(data=vcf.stats2 ,mapping=aes(x=M,y=nloci,color=n,shape=MaxMissingDataSiteFilter)) + geom_point(size=3) + scale_shape_discrete() + scale_x_discrete(limits=factor(1:8)) + theme_classic() + labs(title="Number of loci vs. M, n, max missing data per site, for Ahaetulla prasina Best SNP per locus")
+devtools::document()
+?basic.stats
+vcf.stats2$Heterozygosity.expected/vcf.stats2$Heterozygosity.observed
+basic.stats
+vcf.stats2[1:3,]
+devtools::document()
+vcf <- "/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/Ahaetulla_VCF_stats_v2.txt"
+Ahaetulla.vcf.stats <- read.table("/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/Ahaetulla_VCF_stats_v2.txt",header=T)
+Ahaetulla.vcf.stats[1:10,1:10]
+Ahaetulla.vcf.stats[,1:10]
+mMNn.string0 <- gsub("Ahaetulla_AllPops_","", Ahaetulla.vcf.stats $filename)#
+mMNn.string1 <- gsub("_BestSNP.+$","", mMNn.string0)
+mMNn.mat <- gsub("^.","",do.call(rbind,strsplit(mMNn.string1,"_")))
+mMNn.mat
+mode(mMNn.mat) <- "numeric"
+colnames(mMNn.mat) <- c("m","M","N","n")
+Ahaetulla.vcf.stats <- data.frame(Ahaetulla.vcf.stats,mMNn.mat)
+Ahaetulla.vcf.stats$MaxMissingDataSiteFilter <- NA#
+Ahaetulla.vcf.stats$MaxMissingDataSiteFilter[grep("MissingData5percent",Ahaetulla.vcf.stats$filename)] <- 5#
+Ahaetulla.vcf.stats$MaxMissingDataSiteFilter[grep("MissingData10percent",Ahaetulla.vcf.stats$filename)] <- 10#
+Ahaetulla.vcf.stats$MaxMissingDataSiteFilter[grep("MissingData20percent",Ahaetulla.vcf.stats$filename)] <- 20#
+Ahaetulla.vcf.stats$MaxMissingDataSiteFilter[grep("NoMissingData",Ahaetulla.vcf.stats$filename)] <- 0#
+Ahaetulla.vcf.stats$MaxMissingDataSiteFilter[is.na(Ahaetulla.vcf.stats$MaxMissingDataSiteFilter)] <- 100
+Ahaetulla.vcf.stats
+ggplot(data=Ahaetulla.vcf.stats ,mapping=aes(x=M,y=nloci,color=n,shape=MaxMissingDataSiteFilter)) + geom_point(size=3) + scale_shape_discrete() + scale_x_discrete(limits=factor(1:8)) + theme_classic() + labs(title="Number of loci vs. M, n, max missing data per site, for Ahaetulla prasina Best SNP per locus")
+Ahaetulla.vcf.stats$MaxMissingDataSiteFilter <- factor(Ahaetulla.vcf.stats$MaxMissingDataSiteFilter)
+Ahaetulla.vcf.stats$n <- factor(Ahaetulla.vcf.stats$n)
+Ahaetulla.vcf.stats$n <- factor(Ahaetulla.vcf.stats$n)
+ggplot(data=Ahaetulla.vcf.stats, mapping=aes(x=M, y=nloci, color=n, shape=MaxMissingDataSiteFilter)) + geom_point(size=3) + scale_shape_discrete() + scale_x_discrete(limits=factor(1:8)) + theme_classic() + labs(title="Number of loci vs. M, n, max missing data per site, for Ahaetulla prasina Best SNP per locus")
+ggplot(data=Ahaetulla.vcf.stats, mapping=aes(x=M, y=Fis, color=n, shape=MaxMissingDataSiteFilter)) + geom_point(size=3) + scale_shape_discrete() + scale_x_discrete(limits=factor(1:8)) + theme_classic() + labs(title="Inbreeding coefficient vs. M, n, max missing data per site, for Ahaetulla prasina Best SNP per locus")
+save.path <- "/panfs/pfs.local/home/j926w878/work/ddRAD/snps_goodData/Calamaria_new/"
+save.path
+outdirs   <- list.dirs(save.path,full.name=TRUE,recursive=F)#
+in.paths  <- file.path(outdirs,"populations.snps.vcf")#
+out.paths <- file.path(save.path,sprintf("%s_%s_BestSNP.vcf",basename(save.path),basename(outdirs)))
+out.paths
+Ahaetulla.vcf.stats$m <- factor(Ahaetulla.vcf.stats$m)
+colnames(Ahaetulla.vcf.stats)
+ggplot(data=Ahaetulla.vcf.stats, mapping=aes(x=missingness.total, y=nloci, color=n, shape=M)) + geom_point(size=3) + scale_shape_discrete() + theme_classic() + labs(title="Number of loci vs. proportion missing data, n, M, for Ahaetulla prasina Best SNP per locus")
+Ahaetulla.vcf.stats$M <- factor(Ahaetulla.vcf.stats$M)
+ggplot(data=Ahaetulla.vcf.stats, mapping=aes(x=missingness.total, y=nloci, color=n, shape=M)) + geom_point(size=3) + scale_shape_discrete() + theme_classic() + labs(title="Number of loci vs. proportion missing data, n, M, for Ahaetulla prasina Best SNP per locus")
+ggplot(data=Ahaetulla.vcf.stats, mapping=aes(x=missingness.total, y=nloci, color=M, shape=n)) + geom_point(size=3) + scale_shape_discrete() + theme_classic() + labs(title="Number of loci vs. proportion missing data, n, M, for Ahaetulla prasina Best SNP per locus")
+ggplot(data=Ahaetulla.vcf.stats, mapping=aes(x=missingness.total, y=nloci, color=M, linetype=n)) + geom_line(size=3) + theme_classic() + labs(title="Number of loci vs. proportion missing data, n, M, for Ahaetulla prasina Best SNP per locus")
+ggplot(data=Ahaetulla.vcf.stats, mapping=aes(x=missingness.total, y=nloci, color=M, linetype=n)) + geom_line(size=1) + theme_classic() + labs(title="Number of loci vs. proportion missing data, n, M, for Ahaetulla prasina Best SNP per locus")
+ggplot(data=Ahaetulla.vcf.stats, mapping=aes(x=missingness.total, y=nloci, color=M, linetype=n)) + geom_line(size=0.5) + theme_classic() + labs(title="Number of loci vs. proportion missing data, n, M, for Ahaetulla prasina Best SNP per locus")
+ggplot(data=Ahaetulla.vcf.stats, mapping=aes(x=missingness.total, y=nloci, color=M, linetype=n)) + geom_line(size=0.5) + scale_y_log10() + theme_classic() + labs(title="Number of loci vs. proportion missing data, n, M, for Ahaetulla prasina Best SNP per locus")
+ggplot(data=Ahaetulla.vcf.stats, mapping=aes(x=missingness.total, y=nloci, color=M, linetype=n)) + geom_line(size=0.5) + theme_classic() + labs(title="Number of loci vs. proportion missing data, n, M, for Ahaetulla prasina Best SNP per locus")
+ggplot(data=Ahaetulla.vcf.stats, mapping=aes(x=missingness.total, y=nloci, color=M, shape=n)) + geom_point(size=3) + scale_shape_discrete() + theme_classic() + labs(title="Number of loci vs. proportion missing data, n, M, for Ahaetulla prasina Best SNP per locus")
+devtools::document()
+ggplot(data=Ahaetulla.vcf.stats, mapping=aes(x=missingness.total, y=nloci, color=M, linetype=n)) + geom_line(size=0.5) + theme_classic() + labs(title="Number of loci vs. proportion missing data, n, M, for Ahaetulla prasina Best SNP per locus") # + scale_y_log10()
+ggplot(data=Ahaetulla.vcf.stats, mapping=aes(x=M, y=Fis, color=n, shape=MaxMissingDataSiteFilter)) + geom_point(size=3) + scale_shape_discrete() + scale_x_discrete(limits=factor(1:8)) + theme_classic() + labs(title="Inbreeding coefficient vs. M, n, max missing data per site, for Ahaetulla prasina Best SNP per locus")
+ggplot(data=Ahaetulla.vcf.stats, mapping=aes(x=missingness.total, y=Fis, color=M, linetype=n)) + geom_line(size=0.5) + theme_classic() + labs(title="Inbreeding coefficient vs. proportion missing data, n, M, for Ahaetulla prasina Best SNP per locus")
+"/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/Calamaria_VCF_stats.txt"
+Calamaria.vcf.stats <- read.table("/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/Calamaria_VCF_stats.txt",header=T)
+Calamaria.vcf.stats
+mMNn.string0        <- gsub("Calamaria_AllPops_","", Calamaria.vcf.stats $filename)
+mMNn.string1        <- gsub("_BestSNP.+$","", mMNn.string0)
+mMNn.mat            <- gsub("^.","",do.call(rbind,strsplit(mMNn.string1,"_")))
+mMNn.string1[1]
+mMNn.string2        <- gsub("_AllSNPs.+$","", mMNn.string1)
+mMNn.string2
+mMNn.mat            <- gsub("^.","",do.call(rbind,strsplit(mMNn.string2,"_")))
+mode(mMNn.mat)      <- "numeric"#
+colnames(mMNn.mat)  <- c("m","M","N","n")
+mMNn.mat
+Calamaria.vcf.stats <- data.frame(Calamaria.vcf.stats,mMNn.mat)
+Calamaria.vcf.stats
+Calamaria.vcf.stats$MaxMissingDataSiteFilter <- NA#
+Calamaria.vcf.stats$MaxMissingDataSiteFilter[grep("MissingData5percent",Calamaria.vcf.stats$filename)]  <- 5#
+Calamaria.vcf.stats$MaxMissingDataSiteFilter[grep("MissingData10percent",Calamaria.vcf.stats$filename)] <- 10#
+Calamaria.vcf.stats$MaxMissingDataSiteFilter[grep("MissingData20percent",Calamaria.vcf.stats$filename)] <- 20#
+Calamaria.vcf.stats$MaxMissingDataSiteFilter[grep("NoMissingData",Calamaria.vcf.stats$filename)]  <- 0#
+Calamaria.vcf.stats$MaxMissingDataSiteFilter[is.na(Calamaria.vcf.stats$MaxMissingDataSiteFilter)] <- 100
+Calamaria.vcf.stats[1,]
+Calamaria.vcf.stats$SNPsPerLocus <- NA
+Calamaria.vcf.stats$SNPsPerLocus[grep("BestSNP",Calamaria.vcf.stats$filename)] <- "Best"#
+Calamaria.vcf.stats$SNPsPerLocus[grep("AllSNPs",Calamaria.vcf.stats$filename)] <- "All"#
+C
+Calamaria.vcf.stats[1,]
+Calamaria.vcf.stats[1:3,]
+Calamaria.vcf.stats[1:5,]
+Calamaria.vcf.stats[1:10,]
+Calamaria.vcf.stats[1:11,]
+Calamaria.vcf.stats$n <- factor(Calamaria.vcf.stats$n)#
+Calamaria.vcf.stats$M <- factor(Calamaria.vcf.stats$M)#
+Calamaria.vcf.stats$MaxMissingDataSiteFilter <- factor(Calamaria.vcf.stats$MaxMissingDataSiteFilter)
+ggplot(data=Calamaria.vcf.stats, mapping=aes(x=M, y=nloci, color=n, shape=MaxMissingDataSiteFilter)) + geom_point(size=3) + scale_shape_discrete() + scale_x_discrete(limits=factor(1:8)) + theme_classic() + labs(title="Number of loci vs. M, n, max missing data per site, for Calamaria prasina Best SNP per locus")
+ggplot(data=Calamaria.vcf.stats, mapping=aes(x=missingness.total, y=nloci, color=M, linetype=n)) + geom_line(size=0.5) + theme_classic() + labs(title="Number of loci vs. proportion missing data, n, M, for Calamaria prasina Best SNP per locus") # + scale_y_log10()
+ggplot(data=Calamaria.vcf.stats, mapping=aes(x=missingness.total, y=nloci, color=M, shape=n)) + geom_point(size=3) + scale_shape_discrete() + theme_classic() + labs(title="Number of loci vs. proportion missing data, n, M, for Calamaria prasina Best SNP per locus")
+ggplot(data=Calamaria.vcf.stats, mapping=aes(x=M, y=nloci, color=n, shape=MaxMissingDataSiteFilter)) + geom_point(size=3) + scale_shape_discrete() + scale_x_discrete(limits=factor(1:8)) + theme_classic() + labs(title="Number of loci vs. M, n, max missing data per site, for Calamaria prasina Best SNP per locus")
+ggplot(data=Calamaria.vcf.stats, mapping=aes(x=M, y=nloci, linetype=n, color=MaxMissingDataSiteFilter)) + geom_line(size=3) + scale_x_discrete(limits=factor(1:8)) + theme_classic() + labs(title="Number of loci vs. M, n, max missing data per site, for Calamaria prasina Best SNP per locus")
+ggplot(data=Calamaria.vcf.stats, mapping=aes(x=M, y=nloci, linetype=n, color=MaxMissingDataSiteFilter)) + geom_line(size=0.5) + scale_x_discrete(limits=factor(1:8)) + theme_classic() + labs(title="Number of loci vs. M, n, max missing data per site, for Calamaria prasina Best SNP per locus")
+ggplot(data=Calamaria.vcf.stats, mapping=aes(x=M, y=nloci, color=n, shape=MaxMissingDataSiteFilter)) + geom_point(size=3) + scale_shape_discrete() + scale_x_discrete(limits=factor(1:8)) + theme_classic() + labs(title="Number of loci vs. M, n, max missing data per site, for Calamaria prasina Best SNP per locus")
+ggplot(data=Calamaria.vcf.stats, mapping=aes(x=missingness.total, y=Fis, color=M, linetype=n)) + geom_line(size=0.5) + theme_classic() + labs(title="Inbreeding coefficient vs. proportion missing data, n, M, for Calamaria prasina Best SNP per locus")
+Calamaria.vcf.stats.best <- Calamaria.vcf.stats[,Calamaria.vcf.stats$SNPsPerLocus=="Best"]
+Calamaria.vcf.stats$SNPsPerLocus=="Best"
+which(Calamaria.vcf.stats$SNPsPerLocus=="Best")
+Calamaria.vcf.stats.best <- Calamaria.vcf.stats[Calamaria.vcf.stats$SNPsPerLocus=="Best",]
+Calamaria.vcf.stats.best
+ggplot(data=Calamaria.vcf.stats.best, mapping=aes(x=M, y=nloci, color=n, shape=MaxMissingDataSiteFilter)) + geom_point(size=3) + scale_shape_discrete() + scale_x_discrete(limits=factor(1:8)) + theme_classic() + labs(title="Number of loci vs. M, n, max missing data per site, for Calamaria prasina Best SNP per locus")
+ggplot(data=Calamaria.vcf.stats.best, mapping=aes(x=missingness.total, y=nloci, color=M, shape=n)) + geom_point(size=3) + scale_shape_discrete() + theme_classic() + labs(title="Number of loci vs. proportion missing data, n, M, for Calamaria prasina Best SNP per locus")
+ggplot(data=Calamaria.vcf.stats.best, mapping=aes(x=missingness.total, y=nloci, color=M, linetype=n)) + geom_line(size=0.5) + theme_classic() + labs(title="Number of loci vs. proportion missing data, n, M, for Calamaria prasina Best SNP per locus") # + scale_y_log10()
+ggplot(data=Calamaria.vcf.stats.best, mapping=aes(x=M, y=Fis, color=n, shape=MaxMissingDataSiteFilter)) + geom_point(size=3) + scale_shape_discrete() + scale_x_discrete(limits=factor(1:8)) + theme_classic() + labs(title="Inbreeding coefficient vs. M, n, max missing data per site, for Calamaria prasina Best SNP per locus")
+ggplot(data=Calamaria.vcf.stats.best, mapping=aes(x=missingness.total, y=Fis, color=M, linetype=n)) + geom_line(size=0.5) + theme_classic() + labs(title="Inbreeding coefficient vs. proportion missing data, n, M, for Calamaria prasina Best SNP per locus")
+ggplot(data=Calamaria.vcf.stats.best, mapping=aes(x=M, y=nloci, color=n, shape=MaxMissingDataSiteFilter)) + geom_point(size=3) + scale_shape_discrete() + scale_x_discrete(limits=factor(1:8)) + theme_classic() + labs(title="Number of loci vs. M, n, max missing data per site, for Calamaria prasina Best SNP per locus")#
+ggplot(data=Calamaria.vcf.stats.best, mapping=aes(x=M, y=Fis, color=n, shape=MaxMissingDataSiteFilter)) + geom_point(size=3) + scale_shape_discrete() + scale_x_discrete(limits=factor(1:8)) + theme_classic() + labs(title="Inbreeding coefficient vs. M, n, max missing data per site, for Calamaria prasina Best SNP per locus")
+ggplot(data=Calamaria.vcf.stats.best, mapping=aes(x=M, y=nloci, color=n, shape=MaxMissingDataSiteFilter)) + geom_point(size=3) + scale_shape_discrete() + scale_x_discrete(limits=factor(1:8)) + theme_classic() + labs(title="Number of loci vs. M, n, max missing data per site, for Calamaria prasina Best SNP per locus")
+Calamaria.vcf.stats.md100 <- Calamaria.vcf.stats[Calamaria.vcf.stats$MaxMissingDataSiteFilter==100,]
+Calamaria.vcf.stats.md100
+15654*2
+devtools::document()
+devtools::document()
+upgrade_miscwrappers()
+remotes::install_github("JeffWeinell/misc.wrappers",upgrade=FALSE)
+if("misc.wrappers" %in% (.packages())){detach("package:misc.wrappers", unload=TRUE)}; library(misc.wrappers)
+q("no")
