@@ -15,9 +15,7 @@ function | description | example input files | example output files
 ```runtess``` | Pipeline for running tess3r and generating graphs of results comparable to the other pop structure methods | [simK4.vcf.gz](inst/extdata/simK4.vcf.gz),<br/> [simK4_coords.txt](inst/extdata/simK4_coords.txt)| [tess3r_simK4.pdf](inst/extdata/tess3r_simK4.pdf)
 ```runeems_snps_setup``` | Generates some of the input files and arranges all necessary inputs in a nice environment for EEMS | coming soon | coming soon
 
-
-
- <!-- - ```eemsgg2raster```-->
+<!-- - ```eemsgg2raster```-->
 
 ### Install ```misc.wrappers``` from GitHub using ```devtools```, ```remotes```, or ```BiocManager```
 ```
