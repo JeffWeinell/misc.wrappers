@@ -31,7 +31,7 @@ vcf_getSNP(
 
 \item{which.site}{Character string indicating the method for choosing a site to keep for each locus (or chromosome). Default = "best", which is considered the one with the least missing data, or the first among sites tied for least missing data. Other options are "all.passing", which retains all sites (positions) that pass variation filters (min.n, min.0.n.0, min.1.n), "first" (first site kept at each locus), or "random".}
 
-\item{min.indv}{Integer >= 1 specifying the minimum number of individuals with data required to keep a site. Default = 3. If set to "all", only complete-data sites kept.}
+\item{min.indv}{Integer >= 1 specifying the minimum number of individuals with data required to keep a site. Default = 2. If set to "all", only complete-data sites kept.}
 
 \item{max.fMD}{Number in the range (0,1) specifying the maximum fraction of missing alleles at a site. Default = 1.}
 

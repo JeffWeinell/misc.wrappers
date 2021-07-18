@@ -4,7 +4,7 @@
 \alias{summarize_VCFs}
 \title{summarize_VCFs
 
-Same as 'summarize_stacks', except the full paths to input VCFs and an output directory are suppllied as arguments.}
+Same as 'summarize_stacks', except the full paths to input VCFs and an output directory are supplied as arguments.}
 \usage{
 summarize_VCFs(
   VCF.paths,
@@ -28,5 +28,5 @@ data frame(s) with basic stats
 \description{
 summarize_VCFs
 
-Same as 'summarize_stacks', except the full paths to input VCFs and an output directory are suppllied as arguments.
+Same as 'summarize_stacks', except the full paths to input VCFs and an output directory are supplied as arguments.
 }

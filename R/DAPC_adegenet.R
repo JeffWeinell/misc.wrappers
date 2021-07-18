@@ -1580,7 +1580,7 @@ newpoint <-function(p0,p1,c){
 #' @param out Character string where to write output vcf.
 #' @param indv.keep Character string with names of individuals to keep. Default is NULL (all individuals kept).
 ##' @param min.n Integer >= 1 specifying the minimum number of non-missing alleles required to keep a site. Default = 3; often, 4 is preferred (for use with quartet based analyses). If set to "all", only complete-data sites kept.
-#' @param min.indv Integer >= 1 specifying the minimum number of individuals with data required to keep a site. Default = 3. If set to "all", only complete-data sites kept.
+#' @param min.indv Integer >= 1 specifying the minimum number of individuals with data required to keep a site. Default = 2. If set to "all", only complete-data sites kept.
 #' @param max.fMD Number in the range (0,1) specifying the maximum fraction of missing alleles at a site. Default = 1.
 #' @param min.n0 Minimum number of individuals required to have at least one copy of the major allele to keep a site. Default = 2.
 #' @param min.n1 Minimum number of individuals required to have at least one copy of the minor allele to keep a site. Default = 1.
