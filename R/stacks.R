@@ -357,6 +357,21 @@ populations_cleanup <- function(dir){
 	file.remove(pshfiles)
 }
 
+#' @title cleanup stacks
+#' 
+#' Deletes cstacks, sstacks, tsv2bam, gstacks, and populations bash scripts in a directory. Run this after completing the entire STACKS pipeline.
+#' 
+#' @param dir Character string with path to directory containing populations bash scripts
+#' @return NULL
+#' @export stacks_cleanup
+stacks_cleanup <- function(dir){
+	cstacks_cleanup(dir)
+	sstacks_cleanup(dir)
+	tsv2bam_cleanup(dir)
+	gstacks_cleanup(dir)
+	populations_cleanup(dir)
+}
+
 #' @title summarize_stacks
 #' 
 #' For each set samples (processed with populations and with vcf file generated for snps) this function creates a bash job file to calculate basic statistics.

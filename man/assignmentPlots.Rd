@@ -43,5 +43,4 @@ qfiles         <- list.files(outdir.temp, full.names=T, pattern="log_f$")
 admixturePlots(x=qfiles,labels=samplenames,userun=c(1:5))
 
 admixturePlots(xdir="PATH/TO/STRUCTURE/OUTPUT",userun=c(1:5))
-
 }

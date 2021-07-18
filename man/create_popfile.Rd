@@ -4,7 +4,7 @@
 \alias{create_popfile}
 \title{Generate a popfile from STRUCTURE output
 
-Takes as input the output files from strucutre runs and generates a pdf with plots of admixture}
+Takes as input the output files from strucutre runs and generates a two-column population file with the assignment of individuals to the population in which they are most assigned to.}
 \usage{
 create_popfile(xdir = NULL, K = 2)
 }
@@ -14,12 +14,12 @@ create_popfile(xdir = NULL, K = 2)
 \item{K}{Number indicating the value of K to use.}
 }
 \value{
-NULL; generates pdf with a barplot of admixture for each K
+NULL; generates a two column matrix with the majority-population assignment of each individual
 }
 \description{
 Generate a popfile from STRUCTURE output
 
-Takes as input the output files from strucutre runs and generates a pdf with plots of admixture
+Takes as input the output files from strucutre runs and generates a two-column population file with the assignment of individuals to the population in which they are most assigned to.
 }
 \examples{
 outdir.temp    <- "PATH/TO/STRUCTURE/OUTPUT"
