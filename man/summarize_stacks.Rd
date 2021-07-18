@@ -4,7 +4,7 @@
 \alias{summarize_stacks}
 \title{summarize_stacks
 
-For each set samples (processed with populations and with vcf file generated for snps) this function creates a bash job file to calculate basic statistics.}
+For each set of samples (processed with populations and with vcf file generated for snps) this function creates a bash job file to calculate basic statistics.}
 \usage{
 summarize_stacks(dir, save = TRUE, use.popmap = FALSE, popmap = NULL)
 }
@@ -23,5 +23,5 @@ data frame with basic stats
 \description{
 summarize_stacks
 
-For each set samples (processed with populations and with vcf file generated for snps) this function creates a bash job file to calculate basic statistics.
+For each set of samples (processed with populations and with vcf file generated for snps) this function creates a bash job file to calculate basic statistics.
 }
