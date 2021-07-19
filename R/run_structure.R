@@ -162,7 +162,13 @@ run_structure <- function(x, format="VCF", coords=NULL, mainparams.path=NULL, ex
 	##### Define/create output directory and define output files.
 	if(debug) message("step 2")
 	outdir.temp <- save.in
-	dir.create(outdir.temp)
+	if(!dir.exists(outdir.temp)){
+		dir.create(outdir.temp)
+	} else {
+		if(!overwrite){
+			stop(sprintf("'%s' already exists",outdir.temp))
+		}
+	}
 	outfile.temp  <- file.path(outdir.temp,"structure.log")
 	### Move the structure file into outdir.temp
 	infile.temp0 <- file.path(getwd(),mainparams.df1["INFILE","values"])
@@ -262,7 +268,6 @@ run_structure <- function(x, format="VCF", coords=NULL, mainparams.path=NULL, ex
 	} else {
 		mainparams.df2 <- mainparams.df1
 	}
-	
 	### This section reproduces the template extraparams dataframe that is returned if when calling the 'extraparams.template.df' data
 	if(FALSE){
 		logicalparams   <- c(linkage=0, noadmix=0, usepopinfo=0, locprior=0, onefst=0, inferalpha=1, popalphas=0, inferlambda=0, popspecificlambda=0)
@@ -356,7 +361,7 @@ run_structure <- function(x, format="VCF", coords=NULL, mainparams.path=NULL, ex
 	#	}
 	#}
 	if(setupOnly){
-		return(NULL)
+		return("setup complete")
 	}
 	for(i in 1:runs){
 		for(K in Krange){
