@@ -94,7 +94,7 @@ update_miscwrappers <- function(upgrade=FALSE,...){
 #' @param submit Logical with whether or not to submit the jobs to the cluster.
 #' @return Either vector of character strings that can be piped to system, or NULL
 #' @export rsbatch
-rsbatch <- function(sh.path,partition=NA,nodes=1,ntasksPerNode=1,memGb=50,time=c(0,6,0,0),submit=FALSE){
+rsbatch <- function(sh.path, partition=NA, nodes=1, ntasksPerNode=1, memGb=50, time=c(0,6,0,0), submit=FALSE, intern=FALSE){
 	#sprintf("%s-%s:%s:%s",list(0,6,0,0))
 	#do.call(sprintf,list(0,6,0,0),"%s-%s:%s:%s")
 	#do.call(sprintf,c("%s-%s:%s:%s",list(0,6,0,0)))
@@ -109,7 +109,7 @@ rsbatch <- function(sh.path,partition=NA,nodes=1,ntasksPerNode=1,memGb=50,time=c
 	if(!submit){
 		return(jobstrings)
 	} else {
-		lapply(jobstrings,system)
+		lapply(jobstrings, system, intern=intern)
 	}
 }
 

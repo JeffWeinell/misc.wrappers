@@ -13,7 +13,8 @@ rsbatch(
   ntasksPerNode = 1,
   memGb = 50,
   time = c(0, 6, 0, 0),
-  submit = FALSE
+  submit = FALSE,
+  intern = FALSE
 )
 }
 \arguments{
