@@ -29,6 +29,7 @@ run_structure(
   include.out = c(".pdf", "popfiles"),
   debug = FALSE,
   ...,
+  setupOnly = FALSE,
   overwrite = FALSE
 )
 }
@@ -70,6 +71,8 @@ run_structure(
 \item{debug}{Logical indicating whether or not to print messages indicating the internal step of the function. Default FALSE. Typically only used for development.}
 
 \item{...}{Additional arguments passed to STRUCTURE. Not yet implemented in the future may include 'LABEL', 'POPDATA', 'POPFLAG', 'LOCDATA', 'PHENOTYPE', 'EXTRACOLS', 'MARKERNULLMES', 'RECESSIVEALLELES', 'MAPDISTANCES', 'PHASED', 'PHASEINFO', 'MARKOVPHASE', and 'NOTAMBIGUOUS'}
+
+\item{setupOnly}{Logical indicating whether or not the structure environment should be setup but not run. Default FALSE.}
 
 \item{overwrite}{Whether or not to overwrite previous results. Default FALSE.}
 

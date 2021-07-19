@@ -395,9 +395,6 @@ cpSNPsVCF <- function(indir,outdir,groupname=NULL){
 	return(0)
 }
 
-
-
-
 #' @title summarize_stacks
 #' 
 #' For each set of samples processed with populations (STACKS) and with vcf file generated for snps, this function creates a bash job file to calculate some basic popgen statistics.

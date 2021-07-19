@@ -29,10 +29,11 @@
 #' @param include.out Character vector indicating which type of files should be included as output in addition to the usual structure output. Default is c(".pdf","popfiles"). ".pdf" generates EvannoPlots and admixture barplots, and "popfiles" generates an easySFS-format popfile with individual assignments to populations for each K.
 #' @param debug Logical indicating whether or not to print messages indicating the internal step of the function. Default FALSE. Typically only used for development.
 #' @param ... Additional arguments passed to STRUCTURE. Not yet implemented in the future may include 'LABEL', 'POPDATA', 'POPFLAG', 'LOCDATA', 'PHENOTYPE', 'EXTRACOLS', 'MARKERNULLMES', 'RECESSIVEALLELES', 'MAPDISTANCES', 'PHASED', 'PHASEINFO', 'MARKOVPHASE', and 'NOTAMBIGUOUS'
+#' @param setupOnly Logical indicating whether or not the structure environment should be setup but not run. Default FALSE.
 #' @param overwrite Whether or not to overwrite previous results. Default FALSE.
 #' @return List of plots
 #' @export run_structure
-run_structure <- function(x, format="VCF", coords=NULL, mainparams.path=NULL, extraparams.path=NULL, burnin=1000, kmax=10, numreps=10000, runs=5, ploidy=NULL, missing=NULL, onerowperind=NULL, save.in=NULL, structure.path=NULL, samplenames=NULL, cleanup=TRUE, include.out=c(".pdf","popfiles"), debug=FALSE, ...,overwrite=FALSE){
+run_structure <- function(x, format="VCF", coords=NULL, mainparams.path=NULL, extraparams.path=NULL, burnin=1000, kmax=10, numreps=10000, runs=5, ploidy=NULL, missing=NULL, onerowperind=NULL, save.in=NULL, structure.path=NULL, samplenames=NULL, cleanup=TRUE, include.out=c(".pdf","popfiles"), debug=FALSE, ..., setupOnly=FALSE, overwrite=FALSE){
 	# list with user-specified arguments
 	argslist <- list(...)
 	if(length(argslist)>0){
@@ -354,6 +355,9 @@ run_structure <- function(x, format="VCF", coords=NULL, mainparams.path=NULL, ex
 	#		run.command1 <- system(command1)
 	#	}
 	#}
+	if(setupOnly){
+		return(NULL)
+	}
 	for(i in 1:runs){
 		for(K in Krange){
 			outfile.K <- paste0(tools::file_path_sans_ext(outfile.temp),"_K",K,"r",i,".log")
