@@ -113,11 +113,11 @@ run_structure <- function(x, format="VCF", coords=NULL, mainparams.path=NULL, ex
 	}
 	### Checking that the structure program exists and is executable
 	if(is.null(structure.path)){
-		structure.testpath <- find.exe.path("structure.py")
+		structure.testpath <- find.exe.path("structure")
 		if(structure.testpath!=1){
 			structure.path <- structure.testpath
 		} else {
-			stop("No valid path to structure identified. Set 'structure.path' to location of 'structure.py' executable file")
+			stop("No valid path to structure identified. Set 'structure.path' to location of 'structure' executable file")
 		}
 	}
 	if(!file.exists(structure.path)){
