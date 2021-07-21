@@ -224,3 +224,18 @@ runeems_snps_setup <- function(x, coords, save.in, outer=NULL, exe.path=NULL, n.
 #' # Setup environment and input files for runeems_snps
 #' eems.setup  <- runeems_snps_setup(x=vcf.path, coords=coords.path, save.in=save.path, numMCMCIter = 100000, numBurnIter = 10000, numThinIter = 999)
 
+
+#' @title cleanup eems
+#' 
+#' Deletes eems_setup bash and R scripts in a directory. Run this after all eems jobs are completed. Does not delete the "jobX.sh" bash files that run eems.
+#' 
+#' @param dir Character string with path to directory containing eems .sh amd .R scripts
+#' @return NULL
+#' @export eems_cleanup
+eems_cleanup <- function(dir){
+	sh.files <- list.files(dir,pattern="^[a-z]{20}.sh$",full.name=TRUE)
+	R.files  <- gsub(".sh$",".R",sh.files)
+	file.remove(c(sh.files,R.files))
+}
+
+
