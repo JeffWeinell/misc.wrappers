@@ -60,14 +60,14 @@ genind2diffs <- function(genind.obj,ploidy=2,include.indv.names=F,output.file=NU
 	# colnames(Diffs2) <- colnames(Diffs1)
 	# rownames(Diffs2) <- rownames(Diffs1)
 	### Round diffs to six digits
-	Diffs1 <- round(Diffs1, digits = 15)
+	Diffs1 <- round(Diffs1, digits = 6)
 #	 Diffs2 <- round(Diffs2, digits = 6)
 	### Check which Diffs matrix to use by taking the eigenvalue
 #	eigvals.Diffs_v1 <- sort(round(eigen(Diffs1)$values, digits = 2))
 #	 eigvals.Diffs_v2 <- sort(round(eigen(Diffs2)$values, digits = 2))
 	# if(length(which(eigvals.Diffs_v1>0))==1){
 	diffs <- as.data.frame(Diffs1)
-	diffs[(lower.tri(diffs) | upper.tri(diffs)) & diffs==0] <-  0.000000000000001
+	diffs[(lower.tri(diffs) | upper.tri(diffs)) & diffs==0] <- 0.000001
 	diffs <- format(diffs, scientific=FALSE)
 	# } else {
 	# 	if(length(which(eigvals.Diffs_v2>0))==1){
