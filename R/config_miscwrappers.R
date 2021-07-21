@@ -109,8 +109,15 @@ rsbatch <- function(sh.path, partition=NA, nodes=1, ntasksPerNode=1, memGb=50, t
 	if(!submit){
 		return(jobstrings)
 	} else {
-		lapply(jobstrings, system, intern=intern)
+		res <- lapply(jobstrings, system, intern=intern)
 	}
+	if(FALSE){
+		if(intern){
+			jobids  <- gsub("[^0-9]","", unlist(res))
+			return(jobids)
+		}
+	}
+	res
 }
 
 #' @title write bash and Rscript files for R code
@@ -124,7 +131,7 @@ rsbatch <- function(sh.path, partition=NA, nodes=1, ntasksPerNode=1, memGb=50, t
 #' @param libPath Character string with path where R package libraries are held. Default is .libPaths()[1]
 #' @param libs Character string vector with names of R packages to load. Default is 'misc.wrappers'.
 #' @param dir Character string with path to the directory where bash and Rscript files should be written. Default is the current directory.
-#' @return NULL
+#' @return Character string with path to bash file
 #' @export Rsh
 Rsh <- function(name="job", Rcode, modules=c("compiler/gcc/8.3","gdal/3.0.0","geos/3.7.2","R/4.0"), libPath=.libPaths()[1], libs=c("misc.wrappers"), dir=getwd()){
 	shlines     <- c("#!/bin/bash",sprintf("module load %s",modules),sprintf("Rscript %s/%s.R",dir,name),"")
@@ -132,6 +139,7 @@ Rsh <- function(name="job", Rcode, modules=c("compiler/gcc/8.3","gdal/3.0.0","ge
 	Rlines      <- c(sprintf(".libPaths('%s')",libPath),sprintf("library('%s')",libs),Rcodelines,"")
 	writeLines(shlines,sprintf("%s/%s.sh",dir,name))
 	writeLines(Rlines,sprintf("%s/%s.R",dir,name))
+	return(sprintf("%s/%s.sh",dir,name))
 }
 
 

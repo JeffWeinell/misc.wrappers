@@ -29,6 +29,9 @@ Rsh(
 
 \item{dir}{Character string with path to the directory where bash and Rscript files should be written. Default is the current directory.}
 }
+\value{
+Character string with path to bash file
+}
 \description{
 write bash and Rscript files for R code
 
