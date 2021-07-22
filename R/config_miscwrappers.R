@@ -119,6 +119,7 @@ rsbatch <- function(sh.path, partition=NA, nodes=1, ntasksPerNode=1, memGb=50, t
 	}
 	res
 }
+#' 
 
 #' @title write bash and Rscript files for R code
 #' 

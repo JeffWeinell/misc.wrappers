@@ -9,7 +9,7 @@
 #' @param output.file Optional character string to save the result to a file.
 #' @return A list of length three   with (1) a numeric matrix corresponding to the Diff matrix used for EEMS, (2) the number of individuals, (3) number of biallelic sites in genind.obj
 #' @export genind2diffs
-genind2diffs <- function(genind.obj,ploidy=2,include.indv.names=F,output.file=NULL){
+genind2diffs <- function(genind.obj, ploidy=2, include.indv.names=F, output.file=NULL){
 	gen        <- genind.obj
 	adegenet::ploidy(gen) <- ploidy
 	stopifnot(identical(gen@type, 'codom'))
