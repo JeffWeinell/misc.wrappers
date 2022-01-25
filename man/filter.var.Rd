@@ -7,7 +7,7 @@
 Functon to test that a column of the genotypic matrix is a snp. Using default values for min.freqs this function tests if a site is a SNP.
 This function is used internally in several other functions.}
 \usage{
-filter.var(alignment.site, min.freqs = c(2, 1, 0, 0))
+\method{filter}{var}(alignment.site, min.freqs = c(2, 1, 0, 0))
 }
 \arguments{
 \item{alignment.site}{Character vector containing alleles for each individual at a site.}
