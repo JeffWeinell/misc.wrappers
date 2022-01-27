@@ -152,18 +152,27 @@ reassign <- function(x,ignore0=T){
 	res2
 }
 
-# These functions are very close but not quite there.
-# Accurate for values of mp 1–5
-# mp  <- max.parameters <- 4
-equivalencyMats <- function(mp){
+
+#' @title ennumerate equivalence relations
+#' 
+#' A list of n x n matrices, corresponding to all possible equivalence relation for a set with n elements.
+#' WARNING: long compute time for values of n > 7; otherwise fast.
+#' 
+#' @param n Number of elements in the unpartitioned set
+#' @return A list of transition matrices, for all possible partitions of pairwise transitions into parameters describing transitions.
+#' @export equivalencyMats
+equivalencyMats <- function(n){
+	mp <- n
 	# Zero matrix
 	# ZM <- matrix(0,mp,mp)
 	# List of starting matrices
 	ZML <- lapply(1:mp,function(x){m=diag(mp); m[1:x,1:x] <- 1; m})
 	## For each matrix in ZML, reorder rows and columns on the permutation set of 1:mp.
-#	PM  <- gtools::permutations(n=mp,r=mp)
+	PM <- gtools::permutations(n=mp,r=mp)
+	# PM <- PM[PM[,1]<PM[,2]]
 	# generates all possible reorderings of rows; each row reorder occurs with an identical column reorder.
-	PM  <- gtools::permutations(n=mp,r=mp)
+	## PM2 <- data.frame(gtools::permutations(n=mp,v=1:mp,r=2)) %>% mutate(Resp_final = if_else(X1 < X2, T, F)) %>% filter(Resp_final) %>% select(X1,X2) %>% as.matrix
+
 	LML <- list()
 	## obtain the list of equivalence relations matrices
 	for (i in 1:length(ZML)){
@@ -172,18 +181,13 @@ equivalencyMats <- function(mp){
 		#LML  <- rbind(LML,LMLi)
 		LML   <- c(LML,list(LMLi))
 	}
-	LMLf <- do.call(rbind,LML)
-	setparts1   <- apply(LMLf,1,function(x){matrix(x,nrow=mp,ncol=mp)},simplify=F)
-	p1          <- setparts1
-	numSchemes1 <- length(setparts1)
+	LMLf        <- unique(do.call(rbind,LML))
+	p1          <- apply(LMLf,1,function(x){matrix(x,nrow=mp,ncol=mp)},simplify=F)
+	numSchemes1 <- length(p1)
 	pairsMat0   <- as.matrix(expand.grid(c(1:numSchemes1),c(1:numSchemes1)))
-	pairsMat    <- pairsMat0[(pairsMat0[,1] < pairsMat0[,2]),]
 
-	# pairwise intersections, pairwise unions, pairwise clipping, pairwise products
-	i1    <- apply(pairsMat0, 1, function(x){intMat(setparts1[[x[1]]],setparts1[[x[2]]])}, simplify=F)
-	u1    <- apply(pairsMat0, 1, function(x){unionMat(setparts1[[x[1]]],setparts1[[x[2]]])}, simplify=F)
-	c1    <- apply(pairsMat0, 1, function(x){clipMat(setparts1[[x[1]]],setparts1[[x[2]]])}, simplify=F)
-	
+	# pairwise unions
+	u1    <- apply(pairsMat0, 1, function(x){unionMat(p1[[x[1]]],p1[[x[2]]])}, simplify=F)
 	
 	# All expected partitions generated in the set of pairwise union sets; this is probably the fastest method.
 	u1test1 <- sapply(u1,transitive)
@@ -191,9 +195,14 @@ equivalencyMats <- function(mp){
 	u1test3 <- sapply(u1,reflexive)
 	u2      <- u1[u1test1 & u1test2 & u1test3]
 	u2f     <- unique(do.call(rbind,lapply(u2,c)))
-	#result  <- apply(u2f,1,function(x){matrix(x,nrow=mp,ncol=mp)},simplify=F)
-	
-	
+	if(nrow(u2f)==VGAM::bell(mp)){
+		result <- apply(u2f,1,function(x){matrix(x,nrow=mp,ncol=mp)},simplify=F)
+		return(result)
+	}
+	# pairwise clippings
+	c1    <- apply(pairsMat0, 1, function(x){clipMat(p1[[x[1]]],p1[[x[2]]])}, simplify=F)
+	# pairwise intersections
+	i1    <- apply(pairsMat0, 1, function(x){intMat(p1[[x[1]]],p1[[x[2]]])}, simplify=F)
 	# sets of matrices combined and then filtered to those unique ones
 	#s1      <- c(p1,i1,u1,c1,pr1)
 	s1      <- c(p1,i1,u1,c1)
@@ -206,13 +215,15 @@ equivalencyMats <- function(mp){
 	if(mp<6){
 		result <- s2r
 	} else {
-		pm2    <- as.matrix(expand.grid(c(1:length(s2r)),c(1:length(s2r))))
-		pr1    <- apply(pm2[pm2[,1]<pm2[,2],], 1, function(x){(s2r[[x[1]]] %*% s2r[[x[2]]])}, simplify=F)
-		pr2    <- pr1[sapply(pr1,function(x){transitive(x) & symmetric(x) & reflexive(x)})]
-		pr2r   <- unique(do.call(rbind,lapply(pr2,c)))
-		result <- apply(pr2r,1,function(x){matrix(x,nrow=mp,ncol=mp)},simplify=F)
+		pm2     <- as.matrix(expand.grid(c(1:length(s2r)),c(1:length(s2r))))
+		# pairwise cross-products
+		pr1     <- apply(pm2[pm2[,1]<pm2[,2],], 1, function(x){(s2r[[x[1]]] %*% s2r[[x[2]]])}, simplify=F)
+		pr1f    <- lapply(pr1,function(x){(x>0)*1})
+		pr2     <- pr1f[sapply(pr1f,function(x){transitive(x) & symmetric(x) & reflexive(x)})]
+		pr2f    <- unique(do.call(rbind,lapply(pr2,c)))
+		s2fpr2f <- unique(rbind(s2f,pr2f))
+		result  <- apply(s2fpr2f,1,function(x){matrix(x,nrow=mp,ncol=mp)},simplify=F)
 	}
-
 	if(FALSE){
 		# All expected partitions generated in the set of pairwise product sets
 		pr1test1 <- sapply(pr1,transitive)
@@ -220,15 +231,15 @@ equivalencyMats <- function(mp){
 		pr1test3 <- sapply(pr1,reflexive)
 		pr2      <- pr1[pr1test1 & pr1test2 & pr1test3]
 		pr2f     <- unique(do.call(rbind,lapply(pr2,c)))
-	
-		# nothing new from pairwise intersections
+		
+		# nothing new from pairwise intersections...
 		i1test1 <- sapply(i1,transitive)
 		i1test2 <- sapply(i1,symmetric)
 		i1test3 <- sapply(i1,reflexive)
 		i2      <- i1[i1test1 & i1test2 & i1test3]
 		i2f     <- unique(do.call(rbind,lapply(i2,c)))
 		
-		# All expected partitions generated in the set of pairwise union sets; this is probably the fastest method.
+		# All expected partitions generated in the set of pairwise clipping sets
 		# Should be slower than using union sets
 		c1test1 <- sapply(c1,transitive)
 		c1test2 <- sapply(c1,symmetric)
@@ -266,10 +277,7 @@ unionMat <- function(m1,m2){
 intMat <- function(m1,m2){
 	m1[m1>0] <- 1
 	m2[m2>0] <- 1
-	nm <- nrow(m1)
-	um <- (m1 + m2)
-	um[um<2] <- 0
-	um[um>0] <- 1
+	um <- m1 * m2
 	um
 }
 
