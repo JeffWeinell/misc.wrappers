@@ -9,7 +9,7 @@ Makes a list of all possible model schemes for transitions between a set of stat
 transitionModels(states, include.asymmetric = TRUE, constraint = NULL)
 }
 \arguments{
-\item{states}{A character vector with the names of possible character states.}
+\item{states}{A vector with values representing character states.}
 
 \item{include.asymmetric}{Whether or not to include assymetric rate models in the list of returned models. Default TRUE; (FALSE not yet implemented)}
 
