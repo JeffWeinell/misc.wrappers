@@ -108,16 +108,17 @@ run_DAPC <- function(x, format="VCF", kmax=10, coords=NULL, samplenames=NULL, re
 	}
 	if(debug) message("step 1")
 	#### find.clusters
-	grp          <- adegenet::find.clusters(genind, max.n.clust=max.clusters,n.pca=max.clusters,choose.n.clust=F)
+	# grp          <- adegenet::find.clusters(genind, max.n.clust=max.clusters,n.pca=max.clusters,choose.n.clust=F)
+	grp          <- adegenet::find.clusters(genind, max.n.clust=max.clusters,n.pca=numind,choose.n.clust=F)
 	grp.list     <- list(); length(grp.list) <- reps
 	# par(mar=c(3.5,4,3,2.1))
 	for(i in 1:reps){
-		grp.list[[i]] <- adegenet::find.clusters(genind, max.n.clust=max.clusters,n.pca=max.clusters,choose.n.clust=F)
+		grp.list[[i]] <- adegenet::find.clusters(genind, max.n.clust=max.clusters,n.pca=numind,choose.n.clust=F)
 	}
 	BIC.mat           <- do.call(cbind,lapply(X=1:reps,FUN=function(x){grp.list[[x]]$Kstat}))
 	rownames(BIC.mat) <- 1:max.clusters
 	colnames(BIC.mat) <- paste0("rep",1:reps)
-	mean.BIC        <- apply(BIC.mat,MARGIN=1,FUN=mean,na.rm=TRUE)
+	mean.BIC          <- apply(BIC.mat,MARGIN=1,FUN=mean,na.rm=TRUE)
 	### Lowest K with a lower mean BIC than K+1 mean BIC.
 	if(any(diff(mean.BIC)>0)){
 		bestK <- unname(which(diff(mean.BIC)>0)[1])
@@ -137,12 +138,13 @@ run_DAPC <- function(x, format="VCF", kmax=10, coords=NULL, samplenames=NULL, re
 	BICPlot  <- ggplot2::ggplot(data=BIC.df,ggplot2::aes(x=K, y=BIC)) + ggplot2::geom_boxplot(fill='lightgray', outlier.colour="black", outlier.shape=16,outlier.size=2, notch=FALSE) + ggplot2::theme_classic() + ggplot2::labs(title= paste0("BIC (",reps," replicates of find.clusters) vs. number of clusters (K)"), x="Number of ancestral populations", y = "BIC") + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) # + ggplot2::geom_vline(xintercept=bestK, linetype=2, color="black", size=0.25)
 	if(debug) message("step 1.5")
 	best.npca  <- NULL
-	grp.mat    <- matrix(data=0,nrow=length(grp$grp),ncol=(max.clusters-1))
+	#grp.mat    <- matrix(data=0,nrow=length(grp$grp),ncol=(max.clusters-1))
+	grp.mat <- matrix(data=0,nrow=numind,ncol=(max.clusters-1)) 
 	for(K in 2:max.clusters){
 		i=(K-1)
-		grp.K         <- adegenet::find.clusters(genind, max.n.clust=max.clusters,n.pca=max.clusters,n.clust=K)
+		grp.K         <- adegenet::find.clusters(genind, max.n.clust=max.clusters,n.pca=numind,n.clust=K)
 		grp.mat[,i]   <- grp.K$grp
-		dapc.pcamax.K <- suppressWarnings(adegenet::dapc(genind, grp.K$grp,n.pca=max.clusters,n.da=5))
+		dapc.pcamax.K <- suppressWarnings(adegenet::dapc(genind, grp.K$grp,n.pca=numind,n.da=5))
 		alpha_optim.K <- suppressWarnings(adegenet::optim.a.score(dapc.pcamax.K,plot=FALSE))
 		best.npca     <- c(best.npca,alpha_optim.K$best)
 	}

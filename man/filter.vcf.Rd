@@ -8,7 +8,7 @@ Filter or sample individuals or sites of a SNPs dataset held in either a VCF fil
 Includes options for changing some aspects of formatting, but still within withi the VCF specifications. The function depends on the vcfR. for reading and writing VCF files into R are from the package vcfR.
 NOT QUITE FUNCTIONAL.}
 \usage{
-\method{filter}{vcf}(
+filter.vcf(
   x,
   save.as = NULL,
   nsample = c(NA, NA),

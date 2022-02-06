@@ -1,271 +1,285 @@
+i2[[1]]
+i2[[2]]
+i2[[3]]
+i2f     <- unique(do.call(rbind,lapply(i2,c)))
+dim(i2f)
+head(i2f)
+u1    <- apply(pairsMat0, 1, function(x){unionMat(p1[[x[1]]],p1[[x[2]]])}, simplify=F)
+u1test1 <- sapply(u1,transitive)#
+	u1test2 <- sapply(u1,symmetric)#
+	u1test3 <- sapply(u1,reflexive)
+length(which(i1test1))
+length(which(u1test1))
+length(which(u1test2))
+length(which(u1test3))
+u2      <- u1[u1test1 & u1test2 & u1test3]
+length(u2)
+u2[[1]]
+u2f     <- unique(do.call(rbind,lapply(u2,c)))
+u2f[[1]]
+dim(u2f)
+head(u2f)
+?bell
+nrow(u2f)==VGAML::bell(mp)
+bell(4)
+?bell
+nrow(u2f)==VGAM::bell(mp)
+p[[15]]
+p1[[15]]
+p1[[15]] %*% p1[[15]]
+PM2 <- permutations(v=1:mp,r=2)
+PM2 <- permutations(n=mp,v=1:mp,r=2)
+PM2
+sort(PM2)
+PM2 <- apply(permutations(n=mp,v=1:mp,r=2),1,sort)
+PM2
+PM2 <- unique(t(apply(permutations(n=mp,v=1:mp,r=2),1,sort)))
+PM2
+PM2 <- permutations(n=mp,v=1:mp,r=2) %>% [,1] < [,2]
+PM2 <- permutations(n=mp,v=1:mp,r=2) %>% .[,1] < .[,2]
+library(dplyr)
+PM2 <- permutations(n=mp,v=1:mp,r=2) %>% .[,1] < .[,2]
+PM2 <- permutations(n=mp,v=1:mp,r=2) %>% .[,1] < 1
+PM2
+PM2 <- permutations(n=mp,v=1:mp,r=2) %>% .[,1]
+PM2
+M2 <- permutations(n=mp,v=1:mp,r=2) %>% mutate(Resp_final = if_else(1 < 2, T, F))
+M2 <- permutations(n=mp,v=1:mp,r=2) %>% mutate(Resp_final = if_else($1 < $2, T, F))
+M2 <- permutations(n=mp,v=1:mp,r=2) %>% mutate(Resp_final = if_else(.[,1] < [,2], T, F))
+?mutate
+? permutations
+data.frame(gtools::permutations(n=mp,r=mp)) %>% mutate(Resp_final = if_else(V1 < V2, T, F))
+data.frame(gtools::permutations(n=mp,r=mp))
+data.frame(gtools::permutations(n=mp,v=1:mp,r=2))
+data.frame(gtools::permutations(n=mp,v=1:mp,r=2)) %>% mutate(Resp_final = if_else(X1 < X2, T, F))
+data.frame(gtools::permutations(n=mp,v=1:mp,r=2)) %>% mutate(Resp_final = if_else(X1 < X2, X1, X2))
+data.frame(gtools::permutations(n=mp,v=1:mp,r=2)) %>% mutate(Resp_final = if_else(X1 < X2, T, F)) >%> filter(Resp_final)
+data.frame(gtools::permutations(n=mp,v=1:mp,r=2)) %>% mutate(Resp_final = if_else(X1 < X2, T, F)) >%> filter(Resp_final==TRUE)
+data.frame(gtools::permutations(n=mp,v=1:mp,r=2)) %>% mutate(Resp_final = if_else(X1 < X2, T, F)) %>% filter(Resp_final==TRUE)
+data.frame(gtools::permutations(n=mp,v=1:mp,r=2)) %>% mutate(Resp_final = if_else(X1 < X2, T, F)) %>% filter(Resp_final)
+data.frame(gtools::permutations(n=mp,v=1:mp,r=2)) %>% mutate(Resp_final = if_else(X1 < X2, T, F)) %>% filter(Resp_final) %>% select(X1,X2)
+data.frame(gtools::permutations(n=mp,v=1:mp,r=2)) %>% mutate(Resp_final = if_else(X1 < X2, T, F)) %>% filter(Resp_final) %>% select(X1,X2) %>% as.matrix
 devtools::document()
-Ahaetulla.stats <- read.table("/Users/alyssaleinweber/Downloads/Ahaetulla_stacks_stats.txt")
-Ahaetulla.stats
-library(ggplot2)
-Ahaetulla.stats <- read.table("/Users/alyssaleinweber/Downloads/Ahaetulla_stacks_stats.txt",header=T)
-Ahaetulla.stats
-strsplit(Ahaetulla.stats$params,split="_")
-do.call(rbind,strsplit(Ahaetulla.stats$params,"_"))
-params.mat1 <- do.call(rbind,strsplit(Ahaetulla.stats$params,"_"))
-strsplit(params.mat1,"")
-do.call(rbind,strsplit(params.mat1,""))
-params.mat1
-gsub("^.","", params.mat1)
-params.mat2 <- gsub("^.","", params.mat1)
-mode(params.mat2) <- "integer"
-params.mat2
-colnames(params.mat2) <- c("m","M","N","n")
-params.mat2
-params.df <- as.data.frame(params.mat2)
-params.df
-res2 <- data.frame(Ahaetulla.stats,params.df)
-res2
-?drop
-wc
-library(hierfstat)
-wc
-Fxy
-?Fxy
-??Fxy
-res2
-ggplot(data= res2,aes(x=params,y=Ho)) + geom_bar()
-rlang::last_error()
-res3 <- res2
-res3$params <- factor(res3$params)
-ggplot(data=res3, aes(x=params,y=Ho)) + geom_bar()
-ggplot(data=res3) + geom_bar(aes(x=params,y=Ho))
-ggplot() + geom_bar(res3 ,aes(x=params,y=Ho))
-ggplot(data=res3, aes(x=params,y=Ho))
-res3
-res3
-ggplot() + geom_bar(data=res3 ,mapping=aes(x=params,y=Ho))
-ggplot(data=res3 ,mapping=aes(x=params,y=Ho)) + geom_bar()
-ggplot(data=res3 ,mapping=aes(x=params,y=Ho))
-ggplot(data=res3 ,mapping=aes(y=Ho),x=params) + geom_bar()
-ggplot(data=res3 ,mapping=aes(x=params,y=Ho)) + geom_bar(stat="identity")
-ggplot(data=res3 ,mapping=aes(x=M,y=Ho,fill=n)) + geom_bar(stat="identity")
-ggplot(data=res3 ,mapping=aes(x=M,y=Ho,fill=n)) + geom_point()
-ggplot(data=res3 ,mapping=aes(x=M,y=Ho,color=n)) + geom_point()
-ggplot(data=res3 ,mapping=aes(x=M,y=Ho,color=n)) + geom_point() + scale_color_discrete()
-res3$n <- factor(res3$n)
-ggplot(data=res3 ,mapping=aes(x=M,y=Ho,color=n)) + geom_point() + scale_color_discrete()
-ggplot(data=res3 ,mapping=aes(x=M,y=Ho,color=n)) + geom_point() + scale_color_discrete() + theme_void()
-ggplot(data=res3 ,mapping=aes(x=M,y=Ho,color=n)) + geom_point() + scale_color_discrete() + theme_classic()
-ggplot(data=res3 ,mapping=aes(x=M,y=Hs,color=n)) + geom_point() + scale_color_discrete() + theme_classic()
-?basic.stats
-ggplot(data=res3 ,mapping=aes(x=M,y=Fis,color=n)) + geom_point() + scale_color_discrete() + theme_classic()
-ggplot(data=res3 ,mapping=aes(x=M,y= nsite,color=n)) + geom_point() + scale_color_discrete() + theme_classic()
-ggplot(data=res3 ,mapping=aes(x=M,y= mean.missing.site,color=n)) + geom_point() + scale_color_discrete() + theme_classic()
-res3$missing.total <- res3mean.missing.indv
-res3$missing.total <- res3$mean.missing.indv
-plot.nloci            <- ggplot(data=res3 ,mapping=aes(x=M,y= nloci,color=n)) + geom_point() + scale_color_discrete() + theme_classic()
-plot.nloci
-plot.missing.total    <- ggplot(data=res3 ,mapping=aes(x=M,y= missing.total,color=n)) + geom_point() + scale_color_discrete() + theme_classic()
-plot.missing.total
-ggplot(data=res3 ,mapping=aes(x=M,y= missing.total,color=n),size=4) + geom_point() + scale_color_discrete() + theme_classic()
-ggplot(data=res3 ,mapping=aes(x=M,y= missing.total,color=n),size=7) + geom_point() + scale_color_discrete() + theme_classic()
-ggplot(data=res3 ,mapping=aes(x=M,y= missing.total,color=n)) + geom_point(size=7) + scale_color_discrete() + theme_classic()
-ggplot(data=res3 ,mapping=aes(x=M,y= missing.total,color=n)) + geom_point(size=5) + scale_color_discrete() + theme_classic()
-ggplot(data=res3 ,mapping=aes(x=M,y= missing.total,color=n)) + geom_point(size=4) + scale_color_discrete() + theme_classic()
-ggplot(data=res3 ,mapping=aes(x=M,y= missing.total,color=n)) + geom_point(size=3) + scale_color_discrete() + theme_classic()
-ggplot(data=res3 ,mapping=aes(x=M,y= nloci,color=n)) + geom_point(size=3) + scale_color_discrete() + theme_classic()
-# m3M1N3n2 has hight number of loci
-ggplot(data=res3 ,mapping=aes(x=M,y= missing.total,color=n)) + geom_point(size=3) + scale_color_discrete() + theme_classic()
-# m3M1N3n2 has fairly low missing data
-ggplot(data=res3 ,mapping=aes(x=M,y= nsites,color=n)) + geom_point(size=3) + scale_color_discrete() + theme_classic()
-ggplot(data=res3 ,mapping=aes(x=M,y= nsite,color=n)) + geom_point(size=3) + scale_color_discrete() + theme_classic()
-ggplot(data=res3 ,mapping=aes(x=M,y= Fis,color=n)) + geom_point(size=3) + scale_color_discrete() + theme_classic()
+test2 <- equivalencyMats(2)
+test2
+test3 <- equivalencyMats(3)
+dim(test3)
+length(test3)
+test3
+test4 <- equivalencyMats(4)
+length(test4)
+test5 <- equivalencyMats(5); length(test5)
+test5[10:20]
+test6 <- equivalencyMats(6); length(test6)
+bell(6)
+test6[[1]]
+test6[[2]]
+test6[[3]]
+counts <- lapply(test6,table)
+counts[[1]]
+counts[[2]]
+counts[[3]]
+counts <- lapply(test6,table) %>% melt
+counts <- lapply(test6,table) %>% do.call(rbind)
+counts <- lapply(test6,table) %>% do.call(rbind,.)
+dim(counts)
+head(counts)
+counts <- lapply(test6,table) %>% do.call(rbind,.) %>% select(1==7)
+counts <- lapply(test6,table) %>% do.call(rbind,.) %>% select('1'==7)
+counts <- lapply(test6,table) %>% do.call(rbind,.) %>% class
+lapply(test6,table) %>% do.call(rbind,.) %>% class
+lapply(test6,table) %>% do.call(rbind,.) %>% as.data.frame %>% select(1==7)
+lapply(test6,table) %>% do.call(rbind,.) %>% as.data.frame %>% head
+lapply(test6,table) %>% do.call(rbind,.) %>% as.data.frame %>% select($1==7)
+lapply(test6,table) %>% do.call(rbind,.) %>% as.data.frame %>% select('1'==7)
+lapply(test6,table) %>% do.call(rbind,.) %>% as.data.frame %>% filter(1==7)
+mp
+mp=6
+ZML <- lapply(1:mp,function(x){m=diag(mp); m[1:x,1:x] <- 1; m})#
+	## For each matrix in ZML, reorder rows and columns on the permutation set of 1:mp.#
+	PM <- gtools::permutations(n=mp,r=mp)#
+	# PM <- PM[PM[,1]<PM[,2]]#
+	# generates all possible reorderings of rows; each row reorder occurs with an identical column reorder.#
+	## PM2 <- data.frame(gtools::permutations(n=mp,v=1:mp,r=2)) %>% mutate(Resp_final = if_else(X1 < X2, T, F)) %>% filter(Resp_final) %>% select(X1,X2) %>% as.matrix#
+#
+	LML <- list()#
+	## obtain the list of equivalence relations matrices
+for (i in 1:length(ZML)){#
+		ZMLi  <- lapply(1:nrow(PM),function(x){ZML[[i]][PM[x,],PM[x,]]})#
+		LMLi  <- unique(do.call(rbind,lapply(ZMLi,c)))#
+		#LML  <- rbind(LML,LMLi)#
+		LML   <- c(LML,list(LMLi))#
+	}#
+	LMLf        <- do.call(rbind,LML)#
+	p1   <- apply(LMLf,1,function(x){matrix(x,nrow=mp,ncol=mp)},simplify=F)
+dim(p1)
+numSchemes1 <- length(p1)#
+	pairsMat0   <- as.matrix(expand.grid(c(1:numSchemes1),c(1:numSchemes1)))
+dim(pairsMat0)
+length(p1)
+length(unique(p1))
+p1[[1]]
+p1[[2]]
+u1    <- apply(pairsMat0, 1, function(x){unionMat(p1[[x[1]]],p1[[x[2]]])}, simplify=F)
+dim(1)
+length(u1)
+dim(u1)
+u1[[1]]
+transitive(u1[[1]])
+u1test2 <- sapply(u1,symmetric)#
+	u1test3 <- sapply(u1,reflexive)#
+	u2      <- u1[u1test1 & u1test2 & u1test3]#
+	u2f     <- unique(do.call(rbind,lapply(u2,c)))
+u2
+u1    <- apply(pairsMat0, 1, function(x){unionMat(p1[[x[1]]],p1[[x[2]]])}, simplify=F)#
+	# All expected partitions generated in the set of pairwise union sets; this is probably the fastest method.#
+	u1test1 <- sapply(u1,transitive)#
+	u1test2 <- sapply(u1,symmetric)#
+	u1test3 <- sapply(u1,reflexive)#
+	u2      <- u1[u1test1 & u1test2 & u1test3]#
+	u2f     <- unique(do.call(rbind,lapply(u2,c)))
+dim(u2f)
+nrow(u2f)==VGAM::bell(mp)
+VGAM::bell(mp)
+nrow(u2f)
+i1    <- apply(pairsMat0, 1, function(x){intMat(p1[[x[1]]],p1[[x[2]]])}, simplify=F)
+i1test1 <- sapply(i1,transitive)#
+		i1test2 <- sapply(i1,symmetric)#
+		i1test3 <- sapply(i1,reflexive)#
+		i2      <- i1[i1test1 & i1test2 & i1test3]#
+		i2f     <- unique(do.call(rbind,lapply(i2,c)))
+dim(i2f)
+u2f[[1]]
+u1[[1]]
+u1[[1]] %*% u1[[1]]
+c1    <- apply(pairsMat0, 1, function(x){clipMat(p1[[x[1]]],p1[[x[2]]])}, simplify=F)
+c1[[1]]
+c1[[2]]
+c1test1 <- sapply(c1,transitive)#
+		c1test2 <- sapply(c1,symmetric)#
+		c1test3 <- sapply(c1,reflexive)#
+		c2      <- c1[c1test1 & c1test2 & c1test3]#
+		c2f     <- unique(do.call(rbind,lapply(c2,c)))
+dim(c2f)
+188+27
+dim(LMLf)
+unique(dim(LMLf))
+dim(unique(rbind(LMLf,u2f)))
+dim(unique(rbind(LMLf,u2f,i1f)))
+dim(unique(rbind(LMLf,u2f,i2f)))
+dim(unique(rbind(LMLf,u2f,i2f,c2f)))
+dim(pr2r)
+dim(unique(rbind(LMLf,u2f,i2f,c2f,pr2r)))
+pr0    <- apply(pm[pm[,1]<pm[,2],], 1, function(x){(p1[[x[1]]] %*% p1[[x[2]]])}, simplify=F)
+pr0    <- apply(pairsMat0[pairsMat0[,1]<pairsMat0[,2],], 1, function(x){(p1[[x[1]]] %*% p1[[x[2]]])}, simplify=F)
+length(pr0)
+pr0r   <- unique(do.call(rbind,lapply(pr0[sapply(pr0,function(x){transitive(x) & symmetric(x) & reflexive(x)})],c)))
+dim(pr0r)
+length(p1)
 devtools::document()
+test6 <- equivalencyMats(6)
+dim(pr2r)
+dim(s2r)
+class(s2r)
 devtools::document()
-devtools::document()
-remotes::install_github("JeffWeinell/misc.wrappers",upgrade=FALSE)
-devtools::document()
-devtools::document()
-devtools::document()
-87/3
-"/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/Ahaetulla_VCF_stats.txt"
-read.table("/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/Ahaetulla_VCF_stats.txt",header=T)
-vcf.stats <- read.table("/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/Ahaetulla_VCF_stats.txt",header=T)
-vcf.stats$m <- NA
-vcf.stats$m <- vcf.stats$M <- vcf.stats$N <- vcf.stats$n <- vcf.stats$MaxMissingDataSiteFilter <- NA
-mMNn.string0 <- gsub("Ahaetulla_AllPops_","",vcf.stats$filename)
-mMNn.string1 <- gsub("_BestSNP.+$","", mMNn.string0)
-mMNn.string1
-mMNn.mat <- do.call(rbind,strsplit(mMNn.string1,"_"))
-mMNn.mat
-mMNn.mat <- gsub("^.","",do.call(rbind,strsplit(mMNn.string1,"_")))
-mMNn.mat
-mode(mNMn.mat) <- "numeric"
-mode(mMNn.mat) <- "numeric"
-vcf.stats <- read.table("/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/Ahaetulla_VCF_stats.txt",header=T)
-vcf.stats2 <- data.frame(vcf.stats,mMNn.mat)
-vcf.stats2[1,]
-colnames(mMNn.mat) <- c("m","M","N","n")
-vcf.stats2 <- data.frame(vcf.stats,mMNn.mat)
-vcf.stats2[1,]
-vcf.stats2$MaxMissingDataSiteFilter <- NA
-grep("MissingData5percent",vcf.stats2$filename)
-vcf.stats2$MaxMissingDataSiteFilter[grep("MissingData5percent",vcf.stats2$filename)] <- 5
-vcf.stats2$MaxMissingDataSiteFilter[grep("MissingData10percent",vcf.stats2$filename)] <- 10
-vcf.stats2$MaxMissingDataSiteFilter[grep("MissingData20percent",vcf.stats2$filename)] <- 20
-vcf.stats2$MaxMissingDataSiteFilter[is.na(vcf.stats2$MaxMissingDataSiteFilter)] <- 100
-vcf.stats2[1:3,]
-vcf.stats2$max.missingness.indv
-vcf.stats2$max.missingness.site
-devtools::document()
-devtools::document()
-ggplot(data=vcf.stats2 ,mapping=aes(x=M,y= nloci,color=n)) + geom_point(size=3) + scale_color_discrete() + theme_classic()
-vcf.stats2$n <- factor(vcf.stats2$n)
-ggplot(data=vcf.stats2 ,mapping=aes(x=M,y= nloci,color=n)) + geom_point(size=3) + scale_color_discrete() + theme_classic()
-ggplot(data=vcf.stats2 ,mapping=aes(x=M,y= nloci,color=n,shape=MaxMissingDataSiteFilter)) + geom_point(size=3) + scale_color_discrete() + theme_classic()
-vcf.stats2$MaxMissingDataSiteFilter <- factor(vcf.stats2$MaxMissingDataSiteFilter)
-ggplot(data=vcf.stats2 ,mapping=aes(x=M,y= nloci,color=n,shape=MaxMissingDataSiteFilter)) + geom_point(size=3) + scale_shape_discrete() + theme_classic()
-vcf.stats2$MaxMissingDataSiteFilter
-table(vcf.stats2$MaxMissingDataSiteFilter)
-vcf.stats2[vcf.stats2$MaxMissingDataSiteFilter==100,"nloci"]
-vcf.stats2[vcf.stats2$MaxMissingDataSiteFilter==100,"filename"]
-vcf.stats2$MaxMissingDataSiteFilter <- NA
-vcf.stats2$MaxMissingDataSiteFilter[grep("MissingData5percent",vcf.stats2$filename)] <- 5#
-vcf.stats2$MaxMissingDataSiteFilter[grep("MissingData10percent",vcf.stats2$filename)] <- 10#
-vcf.stats2$MaxMissingDataSiteFilter[grep("MissingData20percent",vcf.stats2$filename)] <- 20
-vcf.stats2$MaxMissingDataSiteFilter[grep("NoMissingData",vcf.stats2$filename)] <- 0
-vcf.stats2$MaxMissingDataSiteFilter[is.na(vcf.stats2$MaxMissingDataSiteFilter)] <- 100
-vcf.stats2[vcf.stats2$MaxMissingDataSiteFilter==100,"nloci"]
-ggplot(data=vcf.stats2 ,mapping=aes(x=M,y= nloci,color=n,shape=MaxMissingDataSiteFilter)) + geom_point(size=3) + scale_shape_discrete() + theme_classic()
-vcf.stats2$MaxMissingDataSiteFilter <- factor(vcf.stats2$MaxMissingDataSiteFilter)
-ggplot(data=vcf.stats2 ,mapping=aes(x=M,y= nloci,color=n,shape=MaxMissingDataSiteFilter)) + geom_point(size=3) + scale_shape_discrete() + theme_classic()
-colnames(vcf.stats2)
-ggplot(data=vcf.stats2 ,mapping=aes(x=M,y=Fis,color=n,shape=MaxMissingDataSiteFilter)) + geom_point(size=3) + scale_shape_discrete() + theme_classic()
-ggplot(data=vcf.stats2 ,mapping=aes(x=M,y=Fis,color=n,shape=MaxMissingDataSiteFilter)) + geom_point(size=3) + scale_shape_discrete() + theme_classic() +title("test")
-ggplot(data=vcf.stats2 ,mapping=aes(x=M,y=Fis,color=n,shape=MaxMissingDataSiteFilter)) + geom_point(size=3) + scale_shape_discrete() + theme_classic() +theme(title.text="test")
-ggplot(data=vcf.stats2 ,mapping=aes(x=M,y=Fis,color=n,shape=MaxMissingDataSiteFilter)) + geom_point(size=3) + scale_shape_discrete() + theme_classic() +theme(text.title="test")
-ggplot(data=vcf.stats2 ,mapping=aes(x=M,y=Fis,color=n,shape=MaxMissingDataSiteFilter)) + geom_point(size=3) + scale_shape_discrete() + theme_classic() + theme(title="test")
-ggplot(data=vcf.stats2 ,mapping=aes(x=M,y=Fis,color=n,shape=MaxMissingDataSiteFilter)) + geom_point(size=3) + scale_shape_discrete() + theme_classic() + theme(title=element_text("test"))
-ggplot(data=vcf.stats2 ,mapping=aes(x=M,y=Fis,color=n,shape=MaxMissingDataSiteFilter)) + geom_point(size=3) + scale_shape_discrete() + theme_classic() + labs(title="test")
-ggplot(data=vcf.stats2 ,mapping=aes(x=M,y=Fis,color=n,shape=MaxMissingDataSiteFilter)) + geom_point(size=3) + scale_shape_discrete() + theme_classic() + labs(title="Ahaetulla prasina Best SNP per locus")
-ggplot(data=vcf.stats2 ,mapping=aes(x=M,y=Fis,color=n,shape=MaxMissingDataSiteFilter)) + geom_point(size=3) + scale_shape_discrete() + scale_x_discrete(breaks=1:8) + theme_classic() + labs(title="Ahaetulla prasina Best SNP per locus")
-ggplot(data=vcf.stats2 ,mapping=aes(x=M,y=Fis,color=n,shape=MaxMissingDataSiteFilter)) + geom_point(size=3) + scale_shape_discrete() + scale_x_discrete(breaks=1:8,labels=1:8) + theme_classic() + labs(title="Ahaetulla prasina Best SNP per locus")
-ggplot(data=vcf.stats2 ,mapping=aes(x=M,y=Fis,color=n,shape=MaxMissingDataSiteFilter)) + geom_point(size=3) + scale_shape_discrete() + scale_x_discrete(labels=1:8) + theme_classic() + labs(title="Ahaetulla prasina Best SNP per locus")
-ggplot(data=vcf.stats2 ,mapping=aes(x=M,y=Fis,color=n,shape=MaxMissingDataSiteFilter)) + geom_point(size=3) + scale_shape_discrete() + scale_x_discrete(name=1:8) + theme_classic() + labs(title="Ahaetulla prasina Best SNP per locus")
-ggplot(data=vcf.stats2 ,mapping=aes(x=M,y=Fis,color=n,shape=MaxMissingDataSiteFilter)) + geom_point(size=3) + scale_shape_discrete() + scale_x_discrete(limits=c(1,8)) + theme_classic() + labs(title="Ahaetulla prasina Best SNP per locus")
-ggplot(data=vcf.stats2 ,mapping=aes(x=M,y=Fis,color=n,shape=MaxMissingDataSiteFilter)) + geom_point(size=3) + scale_shape_discrete() + scale_x_discrete(limits=1:8) + theme_classic() + labs(title="Ahaetulla prasina Best SNP per locus")
-ggplot(data=vcf.stats2 ,mapping=aes(x=M,y=Fis,color=n,shape=MaxMissingDataSiteFilter)) + geom_point(size=3) + scale_shape_discrete() + scale_x_discrete(limits=factor(1:8)) + theme_classic() + labs(title="Ahaetulla prasina Best SNP per locus")
-ggplot(data=vcf.stats2 ,mapping=aes(x=M,y=Fis,color=n,shape=MaxMissingDataSiteFilter)) + geom_point(size=3) + scale_shape_discrete() + scale_x_discrete(limits=factor(1:8)) + theme_classic() + labs(title="Inbreeding coefficient vs. M, n, max missing data per site, Ahaetulla prasina Best SNP per locus")
-ggplot(data=vcf.stats2 ,mapping=aes(x=M,y=Fis,color=n,shape=MaxMissingDataSiteFilter)) + geom_point(size=3) + scale_shape_discrete() + scale_x_discrete(limits=factor(1:8)) + theme_classic() + labs(title="Inbreeding coefficient vs. M, n, max missing data per site, for Ahaetulla prasina Best SNP per locus")
-ggplot(data=vcf.stats2 ,mapping=aes(x=M,y=nloci,color=n,shape=MaxMissingDataSiteFilter)) + geom_point(size=3) + scale_shape_discrete() + scale_x_discrete(limits=factor(1:8)) + theme_classic() + labs(title="Number of loci vs. M, n, max missing data per site, for Ahaetulla prasina Best SNP per locus")
-devtools::document()
-?basic.stats
-vcf.stats2$Heterozygosity.expected/vcf.stats2$Heterozygosity.observed
-basic.stats
-vcf.stats2[1:3,]
-devtools::document()
-vcf <- "/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/Ahaetulla_VCF_stats_v2.txt"
-Ahaetulla.vcf.stats <- read.table("/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/Ahaetulla_VCF_stats_v2.txt",header=T)
-Ahaetulla.vcf.stats[1:10,1:10]
-Ahaetulla.vcf.stats[,1:10]
-mMNn.string0 <- gsub("Ahaetulla_AllPops_","", Ahaetulla.vcf.stats $filename)#
-mMNn.string1 <- gsub("_BestSNP.+$","", mMNn.string0)
-mMNn.mat <- gsub("^.","",do.call(rbind,strsplit(mMNn.string1,"_")))
-mMNn.mat
-mode(mMNn.mat) <- "numeric"
-colnames(mMNn.mat) <- c("m","M","N","n")
-Ahaetulla.vcf.stats <- data.frame(Ahaetulla.vcf.stats,mMNn.mat)
-Ahaetulla.vcf.stats$MaxMissingDataSiteFilter <- NA#
-Ahaetulla.vcf.stats$MaxMissingDataSiteFilter[grep("MissingData5percent",Ahaetulla.vcf.stats$filename)] <- 5#
-Ahaetulla.vcf.stats$MaxMissingDataSiteFilter[grep("MissingData10percent",Ahaetulla.vcf.stats$filename)] <- 10#
-Ahaetulla.vcf.stats$MaxMissingDataSiteFilter[grep("MissingData20percent",Ahaetulla.vcf.stats$filename)] <- 20#
-Ahaetulla.vcf.stats$MaxMissingDataSiteFilter[grep("NoMissingData",Ahaetulla.vcf.stats$filename)] <- 0#
-Ahaetulla.vcf.stats$MaxMissingDataSiteFilter[is.na(Ahaetulla.vcf.stats$MaxMissingDataSiteFilter)] <- 100
-Ahaetulla.vcf.stats
-ggplot(data=Ahaetulla.vcf.stats ,mapping=aes(x=M,y=nloci,color=n,shape=MaxMissingDataSiteFilter)) + geom_point(size=3) + scale_shape_discrete() + scale_x_discrete(limits=factor(1:8)) + theme_classic() + labs(title="Number of loci vs. M, n, max missing data per site, for Ahaetulla prasina Best SNP per locus")
-Ahaetulla.vcf.stats$MaxMissingDataSiteFilter <- factor(Ahaetulla.vcf.stats$MaxMissingDataSiteFilter)
-Ahaetulla.vcf.stats$n <- factor(Ahaetulla.vcf.stats$n)
-Ahaetulla.vcf.stats$n <- factor(Ahaetulla.vcf.stats$n)
-ggplot(data=Ahaetulla.vcf.stats, mapping=aes(x=M, y=nloci, color=n, shape=MaxMissingDataSiteFilter)) + geom_point(size=3) + scale_shape_discrete() + scale_x_discrete(limits=factor(1:8)) + theme_classic() + labs(title="Number of loci vs. M, n, max missing data per site, for Ahaetulla prasina Best SNP per locus")
-ggplot(data=Ahaetulla.vcf.stats, mapping=aes(x=M, y=Fis, color=n, shape=MaxMissingDataSiteFilter)) + geom_point(size=3) + scale_shape_discrete() + scale_x_discrete(limits=factor(1:8)) + theme_classic() + labs(title="Inbreeding coefficient vs. M, n, max missing data per site, for Ahaetulla prasina Best SNP per locus")
-save.path <- "/panfs/pfs.local/home/j926w878/work/ddRAD/snps_goodData/Calamaria_new/"
-save.path
-outdirs   <- list.dirs(save.path,full.name=TRUE,recursive=F)#
-in.paths  <- file.path(outdirs,"populations.snps.vcf")#
-out.paths <- file.path(save.path,sprintf("%s_%s_BestSNP.vcf",basename(save.path),basename(outdirs)))
-out.paths
-Ahaetulla.vcf.stats$m <- factor(Ahaetulla.vcf.stats$m)
-colnames(Ahaetulla.vcf.stats)
-ggplot(data=Ahaetulla.vcf.stats, mapping=aes(x=missingness.total, y=nloci, color=n, shape=M)) + geom_point(size=3) + scale_shape_discrete() + theme_classic() + labs(title="Number of loci vs. proportion missing data, n, M, for Ahaetulla prasina Best SNP per locus")
-Ahaetulla.vcf.stats$M <- factor(Ahaetulla.vcf.stats$M)
-ggplot(data=Ahaetulla.vcf.stats, mapping=aes(x=missingness.total, y=nloci, color=n, shape=M)) + geom_point(size=3) + scale_shape_discrete() + theme_classic() + labs(title="Number of loci vs. proportion missing data, n, M, for Ahaetulla prasina Best SNP per locus")
-ggplot(data=Ahaetulla.vcf.stats, mapping=aes(x=missingness.total, y=nloci, color=M, shape=n)) + geom_point(size=3) + scale_shape_discrete() + theme_classic() + labs(title="Number of loci vs. proportion missing data, n, M, for Ahaetulla prasina Best SNP per locus")
-ggplot(data=Ahaetulla.vcf.stats, mapping=aes(x=missingness.total, y=nloci, color=M, linetype=n)) + geom_line(size=3) + theme_classic() + labs(title="Number of loci vs. proportion missing data, n, M, for Ahaetulla prasina Best SNP per locus")
-ggplot(data=Ahaetulla.vcf.stats, mapping=aes(x=missingness.total, y=nloci, color=M, linetype=n)) + geom_line(size=1) + theme_classic() + labs(title="Number of loci vs. proportion missing data, n, M, for Ahaetulla prasina Best SNP per locus")
-ggplot(data=Ahaetulla.vcf.stats, mapping=aes(x=missingness.total, y=nloci, color=M, linetype=n)) + geom_line(size=0.5) + theme_classic() + labs(title="Number of loci vs. proportion missing data, n, M, for Ahaetulla prasina Best SNP per locus")
-ggplot(data=Ahaetulla.vcf.stats, mapping=aes(x=missingness.total, y=nloci, color=M, linetype=n)) + geom_line(size=0.5) + scale_y_log10() + theme_classic() + labs(title="Number of loci vs. proportion missing data, n, M, for Ahaetulla prasina Best SNP per locus")
-ggplot(data=Ahaetulla.vcf.stats, mapping=aes(x=missingness.total, y=nloci, color=M, linetype=n)) + geom_line(size=0.5) + theme_classic() + labs(title="Number of loci vs. proportion missing data, n, M, for Ahaetulla prasina Best SNP per locus")
-ggplot(data=Ahaetulla.vcf.stats, mapping=aes(x=missingness.total, y=nloci, color=M, shape=n)) + geom_point(size=3) + scale_shape_discrete() + theme_classic() + labs(title="Number of loci vs. proportion missing data, n, M, for Ahaetulla prasina Best SNP per locus")
-devtools::document()
-ggplot(data=Ahaetulla.vcf.stats, mapping=aes(x=missingness.total, y=nloci, color=M, linetype=n)) + geom_line(size=0.5) + theme_classic() + labs(title="Number of loci vs. proportion missing data, n, M, for Ahaetulla prasina Best SNP per locus") # + scale_y_log10()
-ggplot(data=Ahaetulla.vcf.stats, mapping=aes(x=M, y=Fis, color=n, shape=MaxMissingDataSiteFilter)) + geom_point(size=3) + scale_shape_discrete() + scale_x_discrete(limits=factor(1:8)) + theme_classic() + labs(title="Inbreeding coefficient vs. M, n, max missing data per site, for Ahaetulla prasina Best SNP per locus")
-ggplot(data=Ahaetulla.vcf.stats, mapping=aes(x=missingness.total, y=Fis, color=M, linetype=n)) + geom_line(size=0.5) + theme_classic() + labs(title="Inbreeding coefficient vs. proportion missing data, n, M, for Ahaetulla prasina Best SNP per locus")
-"/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/Calamaria_VCF_stats.txt"
-Calamaria.vcf.stats <- read.table("/Users/alyssaleinweber/Documents/Chapter4_Bicol-vs-Luzon/Calamaria_VCF_stats.txt",header=T)
-Calamaria.vcf.stats
-mMNn.string0        <- gsub("Calamaria_AllPops_","", Calamaria.vcf.stats $filename)
-mMNn.string1        <- gsub("_BestSNP.+$","", mMNn.string0)
-mMNn.mat            <- gsub("^.","",do.call(rbind,strsplit(mMNn.string1,"_")))
-mMNn.string1[1]
-mMNn.string2        <- gsub("_AllSNPs.+$","", mMNn.string1)
-mMNn.string2
-mMNn.mat            <- gsub("^.","",do.call(rbind,strsplit(mMNn.string2,"_")))
-mode(mMNn.mat)      <- "numeric"#
-colnames(mMNn.mat)  <- c("m","M","N","n")
-mMNn.mat
-Calamaria.vcf.stats <- data.frame(Calamaria.vcf.stats,mMNn.mat)
-Calamaria.vcf.stats
-Calamaria.vcf.stats$MaxMissingDataSiteFilter <- NA#
-Calamaria.vcf.stats$MaxMissingDataSiteFilter[grep("MissingData5percent",Calamaria.vcf.stats$filename)]  <- 5#
-Calamaria.vcf.stats$MaxMissingDataSiteFilter[grep("MissingData10percent",Calamaria.vcf.stats$filename)] <- 10#
-Calamaria.vcf.stats$MaxMissingDataSiteFilter[grep("MissingData20percent",Calamaria.vcf.stats$filename)] <- 20#
-Calamaria.vcf.stats$MaxMissingDataSiteFilter[grep("NoMissingData",Calamaria.vcf.stats$filename)]  <- 0#
-Calamaria.vcf.stats$MaxMissingDataSiteFilter[is.na(Calamaria.vcf.stats$MaxMissingDataSiteFilter)] <- 100
-Calamaria.vcf.stats[1,]
-Calamaria.vcf.stats$SNPsPerLocus <- NA
-Calamaria.vcf.stats$SNPsPerLocus[grep("BestSNP",Calamaria.vcf.stats$filename)] <- "Best"#
-Calamaria.vcf.stats$SNPsPerLocus[grep("AllSNPs",Calamaria.vcf.stats$filename)] <- "All"#
+test6 <- equivalencyMats(6)
+class(test6)
+length(test6)
+max(unlist(test6))
+max(unlist(pr1))
+pr1max <- which(sapply(pr1,max))
+pr1max <- sapply(pr1,max)
+length(pr1max)
+pr1max[1]
+pr1max[2]
+pr1max[3]
+which(pr1max)==5
+length(which(pr1max==5))
+class(pr1)
+pr1[[which(pr1max==5)]]
+pr1[which(pr1max==5)]
+A=pr1[which(pr1max==5)][[5]]
+A
+A %*% diag(mp)
+diag(mp)
+diag(mp) %*% A
+diag(mp) %*% mat(1,nrow=1,ncol=6)
+diag(mp) %*% matrix(1,nrow=1,ncol=6)
+matrix(1,nrow=1,ncol=6)
+diag(mp) %*% matrix(1,nrow=6,ncol=1)
+diag(mp) %*% matrix(c(1,0,0,0,0,0),ncol=1)
+reassign(A)
+A*T
+A/A
+A
+pr1[[10]]
+B=pr1[[10]]
+B
+B/B
+(B/B)*T
+B%*%B
+B
+B^2
+B
+A^2
+A*B
+C=A*B
 C
-Calamaria.vcf.stats[1,]
-Calamaria.vcf.stats[1:3,]
-Calamaria.vcf.stats[1:5,]
-Calamaria.vcf.stats[1:10,]
-Calamaria.vcf.stats[1:11,]
-Calamaria.vcf.stats$n <- factor(Calamaria.vcf.stats$n)#
-Calamaria.vcf.stats$M <- factor(Calamaria.vcf.stats$M)#
-Calamaria.vcf.stats$MaxMissingDataSiteFilter <- factor(Calamaria.vcf.stats$MaxMissingDataSiteFilter)
-ggplot(data=Calamaria.vcf.stats, mapping=aes(x=M, y=nloci, color=n, shape=MaxMissingDataSiteFilter)) + geom_point(size=3) + scale_shape_discrete() + scale_x_discrete(limits=factor(1:8)) + theme_classic() + labs(title="Number of loci vs. M, n, max missing data per site, for Calamaria prasina Best SNP per locus")
-ggplot(data=Calamaria.vcf.stats, mapping=aes(x=missingness.total, y=nloci, color=M, linetype=n)) + geom_line(size=0.5) + theme_classic() + labs(title="Number of loci vs. proportion missing data, n, M, for Calamaria prasina Best SNP per locus") # + scale_y_log10()
-ggplot(data=Calamaria.vcf.stats, mapping=aes(x=missingness.total, y=nloci, color=M, shape=n)) + geom_point(size=3) + scale_shape_discrete() + theme_classic() + labs(title="Number of loci vs. proportion missing data, n, M, for Calamaria prasina Best SNP per locus")
-ggplot(data=Calamaria.vcf.stats, mapping=aes(x=M, y=nloci, color=n, shape=MaxMissingDataSiteFilter)) + geom_point(size=3) + scale_shape_discrete() + scale_x_discrete(limits=factor(1:8)) + theme_classic() + labs(title="Number of loci vs. M, n, max missing data per site, for Calamaria prasina Best SNP per locus")
-ggplot(data=Calamaria.vcf.stats, mapping=aes(x=M, y=nloci, linetype=n, color=MaxMissingDataSiteFilter)) + geom_line(size=3) + scale_x_discrete(limits=factor(1:8)) + theme_classic() + labs(title="Number of loci vs. M, n, max missing data per site, for Calamaria prasina Best SNP per locus")
-ggplot(data=Calamaria.vcf.stats, mapping=aes(x=M, y=nloci, linetype=n, color=MaxMissingDataSiteFilter)) + geom_line(size=0.5) + scale_x_discrete(limits=factor(1:8)) + theme_classic() + labs(title="Number of loci vs. M, n, max missing data per site, for Calamaria prasina Best SNP per locus")
-ggplot(data=Calamaria.vcf.stats, mapping=aes(x=M, y=nloci, color=n, shape=MaxMissingDataSiteFilter)) + geom_point(size=3) + scale_shape_discrete() + scale_x_discrete(limits=factor(1:8)) + theme_classic() + labs(title="Number of loci vs. M, n, max missing data per site, for Calamaria prasina Best SNP per locus")
-ggplot(data=Calamaria.vcf.stats, mapping=aes(x=missingness.total, y=Fis, color=M, linetype=n)) + geom_line(size=0.5) + theme_classic() + labs(title="Inbreeding coefficient vs. proportion missing data, n, M, for Calamaria prasina Best SNP per locus")
-Calamaria.vcf.stats.best <- Calamaria.vcf.stats[,Calamaria.vcf.stats$SNPsPerLocus=="Best"]
-Calamaria.vcf.stats$SNPsPerLocus=="Best"
-which(Calamaria.vcf.stats$SNPsPerLocus=="Best")
-Calamaria.vcf.stats.best <- Calamaria.vcf.stats[Calamaria.vcf.stats$SNPsPerLocus=="Best",]
-Calamaria.vcf.stats.best
-ggplot(data=Calamaria.vcf.stats.best, mapping=aes(x=M, y=nloci, color=n, shape=MaxMissingDataSiteFilter)) + geom_point(size=3) + scale_shape_discrete() + scale_x_discrete(limits=factor(1:8)) + theme_classic() + labs(title="Number of loci vs. M, n, max missing data per site, for Calamaria prasina Best SNP per locus")
-ggplot(data=Calamaria.vcf.stats.best, mapping=aes(x=missingness.total, y=nloci, color=M, shape=n)) + geom_point(size=3) + scale_shape_discrete() + theme_classic() + labs(title="Number of loci vs. proportion missing data, n, M, for Calamaria prasina Best SNP per locus")
-ggplot(data=Calamaria.vcf.stats.best, mapping=aes(x=missingness.total, y=nloci, color=M, linetype=n)) + geom_line(size=0.5) + theme_classic() + labs(title="Number of loci vs. proportion missing data, n, M, for Calamaria prasina Best SNP per locus") # + scale_y_log10()
-ggplot(data=Calamaria.vcf.stats.best, mapping=aes(x=M, y=Fis, color=n, shape=MaxMissingDataSiteFilter)) + geom_point(size=3) + scale_shape_discrete() + scale_x_discrete(limits=factor(1:8)) + theme_classic() + labs(title="Inbreeding coefficient vs. M, n, max missing data per site, for Calamaria prasina Best SNP per locus")
-ggplot(data=Calamaria.vcf.stats.best, mapping=aes(x=missingness.total, y=Fis, color=M, linetype=n)) + geom_line(size=0.5) + theme_classic() + labs(title="Inbreeding coefficient vs. proportion missing data, n, M, for Calamaria prasina Best SNP per locus")
-ggplot(data=Calamaria.vcf.stats.best, mapping=aes(x=M, y=nloci, color=n, shape=MaxMissingDataSiteFilter)) + geom_point(size=3) + scale_shape_discrete() + scale_x_discrete(limits=factor(1:8)) + theme_classic() + labs(title="Number of loci vs. M, n, max missing data per site, for Calamaria prasina Best SNP per locus")#
-ggplot(data=Calamaria.vcf.stats.best, mapping=aes(x=M, y=Fis, color=n, shape=MaxMissingDataSiteFilter)) + geom_point(size=3) + scale_shape_discrete() + scale_x_discrete(limits=factor(1:8)) + theme_classic() + labs(title="Inbreeding coefficient vs. M, n, max missing data per site, for Calamaria prasina Best SNP per locus")
-ggplot(data=Calamaria.vcf.stats.best, mapping=aes(x=M, y=nloci, color=n, shape=MaxMissingDataSiteFilter)) + geom_point(size=3) + scale_shape_discrete() + scale_x_discrete(limits=factor(1:8)) + theme_classic() + labs(title="Number of loci vs. M, n, max missing data per site, for Calamaria prasina Best SNP per locus")
-Calamaria.vcf.stats.md100 <- Calamaria.vcf.stats[Calamaria.vcf.stats$MaxMissingDataSiteFilter==100,]
-Calamaria.vcf.stats.md100
-15654*2
+C/C
+C/5
+CC
+C
+C
+C%*%C
+C
+C*1
+C>0
+(C>0)*1
+length(pr1)
+dim(pr1)
+pr1f    <- lapply(pr1,function(x){(x>0)*1})
+pr1f[[1]]
+pr1f[[500]]
+pr1f[[1000]]
+pr2     <- pr1f[sapply(pr1f,function(x){transitive(x) & symmetric(x) & reflexive(x)})]
+length(pr2)
+pr2f    <- unique(do.call(rbind,lapply(pr2,c)))
+dim(pr2f)
+s2fpr2f <- unique(rbind(s2f,pr2f))
+dim(s2fpr2f)
 devtools::document()
+equivalencyMats(1)
+equivalencyMats(2)
+equivalencyMats(3)
+length(equivalencyMats(4))
+length(equivalencyMats(5))
+length(equivalencyMats(6))
+length(equivalencyMats(7))
+length(equivalencyMats(8))
+# 4140
+bell(8)
+bell(7)
+bell(9)
+C
+C %*% C
+D = C %*% C
+D / max(D)
+C %*% C
+C %*% C %>% max
+D == max(D)
+(D == max(D)) * 1
+C %*% C %*% C
+C %*% C %*% C %*% C
+C
+length(test6)
+test[[50]]
+test6[[50]]
+test5[[50]]
+test5[[50]] %*% test5[[50]]
+test5[[40]] %*% test5[[40]]
+test5[[35]] %*% test5[[35]]
+sum(test5[[35]] %*% test5[[35]])
+sum(test5[[40]] %*% test5[[40]])
+sum(diag(test5[[40]] %*% test5[[40]]))
+sum(diag(test5[[35]] %*% test5[[35]]))
 devtools::document()
-upgrade_miscwrappers()
-remotes::install_github("JeffWeinell/misc.wrappers",upgrade=FALSE)
-if("misc.wrappers" %in% (.packages())){detach("package:misc.wrappers", unload=TRUE)}; library(misc.wrappers)
-q("no")
