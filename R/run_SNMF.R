@@ -101,7 +101,7 @@ run_sNMF <- function(x,format="VCF",coords=NULL, samplenames=NULL, kmax=10, reps
 	if(!is.numeric(num.CPUs)){
 		num.CPUs <- 2
 	}
-	snmf.obj         <- LEA::snmf(geno.temp.path, K=Krange, repetitions=reps, entropy=entropy, project="new", iterations=iter, CPU=num.CPUs)
+	snmf.obj         <- LEA::snmf(geno.temp.path, K=Krange, repetitions=reps, entropy=entropy, project="new", iterations=iter, CPU=num.CPUs,...)
 	crossentropy.mat <- t(do.call(cbind, lapply(X=Krange, FUN=function(x){LEA::cross.entropy(snmf.obj, K = x)})))
 	rownames(crossentropy.mat) <- Krange
 	colnames(crossentropy.mat) <- paste0("rep", 1:reps)
