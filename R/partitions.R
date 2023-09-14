@@ -34,9 +34,10 @@ vcf2parts <- function(x,save.as){
 #' @title VCF format to Phylip format
 #' 
 #' Converts VCF to phylip and saves the result to file. Output can be sequential or interleaved.
+#' Only use for diploids. The exported sequence is the haplotype consensus for each individual.
 #' 
 #' @param x 'vcfR' object (see package::vcfR) or character string with path to VCF file containing nucleotide data.
-#' @param save.as Path where phylip alignment should be saved
+#' @param save.as Path where phylip alignment should be saved.
 #' @param missing Character to use for missing data in the output file. Default "-".
 #' @param sequential Whether or not data should be written on a single line (TRUE) or in multiple blocks (interleaced format) with the number of bases per line controlled by 'width'.
 #' @param width NULL or a number specifying the number of bases to write per line when output is interleaved.

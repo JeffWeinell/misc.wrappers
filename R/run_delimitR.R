@@ -263,6 +263,7 @@ fastsimcoalsims_Par <- function(prefix, pathtofsc, nreps=10000,wd=getwd(),ncores
 #' @param vcf Character string with path to the VCF file
 #' @param traits Character string with path to the traits file
 #' @param output.dir Character string with path to directory where the two output files should be saved.
+#' @export easySFS_fsc2
 easySFS_fsc2 <- function(easySFS.path,vcf,traits,output.dir){
 	prev.tempfile  <- tempfile()
 	prev.command   <- paste(easySFS.path,"-i",vcf,"-p",traits,"--preview >",prev.tempfile)

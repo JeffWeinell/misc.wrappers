@@ -1,6 +1,7 @@
 #' @title minimum length set of clades with tip labels
 #' 
 #' Returns a smallest set of non-intersecting, non-sister clades of an input tree, and which together contain all of the tip labels supplied in the vector tiplabs.
+#' REQUIRES ggtree
 #' 
 #' @param tree A tree object of class phylo or treedata.
 #' @param tiplabs A character vector with a subset of the tip labels of the input tree
